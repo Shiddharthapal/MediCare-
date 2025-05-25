@@ -1,0 +1,394 @@
+"use client";
+import {
+  Clock,
+  Truck,
+  Star,
+  Phone,
+  Mail,
+  MapPin,
+  Shield,
+  Users,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+export default function MedicationLandingPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+      <section className="relative py-20 lg:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
+            <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
+              <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
+                Your Health,
+                <span className="text-green-600"> Delivered</span>
+              </h1>
+              <p className="mt-3 text-base text-gray-600 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
+                Get your medications delivered safely and securely to your
+                doorstep. Our platform connects patients with licensed
+                pharmacies and healthcare providers for seamless medication
+                management.
+              </p>
+              <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                    Order Medication
+                  </Button>
+                  <Button variant="outline" size="lg">
+                    Learn More
+                  </Button>
+                </div>
+              </div>
+              <div className="mt-8 flex items-center justify-center lg:justify-start space-x-6">
+                <div className="flex items-center">
+                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                  <span className="ml-2 text-sm text-gray-600">
+                    4.9/5 from 2,000+ reviews
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
+              <div className="relative mx-auto w-full rounded-lg shadow-xl lg:max-w-md">
+                <img
+                  className="w-96 h-110 rounded-lg"
+                  src="/image (4).jpg"
+                  alt="Online medication delivery"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="services" className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+              Why Choose MediCare+?
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              We provide comprehensive medication management solutions for
+              patients and healthcare providers
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="text-center border-0 shadow-lg">
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Shield className="h-6 w-6 text-green-600" />
+                </div>
+                <CardTitle className="text-lg">Secure & Licensed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  All medications sourced from licensed pharmacies with full
+                  regulatory compliance
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center border-0 shadow-lg">
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-green-600" />
+                </div>
+                <CardTitle className="text-lg">24/7 Support</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Round-the-clock customer support and pharmacist consultation
+                  available
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center border-0 shadow-lg">
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Truck className="h-6 w-6 text-green-600" />
+                </div>
+                <CardTitle className="text-lg">Fast Delivery</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Same-day delivery available in major cities, next-day delivery
+                  nationwide
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center border-0 shadow-lg">
+              <CardHeader>
+                <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Users className="h-6 w-6 text-green-600" />
+                </div>
+                <CardTitle className="text-lg">Expert Care</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Licensed pharmacists and healthcare professionals managing
+                  your care
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+              How It Works
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Simple steps to get your medications delivered
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                1
+              </div>
+              <h3 className="mt-4 text-xl font-semibold text-gray-900">
+                Upload Prescription
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Upload your prescription or have your doctor send it directly to
+                our platform
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                2
+              </div>
+              <h3 className="mt-4 text-xl font-semibold text-gray-900">
+                Verify & Process
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Our licensed pharmacists verify your prescription and prepare
+                your medication
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                3
+              </div>
+              <h3 className="mt-4 text-xl font-semibold text-gray-900">
+                Receive Delivery
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Get your medications delivered safely to your doorstep with
+                tracking
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-green-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-white">50K+</div>
+              <div className="text-green-100">Happy Patients</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-white">500+</div>
+              <div className="text-green-100">Partner Pharmacies</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-white">1M+</div>
+              <div className="text-green-100">Medications Delivered</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-white">99.9%</div>
+              <div className="text-green-100">Uptime</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            Ready to Get Started?
+          </h2>
+          <p className="mt-4 text-lg text-gray-600">
+            Join thousands of patients who trust MediCare+ for their medication
+            needs
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="bg-green-600 hover:bg-green-700">
+              Start Your Order
+            </Button>
+            <Button variant="outline" size="lg">
+              Contact Support
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer id="contact" className="bg-gray-900">
+        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">M</span>
+                </div>
+                <span className="ml-2 text-xl font-bold text-white">
+                  MediCare+
+                </span>
+              </div>
+              <p className="mt-4 text-gray-400 max-w-md">
+                Your trusted partner for safe, secure, and convenient medication
+                delivery. Licensed, regulated, and committed to your health.
+              </p>
+              <div className="mt-6 space-y-2">
+                <div className="flex items-center text-gray-400">
+                  <Phone className="h-4 w-4 mr-2" />
+                  <span>1-800-MEDICARE</span>
+                </div>
+                <div className="flex items-center text-gray-400">
+                  <Mail className="h-4 w-4 mr-2" />
+                  <span>support@medicareplus.com</span>
+                </div>
+                <div className="flex items-center text-gray-400">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  <span>Available nationwide</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">
+                Services
+              </h3>
+              <ul className="mt-4 space-y-4">
+                <li>
+                  <Link
+                    to="#"
+                    className="text-base text-gray-300 hover:text-white"
+                  >
+                    Prescription Delivery
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="#"
+                    className="text-base text-gray-300 hover:text-white"
+                  >
+                    Medication Management
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="#"
+                    className="text-base text-gray-300 hover:text-white"
+                  >
+                    Pharmacy Consultation
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="#"
+                    className="text-base text-gray-300 hover:text-white"
+                  >
+                    Health Monitoring
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">
+                Support
+              </h3>
+              <ul className="mt-4 space-y-4">
+                <li>
+                  <Link
+                    to="#"
+                    className="text-base text-gray-300 hover:text-white"
+                  >
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="#"
+                    className="text-base text-gray-300 hover:text-white"
+                  >
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="#"
+                    className="text-base text-gray-300 hover:text-white"
+                  >
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="#"
+                    className="text-base text-gray-300 hover:text-white"
+                  >
+                    Contact Us
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-8 border-t border-gray-700 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-base text-gray-400">
+                © 2024 MediCare+. All rights reserved. Licensed pharmacy
+                services.
+              </p>
+              <div className="mt-4 md:mt-0 flex space-x-4">
+                <Badge
+                  variant="outline"
+                  className="text-gray-400 border-gray-600"
+                >
+                  FDA Approved
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="text-gray-400 border-gray-600"
+                >
+                  HIPAA Compliant
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
