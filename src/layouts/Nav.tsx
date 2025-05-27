@@ -1,7 +1,8 @@
 "use client";
+import { useEffect, useState } from "react";
 import { ChevronDown, Shield, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-
+import { logout } from "@/redux/slices/authSlice";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,8 +10,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import { useNavigate } from "react-router-dom";
 
 export default function Navigation() {
+  const { token } = useAppSelector((state) => state.auth);
+  const [loginStatus, setLoginStatus] = useState<boolean>(token ? true : false);
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  console.log("Token:", token);
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  };
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setLoginStatus(true);
+    } else {
+      setLoginStatus(false);
+    }
+  }, [token]);
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,24 +110,38 @@ export default function Navigation() {
 
           {/* Login Dropdown */}
           <div className="flex items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  Login
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem className="cursor-pointer">
-                  <Users className="mr-2 h-4 w-4" />
-                  As a Patient
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Shield className="mr-2 h-4 w-4" />
-                  As an Admin
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {loginStatus ? (
+              <Button
+                onClick={() => {
+                  handleLogout();
+                }}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                Logout
+              </Button>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    Login
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Users className="mr-2 h-4 w-4" />
+                    <Link to="/login" className="text-gray-900">
+                      <p>As a Patient</p>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Shield className="mr-2 h-4 w-4" />
+                    <p>As an Admin</p>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 

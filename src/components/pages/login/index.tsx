@@ -1,17 +1,19 @@
+"use client";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { Eye, EyeOff, ChevronDown } from "lucide-react";
 import {
-  loginStart,
-  loginSuccess,
-  loginFailure,
-} from "@/redux/slices/authSlice";
-import { Eye, EyeOff } from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface LoginFormData {
   email: string;
@@ -20,9 +22,11 @@ interface LoginFormData {
 
 export default function Login() {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.auth);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<"email" | "mobile">("email");
+
   const {
     register,
     handleSubmit,
@@ -31,14 +35,19 @@ export default function Login() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      dispatch(loginStart());
+      setLoading(true);
+      setError(null);
 
       const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          [loginMethod]: data.email, // Using the same field name for simplicity
+          password: data.password,
+          registrationMethod: loginMethod,
+        }),
       });
 
       const result = await response.json();
@@ -47,20 +56,12 @@ export default function Login() {
         throw new Error(result.message || "Login failed");
       }
 
-      dispatch(
-        loginSuccess({
-          _id: result._id,
-          email: data.email,
-          token: result.token,
-        })
-      );
-
       // Redirect to user page after successful login
-      navigate("/user");
+      navigate("/");
     } catch (err) {
-      dispatch(
-        loginFailure(err instanceof Error ? err.message : "Login failed")
-      );
+      setError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,20 +74,82 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address",
-                  },
-                })}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+              <div className="mb-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between bg-gray-800 text-white hover:bg-gray-700 hover:text-white"
+                    >
+                      {loginMethod === "email"
+                        ? "Use Email"
+                        : "Use Mobile Number"}
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full">
+                    <DropdownMenuItem onClick={() => setLoginMethod("email")}>
+                      Use Email
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLoginMethod("mobile")}>
+                      Use Mobile Number
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {loginMethod === "email" ? (
+                <>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="medicare+@aidoctor.com"
+                    {...register("email", {
+                      required:
+                        loginMethod === "email" ? "Email is required" : false,
+                      pattern:
+                        loginMethod === "email"
+                          ? {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: "Invalid email address",
+                            }
+                          : undefined,
+                    })}
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-red-500">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Label htmlFor="mobile">Mobile Number</Label>
+                  <Input
+                    id="mobile"
+                    type="tel"
+                    placeholder="017XXXXXXXX"
+                    {...register("email", {
+                      required:
+                        loginMethod === "mobile"
+                          ? "Mobile number is required"
+                          : false,
+                      pattern:
+                        loginMethod === "mobile"
+                          ? {
+                              value: /^[+]?[1-9][\d]{0,15}$/,
+                              message: "Invalid mobile number",
+                            }
+                          : undefined,
+                    })}
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-red-500">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
@@ -126,13 +189,17 @@ export default function Login() {
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full bg-gray-800"
+              disabled={loading}
+            >
               {loading ? "Loading..." : "Login"}
             </Button>
 
             <div className="text-center text-sm">
               <Link to="/register" className="text-primary hover:underline">
-                Don't have an account? Register
+                {"Don't have an account? Register"}
               </Link>
             </div>
           </form>
