@@ -5,7 +5,6 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: false,
-    unique: true,
     lowercase: true,
     trim: true,
     sparse: true,
@@ -18,7 +17,6 @@ const userSchema = new mongoose.Schema({
   mobile: {
     type: String,
     required: false,
-    unique: true,
     trim: true,
     sparse: true,
     match: [/^(\+88)?01[3-9]\d{8}$/, "Invalid mobile number"],

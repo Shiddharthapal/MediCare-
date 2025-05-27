@@ -4,14 +4,11 @@ import User from "@/model/user";
 import jwt from "jsonwebtoken";
 
 export const POST: APIRoute = async ({ request }) => {
+  const body = await request.json();
+  const { password, registrationMethod } = body;
+  const identifier = body[registrationMethod];
+  const identifierType = registrationMethod;
   try {
-    const body = await request.json();
-    console.log("🧞‍♂️body --->", body);
-    const { password, registrationMethod } = body;
-    const identifier = body[registrationMethod];
-    console.log("🧞‍♂️identifier --->", identifier);
-    const identifierType = registrationMethod;
-
     // Connect to database
     await connect();
 
@@ -22,9 +19,13 @@ export const POST: APIRoute = async ({ request }) => {
     });
     console.log("existingUser --->", existingUser);
     if (existingUser) {
+      const errorMessage =
+        registrationMethod === "email"
+          ? "Email already registered"
+          : "Mobile number already registered";
       return new Response(
         JSON.stringify({
-          message: "Email already registered",
+          message: errorMessage,
         }),
         {
           status: 400,
@@ -35,16 +36,20 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Create new user
-
-    const user = new User({
-      [identifierType]: identifier,
+    // Create new user with only the required fields
+    const userData: Record<string, any> = {
       registrationMethod,
       password, // Password will be hashed by mongoose pre-save hook
-    });
-    console.log("user --->", user);
+    };
+
+    // Only add the identifier being used
+    userData[identifierType] = identifier;
+
+    const user = new User(userData);
+    console.log("🧞‍♂️user --->", user);
 
     await user.save();
+    console.log("🧞‍♂️user saved --->");
 
     // Generate JWT token
     const token = jwt.sign(
@@ -52,6 +57,7 @@ export const POST: APIRoute = async ({ request }) => {
       import.meta.env.JWT_SECRET || "your-secret-key",
       { expiresIn: "24h" }
     );
+    console.log("🧞‍♂️token --->", token);
 
     return new Response(
       JSON.stringify({
@@ -67,12 +73,26 @@ export const POST: APIRoute = async ({ request }) => {
     );
   } catch (error) {
     console.error("Registration error:", error);
+    let errorMessage = "Internal server error";
+    let statusCode = 500;
+
+    // Handle MongoDB duplicate key error
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === 11000
+    ) {
+      statusCode = 400;
+      errorMessage = `This ${registrationMethod} is already registered`;
+    }
+
     return new Response(
       JSON.stringify({
-        message: "Internal server error",
+        message: errorMessage,
       }),
       {
-        status: 500,
+        status: statusCode,
         headers: {
           "Content-Type": "application/json",
         },
