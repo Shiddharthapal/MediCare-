@@ -4,22 +4,43 @@ import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
-    required: false,
     lowercase: true,
     trim: true,
+    unique: true,
     sparse: true,
-    match: [
-      /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-      "Invalid email address",
-    ],
+    validate: {
+      validator: function (v) {
+        if (this.registrationMethod === "email") {
+          if (!v) return false;
+          return /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(v);
+        }
+        return true;
+      },
+      message: (props) =>
+        !props.value
+          ? "Email is required for email registration"
+          : "Invalid email address",
+    },
   },
 
   mobile: {
     type: String,
-    required: false,
     trim: true,
+    unique: true,
     sparse: true,
-    match: [/^(\+88)?01[3-9]\d{8}$/, "Invalid mobile number"],
+    validate: {
+      validator: function (v) {
+        if (this.registrationMethod === "mobile") {
+          if (!v) return false;
+          return /^(\+88)?01[3-9]\d{8}$/.test(v);
+        }
+        return true;
+      },
+      message: (props) =>
+        !props.value
+          ? "Mobile number is required for mobile registration"
+          : "Invalid mobile number format",
+    },
   },
   registrationMethod: {
     type: String,
@@ -44,6 +65,13 @@ userSchema.pre("save", async function (next) {
     if (this.isModified("password")) {
       const salt = await bcrypt.genSalt(10);
       this.password = await bcrypt.hash(this.password, salt);
+    }
+
+    // Ensure unused field is undefined based on registration method
+    if (this.registrationMethod === "email") {
+      this.mobile = undefined;
+    } else if (this.registrationMethod === "mobile") {
+      this.email = undefined;
     }
 
     next();

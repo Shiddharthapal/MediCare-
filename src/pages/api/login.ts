@@ -7,9 +7,9 @@ import type { Token } from "@/types/token";
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
-    const { password, loginMethod } = body;
-    const identifier = body[loginMethod];
-    const identifierType = loginMethod;
+    const { password, registrationMethod } = body;
+    const identifier = body[registrationMethod];
+    const identifierType = registrationMethod;
 
     // Connect to database
     await connect();
@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Find user by email
     const user = await User.findOne({
       [identifierType]: identifier,
-      loginMethod,
+      registrationMethod,
     });
     if (!user) {
       return new Response(

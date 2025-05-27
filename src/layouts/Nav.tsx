@@ -1,36 +1,44 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ChevronDown, Shield, Users } from "lucide-react";
+import {
+  ChevronDown,
+  Shield,
+  Users,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { logout } from "@/redux/slices/authSlice";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { useNavigate } from "react-router-dom";
 
 export default function Navigation() {
-  const { token } = useAppSelector((state) => state.auth);
-  const [loginStatus, setLoginStatus] = useState<boolean>(token ? true : false);
+  const [userType, setUserType] = useState<"patient" | "admin" | null>(
+    "patient"
+  );
+  const token = useAppSelector((state) => state.auth.token);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const handleLogin = (type: "patient" | "admin") => {
+    setUserType(type);
+    // In real app, this would trigger actual authentication
+  };
   console.log("Token:", token);
   const handleLogout = () => {
     dispatch(logout());
     navigate("/");
   };
-  useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) {
-      setLoginStatus(true);
-    } else {
-      setLoginStatus(false);
-    }
-  }, [token]);
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -110,16 +118,50 @@ export default function Navigation() {
 
           {/* Login Dropdown */}
           <div className="flex items-center">
-            {loginStatus ? (
-              <Button
-                onClick={() => {
-                  handleLogout();
-                }}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                Logout
-              </Button>
+            {token ? (
+              <div className="flex items-center space-x-3">
+                {/* Active Status Indicator */}
+                <div className="flex items-center space-x-2">
+                  <div className="relative">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75"></div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="text-green-600 border-green-600"
+                  >
+                    {userType === "admin" ? "Admin Active" : "Patient Active"}
+                  </Badge>
+                </div>
+
+                {/* User Profile Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className=" flex items-center justify-center w-8 h-8 broder-1 rounded-full bg-green-600 hover:bg-green-700 hover:shadow-md">
+                      <ChevronDown className="h-4 w-4" />
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer text-red-600"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

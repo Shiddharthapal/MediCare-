@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { loginStart, loginSuccess } from "@/redux/slices/authSlice";
 
 interface RegisterFormData {
   email: string;
@@ -47,6 +48,7 @@ export default function Register() {
     try {
       setLoading(true);
       setError(null);
+      dispatch(loginStart());
 
       const response = await fetch("/api/register", {
         method: "POST",
@@ -65,12 +67,13 @@ export default function Register() {
       if (!response.ok) {
         throw new Error(result.message || "Registration failed");
       }
-      // dispatch(
-      //   loginSuccess({
-      //     email: data.email,
-      //     token: result.token,
-      //   })
-      // );
+      dispatch(
+        loginSuccess({
+          id: result.userId,
+          email: data.email,
+          token: result.token,
+        })
+      );
 
       // Redirect to user page after successful registration
       navigate("/");

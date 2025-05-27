@@ -36,20 +36,15 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Create new user with only the required fields
-    const userData: Record<string, any> = {
+    // Create new user
+    const user = new User({
       registrationMethod,
-      password, // Password will be hashed by mongoose pre-save hook
-    };
-
-    // Only add the identifier being used
-    userData[identifierType] = identifier;
-
-    const user = new User(userData);
+      password,
+      [identifierType]: identifier, // Only add the active identifier
+    });
     console.log("🧞‍♂️user --->", user);
 
     await user.save();
-    console.log("🧞‍♂️user saved --->");
 
     // Generate JWT token
     const token = jwt.sign(
@@ -57,7 +52,6 @@ export const POST: APIRoute = async ({ request }) => {
       import.meta.env.JWT_SECRET || "your-secret-key",
       { expiresIn: "24h" }
     );
-    console.log("🧞‍♂️token --->", token);
 
     return new Response(
       JSON.stringify({
@@ -71,20 +65,25 @@ export const POST: APIRoute = async ({ request }) => {
         },
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Registration error:", error);
     let errorMessage = "Internal server error";
     let statusCode = 500;
 
-    // Handle MongoDB duplicate key error
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === 11000
-    ) {
+    // Handle validation errors
+    if (error.name === "ValidationError") {
       statusCode = 400;
-      errorMessage = `This ${registrationMethod} is already registered`;
+      const validationError = error as {
+        errors: { [key: string]: { message: string } };
+      };
+      errorMessage = Object.values(validationError.errors)[0].message;
+    }
+    // Handle duplicate key errors
+    else if (error.code === 11000) {
+      statusCode = 400;
+      const field =
+        registrationMethod === "email" ? "email address" : "mobile number";
+      errorMessage = `This ${field} is already registered`;
     }
 
     return new Response(

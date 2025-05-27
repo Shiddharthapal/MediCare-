@@ -14,7 +14,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { useAppDispatch } from "@/redux/hooks";
+import { loginStart, loginSuccess } from "@/redux/slices/authSlice";
 interface LoginFormData {
   email: string;
   password: string;
@@ -27,6 +28,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"email" | "mobile">("email");
 
+  const dispatch = useAppDispatch();
   const {
     register,
     handleSubmit,
@@ -37,7 +39,7 @@ export default function Login() {
     try {
       setLoading(true);
       setError(null);
-
+      dispatch(loginStart());
       const response = await fetch("/api/login", {
         method: "POST",
         headers: {
@@ -55,7 +57,13 @@ export default function Login() {
       if (!response.ok) {
         throw new Error(result.message || "Login failed");
       }
-
+      dispatch(
+        loginSuccess({
+          _id: result._id,
+          email: data.email,
+          token: result.token,
+        })
+      );
       // Redirect to user page after successful login
       navigate("/");
     } catch (err) {
