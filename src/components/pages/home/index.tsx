@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import {
   Clock,
   Truck,
@@ -8,6 +9,10 @@ import {
   MapPin,
   Shield,
   Users,
+  BarChart3,
+  Zap,
+  BookOpen,
+  Activity,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -20,8 +25,74 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import TestRecommendationForm from "@/components/pages/services/form/test-recommendation-form";
+import ReportAnalysisForm from "@/components/pages/services/form/report-analysis-form";
+import DiagnosisForm from "@/components/pages/services/form/diagnosis-form";
+import TreatmentPlanForm from "@/components/pages/services/form/treatment-plan-form";
+import HealthMonitoringForm from "@/components/pages/services/form/health-monitoring-form";
+import EnhancedSymptomAnalysisForm from "@/components/pages/services/form/enhanced-symptom-analysis-form";
+type ServiceType = "report" | "diagnosis" | "treatment" | "monitoring" | null;
 
 export default function MedicationLandingPage() {
+  const [activeService, setActiveService] = useState<ServiceType>(null);
+  const services = [
+    {
+      id: "diagnosis" as const,
+      title: "AI Diagnosis",
+      description:
+        "Receive AI-powered disease predictions with confidence scores and detailed explanations",
+      icon: Zap,
+      buttonText: "View Diagnosis",
+      color: "bg-green-200",
+    },
+    {
+      id: "report" as const,
+      title: "Report Analysis",
+      description:
+        "Upload your test reports and medical documents for AI-powered analysis and disease prediction",
+      icon: BarChart3,
+      buttonText: "Upload Reports",
+      color: "bg-green-200",
+    },
+    {
+      id: "treatment" as const,
+      title: "Treatment Plans",
+      description:
+        "Get personalized treatment recommendations and medication suggestions based on AI diagnosis",
+      icon: BookOpen,
+      buttonText: "Get Treatment",
+      color: "bg-green-200",
+    },
+    {
+      id: "monitoring" as const,
+      title: "Health Monitoring",
+      description:
+        "Continuous AI-powered health monitoring with  recommendations for preventive care",
+      icon: Activity,
+      buttonText: "Start Monitoring",
+      color: "bg-green-200",
+    },
+  ];
+
+  const renderForm = () => {
+    switch (activeService) {
+      case "diagnosis":
+        return <DiagnosisForm onClose={() => setActiveService(null)} />;
+      case "report":
+        return <ReportAnalysisForm onClose={() => setActiveService(null)} />;
+      case "treatment":
+        return <TreatmentPlanForm onClose={() => setActiveService(null)} />;
+      case "monitoring":
+        return <HealthMonitoringForm onClose={() => setActiveService(null)} />;
+      default:
+        return null;
+    }
+  };
+
+  if (activeService) {
+    return renderForm();
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
       <section className="relative py-20 lg:py-32">
@@ -70,6 +141,52 @@ export default function MedicationLandingPage() {
                 />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/*service section */}
+      <section id="services" className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+              Services
+            </h2>
+            <p>Choose any services for better medication</p>
+          </div>
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {services.map((service) => {
+              const IconComponent = service.icon;
+              return (
+                <Card
+                  key={service.id}
+                  className={`bg-green-100 hover:shadow-lg hover:ring-4 transition-all duration-300 border-0 shadow-md`}
+                  onClick={() => setActiveService(service.id)}
+                >
+                  <CardHeader className="text-center ">
+                    <div
+                      className={`w-16 h-16 ${service.color} rounded-full flex items-center justify-center mx-auto mb-2`}
+                    >
+                      <IconComponent className="w-8 h-8 text-green-600" />
+                    </div>
+                    <CardTitle className="text-xl font-semibold text-gray-900">
+                      {service.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <CardDescription className="text-gray-600 mb-3 leading-relaxed">
+                      {service.description}
+                    </CardDescription>
+                    <Button
+                      onClick={() => setActiveService(service.id)}
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                    >
+                      {service.buttonText}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
