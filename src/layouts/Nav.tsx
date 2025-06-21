@@ -143,10 +143,13 @@ export default function Navigation() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer">
+                    <Link
+                      to="/profile"
+                      className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-100 hover:rounded-sm"
+                    >
                       <User className="mr-2 h-4 w-4" />
                       Profile
-                    </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem className="cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
