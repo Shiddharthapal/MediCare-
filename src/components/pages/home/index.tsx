@@ -25,12 +25,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import TestRecommendationForm from "@/components/pages/services/form/test-recommendation-form";
 import ReportAnalysisForm from "@/components/pages/services/form/report-analysis-form";
 import DiagnosisForm from "@/components/pages/services/form/diagnosis-form";
 import TreatmentPlanForm from "@/components/pages/services/form/treatment-plan-form";
 import HealthMonitoringForm from "@/components/pages/services/form/health-monitoring-form";
-import EnhancedSymptomAnalysisForm from "@/components/pages/services/form/enhanced-symptom-analysis-form";
+
+import { motion } from "framer-motion";
 type ServiceType = "report" | "diagnosis" | "treatment" | "monitoring" | null;
 
 export default function MedicationLandingPage() {
@@ -67,7 +67,7 @@ export default function MedicationLandingPage() {
       id: "monitoring" as const,
       title: "Health Monitoring",
       description:
-        "Continuous AI-powered health monitoring with  recommendations for preventive care",
+        "Continuous AI-powered health monitoring actively and recommendations for preventive care",
       icon: Activity,
       buttonText: "Start Monitoring",
       color: "bg-green-200",
@@ -92,6 +92,36 @@ export default function MedicationLandingPage() {
   if (activeService) {
     return renderForm();
   }
+  function ServiceCard({ service }: { service: (typeof services)[0] }) {
+    const Icon = service.icon;
+
+    return (
+      <Card className="flex-shrink-0 w-80 mx-4 bg-green-100 border-0 shadow-sm">
+        <CardContent className="p-1 text-center">
+          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
+            <Icon className="w-8 h-8 text-white" />
+          </div>
+
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            {service.title}
+          </h3>
+
+          <p className="text-gray-600 mb-4 leading-relaxed">
+            {service.description}
+          </p>
+
+          <Button
+            onClick={() => setActiveService(service.id)}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-1 rounded-md font-medium"
+          >
+            {service.buttonText}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+  const cardWidth = 320 + 32;
+  const totalWidth = services.length * cardWidth;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
@@ -147,47 +177,58 @@ export default function MedicationLandingPage() {
 
       {/*service section */}
       <section id="services" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-              Services
-            </h2>
-            <p>Choose any services for better medication</p>
+        <div className="w-full py-16 bg-white overflow-hidden">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Services</h2>
+            <p className="text-lg text-gray-600">
+              Choose any services for better medication
+            </p>
           </div>
-          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {services.map((service) => {
-              const IconComponent = service.icon;
-              return (
-                <Card
-                  key={service.id}
-                  className={`bg-green-100 hover:shadow-lg hover:ring-4 transition-all duration-300 border-0 shadow-md`}
-                  onClick={() => setActiveService(service.id)}
-                >
-                  <CardHeader className="text-center ">
-                    <div
-                      className={`w-16 h-16 ${service.color} rounded-full flex items-center justify-center mx-auto mb-2`}
-                    >
-                      <IconComponent className="w-8 h-8 text-green-600" />
-                    </div>
-                    <CardTitle className="text-xl font-semibold text-gray-900">
-                      {service.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <CardDescription className="text-gray-600 mb-3 leading-relaxed">
-                      {service.description}
-                    </CardDescription>
-                    <Button
-                      onClick={() => setActiveService(service.id)}
-                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
-                    >
-                      {service.buttonText}
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+
+          <div className="overflow-hidden">
+            <motion.div
+              className="flex"
+              animate={{
+                x: [0, -totalWidth],
+              }}
+              transition={{
+                x: {
+                  repeat: Number.POSITIVE_INFINITY,
+                  repeatType: "loop",
+                  duration: 25,
+                  ease: "linear",
+                },
+              }}
+            >
+              {/* First set */}
+              {services.map((service, index) => (
+                <ServiceCard key={`original-${index}`} service={service} />
+              ))}
+              {/* Second set - exact duplicate for seamless loop */}
+              {services.map((service, index) => (
+                <ServiceCard key={`duplicate-${index}`} service={service} />
+              ))}
+              {/* Third set - extra buffer for ultra smooth transition */}
+              {services.map((service, index) => (
+                <ServiceCard key={`buffer-${index}`} service={service} />
+              ))}
+            </motion.div>
           </div>
+
+          <style>{`
+            @keyframes scroll {
+              0% {
+                transform: translateX(0);
+              }
+              100% {
+                transform: translateX(-50%);
+              }
+            }
+
+            .animate-scroll {
+              animation: scroll 20s linear infinite;
+            }
+          `}</style>
         </div>
       </section>
 

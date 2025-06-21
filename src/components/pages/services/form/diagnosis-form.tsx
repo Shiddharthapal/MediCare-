@@ -2,430 +2,233 @@
 
 import type React from "react";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Zap } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { X, Send, Bot, User, Stethoscope } from "lucide-react";
 
-interface DiagnosisFormProps {
+interface Message {
+  id: string;
+  content: string;
+  sender: "user" | "ai";
+  timestamp: Date;
+}
+
+interface AIChatInterfaceProps {
   onClose: () => void;
 }
 
-export default function DiagnosisForm({ onClose }: DiagnosisFormProps) {
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    gender: "",
-    chiefComplaint: "",
-    symptoms: "",
-    duration: "",
-    severity: "",
-    triggers: "",
-    relievingFactors: "",
-    associatedSymptoms: [] as string[],
-    medicalHistory: "",
-    familyHistory: "",
-    medications: "",
-    allergies: "",
-    socialHistory: "",
-    reviewOfSystems: "",
-  });
+export default function AIChatInterface({ onClose }: AIChatInterfaceProps) {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      content:
+        "Hello! I'm your AI Medical Assistant. I can help you understand symptoms and provide general health information. Please describe your symptoms or health concerns, and I'll do my best to assist you. Remember, this is for informational purposes only and doesn't replace professional medical advice.",
+      sender: "ai",
+      timestamp: new Date(),
+    },
+  ]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const associatedSymptoms = [
-    "Fever",
-    "Chills",
-    "Night sweats",
-    "Weight loss",
-    "Weight gain",
-    "Fatigue",
-    "Nausea",
-    "Vomiting",
-    "Diarrhea",
-    "Constipation",
-    "Headache",
-    "Dizziness",
-    "Shortness of breath",
-    "Chest pain",
-    "Palpitations",
-    "Cough",
-    "Skin changes",
-  ];
-
-  const handleSymptomChange = (symptom: string, checked: boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      associatedSymptoms: checked
-        ? [...prev.associatedSymptoms, symptom]
-        : prev.associatedSymptoms.filter((s) => s !== symptom),
-    }));
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-    toast({
-      title: "AI Diagnosis in Progress",
-      description:
-        "Our advanced AI is analyzing your symptoms and medical information.",
-    });
+  const generateAIResponse = (userMessage: string): string => {
+    const lowerMessage = userMessage.toLowerCase();
 
-    console.log("Diagnosis Data:", formData);
+    // Simple keyword-based responses for demonstration
+    if (
+      lowerMessage.includes("headache") ||
+      lowerMessage.includes("head pain")
+    ) {
+      return "Headaches can have various causes including stress, dehydration, lack of sleep, or tension. For frequent or severe headaches, I recommend: 1) Stay hydrated, 2) Get adequate rest, 3) Manage stress, 4) Consider over-the-counter pain relievers if appropriate. If headaches persist or worsen, please consult a healthcare professional.";
+    }
 
+    if (
+      lowerMessage.includes("fever") ||
+      lowerMessage.includes("temperature")
+    ) {
+      return "Fever is often a sign that your body is fighting an infection. For mild fever: 1) Rest and stay hydrated, 2) Use fever-reducing medications if needed, 3) Monitor your temperature regularly. Seek immediate medical attention if fever exceeds 103°F (39.4°C) or is accompanied by severe symptoms.";
+    }
+
+    if (lowerMessage.includes("cough") || lowerMessage.includes("throat")) {
+      return "Coughs can be caused by various factors including viral infections, allergies, or irritants. For symptom relief: 1) Stay hydrated, 2) Use throat lozenges, 3) Consider honey for soothing, 4) Avoid irritants like smoke. If cough persists for more than 2 weeks or is accompanied by blood, seek medical attention.";
+    }
+
+    if (
+      lowerMessage.includes("stomach") ||
+      lowerMessage.includes("nausea") ||
+      lowerMessage.includes("digestive")
+    ) {
+      return "Digestive issues can result from various causes including diet, stress, or infections. General recommendations: 1) Eat bland foods (BRAT diet), 2) Stay hydrated, 3) Avoid dairy and fatty foods temporarily, 4) Rest. If symptoms persist or worsen, especially with severe pain or blood, consult a healthcare provider.";
+    }
+
+    // Default response
+    return "Thank you for sharing your symptoms. Based on what you've described, I recommend monitoring your condition closely. General wellness tips include: staying hydrated, getting adequate rest, maintaining good hygiene, and eating nutritious foods. However, for a proper diagnosis and treatment plan, it's important to consult with a qualified healthcare professional who can examine you in person and consider your full medical history.";
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: inputMessage,
+      sender: "user",
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
+    setIsTyping(true);
+
+    // Simulate AI thinking time
     setTimeout(() => {
-      toast({
-        title: "Diagnosis Complete",
-        description:
-          "Your AI diagnosis with confidence scores is ready in your dashboard.",
-      });
-    }, 5000);
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: generateAIResponse(inputMessage),
+        sender: "ai",
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, aiResponse]);
+      setIsTyping(false);
+    }, 1500);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <Button variant="ghost" onClick={onClose} className="mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Services
-          </Button>
+    <Card className="w-full max-w-2xl mx-auto h-[600px] flex flex-col bg-white shadow-xl">
+      <CardHeader className="flex flex-row items-center justify-between p-4 border-b bg-green-50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+            <Stethoscope className="w-5 h-5 text-green-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">
+              AI Medical Assistant
+            </h3>
+            <p className="text-sm text-gray-600">Online • Ready to help</p>
+          </div>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <X className="w-5 h-5" />
+        </Button>
+      </CardHeader>
 
-        <Card className="shadow-lg">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Zap className="w-8 h-8 text-green-600" />
-            </div>
-            <CardTitle className="text-2xl">AI Diagnosis</CardTitle>
-            <CardDescription>
-              Comprehensive medical assessment for AI-powered diagnosis with
-              confidence scores
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="age">Age *</Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    value={formData.age}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, age: e.target.value }))
-                    }
-                    required
-                  />
-                </div>
-              </div>
+      <CardContent className="flex-1 flex flex-col p-0">
+        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+          <div className="space-y-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex gap-3 ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+              >
+                {message.sender === "ai" && (
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Bot className="w-4 h-4 text-green-600" />
+                  </div>
+                )}
 
-              <div className="space-y-2">
-                <Label htmlFor="gender">Gender *</Label>
-                <Select
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, gender: value }))
-                  }
+                <div
+                  className={`max-w-[80%] p-3 rounded-lg ${
+                    message.sender === "user"
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-100 text-gray-900"
+                  }`}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                    <SelectItem value="prefer-not-to-say">
-                      Prefer not to say
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="chiefComplaint">Chief Complaint *</Label>
-                <Textarea
-                  id="chiefComplaint"
-                  placeholder="What is the main reason for seeking medical attention?"
-                  value={formData.chiefComplaint}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      chiefComplaint: e.target.value,
-                    }))
-                  }
-                  required
-                  rows={2}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="symptoms">Detailed Symptom Description *</Label>
-                <Textarea
-                  id="symptoms"
-                  placeholder="Describe your symptoms in detail - location, quality, timing, etc."
-                  value={formData.symptoms}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      symptoms: e.target.value,
-                    }))
-                  }
-                  required
-                  rows={4}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration *</Label>
-                  <Select
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, duration: value }))
-                    }
+                  <p className="text-sm leading-relaxed">{message.content}</p>
+                  <p
+                    className={`text-xs mt-1 ${message.sender === "user" ? "text-green-100" : "text-gray-500"}`}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="How long have you had these symptoms?" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="acute">
-                        Acute (less than 1 week)
-                      </SelectItem>
-                      <SelectItem value="subacute">
-                        Subacute (1-4 weeks)
-                      </SelectItem>
-                      <SelectItem value="chronic">
-                        Chronic (more than 4 weeks)
-                      </SelectItem>
-                      <SelectItem value="intermittent">Intermittent</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="severity">Severity (1-10) *</Label>
-                  <Select
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, severity: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Rate severity" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+
+                {message.sender === "user" && (
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <User className="w-4 h-4 text-blue-600" />
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {isTyping && (
+              <div className="flex gap-3 justify-start">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <Bot className="w-4 h-4 text-green-600" />
+                </div>
+                <div className="bg-gray-100 p-3 rounded-lg">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
+                  </div>
                 </div>
               </div>
+            )}
+          </div>
+        </ScrollArea>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="triggers">Triggers/Aggravating Factors</Label>
-                  <Textarea
-                    id="triggers"
-                    placeholder="What makes the symptoms worse?"
-                    value={formData.triggers}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        triggers: e.target.value,
-                      }))
-                    }
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="relievingFactors">Relieving Factors</Label>
-                  <Textarea
-                    id="relievingFactors"
-                    placeholder="What makes the symptoms better?"
-                    value={formData.relievingFactors}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        relievingFactors: e.target.value,
-                      }))
-                    }
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Associated Symptoms</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {associatedSymptoms.map((symptom) => (
-                    <div key={symptom} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={symptom}
-                        checked={formData.associatedSymptoms.includes(symptom)}
-                        onCheckedChange={(checked) =>
-                          handleSymptomChange(symptom, checked as boolean)
-                        }
-                      />
-                      <Label htmlFor={symptom} className="text-sm">
-                        {symptom}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="medicalHistory">Past Medical History</Label>
-                <Textarea
-                  id="medicalHistory"
-                  placeholder="Previous illnesses, surgeries, hospitalizations..."
-                  value={formData.medicalHistory}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      medicalHistory: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="familyHistory">Family History</Label>
-                <Textarea
-                  id="familyHistory"
-                  placeholder="Relevant family medical history..."
-                  value={formData.familyHistory}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      familyHistory: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="medications">Current Medications</Label>
-                  <Textarea
-                    id="medications"
-                    placeholder="List all current medications and dosages..."
-                    value={formData.medications}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        medications: e.target.value,
-                      }))
-                    }
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="allergies">Allergies</Label>
-                  <Textarea
-                    id="allergies"
-                    placeholder="Drug allergies, food allergies, environmental allergies..."
-                    value={formData.allergies}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        allergies: e.target.value,
-                      }))
-                    }
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="socialHistory">Social History</Label>
-                <Textarea
-                  id="socialHistory"
-                  placeholder="Smoking, alcohol, drug use, occupation, travel history..."
-                  value={formData.socialHistory}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      socialHistory: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="reviewOfSystems">Review of Systems</Label>
-                <Textarea
-                  id="reviewOfSystems"
-                  placeholder="Any other symptoms not mentioned above..."
-                  value={formData.reviewOfSystems}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      reviewOfSystems: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                />
-              </div>
-
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-yellow-900 mb-2">
-                  Important Disclaimer
-                </h4>
-                <p className="text-sm text-yellow-800">
-                  This AI diagnosis is for informational purposes only and
-                  should not replace professional medical advice. Please consult
-                  with a qualified healthcare provider for proper diagnosis and
-                  treatment.
-                </p>
-              </div>
-
-              <div className="flex gap-4 pt-6">
-                <Button
-                  type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                >
-                  Generate AI Diagnosis
-                </Button>
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        <div className="p-4 border-t bg-gray-50">
+          <div className="flex gap-2">
+            <Input
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Describe your symptoms or ask a health question..."
+              className="flex-1"
+              disabled={isTyping}
+            />
+            <Button
+              onClick={handleSendMessage}
+              disabled={!inputMessage.trim() || isTyping}
+              className="bg-green-600 hover:bg-green-700 text-white px-4"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            This AI assistant provides general information only. Always consult
+            healthcare professionals for medical advice.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

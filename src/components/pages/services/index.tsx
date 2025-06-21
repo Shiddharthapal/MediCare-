@@ -20,42 +20,24 @@ import {
   BookOpen,
   Activity,
 } from "lucide-react";
-import TestRecommendationForm from "@/components/pages/services/form/test-recommendation-form";
 import ReportAnalysisForm from "@/components/pages/services/form/report-analysis-form";
 import DiagnosisForm from "@/components/pages/services/form/diagnosis-form";
 import TreatmentPlanForm from "@/components/pages/services/form/treatment-plan-form";
 import HealthMonitoringForm from "@/components/pages/services/form/health-monitoring-form";
-import EnhancedSymptomAnalysisForm from "@/components/pages/services/form/enhanced-symptom-analysis-form";
-type ServiceType =
-  | "symptom"
-  | "test"
-  | "report"
-  | "diagnosis"
-  | "treatment"
-  | "monitoring"
-  | null;
+
+type ServiceType = "report" | "diagnosis" | "treatment" | "monitoring" | null;
 
 export default function HealthcareServices() {
   const [activeService, setActiveService] = useState<ServiceType>(null);
 
   const services = [
     {
-      id: "symptom" as const,
-      title: "Symptom Analysis",
+      id: "diagnosis" as const,
+      title: "AI Diagnosis",
       description:
-        "Describe your symptoms and let our AI analyze patterns to predict potential diseases with high accuracy",
-      icon: FileText,
-      buttonText: "Start Analysis",
-      color: "bg-green-100",
-      highlighted: true, // Add this to mark it as the featured service
-    },
-    {
-      id: "test" as const,
-      title: "AI Test Recommendations",
-      description:
-        "Get personalized test recommendations based on AI analysis of your symptoms and medical history",
-      icon: CheckSquare,
-      buttonText: "Get Tests",
+        "Receive AI-powered disease predictions with confidence scores and detailed explanations",
+      icon: Zap,
+      buttonText: "View Diagnosis",
       color: "bg-green-100",
     },
     {
@@ -65,15 +47,6 @@ export default function HealthcareServices() {
         "Upload your test reports and medical documents for AI-powered analysis and disease prediction",
       icon: BarChart3,
       buttonText: "Upload Reports",
-      color: "bg-green-100",
-    },
-    {
-      id: "diagnosis" as const,
-      title: "AI Diagnosis",
-      description:
-        "Receive AI-powered disease predictions with confidence scores and detailed explanations",
-      icon: Zap,
-      buttonText: "View Diagnosis",
       color: "bg-green-100",
     },
     {
@@ -98,14 +71,6 @@ export default function HealthcareServices() {
 
   const renderForm = () => {
     switch (activeService) {
-      case "symptom":
-        return (
-          <EnhancedSymptomAnalysisForm onClose={() => setActiveService(null)} />
-        );
-      case "test":
-        return (
-          <TestRecommendationForm onClose={() => setActiveService(null)} />
-        );
       case "report":
         return <ReportAnalysisForm onClose={() => setActiveService(null)} />;
       case "diagnosis":
@@ -145,7 +110,7 @@ export default function HealthcareServices() {
                 return (
                   <Card
                     key={service.id}
-                    className={`hover:shadow-lg hover:ring-4 transition-all duration-300 border-0 shadow-md`}
+                    className={` bg-green-100 hover:shadow-lg hover:ring-4 transition-all duration-300 border-0 shadow-md`}
                     onClick={() => setActiveService(service.id)}
                   >
                     <CardHeader className="text-center pb-4">
