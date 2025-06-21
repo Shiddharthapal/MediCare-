@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import authReducer from "./slices/authSlice";
+import profileReducer from "./slices/profileSlice";
 
 // Configure Redux Persist
 const persistConfig = {
@@ -15,12 +16,14 @@ const persistedAuthReducer = persistReducer(persistConfig, authReducer);
 export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
+    profile: profileReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore Redux Persist actions
+        // Ignore Redux Persist actions and non-serializable dates in profile
         ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+        ignoredPaths: ["profile.lastUpdated"],
       },
     }),
 });
