@@ -35,6 +35,7 @@ export default function ProfilePage() {
   const { isEditing, isSaving, error } = useAppSelector(
     (state) => state.profile
   );
+  const token = useAppSelector((state) => state.auth.token);
   const [errors, setErrors] = useState<FormErrors>({});
 
   const defaultProfile: ProfileFormData = {
@@ -70,10 +71,6 @@ export default function ProfilePage() {
 
     if (!formData.contactNumber.trim()) {
       newErrors.contactNumber = "Contact number is required";
-    } else if (
-      !/^(\+\d{1,3}[- ]?)?\d{10}$/.test(formData.contactNumber.trim())
-    ) {
-      newErrors.contactNumber = "Invalid contact number format";
     }
 
     if (!formData.bloodGroup.trim()) {
@@ -95,6 +92,17 @@ export default function ProfilePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    console.log("=>", e.target);
+    const createProfile = async () => {
+      let response = await fetch("/api/createProfile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ e, token }),
+      });
+    };
+    createProfile();
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -126,7 +134,7 @@ export default function ProfilePage() {
 
       // Convert form data to User type
       const updatedProfile: Partial<User> = {
-        name: formData.name,
+        ...(formData.name ? { name: formData.name } : {}),
         ...(formData.age ? { age: Number(formData.age) } : {}),
         ...(formData.weight ? { weight: Number(formData.weight) } : {}),
         ...(formData.height ? { height: Number(formData.height) } : {}),
@@ -162,7 +170,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <div className="bg-white shadow-lg rounded-lg p-6">
+      <div className="bg-green-100 shadow-lg rounded-lg p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">
           Profile Information
         </h1>
@@ -189,7 +197,7 @@ export default function ProfilePage() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className={errors.name ? "border-red-500" : ""}
+                    className={errors.name ? "border-red-500" : "bg-white"}
                   />
                   {errors.name && (
                     <p className="text-sm text-red-500">{errors.name}</p>
@@ -197,7 +205,7 @@ export default function ProfilePage() {
                 </>
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.name}
+                  {formData.name || "Not provided"}
                 </p>
               )}
             </div>
@@ -210,6 +218,7 @@ export default function ProfilePage() {
                   name="fatherName"
                   value={formData.fatherName}
                   onChange={handleInputChange}
+                  className="bg-white"
                 />
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
@@ -219,13 +228,14 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address">Address *</Label>
               {isEditing ? (
                 <Input
                   id="address"
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
+                  className="bg-white"
                 />
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
@@ -243,7 +253,9 @@ export default function ProfilePage() {
                     name="contactNumber"
                     value={formData.contactNumber}
                     onChange={handleInputChange}
-                    className={errors.contactNumber ? "border-red-500" : ""}
+                    className={
+                      errors.contactNumber ? "border-red-500" : "bg-white"
+                    }
                   />
                   {errors.contactNumber && (
                     <p className="text-sm text-red-500">
@@ -261,9 +273,7 @@ export default function ProfilePage() {
 
           {/* Medical Information Section */}
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">
-              Medical Details
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-700 mb-4"></h2>
 
             <div className="space-y-2">
               <Label htmlFor="bloodGroup">Blood Group *</Label>
@@ -274,7 +284,9 @@ export default function ProfilePage() {
                     name="bloodGroup"
                     value={formData.bloodGroup}
                     onChange={handleInputChange}
-                    className={errors.bloodGroup ? "border-red-500" : ""}
+                    className={
+                      errors.bloodGroup ? "border-red-500" : "bg-white"
+                    }
                     placeholder="e.g., A+, B-, O+"
                   />
                   {errors.bloodGroup && (
@@ -289,7 +301,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="age">Age</Label>
+              <Label htmlFor="age">Age *</Label>
               {isEditing ? (
                 <>
                   <Input
@@ -298,7 +310,7 @@ export default function ProfilePage() {
                     type="number"
                     value={formData.age}
                     onChange={handleInputChange}
-                    className={errors.age ? "border-red-500" : ""}
+                    className={errors.age ? "border-red-500" : "bg-white"}
                   />
                   {errors.age && (
                     <p className="text-sm text-red-500">{errors.age}</p>
@@ -312,7 +324,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="weight">Weight (kg)</Label>
+              <Label htmlFor="weight">Weight (kg) *</Label>
               {isEditing ? (
                 <Input
                   id="weight"
@@ -320,6 +332,7 @@ export default function ProfilePage() {
                   type="number"
                   value={formData.weight}
                   onChange={handleInputChange}
+                  className="bg-white"
                 />
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
@@ -337,6 +350,7 @@ export default function ProfilePage() {
                   type="number"
                   value={formData.height}
                   onChange={handleInputChange}
+                  className="bg-white"
                 />
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
@@ -354,6 +368,7 @@ export default function ProfilePage() {
                   type="date"
                   value={formData.lastTreatmentDate}
                   onChange={handleInputChange}
+                  className="bg-white"
                 />
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
@@ -374,6 +389,7 @@ export default function ProfilePage() {
                 onClick={handleCancel}
                 variant="outline"
                 disabled={isSaving}
+                className="hover:bg-red-300"
               >
                 Cancel
               </Button>
@@ -387,10 +403,18 @@ export default function ProfilePage() {
             </>
           ) : (
             <>
-              <Button onClick={handleEdit} variant="outline">
+              <Button
+                onClick={handleEdit}
+                variant="outline"
+                className="hover:bg-blue-300"
+              >
                 Edit
               </Button>
-              <Button onClick={handleClose} variant="secondary">
+              <Button
+                onClick={handleClose}
+                variant="secondary"
+                className="hover:bg-red-300"
+              >
                 Close
               </Button>
             </>

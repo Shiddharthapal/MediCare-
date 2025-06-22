@@ -7,6 +7,7 @@ import Layout from "../layouts/Layout";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Services from "./pages/services";
+import Profile from "./pages/profile";
 import ProtectedRoute from "./ProctedRoute";
 export default function App() {
   return (
@@ -18,8 +19,8 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-
               <Route path="/services" element={<Services />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
           </Routes>
         </Router>
