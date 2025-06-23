@@ -6,9 +6,9 @@ import profileReducer from "./slices/profileSlice";
 
 // Configure Redux Persist
 const persistConfig = {
-  key: "root",
+  key: "auth",
   storage,
-  whitelist: ["auth"], // Only persist auth state
+  whitelist: ["user", "isAuthenticated"], // Only persist auth state
 };
 
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);

@@ -53,6 +53,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState<ProfileFormData>(defaultProfile);
 
   useEffect(() => {
+    console.log("=>", user?._id);
     if (user) {
       setFormData((prev) => ({
         ...prev,
@@ -92,17 +93,6 @@ export default function ProfilePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log("=>", e.target);
-    const createProfile = async () => {
-      let response = await fetch("/api/createProfile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ e, token }),
-      });
-    };
-    createProfile();
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -148,6 +138,14 @@ export default function ProfilePage() {
           ? { lastTreatmentDate: new Date(formData.lastTreatmentDate) }
           : {}),
       };
+
+      let response = await fetch("/api/createProfile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ updatedProfile, token }),
+      });
 
       // TODO: Add API call to update profile
       // const response = await updateUserProfile(updatedProfile);

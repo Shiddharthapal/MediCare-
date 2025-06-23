@@ -62,6 +62,7 @@ export default function Login() {
           _id: result._id,
           email: data.email,
           token: result.token,
+          createdAt: result.createdAt || new Date().toISOString(),
         })
       );
       // Redirect to user page after successful login
