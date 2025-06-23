@@ -20,9 +20,9 @@ interface ProfileFormData {
   name: string;
   fatherName: string;
   address: string;
-  age: string; // Keep as string for input handling
+  age: number; // Keep as string for input handling
   bloodGroup: string;
-  weight: string; // Keep as string for input handling
+  weight: number; // Keep as string for input handling
   height: string; // Keep as string for input handling
   contactNumber: string;
   lastTreatmentDate: string;
@@ -53,7 +53,6 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState<ProfileFormData>(defaultProfile);
 
   useEffect(() => {
-    console.log("=>", user?._id);
     if (user) {
       setFormData((prev) => ({
         ...prev,
@@ -125,15 +124,15 @@ export default function ProfilePage() {
       // Convert form data to User type
       const updatedProfile: Partial<User> = {
         ...(formData.name ? { name: formData.name } : {}),
-        ...(formData.age ? { age: Number(formData.age) } : {}),
-        ...(formData.weight ? { weight: Number(formData.weight) } : {}),
-        ...(formData.height ? { height: Number(formData.height) } : {}),
         ...(formData.fatherName ? { fatherName: formData.fatherName } : {}),
         ...(formData.address ? { address: formData.address } : {}),
-        ...(formData.bloodGroup ? { bloodGroup: formData.bloodGroup } : {}),
         ...(formData.contactNumber
           ? { contactNumber: formData.contactNumber }
           : {}),
+        ...(formData.age ? { age: formData.age } : {}),
+        ...(formData.bloodGroup ? { bloodGroup: formData.bloodGroup } : {}),
+        ...(formData.weight ? { weight: formData.weight } : {}),
+        ...(formData.height ? { height: formData.height } : {}),
         ...(formData.lastTreatmentDate
           ? { lastTreatmentDate: new Date(formData.lastTreatmentDate) }
           : {}),
@@ -146,6 +145,12 @@ export default function ProfilePage() {
         },
         body: JSON.stringify({ updatedProfile, token }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
 
       // TODO: Add API call to update profile
       // const response = await updateUserProfile(updatedProfile);

@@ -18,23 +18,24 @@ const userDetailsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  contractNumber: {
+    type: Number,
+    required: true,
+  },
   age: {
     type: Number,
     required: true,
   },
   bloodGroup: {
+    type: String,
+  },
+  weight: {
     type: Number,
   },
   height: {
     type: Number,
   },
-  weight: {
-    type: Number,
-  },
-  contractNumber: {
-    type: Number,
-    required: true,
-  },
+
   lastTreatmentDate: {
     type: Date,
   },
