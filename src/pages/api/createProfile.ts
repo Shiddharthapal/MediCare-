@@ -8,39 +8,19 @@ export const POST: APIRoute = async ({ request }) => {
     "Content-Type": "application/json",
   };
   try {
-    const body = await request.json();
+    const { updatedProfile, token } = await request.json();
     const {
       name,
       fatherName,
       address,
-      contractNumber,
+      contactNumber,
       age,
       bloodGroup,
       weight,
       height,
       lastTreatmentDate,
-    } = body.updatedProfile;
-    await connect();
-    const tokenData = await verifyToken(body.token);
-    console.log("🧞‍♂️tokenData --->", tokenData);
-    const userdetails = await UserDetails.findOne(tokenData);
-    console.log("🧞‍♂️userdetails --->", userdetails);
-
-    console.log("name=>", name);
-    if (
-      !name ||
-      !address ||
-      !bloodGroup ||
-      !age ||
-      !weight ||
-      !contractNumber
-    ) {
-      console.log("name=>", name);
-      console.log("address=>", address);
-      console.log("bloodGroup=>", bloodGroup);
-      console.log("age=>", age);
-      console.log("weight=>", weight);
-      console.log("contractNumber=>", contractNumber);
+    } = updatedProfile;
+    if (!name || !address || !bloodGroup || !age || !weight || !contactNumber) {
       return new Response(
         JSON.stringify({
           message: "Missing field required",
@@ -50,9 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
             age: !age ? "Age is required" : null,
             weight: !weight ? "Weight is required" : null,
             bloodGroup: !bloodGroup ? "Bloodgroup is required" : null,
-            contractNumber: !contractNumber
-              ? "Contact number is required"
-              : null,
+            contactNumber: !contactNumber ? "Contact number is required" : null,
           },
         }),
         {
@@ -61,14 +39,19 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
-    console.log("userId=>", tokenData.userId);
+    await connect();
+    const tokenData = await verifyToken(token);
+    let userId = tokenData.userId;
+    console.log("🧞‍♂️tokenData --->", tokenData);
+    const userdetails = await UserDetails.findOne({ userId: userId });
+    console.log("userId=>", userId);
     if (!userdetails) {
       const userDetails = new UserDetails({
-        userId: tokenData.userId,
+        userId: userId,
         name,
         fatherName,
         address,
-        contractNumber,
+        contactNumber,
         age,
         bloodGroup,
         weight,

@@ -18,14 +18,14 @@ interface FormErrors {
 
 interface ProfileFormData {
   name: string;
-  fatherName: string;
+  fatherName?: string;
   address: string;
-  age: number; // Keep as string for input handling
+  age: number;
   bloodGroup: string;
-  weight: number; // Keep as string for input handling
-  height: string; // Keep as string for input handling
+  weight: number;
+  height?: number;
   contactNumber: string;
-  lastTreatmentDate: string;
+  lastTreatmentDate?: string;
 }
 
 export default function ProfilePage() {
@@ -40,14 +40,14 @@ export default function ProfilePage() {
 
   const defaultProfile: ProfileFormData = {
     name: "",
-    fatherName: "",
+    fatherName: undefined,
     address: "",
-    age: "",
+    age: 18,
     bloodGroup: "",
-    weight: "",
-    height: "",
+    weight: 0,
+    height: undefined,
     contactNumber: "",
-    lastTreatmentDate: new Date().toISOString().split("T")[0],
+    lastTreatmentDate: undefined,
   };
 
   const [formData, setFormData] = useState<ProfileFormData>(defaultProfile);
@@ -60,30 +60,65 @@ export default function ProfilePage() {
         // Add other fields when API is ready
       }));
     }
+    const fetchData = async () => {
+      let id = user?._id;
+      try {
+        let response = await fetch(`/api/user/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Status:${response.status}`);
+        }
+        const responseData = await response.json();
+        //console.log("🧞‍♂️responseData --->", responseData.userdetails);
+        setFormData(responseData?.userdetails);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
   }, [user]);
 
   const validateForm = () => {
     const newErrors: FormErrors = {};
 
+    // Required fields validation
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
 
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
+    }
+
     if (!formData.contactNumber.trim()) {
       newErrors.contactNumber = "Contact number is required";
+    } else if (formData.contactNumber.trim().length < 10) {
+      newErrors.contactNumber = "Contact number must be at least 10 digits";
     }
 
     if (!formData.bloodGroup.trim()) {
       newErrors.bloodGroup = "Blood group is required";
     } else if (!/^(A|B|AB|O)[+-]$/.test(formData.bloodGroup.trim())) {
-      newErrors.bloodGroup = "Invalid blood group format";
+      newErrors.bloodGroup = "Invalid blood group format (e.g., A+, B-, O+)";
     }
 
-    if (
-      formData.age &&
-      (isNaN(Number(formData.age)) || Number(formData.age) < 0)
-    ) {
-      newErrors.age = "Age must be a valid positive number";
+    if (!formData.age) {
+      newErrors.age = "Age is required";
+    } else if (formData.age < 0 || formData.age > 150) {
+      newErrors.age = "Age must be between 0 and 150";
+    }
+
+    if (formData.weight && formData.weight < 0) {
+      newErrors.weight = "Weight must be a positive number";
+    }
+
+    if (formData.height && formData.height < 0) {
+      newErrors.height = "Height must be a positive number";
     }
 
     setErrors(newErrors);
@@ -91,10 +126,18 @@ export default function ProfilePage() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+
+    let parsedValue: string | number | undefined = value;
+
+    // Handle numeric inputs
+    if (type === "number") {
+      parsedValue = value === "" ? undefined : Number(value);
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: parsedValue,
     }));
     // Clear error when user starts typing
     if (errors[name]) {
@@ -122,21 +165,26 @@ export default function ProfilePage() {
       dispatch(updateProfileStart());
 
       // Convert form data to User type
+      // Required fields
       const updatedProfile: Partial<User> = {
-        ...(formData.name ? { name: formData.name } : {}),
-        ...(formData.fatherName ? { fatherName: formData.fatherName } : {}),
-        ...(formData.address ? { address: formData.address } : {}),
-        ...(formData.contactNumber
-          ? { contactNumber: formData.contactNumber }
-          : {}),
-        ...(formData.age ? { age: formData.age } : {}),
-        ...(formData.bloodGroup ? { bloodGroup: formData.bloodGroup } : {}),
-        ...(formData.weight ? { weight: formData.weight } : {}),
-        ...(formData.height ? { height: formData.height } : {}),
-        ...(formData.lastTreatmentDate
-          ? { lastTreatmentDate: new Date(formData.lastTreatmentDate) }
-          : {}),
+        name: formData.name.trim(),
+        address: formData.address.trim(),
+        contactNumber: formData.contactNumber.trim(),
+        age: formData.age,
+        bloodGroup: formData.bloodGroup.trim(),
+        weight: formData.weight,
       };
+
+      // Optional fields
+      if (formData.fatherName?.trim()) {
+        updatedProfile.fatherName = formData.fatherName.trim();
+      }
+      if (formData.height) {
+        updatedProfile.height = formData.height;
+      }
+      if (formData.lastTreatmentDate) {
+        updatedProfile.lastTreatmentDate = new Date(formData.lastTreatmentDate);
+      }
 
       let response = await fetch("/api/createProfile", {
         method: "POST",
@@ -208,7 +256,7 @@ export default function ProfilePage() {
                 </>
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.name || "Not provided"}
+                  {formData?.name || "Not provided"}
                 </p>
               )}
             </div>
@@ -225,7 +273,7 @@ export default function ProfilePage() {
                 />
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.fatherName || "Not provided"}
+                  {formData?.fatherName || "Not provided"}
                 </p>
               )}
             </div>
@@ -233,16 +281,22 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <Label htmlFor="address">Address *</Label>
               {isEditing ? (
-                <Input
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className="bg-white"
-                />
+                <>
+                  <Input
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className={errors.address ? "border-red-500" : "bg-white"}
+                    required
+                  />
+                  {errors.address && (
+                    <p className="text-sm text-red-500">{errors.address}</p>
+                  )}
+                </>
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.address || "Not provided"}
+                  {formData?.address || "Not provided"}
                 </p>
               )}
             </div>
@@ -259,6 +313,7 @@ export default function ProfilePage() {
                     className={
                       errors.contactNumber ? "border-red-500" : "bg-white"
                     }
+                    placeholder="01xxxxxxxxx"
                   />
                   {errors.contactNumber && (
                     <p className="text-sm text-red-500">
@@ -268,7 +323,7 @@ export default function ProfilePage() {
                 </>
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.contactNumber || "Not provided"}
+                  {formData?.contactNumber || "Not provided"}
                 </p>
               )}
             </div>
@@ -298,7 +353,7 @@ export default function ProfilePage() {
                 </>
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.bloodGroup || "Not provided"}
+                  {formData?.bloodGroup || "Not provided"}
                 </p>
               )}
             </div>
@@ -310,7 +365,6 @@ export default function ProfilePage() {
                   <Input
                     id="age"
                     name="age"
-                    type="number"
                     value={formData.age}
                     onChange={handleInputChange}
                     className={errors.age ? "border-red-500" : "bg-white"}
@@ -321,7 +375,7 @@ export default function ProfilePage() {
                 </>
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.age ? `${formData.age} years` : "Not provided"}
+                  {formData?.age ? `${formData?.age} years` : "Not provided"}
                 </p>
               )}
             </div>
@@ -329,35 +383,52 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <Label htmlFor="weight">Weight (kg) *</Label>
               {isEditing ? (
-                <Input
-                  id="weight"
-                  name="weight"
-                  type="number"
-                  value={formData.weight}
-                  onChange={handleInputChange}
-                  className="bg-white"
-                />
+                <>
+                  <Input
+                    id="weight"
+                    name="weight"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={formData.weight || ""}
+                    onChange={handleInputChange}
+                    className={errors.weight ? "border-red-500" : "bg-white"}
+                    required
+                  />
+                  {errors.weight && (
+                    <p className="text-sm text-red-500">{errors.weight}</p>
+                  )}
+                </>
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.weight ? `${formData.weight} kg` : "Not provided"}
+                  {formData?.weight ? `${formData?.weight} kg` : "Not provided"}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="height">Height (cm)</Label>
+              <Label htmlFor="height">Height (inch)</Label>
               {isEditing ? (
-                <Input
-                  id="height"
-                  name="height"
-                  type="number"
-                  value={formData.height}
-                  onChange={handleInputChange}
-                  className="bg-white"
-                />
+                <>
+                  <Input
+                    id="height"
+                    name="height"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={formData.height || ""}
+                    onChange={handleInputChange}
+                    className={errors.height ? "border-red-500" : "bg-white"}
+                  />
+                  {errors.height && (
+                    <p className="text-sm text-red-500">{errors.height}</p>
+                  )}
+                </>
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.height ? `${formData.height} cm` : "Not provided"}
+                  {formData?.height
+                    ? `${formData?.height} inch`
+                    : "Not provided"}
                 </p>
               )}
             </div>
@@ -369,14 +440,15 @@ export default function ProfilePage() {
                   id="lastTreatmentDate"
                   name="lastTreatmentDate"
                   type="date"
-                  value={formData.lastTreatmentDate}
+                  max={new Date().toISOString().split("T")[0]}
+                  value={formData.lastTreatmentDate || ""}
                   onChange={handleInputChange}
                   className="bg-white"
                 />
               ) : (
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData.lastTreatmentDate
-                    ? new Date(formData.lastTreatmentDate).toLocaleDateString()
+                  {formData?.lastTreatmentDate
+                    ? new Date(formData?.lastTreatmentDate).toLocaleDateString()
                     : "Not provided"}
                 </p>
               )}

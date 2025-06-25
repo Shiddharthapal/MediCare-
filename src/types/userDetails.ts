@@ -5,7 +5,7 @@ export interface User {
   name: string;
   fatherName?: string;
   address: string;
-  contactNumber: number;
+  contactNumber: string;
   age: number;
   bloodGroup: string;
   weight: number;

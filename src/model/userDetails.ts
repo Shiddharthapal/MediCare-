@@ -18,8 +18,8 @@ const userDetailsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  contractNumber: {
-    type: Number,
+  contactNumber: {
+    type: String,
     required: true,
   },
   age: {
@@ -45,5 +45,8 @@ const userDetailsSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.models.UserDetails ||
+const userDetails =
+  mongoose.models.UserDetails ||
   mongoose.model("UserDetails", userDetailsSchema);
+
+export default userDetails;
