@@ -10,6 +10,11 @@ const doctorSchema = new mongoose.Schema({
       "Please provide a valid email",
     ],
   },
+  registrationNo: {
+    type: Number,
+    required: [true, "Please provide a registration no"],
+    unique: true,
+  },
   password: {
     type: String,
     required: [true, "Password is required"],

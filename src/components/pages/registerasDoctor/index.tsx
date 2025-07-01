@@ -1,39 +1,47 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, ChevronDown } from "lucide-react";
-import { useAppDispatch } from "@/redux/hooks";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { loginStart, loginSuccess } from "@/redux/slices/authSlice";
-interface LoginFormData {
+
+interface RegisterFormData {
   email: string;
+  registrationNo: number;
   password: string;
+  confirmPassword: string;
 }
 
-export default function Login() {
+export default function Register() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const dispatch = useAppDispatch();
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm<LoginFormData>();
+  } = useForm<RegisterFormData>();
 
-  const onSubmit = async (data: LoginFormData) => {
+  const password = watch("password");
+
+  const onSubmit = async (data: RegisterFormData) => {
     try {
       setLoading(true);
       setError(null);
       dispatch(loginStart());
-      console.log("data=>", data);
-      const response = await fetch("/api/login", {
+
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,28 +49,29 @@ export default function Login() {
         body: JSON.stringify({
           email: data.email, // Using the same field name for simplicity
           password: data.password,
-          loginType: "doctor",
+          registrationNo: data.registrationNo,
         }),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Login failed");
+        throw new Error(result.message || "Registration failed");
       }
       dispatch(
         loginSuccess({
-          _id: result._id,
+          _id: result.userId,
           email: data.email,
           token: result.token,
           role: "doctor",
           createdAt: result.createdAt || new Date().toISOString(),
         })
       );
-      // Redirect to user page after successful login
+
+      // Redirect to user page after successful registration
       navigate("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -72,9 +81,7 @@ export default function Login() {
     <div className="flex justify-center items-center min-h-screen bg-gray-200">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">
-            Login as Doctor
-          </CardTitle>
+          <CardTitle className="text-2xl text-center">Register</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -84,8 +91,8 @@ export default function Login() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="medicare+@aidoctor.com"
                   className="bordar-2 border-black shadow-md"
+                  placeholder="medicare+@aidoctor.com"
                   {...register("email", {
                     required: "Email is required",
                     pattern: {
@@ -94,10 +101,24 @@ export default function Login() {
                     },
                   })}
                 />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
-                )}
               </>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="registrationNo">Registration No</Label>
+              <Input
+                id="registrationNo"
+                type="registrationNo"
+                className="bordar-2 border-black shadow-md"
+                placeholder="0123456..."
+                {...register("registrationNo", {
+                  required: "Registration no is require",
+                  minLength: {
+                    value: 12,
+                    message: "Registration no invalid",
+                  },
+                })}
+              />
             </div>
 
             <div className="space-y-2">
@@ -105,8 +126,8 @@ export default function Login() {
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
                   className="bordar-2 border-black shadow-md"
+                  type={showPassword ? "text" : "password"}
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
@@ -135,6 +156,39 @@ export default function Login() {
               )}
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="bordar-2 border-black shadow-md"
+                  {...register("confirmPassword", {
+                    required: "Please confirm your password",
+                    validate: (value) =>
+                      value === password || "Passwords do not match",
+                  })}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+
             {error && <p className="text-sm text-red-500">{error}</p>}
 
             <Button
@@ -142,15 +196,15 @@ export default function Login() {
               className="w-full bg-gray-800"
               disabled={loading}
             >
-              {loading ? "Loading..." : "Login"}
+              {loading ? "Loading..." : "Register"}
             </Button>
 
             <div className="text-center text-sm">
               <Link
-                to="/registerasDoctor"
+                to="/loginasDoctor"
                 className="text-primary hover:underline"
               >
-                {"Don't have an account? Register"}
+                Already have an account? Login
               </Link>
             </div>
           </form>

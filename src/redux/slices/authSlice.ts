@@ -56,7 +56,7 @@ export const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = userData; // Store only user data
       state.token = token; // Store token separately
-      (state.uitype = ""), (state.loading = false);
+      state.loading = false;
       state.error = null;
 
       localStorage.setItem("authToken", action.payload.token);
@@ -65,6 +65,7 @@ export const authSlice = createSlice({
         JSON.stringify({
           _id: action.payload._id,
           email: action.payload.email,
+          role: action.payload.role,
         })
       );
     },

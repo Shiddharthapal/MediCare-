@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import {
   ChevronDown,
   Shield,
@@ -24,16 +23,10 @@ import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { useNavigate } from "react-router-dom";
 
 export default function Navigation() {
-  const [userType, setUserType] = useState<"patient" | "admin" | null>(
-    "patient"
-  );
   const token = useAppSelector((state) => state.auth.token);
+  const authuser = JSON.parse(localStorage.getItem("authUser") || "");
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const handleLogin = (type: "patient" | "admin") => {
-    setUserType(type);
-    // In real app, this would trigger actual authentication
-  };
   console.log("Token:", token);
   const handleLogout = () => {
     dispatch(logout());
@@ -72,13 +65,25 @@ export default function Navigation() {
                 Services
                 <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
               </Link>
-              <Link
-                to="/how-it-works"
-                className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
-              >
-                How It Works
-                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
-              </Link>
+              {authuser.role === "user" && (
+                <Link
+                  to="/how-it-works"
+                  className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
+                >
+                  How It Works
+                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
+                </Link>
+              )}
+
+              {authuser.role === "doctor" && (
+                <Link
+                  to="/appoinments"
+                  className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
+                >
+                  Appoinments
+                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
+                </Link>
+              )}
               <Link
                 to="/about"
                 className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
@@ -130,7 +135,9 @@ export default function Navigation() {
                     variant="outline"
                     className="text-green-600 border-green-600"
                   >
-                    {userType === "admin" ? "Doctor Active" : "Patient Active"}
+                    {authuser.role === "doctor"
+                      ? "Doctor Active"
+                      : "Patient Active"}
                   </Badge>
                 </div>
 
@@ -176,13 +183,13 @@ export default function Navigation() {
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem className="cursor-pointer">
                     <Users className="mr-2 h-4 w-4" />
-                    <Link to="/loginasusers" className="text-gray-900">
+                    <Link to="/loginasUser" className="text-gray-900">
                       <p>As a Patient</p>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer">
                     <Shield className="mr-2 h-4 w-4" />
-                    <Link to="/loginasdoctor">
+                    <Link to="/loginasDoctor">
                       <p>As an Doctor</p>
                     </Link>
                   </DropdownMenuItem>
@@ -207,12 +214,23 @@ export default function Navigation() {
             >
               Services
             </Link>
-            <Link
-              to="/how-it-works"
-              className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
-            >
-              How It Works
-            </Link>
+            {authuser.role === "user" && (
+              <Link
+                to="/how-it-works"
+                className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
+              >
+                How It Works
+              </Link>
+            )}
+
+            {authuser.role === "doctor" && (
+              <Link
+                to="/appoinments"
+                className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
+              >
+                Appoinments
+              </Link>
+            )}
             <Link
               to="/about"
               className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"

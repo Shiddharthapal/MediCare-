@@ -5,23 +5,18 @@ import jwt from "jsonwebtoken";
 import Doctor from "@/model/doctor";
 
 export const POST: APIRoute = async ({ request }) => {
-  const body = await request.json();
-  console.log("🧞‍♂️body --->", body);
-  const { email, password, registrationType } = body;
-  const identifier = body[registrationType];
-  console.log("🧞‍♂️identifier --->", identifier);
-  const identifierType = registrationType;
-  console.log("🧞‍♂️identifierType --->", identifierType);
   const headers = {
     "Content-Type": "application/json",
   };
   try {
+    const body = await request.json();
+    const { email, password, registrationNo } = body;
     // Connect to database
     await connect();
 
     let token = null;
     // Check if user already exists
-    if (identifierType === "user") {
+    if (!registrationNo) {
       const existingUser = await User.findOne({
         email: email,
       });
@@ -73,8 +68,8 @@ export const POST: APIRoute = async ({ request }) => {
       const doctor = new Doctor({
         email: email,
         password,
+        registrationNo,
       });
-      console.log("doctor=>", doctor);
       await doctor.save();
 
       token = jwt.sign(
@@ -84,7 +79,6 @@ export const POST: APIRoute = async ({ request }) => {
           "your-secret-key",
         { expiresIn: "24h" }
       );
-      console.log("token=>", token);
     }
     return new Response(
       JSON.stringify({
@@ -108,13 +102,6 @@ export const POST: APIRoute = async ({ request }) => {
         errors: { [key: string]: { message: string } };
       };
       errorMessage = Object.values(validationError.errors)[0].message;
-    }
-    // Handle duplicate key errors
-    else if (error.code === 11000) {
-      statusCode = 400;
-      const field =
-        registrationType === "email" ? "email address" : "mobile number";
-      errorMessage = `This ${field} is already registered`;
     }
 
     return new Response(

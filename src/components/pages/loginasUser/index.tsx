@@ -61,6 +61,7 @@ export default function Login() {
           _id: result._id,
           email: data.email,
           token: result.token,
+          role: "user",
           createdAt: result.createdAt || new Date().toISOString(),
         })
       );
@@ -74,8 +75,8 @@ export default function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background">
-      <Card className="w-[350px]">
+    <div className="flex justify-center items-center min-h-screen bg-gray-200">
+      <Card className="w-[350px] shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl text-center">
             Login as Patient
@@ -90,6 +91,7 @@ export default function Login() {
                   id="email"
                   type="email"
                   placeholder="medicare+@patient.com"
+                  className="bordar-2 border-black shadow-md"
                   {...register("email", {
                     required: "Email is required",
                     pattern: {
@@ -110,6 +112,7 @@ export default function Login() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  className="bordar-2 border-black shadow-md"
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
@@ -149,7 +152,10 @@ export default function Login() {
             </Button>
 
             <div className="text-center text-sm">
-              <Link to="/register" className="text-primary hover:underline">
+              <Link
+                to="/registerasUser"
+                className="text-primary hover:underline"
+              >
                 {"Don't have an account? Register"}
               </Link>
             </div>
