@@ -4,7 +4,8 @@ import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "@/redux/store";
 import Home from "./pages/home";
 import Layout from "../layouts/Layout";
-import Login from "./pages/login";
+import LoginAsUser from "./pages/loginasusers";
+import LoginAsDoctor from "./pages/loginasdoctor";
 import Register from "./pages/register";
 import Services from "./pages/services";
 import Profile from "./pages/profile";
@@ -17,7 +18,8 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
+              <Route path="/loginasusers" element={<LoginAsUser />} />
+              <Route path="/loginasdoctor" element={<LoginAsDoctor />} />
               <Route path="/register" element={<Register />} />
               <Route path="/services" element={<Services />} />
               <Route path="/profile" element={<Profile />} />

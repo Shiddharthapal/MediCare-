@@ -26,7 +26,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [loginMethod, setLoginMethod] = useState<"email" | "mobile">("email");
 
   const dispatch = useAppDispatch();
   const {
@@ -46,9 +45,9 @@ export default function Login() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          [loginMethod]: data.email, // Using the same field name for simplicity
+          email: data.email, // Using the same field name for simplicity
           password: data.password,
-          registrationMethod: loginMethod,
+          registrationType: "user",
         }),
       });
 
@@ -78,88 +77,31 @@ export default function Login() {
     <div className="flex justify-center items-center min-h-screen bg-background">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Login</CardTitle>
+          <CardTitle className="text-2xl text-center">
+            Login as Patient
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <div className="mb-3">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between bg-gray-800 text-white hover:bg-gray-700 hover:text-white"
-                    >
-                      {loginMethod === "email"
-                        ? "Use Email"
-                        : "Use Mobile Number"}
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-full">
-                    <DropdownMenuItem onClick={() => setLoginMethod("email")}>
-                      Use Email
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setLoginMethod("mobile")}>
-                      Use Mobile Number
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              {loginMethod === "email" ? (
-                <>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="medicare+@aidoctor.com"
-                    {...register("email", {
-                      required:
-                        loginMethod === "email" ? "Email is required" : false,
-                      pattern:
-                        loginMethod === "email"
-                          ? {
-                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                              message: "Invalid email address",
-                            }
-                          : undefined,
-                    })}
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Label htmlFor="mobile">Mobile Number</Label>
-                  <Input
-                    id="mobile"
-                    type="tel"
-                    placeholder="017XXXXXXXX"
-                    {...register("email", {
-                      required:
-                        loginMethod === "mobile"
-                          ? "Mobile number is required"
-                          : false,
-                      pattern:
-                        loginMethod === "mobile"
-                          ? {
-                              value: /^[+]?[1-9][\d]{0,15}$/,
-                              message: "Invalid mobile number",
-                            }
-                          : undefined,
-                    })}
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </>
-              )}
+              <>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="medicare+@patient.com"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </>
             </div>
 
             <div className="space-y-2">

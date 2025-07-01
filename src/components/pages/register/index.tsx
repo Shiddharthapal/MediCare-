@@ -31,9 +31,9 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [registrationMethod, setRegistrationMethod] = useState<
-    "email" | "mobile"
-  >("email");
+  const [registrationType, setRegistrationType] = useState<"user" | "doctor">(
+    "user"
+  );
 
   const {
     register,
@@ -56,9 +56,9 @@ export default function Register() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          [registrationMethod]: data.email, // Using the same field name for simplicity
+          email: data.email, // Using the same field name for simplicity
           password: data.password,
-          registrationMethod,
+          registrationType,
         }),
       });
 
@@ -100,41 +100,41 @@ export default function Register() {
                       variant="outline"
                       className="w-full justify-between bg-gray-800 text-white hover:bg-gray-700 hover:text-white"
                     >
-                      {registrationMethod === "email"
-                        ? "Use Email"
-                        : "Use Mobile Number"}
+                      {registrationType === "user"
+                        ? "Registation as user"
+                        : "Registation as doctor"}
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-full">
                     <DropdownMenuItem
-                      onClick={() => setRegistrationMethod("email")}
+                      onClick={() => setRegistrationType("user")}
                     >
-                      Use Email
+                      Register as user
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => setRegistrationMethod("mobile")}
+                      onClick={() => setRegistrationType("doctor")}
                     >
-                      Use Mobile Number
+                      Register as doctor
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
 
-              {registrationMethod === "email" ? (
+              {registrationType === "user" ? (
                 <>
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="medicare+@aidoctor.com"
+                    placeholder="medicare+@aiuser.com"
                     {...register("email", {
                       required:
-                        registrationMethod === "email"
-                          ? "Email is required"
+                        registrationType === "user"
+                          ? "Email is required for user login"
                           : false,
                       pattern:
-                        registrationMethod === "email"
+                        registrationType === "user"
                           ? {
                               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                               message: "Invalid email address",
@@ -150,21 +150,21 @@ export default function Register() {
                 </>
               ) : (
                 <>
-                  <Label htmlFor="mobile">Mobile Number</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
-                    id="mobile"
-                    type="tel"
-                    placeholder="01XXXXXXXXX"
+                    id="email"
+                    type="email"
+                    placeholder="medicare+@aidoctor.com"
                     {...register("email", {
                       required:
-                        registrationMethod === "mobile"
-                          ? "Mobile number is required"
+                        registrationType === "doctor"
+                          ? "Email is required for doctor login"
                           : false,
                       pattern:
-                        registrationMethod === "mobile"
+                        registrationType === "doctor"
                           ? {
-                              value: /^(\+88)?01[3-9]\d{8}$/,
-                              message: "Invalid mobile number",
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: "Invalid email address",
                             }
                           : undefined,
                     })}

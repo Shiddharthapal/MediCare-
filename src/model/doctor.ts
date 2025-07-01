@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-
-const userSchema = new mongoose.Schema({
+const doctorSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Please provide an email"],
@@ -23,7 +22,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Set default name and hash password before saving
-userSchema.pre("save", async function (next) {
+doctorSchema.pre("save", async function (next) {
   try {
     // Hash password if modified
     if (this.isModified("password")) {
@@ -37,11 +36,9 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Method to compare password
-userSchema.methods.comparePassword = async function (
+doctorSchema.methods.comparePassword = async function (
   candidatePassword: string
 ) {
   return bcrypt.compare(candidatePassword, this.password);
 };
-
-export default mongoose.models.User || mongoose.model("User", userSchema);
+export default mongoose.models.Doctor || mongoose.model("Doctor", doctorSchema);

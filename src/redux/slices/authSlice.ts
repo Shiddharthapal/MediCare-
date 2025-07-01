@@ -6,6 +6,7 @@ interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   token: string | null; // Add token field
+  uitype: string | null;
   loading: boolean;
   error: string | null;
 }
@@ -21,6 +22,7 @@ const getInitialState = (): AuthState => {
       isAuthenticated: true,
       user: user,
       token: token,
+      uitype: "",
       loading: false,
       error: null,
     };
@@ -29,6 +31,7 @@ const getInitialState = (): AuthState => {
       isAuthenticated: false,
       user: null,
       token: null,
+      uitype: "",
       loading: false,
       error: null,
     };
@@ -53,7 +56,7 @@ export const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = userData; // Store only user data
       state.token = token; // Store token separately
-      state.loading = false;
+      (state.uitype = ""), (state.loading = false);
       state.error = null;
 
       localStorage.setItem("authToken", action.payload.token);

@@ -130,7 +130,7 @@ export default function Navigation() {
                     variant="outline"
                     className="text-green-600 border-green-600"
                   >
-                    {userType === "admin" ? "Admin Active" : "Patient Active"}
+                    {userType === "admin" ? "Doctor Active" : "Patient Active"}
                   </Badge>
                 </div>
 
@@ -176,13 +176,15 @@ export default function Navigation() {
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem className="cursor-pointer">
                     <Users className="mr-2 h-4 w-4" />
-                    <Link to="/login" className="text-gray-900">
+                    <Link to="/loginasusers" className="text-gray-900">
                       <p>As a Patient</p>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer">
                     <Shield className="mr-2 h-4 w-4" />
-                    <p>As an Admin</p>
+                    <Link to="/loginasdoctor">
+                      <p>As an Doctor</p>
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

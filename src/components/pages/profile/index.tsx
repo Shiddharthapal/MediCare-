@@ -435,7 +435,7 @@ export default function ProfilePage() {
 
             <div className="space-y-2">
               <Label htmlFor="lastTreatmentDate">Last Treatment Date</Label>
-              {isEditing ? (
+              {!formData?.lastTreatmentDate && isEditing ? (
                 <Input
                   id="lastTreatmentDate"
                   name="lastTreatmentDate"

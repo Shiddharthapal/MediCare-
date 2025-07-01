@@ -58,8 +58,19 @@ export const POST: APIRoute = async ({ request }) => {
         height,
         lastTreatmentDate,
       });
-      console.log("user=>", userDetails);
+      //console.log("user=>", userDetails);
       userDetails.save();
+    } else {
+      userdetails.name = name || userdetails.name;
+      userdetails.fatherName = fatherName || userdetails.fatherName;
+      userdetails.address = address || userdetails.address;
+      userdetails.contactNumber = contactNumber || userdetails.contactNumber;
+      userdetails.age = age || userdetails.age;
+      userdetails.bloodGroup = bloodGroup || userdetails.bloodGroup;
+      userdetails.weight = weight || userdetails.weight;
+      userdetails.height = height || userdetails.height;
+
+      await userdetails.save();
     }
 
     return new Response(JSON.stringify({}), {
