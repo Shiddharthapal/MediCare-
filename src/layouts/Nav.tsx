@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Navigation() {
   const token = useAppSelector((state) => state.auth.token);
-  const authuser = JSON.parse(localStorage.getItem("authUser") || "");
+  const authuser = JSON.parse(localStorage.getItem("authUser")) || "";
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   console.log("Token:", token);
@@ -65,7 +65,7 @@ export default function Navigation() {
                 Services
                 <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
               </Link>
-              {authuser.role === "user" && (
+              {authuser.role !== "doctor" && (
                 <Link
                   to="/how-it-works"
                   className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
