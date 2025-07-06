@@ -19,10 +19,10 @@ export const POST: APIRoute = async ({ request }) => {
 
     //check login for user or doctor
     if (loginType === "user") {
-      const user = await User.findOne({
+      const users = await User.findOne({
         email: email,
       });
-      if (!user) {
+      if (!users) {
         return new Response(
           JSON.stringify({
             message: "Invalid credentials",
@@ -37,7 +37,7 @@ export const POST: APIRoute = async ({ request }) => {
       }
 
       // Verify password
-      const isPasswordValid = await user.comparePassword(password);
+      const isPasswordValid = await users.comparePassword(password);
       if (!isPasswordValid) {
         return new Response(
           JSON.stringify({
@@ -53,7 +53,7 @@ export const POST: APIRoute = async ({ request }) => {
       }
 
       const payload: Token = {
-        userId: user._id,
+        userId: users._id,
       };
 
       // Generate JWT token
@@ -67,7 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
 
       return new Response(
         JSON.stringify({
-          _id: user._id,
+          _id: users._id,
           token,
           message: "Login successful",
         }),

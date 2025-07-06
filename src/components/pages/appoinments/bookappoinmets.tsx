@@ -117,6 +117,43 @@ const doctors = [
   },
 ];
 
+// Mock appointments data
+const mockAppointments = [
+  {
+    id: 1,
+    doctorName: "Dr. Sarah Johnson",
+    doctorImage: "/placeholder.svg?height=40&width=40",
+    specialty: "Cardiologist",
+    date: "2024-01-15",
+    time: "10:30 AM",
+    hospital: "City General Hospital",
+    fee: 150,
+    status: "confirmed" as const,
+  },
+  {
+    id: 2,
+    doctorName: "Dr. Michael Chen",
+    doctorImage: "/placeholder.svg?height=40&width=40",
+    specialty: "Neurologist",
+    date: "2024-01-18",
+    time: "02:00 PM",
+    hospital: "Metro Medical Center",
+    fee: 200,
+    status: "pending" as const,
+  },
+  {
+    id: 3,
+    doctorName: "Dr. Emily Rodriguez",
+    doctorImage: "/placeholder.svg?height=40&width=40",
+    specialty: "Pediatrician",
+    date: "2024-01-20",
+    time: "11:30 AM",
+    hospital: "Children's Healthcare",
+    fee: 120,
+    status: "confirmed" as const,
+  },
+];
+
 export default function DoctorsPage() {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [bookingDoctor, setBookingDoctor] = useState<Doctor | null>(null);
@@ -177,6 +214,122 @@ export default function DoctorsPage() {
         <p className="text-gray-600">
           Book appointments with qualified healthcare professionals
         </p>
+      </div>
+
+      {/* User Appointments Section */}
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Your Appointments
+          </h2>
+          <Badge variant="secondary" className="text-sm">
+            {mockAppointments.length} Active
+          </Badge>
+        </div>
+
+        {mockAppointments.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {mockAppointments.map((appointment) => (
+              <Card
+                key={appointment.id}
+                className="border-l-4 border-l-blue-500"
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage
+                          src={appointment.doctorImage || "/placeholder.svg"}
+                          alt={appointment.doctorName}
+                        />
+                        <AvatarFallback>
+                          {appointment.doctorName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-semibold text-sm">
+                          {appointment.doctorName}
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          {appointment.specialty}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant={
+                        appointment.status === "confirmed"
+                          ? "default"
+                          : appointment.status === "pending"
+                            ? "secondary"
+                            : "destructive"
+                      }
+                      className="text-xs"
+                    >
+                      {appointment.status}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {new Date(appointment.date).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Clock className="h-4 w-4 mr-2" />
+                      {appointment.time}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Building2 className="h-4 w-4 mr-2" />
+                      {appointment.hospital}
+                    </div>
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="text-sm font-medium text-green-600">
+                        ${appointment.fee}
+                      </span>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs bg-transparent"
+                        >
+                          Reschedule
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs text-red-600 hover:text-red-700"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="p-8 text-center border-dashed">
+            <div className="flex flex-col items-center space-y-3">
+              <Calendar className="h-12 w-12 text-gray-400" />
+              <h3 className="text-lg font-medium text-gray-900">
+                No appointments yet
+              </h3>
+              <p className="text-gray-600">
+                Book your first appointment with a qualified doctor below
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -375,125 +528,130 @@ export default function DoctorsPage() {
 
       {/* Booking Modal */}
       <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
+        <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="px-6 py-4 border-b">
             <DialogTitle>Book Appointment</DialogTitle>
           </DialogHeader>
-          {bookingDoctor && (
-            <div className="space-y-6">
-              {/* Doctor Info */}
-              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage
-                    src={bookingDoctor.image || "/placeholder.svg"}
-                    alt={bookingDoctor.name}
-                  />
-                  <AvatarFallback>
-                    {bookingDoctor.name
-                      .split(" ")
-                      .map((n: string) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold">{bookingDoctor.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    {bookingDoctor.specialist}
-                  </p>
-                  <p className="text-sm font-medium text-green-600">
-                    ${bookingDoctor.fees}
-                  </p>
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            {bookingDoctor && (
+              <div className="space-y-6">
+                {/* Doctor Info */}
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage
+                      src={bookingDoctor.image || "/placeholder.svg"}
+                      alt={bookingDoctor.name}
+                    />
+                    <AvatarFallback>
+                      {bookingDoctor.name
+                        .split(" ")
+                        .map((n: string) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold">{bookingDoctor.name}</h3>
+                    <p className="text-sm text-gray-600">
+                      {bookingDoctor.specialist}
+                    </p>
+                    <p className="text-sm font-medium text-green-600">
+                      ${bookingDoctor.fees}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Date Selection */}
-              <div>
-                <h4 className="font-medium mb-3 flex items-center">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Select Date
-                </h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {getNextSevenDays().map((date) => (
-                    <Button
-                      key={date.value}
-                      variant={
-                        selectedDate === date.value ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => setSelectedDate(date.value)}
-                      className="text-xs"
-                    >
-                      {date.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Time Slot Selection */}
-              {selectedDate && (
+                {/* Date Selection */}
                 <div>
                   <h4 className="font-medium mb-3 flex items-center">
-                    <Clock className="h-4 w-4 mr-2" />
-                    Available Slots
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Select Date
                   </h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {bookingDoctor.availableSlots.map((slot: string) => (
+                    {getNextSevenDays().map((date) => (
                       <Button
-                        key={slot}
-                        variant={selectedSlot === slot ? "default" : "outline"}
+                        key={date.value}
+                        variant={
+                          selectedDate === date.value ? "default" : "outline"
+                        }
                         size="sm"
-                        onClick={() => setSelectedSlot(slot)}
+                        onClick={() => setSelectedDate(date.value)}
                         className="text-xs"
                       >
-                        {slot}
+                        {date.label}
                       </Button>
                     ))}
                   </div>
                 </div>
-              )}
 
-              {/* Booking Summary */}
-              {selectedDate && selectedSlot && (
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <h4 className="font-medium mb-2">Booking Summary</h4>
-                  <div className="text-sm space-y-1">
-                    <p>
-                      <span className="font-medium">Doctor:</span>{" "}
-                      {bookingDoctor.name}
-                    </p>
-                    <p>
-                      <span className="font-medium">Date:</span>{" "}
-                      {new Date(selectedDate).toLocaleDateString()}
-                    </p>
-                    <p>
-                      <span className="font-medium">Time:</span> {selectedSlot}
-                    </p>
-                    <p>
-                      <span className="font-medium">Fee:</span> $
-                      {bookingDoctor.fees}
-                    </p>
+                {/* Time Slot Selection */}
+                {selectedDate && (
+                  <div>
+                    <h4 className="font-medium mb-3 flex items-center">
+                      <Clock className="h-4 w-4 mr-2" />
+                      Available Slots
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {bookingDoctor.availableSlots.map((slot: string) => (
+                        <Button
+                          key={slot}
+                          variant={
+                            selectedSlot === slot ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() => setSelectedSlot(slot)}
+                          className="text-xs"
+                        >
+                          {slot}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Action Buttons */}
-              <div className="flex gap-3">
-                <Button
-                  className="flex-1"
-                  onClick={handleConfirmBooking}
-                  disabled={!selectedDate || !selectedSlot}
-                >
-                  Confirm Booking
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowBookingModal(false)}
-                >
-                  Cancel
-                </Button>
+                {/* Booking Summary */}
+                {selectedDate && selectedSlot && (
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium mb-2">Booking Summary</h4>
+                    <div className="text-sm space-y-1">
+                      <p>
+                        <span className="font-medium">Doctor:</span>{" "}
+                        {bookingDoctor.name}
+                      </p>
+                      <p>
+                        <span className="font-medium">Date:</span>{" "}
+                        {new Date(selectedDate).toLocaleDateString()}
+                      </p>
+                      <p>
+                        <span className="font-medium">Time:</span>{" "}
+                        {selectedSlot}
+                      </p>
+                      <p>
+                        <span className="font-medium">Fee:</span> $
+                        {bookingDoctor.fees}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    className="flex-1"
+                    onClick={handleConfirmBooking}
+                    disabled={!selectedDate || !selectedSlot}
+                  >
+                    Confirm Booking
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowBookingModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

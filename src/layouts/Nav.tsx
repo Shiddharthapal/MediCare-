@@ -67,10 +67,10 @@ export default function Navigation() {
               </Link>
               {authuser.role !== "doctor" && (
                 <Link
-                  to="/how-it-works"
+                  to="/bookappoinments"
                   className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
                 >
-                  How It Works
+                  Appoinments
                   <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
                 </Link>
               )}
@@ -89,13 +89,6 @@ export default function Navigation() {
                 className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
               >
                 About
-                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
-              </Link>
-              <Link
-                to="/contact"
-                className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
-              >
-                Contact
                 <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
               </Link>
             </div>
@@ -150,13 +143,24 @@ export default function Navigation() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuSeparator />
-                    <Link
-                      to="/profile"
-                      className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-100 hover:rounded-sm"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
+                    {authuser.role !== "doctor" && (
+                      <Link
+                        to="/profile"
+                        className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-100 hover:rounded-sm"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    )}
+                    {authuser.role === "doctor" && (
+                      <Link
+                        to="/profilefordoctor"
+                        className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-100 hover:rounded-sm"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    )}
                     <DropdownMenuItem className="cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
@@ -236,12 +240,6 @@ export default function Navigation() {
               className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
             >
               About
-            </Link>
-            <Link
-              to="/contact"
-              className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
-            >
-              Contact
             </Link>
           </div>
         </div>

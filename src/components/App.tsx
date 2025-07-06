@@ -11,6 +11,8 @@ import RegisterAsDoctor from "./pages/registerasDoctor";
 import Services from "./pages/services";
 import Profile from "./pages/profile";
 import Appoinments from "./pages/appoinments";
+import BookAppoiments from "./pages/appoinments/bookappoinmets";
+import ProfileofDoctor from "./pages/profile/profilefordoctor";
 import ProtectedRoute from "./ProctedRoute";
 export default function App() {
   return (
@@ -26,7 +28,9 @@ export default function App() {
               <Route path="/registerasDoctor" element={<RegisterAsDoctor />} />
               <Route path="/services" element={<Services />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/profilefordoctor" element={<ProfileofDoctor />} />
               <Route path="/appoinments" element={<Appoinments />} />
+              <Route path="/bookappoinments" element={<BookAppoiments />} />
             </Route>
           </Routes>
         </Router>
