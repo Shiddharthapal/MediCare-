@@ -70,25 +70,32 @@ export default function DoctorProfilePage() {
 
   useEffect(() => {
     const profileExists =
-      doctor.name ||
-      doctor.specialist ||
-      doctor.hospital ||
-      doctor.education ||
-      doctor.degree ||
-      doctor.about;
+      doctor?.name ||
+      doctor?.specialist ||
+      doctor?.hospital ||
+      doctor?.education ||
+      doctor?.degree ||
+      doctor?.about;
     setHasProfile(Boolean(profileExists));
     setEditedDoctor({ ...doctor });
 
     const fetchDetails = async () => {
-      const response = await fetch(`/api/createProfileofDcotor/${user?._id}`, {
+      let id = user?._id;
+      const response = await fetch(`/api/doctor/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
+
+      console.log("🧞‍♂️responseData --->", response);
+      if (!response.ok) {
+        throw new Error(`Status:${response.status}`);
+      }
+
       const responseData = await response.json();
-      setHasProfile(Boolean(responseData));
-      setDoctor(responseData?.doctordetails);
+      setHasProfile(Boolean(responseData.doctordetails));
+      setDoctor(responseData.doctordetails);
     };
     fetchDetails();
   }, [doctor]);
@@ -112,6 +119,10 @@ export default function DoctorProfilePage() {
       if (!response.ok) {
         throw new Error(`Status: ${response.status}`);
       }
+
+      const responseData = await response.json();
+      console.log("🧞‍♂️responseData --->", responseData);
+
       dispatch(updateProfileSuccess(doctor));
       dispatch(setEditMode(false));
       setHasProfile(true);
@@ -168,15 +179,12 @@ export default function DoctorProfilePage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white pt-2">
             <div className="flex items-center space-x-6">
               <Avatar className="h-24 w-24 border-4 border-white">
-                <AvatarImage
-                  src={currentDoctor.image || "/placeholder.svg"}
-                  alt={currentDoctor.name || "Doctor"}
-                />
+                <AvatarImage src={currentDoctor?.image || "/image (4).jpg"} />
                 <AvatarFallback className="text-2xl bg-blue-500">
-                  {currentDoctor.name
+                  {currentDoctor?.name
                     ? currentDoctor.name
                         .split(" ")
                         .map((n) => n[0])
@@ -194,7 +202,7 @@ export default function DoctorProfilePage() {
                   />
                 ) : (
                   <h1 className="text-3xl font-bold">
-                    {currentDoctor.name || "Doctor Name Not Provided"}
+                    {currentDoctor?.name || "Doctor Name Not Provided"}
                   </h1>
                 )}
                 {isEditing ? (
@@ -208,16 +216,16 @@ export default function DoctorProfilePage() {
                   />
                 ) : (
                   <p className="text-xl text-blue-100 mt-1">
-                    {currentDoctor.specialist || "Specialization not provided"}
+                    {currentDoctor?.specialist || "Specialization not provided"}
                   </p>
                 )}
                 <div className="flex items-center mt-3">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="ml-2 text-lg font-medium">
-                    {currentDoctor.rating || "0.0"}
+                    {currentDoctor?.rating || "0.0"}
                   </span>
                   <span className="ml-4 text-blue-100">
-                    ({currentDoctor.experience || "Experience not provided"})
+                    ({currentDoctor?.experience || "Experience not provided"})
                   </span>
                 </div>
               </div>
@@ -264,7 +272,7 @@ export default function DoctorProfilePage() {
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
-                      {displayValue(currentDoctor.hospital)}
+                      {displayValue(currentDoctor?.hospital)}
                     </p>
                   )}
                 </div>
@@ -280,11 +288,11 @@ export default function DoctorProfilePage() {
                       onChange={(e) =>
                         handleInputChange("education", e.target.value)
                       }
-                      placeholder="Enter your educational background"
+                      placeholder="Enter your medical collage name"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
-                      {displayValue(currentDoctor.education)}
+                      {displayValue(currentDoctor?.education)}
                     </p>
                   )}
                 </div>
@@ -303,7 +311,7 @@ export default function DoctorProfilePage() {
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
-                      {displayValue(currentDoctor.degree)}
+                      {displayValue(currentDoctor?.degree)}
                     </p>
                   )}
                 </div>
@@ -323,7 +331,7 @@ export default function DoctorProfilePage() {
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
-                      {displayValue(currentDoctor.experience)}
+                      {displayValue(currentDoctor?.experience)}
                     </p>
                   )}
                 </div>
@@ -349,7 +357,7 @@ export default function DoctorProfilePage() {
                     />
                   ) : (
                     <p className="text-3xl font-bold text-green-600">
-                      {currentDoctor.fees
+                      {currentDoctor?.fees
                         ? `$${currentDoctor.fees}`
                         : "Fee not set"}
                     </p>
@@ -364,7 +372,7 @@ export default function DoctorProfilePage() {
                   <div className="flex items-center">
                     <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
                     <span className="ml-2 text-2xl font-bold">
-                      {currentDoctor.rating || "0.0"}
+                      {currentDoctor?.rating || "0.0"}
                     </span>
                   </div>
                 </div>
@@ -376,8 +384,8 @@ export default function DoctorProfilePage() {
                   </Label>
                   <div className="space-y-2">
                     <div className="flex flex-wrap gap-2">
-                      {currentDoctor.availableSlots.length > 0
-                        ? currentDoctor.availableSlots.map((slot, index) => (
+                      {currentDoctor?.availableSlots?.length > 0
+                        ? currentDoctor?.availableSlots.map((slot, index) => (
                             <div key={index} className="flex items-center">
                               <Badge variant="outline" className="text-sm">
                                 {slot}
@@ -432,7 +440,7 @@ export default function DoctorProfilePage() {
                 />
               ) : (
                 <p className="text-gray-700 leading-relaxed text-lg">
-                  {currentDoctor.about ||
+                  {currentDoctor?.about ||
                     "No information provided about the doctor."}
                 </p>
               )}
@@ -460,14 +468,24 @@ export default function DoctorProfilePage() {
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    onClick={handleEdit}
-                    variant="outline"
-                    className="flex items-center gap-2 bg-transparent"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                    {hasProfile ? "Edit Profile" : "Create Profile"}
-                  </Button>
+                  <>
+                    <Button
+                      onClick={handleEdit}
+                      variant="outline"
+                      className="flex items-center gap-2 bg-transparent"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                      {hasProfile ? "Edit Profile" : "Create Profile"}
+                    </Button>
+                    <Button
+                      onClick={handleCancel}
+                      variant="outline"
+                      className="flex items-center gap-2 bg-transparent"
+                    >
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

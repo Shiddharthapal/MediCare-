@@ -4,7 +4,7 @@ import userDetails from "@/model/userDetails";
 import { verifyToken } from "@/utils/token";
 import type { APIRoute } from "astro";
 
-const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request }) => {
   const headers = {
     "Content-Type": "application/json",
   };
