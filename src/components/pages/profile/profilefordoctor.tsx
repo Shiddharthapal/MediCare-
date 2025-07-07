@@ -69,15 +69,15 @@ export default function DoctorProfilePage() {
   const user = useAppSelector((state) => state.auth.user);
 
   useEffect(() => {
-    const profileExists =
-      doctor?.name ||
-      doctor?.specialist ||
-      doctor?.hospital ||
-      doctor?.education ||
-      doctor?.degree ||
-      doctor?.about;
-    setHasProfile(Boolean(profileExists));
-    setEditedDoctor({ ...doctor });
+    // const profileExists =
+    //   doctor?.name ||
+    //   doctor?.specialist ||
+    //   doctor?.hospital ||
+    //   doctor?.education ||
+    //   doctor?.degree ||
+    //   doctor?.about;
+    // setHasProfile(Boolean(profileExists));
+    // setEditedDoctor({ ...doctor });
 
     const fetchDetails = async () => {
       let id = user?._id;
@@ -88,7 +88,7 @@ export default function DoctorProfilePage() {
         },
       });
 
-      console.log("🧞‍♂️responseData --->", response);
+      //console.log("🧞‍♂️responseData --->", response);
       if (!response.ok) {
         throw new Error(`Status:${response.status}`);
       }
@@ -107,14 +107,12 @@ export default function DoctorProfilePage() {
   const handleSave = async () => {
     try {
       dispatch(updateProfileStart());
-
-      setDoctor({ ...editedDoctor });
-      let response = await fetch("/api/createProfileofDcotor", {
+      const response = await fetch("/api/doctorProfileCreate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ doctor, token }),
+        body: JSON.stringify({ editedDoctor, token }),
       });
       if (!response.ok) {
         throw new Error(`Status: ${response.status}`);
@@ -152,7 +150,10 @@ export default function DoctorProfilePage() {
     if (newSlot.trim()) {
       setEditedDoctor({
         ...editedDoctor,
-        availableSlots: [...editedDoctor.availableSlots, newSlot.trim()],
+        availableSlots: [
+          ...(editedDoctor?.availableSlots || []),
+          newSlot.trim(),
+        ],
       });
       setNewSlot("");
     }
@@ -182,7 +183,7 @@ export default function DoctorProfilePage() {
           <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white pt-2">
             <div className="flex items-center space-x-6">
               <Avatar className="h-24 w-24 border-4 border-white">
-                <AvatarImage src={currentDoctor?.image || "/image (4).jpg"} />
+                <AvatarImage src="/image (4).jpg" alt="DR" />
                 <AvatarFallback className="text-2xl bg-blue-500">
                   {currentDoctor?.name
                     ? currentDoctor.name
@@ -341,7 +342,7 @@ export default function DoctorProfilePage() {
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-3 block">
-                    Consultation Fee
+                    Consultation Fees
                   </Label>
                   {isEditing ? (
                     <Input
@@ -353,13 +354,13 @@ export default function DoctorProfilePage() {
                           Number.parseInt(e.target.value) || 0
                         )
                       }
-                      placeholder="Enter consultation fee"
+                      placeholder="Enter consultation fees"
                     />
                   ) : (
                     <p className="text-3xl font-bold text-green-600">
                       {currentDoctor?.fees
                         ? `$${currentDoctor.fees}`
-                        : "Fee not set"}
+                        : "Fees not set"}
                     </p>
                   )}
                 </div>
@@ -429,7 +430,9 @@ export default function DoctorProfilePage() {
             <Separator className="my-8" />
 
             <div>
-              <Label className="text-lg font-semibold mb-3 block">About</Label>
+              <Label className="text-lg font-semibold mb-3 block">
+                About You
+              </Label>
               {isEditing ? (
                 <Textarea
                   value={editedDoctor.about}
