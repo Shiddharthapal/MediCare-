@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -16,9 +15,16 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  FileText,
+  Plus,
+  Download,
+  Eye,
+  Pill,
+  ClipboardList,
+  ImageIcon,
 } from "lucide-react";
-
 import { Link } from "react-router-dom";
+import { Clock } from "lucide-react";
 
 // Mock data for patients
 const patients = [
@@ -111,6 +117,108 @@ const patients = [
         status: "Completed",
       },
     ],
+    documents: [
+      {
+        id: 1,
+        name: "Blood Pressure Prescription",
+        type: "Prescription",
+        doctor: "Dr. Edward Bailey",
+        date: "December 1, 2024",
+        time: "12:45 PM",
+        size: "245 KB",
+        format: "PDF",
+        description:
+          "Lisinopril 10mg daily prescription for hypertension management",
+        status: "Active",
+      },
+      {
+        id: 2,
+        name: "Lab Results - Complete Blood Count",
+        type: "Lab Report",
+        doctor: "Dr. Sarah Johnson",
+        date: "November 28, 2024",
+        time: "09:30 AM",
+        size: "1.2 MB",
+        format: "PDF",
+        description: "Complete blood count analysis with normal values",
+        status: "Reviewed",
+      },
+      {
+        id: 3,
+        name: "Chest X-Ray Report",
+        type: "Imaging Report",
+        doctor: "Dr. Michael Chen",
+        date: "November 25, 2024",
+        time: "02:15 PM",
+        size: "3.4 MB",
+        format: "PDF",
+        description:
+          "Chest X-ray showing clear lungs, no abnormalities detected",
+        status: "Reviewed",
+      },
+      {
+        id: 4,
+        name: "Diabetes Medication Prescription",
+        type: "Prescription",
+        doctor: "Dr. Edward Bailey",
+        date: "November 20, 2024",
+        time: "11:00 AM",
+        size: "198 KB",
+        format: "PDF",
+        description:
+          "Metformin 500mg twice daily for Type 2 diabetes management",
+        status: "Active",
+      },
+      {
+        id: 5,
+        name: "Cardiology Consultation Report",
+        type: "Consultation Report",
+        doctor: "Dr. Lisa Wong",
+        date: "November 15, 2024",
+        time: "03:30 PM",
+        size: "567 KB",
+        format: "PDF",
+        description: "Comprehensive cardiac evaluation and recommendations",
+        status: "Reviewed",
+      },
+      {
+        id: 6,
+        name: "Sleep Study Results",
+        type: "Study Report",
+        doctor: "Dr. Amanda Lee",
+        date: "November 10, 2024",
+        time: "08:00 AM",
+        size: "2.1 MB",
+        format: "PDF",
+        description: "Polysomnography results showing moderate sleep apnea",
+        status: "Reviewed",
+      },
+      {
+        id: 7,
+        name: "Physical Therapy Plan",
+        type: "Treatment Plan",
+        doctor: "Dr. Robert Kim",
+        date: "November 5, 2024",
+        time: "10:30 AM",
+        size: "324 KB",
+        format: "PDF",
+        description: "12-week physical therapy program for lower back pain",
+        status: "Active",
+      },
+      {
+        id: 8,
+        name: "Allergy Test Results",
+        type: "Lab Report",
+        doctor: "Dr. Sarah Johnson",
+        date: "October 28, 2024",
+        time: "01:45 PM",
+        size: "892 KB",
+        format: "PDF",
+        description:
+          "Comprehensive allergy panel showing reactions to peanuts and shellfish",
+        status: "Reviewed",
+      },
+    ],
   },
   {
     id: 2,
@@ -145,6 +253,33 @@ const patients = [
         status: "Completed",
       },
     ],
+    documents: [
+      {
+        id: 1,
+        name: "Blood Pressure Prescription",
+        type: "Prescription",
+        doctor: "Dr. Edward Bailey",
+        date: "December 1, 2024",
+        time: "12:45 PM",
+        size: "245 KB",
+        format: "PDF",
+        description:
+          "Lisinopril 10mg daily prescription for hypertension management",
+        status: "Active",
+      },
+      {
+        id: 2,
+        name: "Lab Results - Complete Blood Count",
+        type: "Lab Report",
+        doctor: "Dr. Sarah Johnson",
+        date: "November 28, 2024",
+        time: "09:30 AM",
+        size: "1.2 MB",
+        format: "PDF",
+        description: "Complete blood count analysis with normal values",
+        status: "Reviewed",
+      },
+    ],
   },
   {
     id: 3,
@@ -173,10 +308,25 @@ const patients = [
         status: "Completed",
       },
     ],
+    documents: [
+      {
+        id: 1,
+        name: "Blood Pressure Prescription",
+        type: "Prescription",
+        doctor: "Dr. Edward Bailey",
+        date: "December 1, 2024",
+        time: "12:45 PM",
+        size: "245 KB",
+        format: "PDF",
+        description:
+          "Lisinopril 10mg daily prescription for hypertension management",
+        status: "Active",
+      },
+    ],
   },
 ];
 
-export default function PatientsPage() {
+export default function AllPatientsPage() {
   const [selectedPatient, setSelectedPatient] = useState(patients[0]);
   const [showPatientList, setShowPatientList] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
@@ -209,16 +359,16 @@ export default function PatientsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl bg-white rounded-2xl shadow-sm overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center justify-between p-6 border-b border-gray-100">
+      <div className="mx-auto max-w-full bg-white shadow-sm overflow-hidden">
+        {/* Header - Fixed */}
+        <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-6 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-8">
-            <Link to="/" className="text-2xl font-bold text-green-600">
+            <Link to="/dashboard" className="text-2xl font-bold text-green-600">
               Helsi
             </Link>
             <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Link to="/" className="hover:text-gray-700">
-                Patients
+              <Link to="/dashboard" className="hover:text-gray-700">
+                Dashboard
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className="text-gray-900">Patients Information</span>
@@ -234,14 +384,14 @@ export default function PatientsPage() {
           </div>
         </header>
 
-        <div className="flex">
-          {/* Sidebar */}
-          <aside className="w-64 border-r border-gray-100">
+        <div className="flex pt-20">
+          {/* Left Sidebar - Fixed */}
+          <aside className="fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 border-r border-gray-100 bg-white overflow-y-auto">
             {/* Navigation */}
             <div className="p-6 border-b border-gray-100">
               <nav className="space-y-2">
                 <Link
-                  to="/"
+                  to="/dashboard"
                   className="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg cursor-pointer"
                 >
                   <LayoutDashboard className="h-5 w-5" />
@@ -312,10 +462,10 @@ export default function PatientsPage() {
             )}
           </aside>
 
-          {/* Main Content */}
-          <main className="flex-1">
-            {/* Patient Header */}
-            <div className="p-6 border-b border-gray-100">
+          {/* Main Content - Scrollable */}
+          <main className="flex-1 ml-64 mr-80">
+            {/* Patient Header - Sticky */}
+            <div className="sticky top-20 z-40 bg-white p-6 border-b border-gray-100 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <Avatar className="w-12 h-12">
@@ -326,7 +476,7 @@ export default function PatientsPage() {
                     <h2 className="text-xl font-semibold text-gray-900">
                       {selectedPatient.name}
                     </h2>
-                    <p className="text-sm text-gray-500">was # 78146284/201</p>
+                    <p className="text-sm text-gray-500">ID: #78146284/201</p>
                   </div>
                 </div>
               </div>
@@ -363,15 +513,26 @@ export default function PatientsPage() {
                 >
                   Appointments History
                 </button>
+                <button
+                  className={`pb-2 border-b-2 transition-colors ${
+                    activeTab === "documents"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                  onClick={() => setActiveTab("documents")}
+                >
+                  Documents
+                </button>
               </div>
             </div>
 
-            <div className="p-6">
+            {/* Scrollable Content */}
+            <div className="p-6 min-h-screen">
+              {/* Keep all the existing tab content exactly the same */}
               {activeTab === "overview" && (
                 <div className="">
-                  {/* Basic Patient Information */}
-                  <div className="mb-4 ">
-                    {/* Personal Information */}
+                  {/* Personal Information */}
+                  <div className="mb-6">
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">
@@ -432,7 +593,6 @@ export default function PatientsPage() {
                             <p className="text-sm text-gray-500">Blood Type</p>
                             <p className="font-medium">O+</p>
                           </div>
-
                           <div>
                             <p className="text-sm text-gray-500">
                               Home Address
@@ -446,9 +606,8 @@ export default function PatientsPage() {
                     </Card>
                   </div>
 
-                  {/* Insurance & Medical Information */}
-                  <div className="grid grid-cols-2 gap-6 mb-4">
-                    {/* Medical Summary */}
+                  {/* Medical Summary and Active Conditions */}
+                  <div className="grid grid-cols-2 gap-6 mb-6">
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">
@@ -508,7 +667,6 @@ export default function PatientsPage() {
                       </CardContent>
                     </Card>
 
-                    {/* Active Conditions */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">
@@ -516,7 +674,7 @@ export default function PatientsPage() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-3">
                           {selectedPatient.diseases
                             ?.filter((d) => d.status === "Active")
                             .map((disease, index) => (
@@ -596,6 +754,7 @@ export default function PatientsPage() {
                 </div>
               )}
 
+              {/* Keep the existing history and appointments tabs exactly the same */}
               {activeTab === "history" && (
                 <div className="space-y-6">
                   <Card>
@@ -614,8 +773,12 @@ export default function PatientsPage() {
                               Low: 1,
                             };
                             return (
-                              severityOrder[b.severity] -
-                              severityOrder[a.severity]
+                              severityOrder[
+                                b.severity as keyof typeof severityOrder
+                              ] -
+                              severityOrder[
+                                a.severity as keyof typeof severityOrder
+                              ]
                             );
                           })
                           .map((disease, index) => (
@@ -732,8 +895,363 @@ export default function PatientsPage() {
                   </Card>
                 </div>
               )}
+
+              {activeTab === "documents" && (
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          Patient Documents
+                        </CardTitle>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Upload Document
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download All
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {/* Document Filters */}
+                      <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">
+                            Filter by type:
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs bg-transparent"
+                          >
+                            All
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs">
+                            Prescriptions
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs">
+                            Lab Reports
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs">
+                            Imaging
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs">
+                            Consultation
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Documents List */}
+                      <div className="space-y-4">
+                        {selectedPatient.documents?.map((document, index) => (
+                          <div
+                            key={index}
+                            className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-4 flex-1">
+                                {/* Document Icon */}
+                                <div className="p-3 rounded-lg bg-blue-50">
+                                  {document.type === "Prescription" && (
+                                    <Pill className="h-6 w-6 text-blue-600" />
+                                  )}
+                                  {document.type === "Lab Report" && (
+                                    <ClipboardList className="h-6 w-6 text-green-600" />
+                                  )}
+                                  {document.type === "Imaging Report" && (
+                                    <ImageIcon className="h-6 w-6 text-purple-600" />
+                                  )}
+                                  {document.type === "Consultation Report" && (
+                                    <FileText className="h-6 w-6 text-orange-600" />
+                                  )}
+                                  {document.type === "Study Report" && (
+                                    <ClipboardList className="h-6 w-6 text-indigo-600" />
+                                  )}
+                                  {document.type === "Treatment Plan" && (
+                                    <FileText className="h-6 w-6 text-teal-600" />
+                                  )}
+                                  {![
+                                    "Prescription",
+                                    "Lab Report",
+                                    "Imaging Report",
+                                    "Consultation Report",
+                                    "Study Report",
+                                    "Treatment Plan",
+                                  ].includes(document.type) && (
+                                    <FileText className="h-6 w-6 text-gray-600" />
+                                  )}
+                                </div>
+
+                                {/* Document Details */}
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-semibold text-lg">
+                                      {document.name}
+                                    </h3>
+                                    <Badge
+                                      variant={
+                                        document.status === "Active"
+                                          ? "default"
+                                          : "secondary"
+                                      }
+                                      className={
+                                        document.status === "Active"
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-gray-100 text-gray-800"
+                                      }
+                                    >
+                                      {document.status}
+                                    </Badge>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
+                                    <div className="flex items-center gap-1">
+                                      <FileText className="h-4 w-4" />
+                                      <span>{document.type}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4" />
+                                      <span>{document.date}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4" />
+                                      <span>{document.time}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Users className="h-4 w-4" />
+                                      <span>{document.doctor}</span>
+                                    </div>
+                                  </div>
+
+                                  <p className="text-sm text-gray-700 mb-2">
+                                    <strong>Description:</strong>{" "}
+                                    {document.description}
+                                  </p>
+
+                                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                                    <span>Size: {document.size}</span>
+                                    <span>Format: {document.format}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex flex-col gap-2 ml-4">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-transparent"
+                                >
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  View
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-transparent"
+                                >
+                                  <Download className="h-3 w-3 mr-1" />
+                                  Download
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Document Statistics */}
+                      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <h4 className="font-medium mb-3">Document Summary</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="text-center">
+                            <p className="font-semibold text-lg text-blue-600">
+                              {selectedPatient.documents?.filter(
+                                (d) => d.type === "Prescription"
+                              ).length || 0}
+                            </p>
+                            <p className="text-gray-600">Prescriptions</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-semibold text-lg text-green-600">
+                              {selectedPatient.documents?.filter(
+                                (d) => d.type === "Lab Report"
+                              ).length || 0}
+                            </p>
+                            <p className="text-gray-600">Lab Reports</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-semibold text-lg text-purple-600">
+                              {selectedPatient.documents?.filter(
+                                (d) => d.type === "Imaging Report"
+                              ).length || 0}
+                            </p>
+                            <p className="text-gray-600">Imaging Reports</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-semibold text-lg text-gray-600">
+                              {selectedPatient.documents?.length || 0}
+                            </p>
+                            <p className="text-gray-600">Total Documents</p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
           </main>
+
+          {/* Right Sidebar - Fixed */}
+          <aside className="fixed right-0 top-20 h-[calc(100vh-5rem)] w-80 border-l border-gray-100 bg-white overflow-y-auto">
+            <div className="p-6">
+              {/* Patient Quick Info */}
+              <Card className="mb-6">
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <Avatar className="w-16 h-16 mx-auto mb-3">
+                      <AvatarImage src="/placeholder.svg?height=64&width=64" />
+                      <AvatarFallback className="text-lg">
+                        {selectedPatient.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h3 className="font-semibold text-lg">
+                      {selectedPatient.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                      ID: #78146284/201
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="bg-gray-50 p-2 rounded">
+                        <p className="text-gray-500">Age</p>
+                        <p className="font-medium">{selectedPatient.age}</p>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded">
+                        <p className="text-gray-500">Gender</p>
+                        <p className="font-medium">{selectedPatient.gender}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button
+                    className="w-full justify-start bg-transparent"
+                    variant="outline"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Schedule Appointment
+                  </Button>
+                  <Button
+                    className="w-full justify-start bg-transparent"
+                    variant="outline"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Medical Records
+                  </Button>
+                  <Button
+                    className="w-full justify-start bg-transparent"
+                    variant="outline"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Note
+                  </Button>
+                  <Button
+                    className="w-full justify-start bg-transparent"
+                    variant="outline"
+                  >
+                    <Bell className="h-4 w-4 mr-2" />
+                    Set Reminder
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Vital Signs */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Latest Vital Signs</CardTitle>
+                  <p className="text-sm text-gray-500">
+                    Last updated: Dec 1, 2024
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-sm">Blood Pressure</span>
+                    <span className="font-medium text-red-600">
+                      140/90 mmHg
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-sm">Heart Rate</span>
+                    <span className="font-medium">72 bpm</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-sm">Temperature</span>
+                    <span className="font-medium">98.6°F</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-sm">Weight</span>
+                    <span className="font-medium">185 lbs</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Upcoming Appointments */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">
+                    Upcoming Appointments
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="border-l-4 border-blue-500 pl-3 py-2">
+                    <p className="font-medium text-sm">
+                      Follow-up Consultation
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Dec 15, 2024 at 2:30 PM
+                    </p>
+                    <p className="text-xs text-gray-500">Dr. Edward Bailey</p>
+                  </div>
+                  <div className="border-l-4 border-green-500 pl-3 py-2">
+                    <p className="font-medium text-sm">Lab Work</p>
+                    <p className="text-xs text-gray-500">
+                      Dec 20, 2024 at 9:00 AM
+                    </p>
+                    <p className="text-xs text-gray-500">Lab Department</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Emergency Contacts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Emergency Contact</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="font-medium">Sarah Miles (Spouse)</p>
+                    <p className="text-sm text-gray-600">(603) 555-0124</p>
+                    <p className="text-sm text-gray-600">
+                      sarah.miles@email.com
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </aside>
         </div>
       </div>
     </div>

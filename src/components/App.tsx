@@ -10,8 +10,8 @@ import RegisterAsUser from "./pages/registerasUser";
 import RegisterAsDoctor from "./pages/registerasDoctor";
 import Services from "./pages/services";
 import Profile from "./pages/profile";
-import Appoinments from "./pages/appoinments";
-import BookAppoiments from "./pages/appoinments/bookappoinmets";
+import DashboardofDoctor from "./pages/dashboard/doctor";
+import DashboardofPatient from "./pages/dashboard/patient";
 import ProfileofDoctor from "./pages/profile/profilefordoctor";
 import ProtectedRoute from "./ProctedRoute";
 export default function App() {
@@ -29,8 +29,8 @@ export default function App() {
               <Route path="/services" element={<Services />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/profilefordoctor" element={<ProfileofDoctor />} />
-              <Route path="/appoinments" element={<Appoinments />} />
-              <Route path="/bookappoinments" element={<BookAppoiments />} />
+              <Route path="/doctor" element={<DashboardofDoctor />} />
+              <Route path="/patient" element={<DashboardofPatient />} />
             </Route>
           </Routes>
         </Router>

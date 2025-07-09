@@ -67,20 +67,20 @@ export default function Navigation() {
               </Link>
               {authuser.role !== "doctor" && (
                 <Link
-                  to="/bookappoinments"
+                  to="/patient"
                   className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
                 >
-                  Appoinments
+                  Dashboard
                   <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
                 </Link>
               )}
 
               {authuser.role === "doctor" && (
                 <Link
-                  to="/appoinments"
+                  to="/doctor"
                   className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
                 >
-                  Appoinments
+                  Dashboard
                   <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
                 </Link>
               )}
