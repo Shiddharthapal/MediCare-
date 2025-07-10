@@ -27,7 +27,6 @@ import {
   Menu,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { usePathname, useRouter } from "react";
 
 // Mock data for appointments
 const appointmentsData = {
@@ -352,19 +351,38 @@ const appointmentsData = {
 };
 
 const menuItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/dashboard/users", icon: Users, label: "Users" },
-  { href: "/dashboard/appointments", icon: Calendar, label: "Appointments" },
-  { href: "/dashboard/reports", icon: FileText, label: "Reports" },
-  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
+  {
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    label: "Dashboard",
+    active: true,
+  },
+  { href: "/dashboard/users", icon: Users, label: "Users", active: false },
+  {
+    href: "/dashboard/appointments",
+    icon: Calendar,
+    label: "Appointments",
+    active: false,
+  },
+  {
+    href: "/dashboard/reports",
+    icon: FileText,
+    label: "Reports",
+    active: false,
+  },
+  {
+    href: "/dashboard/settings",
+    icon: Settings,
+    label: "Settings",
+    active: false,
+  },
 ];
 
 export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
   const [collapsed, setCollapsed] = useState(false);
-  const pathname = usePathname();
-  const router = useRouter();
+  const [currentPage, setCurrentPage] = useState("Dashboard");
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -527,13 +545,17 @@ export default function AppointmentsPage() {
               {menuItems.map((item, index) => (
                 <li key={index}>
                   <Button
-                    variant={pathname === item.href ? "default" : "ghost"}
+                    variant={
+                      item.label.toLowerCase() === currentPage
+                        ? "default"
+                        : "ghost"
+                    }
                     className={`w-full justify-start ${collapsed ? "px-2" : "px-4"} ${
-                      pathname === item.href
+                      item.label.toLowerCase() === currentPage
                         ? "bg-blue-600 text-white hover:bg-blue-700"
                         : "text-gray-700 hover:bg-gray-100"
                     }`}
-                    onClick={() => router.push(item.href)}
+                    onClick={() => setCurrentPage(item.label.toLowerCase())}
                   >
                     <item.icon
                       className={`h-5 w-5 ${collapsed ? "" : "mr-3"}`}
@@ -587,7 +609,7 @@ export default function AppointmentsPage() {
         <header className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Link href="/dashboard" className="hover:text-gray-700">
+              <Link to="/dashboard" className="hover:text-gray-700">
                 Dashboard
               </Link>
               <ChevronRight className="h-4 w-4" />

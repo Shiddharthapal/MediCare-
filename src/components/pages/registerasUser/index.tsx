@@ -8,13 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { loginStart, loginSuccess } from "@/redux/slices/authSlice";
 

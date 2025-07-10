@@ -11,8 +11,6 @@ import {
   Users,
   User,
   CreditCard,
-  Search,
-  Bell,
   TrendingDown,
   TrendingUp,
   Clock,
@@ -27,14 +25,7 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
-import {
-  LayoutDashboard,
-  FileText,
-  Settings,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { LayoutDashboard, FileText, Settings, LogOut } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -44,6 +35,7 @@ import {
 } from "recharts";
 
 import Patients from "./allpatients";
+import Appoinments from "./appoinments";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", active: true },
@@ -588,6 +580,12 @@ export default function DashboardPage() {
           <Patients />
         </div>
       )}
+
+      {/* {currentPage === "Appointments" && (
+        <div className="max-w-6xl mx-auto">
+          <Appoinments />
+        </div>
+      )} */}
     </div>
   );
 }
