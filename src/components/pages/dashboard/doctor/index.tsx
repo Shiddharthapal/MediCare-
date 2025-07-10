@@ -16,6 +16,10 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  LayoutDashboard,
+  FileText,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import {
   Area,
@@ -24,18 +28,12 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-} from "recharts";
-import { LayoutDashboard, FileText, Settings, LogOut } from "lucide-react";
-import {
   PieChart,
   Pie,
   Cell,
-  ResponsiveContainer as ResponsiveContainerPie,
   Legend,
 } from "recharts";
-
-import Patients from "./allpatients";
-import Appoinments from "./appoinments";
+import AppointmentsPage from "./appoinments";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", active: true },
@@ -64,7 +62,7 @@ const data = [
 
 export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
-  const [currentPage, setCurrentPage] = useState("Dashboard");
+  const [currentPage, setCurrentPage] = useState("dashboard");
 
   const stats = [
     {
@@ -146,10 +144,23 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
       <div
         className={`bg-white border-r border-gray-200 transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}
       >
         <div className="flex flex-col h-full">
+          {/* Logo/Header */}
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">M</span>
+              </div>
+              {!collapsed && (
+                <span className="ml-3 font-bold text-lg">MedDash</span>
+              )}
+            </div>
+          </div>
+
           {/* Navigation */}
           <nav className="flex-1 p-4">
             <ul className="space-y-2">
@@ -177,6 +188,7 @@ export default function DashboardPage() {
               ))}
             </ul>
           </nav>
+
           {/* Footer */}
           <div className="p-4 border-t border-gray-200">
             {!collapsed ? (
@@ -209,13 +221,21 @@ export default function DashboardPage() {
               <LogOut className={`h-5 w-5 ${collapsed ? "" : "mr-3"}`} />
               {!collapsed && <span>Logout</span>}
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCollapsed(!collapsed)}
+              className="w-full mt-2"
+            >
+              {collapsed ? "→" : "←"}
+            </Button>
           </div>
         </div>
       </div>
 
-      {currentPage === "Dashboard" && (
+      {/* Main Content */}
+      {currentPage === "dashboard" && (
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Main Content */}
           <main className="flex-1 overflow-y-auto p-6">
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
               {/* Stats Cards */}
@@ -256,7 +276,7 @@ export default function DashboardPage() {
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle>Appointments</CardTitle>
-                        <Tabs defaultValue="day" className="w-auto">
+                        <Tabs defaultValue="week" className="w-auto">
                           <TabsList className="grid w-full grid-cols-4">
                             <TabsTrigger value="day">Day</TabsTrigger>
                             <TabsTrigger value="week">Week</TabsTrigger>
@@ -328,11 +348,11 @@ export default function DashboardPage() {
 
                   <Card>
                     <CardHeader>
-                      <CardTitle>Gender</CardTitle>
+                      <CardTitle>Gender Distribution</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="h-[300px] w-full">
-                        <ResponsiveContainerPie width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Pie
                               data={datagender}
@@ -368,12 +388,12 @@ export default function DashboardPage() {
                                     fontWeight: 500,
                                   }}
                                 >
-                                  {value}: {entry?.payload?.value || null}
+                                  {value}: {entry?.payload?.value || 0}
                                 </span>
                               )}
                             />
                           </PieChart>
-                        </ResponsiveContainerPie>
+                        </ResponsiveContainer>
                       </div>
                     </CardContent>
                   </Card>
@@ -575,17 +595,23 @@ export default function DashboardPage() {
           </main>
         </div>
       )}
-      {currentPage === "Patients" && (
-        <div className="max-w-6xl mx-auto">
-          <Patients />
-        </div>
+
+      {/* Appointments Page */}
+      {currentPage === "appointments" && (
+        <AppointmentsPage onNavigate={setCurrentPage} />
       )}
 
-      {/* {currentPage === "Appointments" && (
-        <div className="max-w-6xl mx-auto">
-          <Appoinments />
+      {/* Other Pages Placeholder */}
+      {currentPage !== "dashboard" && currentPage !== "appointments" && (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4 capitalize">
+              {currentPage}
+            </h2>
+            <p className="text-gray-600">This page is under construction.</p>
+          </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,14 +20,7 @@ import {
   Plus,
   Filter,
   Download,
-  LayoutDashboard,
-  Users,
-  FileText,
-  Settings,
-  LogOut,
-  Menu,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 
 // Mock data for appointments
 const appointmentsData = {
@@ -105,7 +99,6 @@ const appointmentsData = {
     },
   ],
   upcoming: [
-    // Tomorrow
     {
       id: 5,
       date: "Tomorrow",
@@ -149,7 +142,6 @@ const appointmentsData = {
         },
       ],
     },
-    // Day after tomorrow
     {
       id: 6,
       date: "2 days after",
@@ -175,7 +167,6 @@ const appointmentsData = {
         },
       ],
     },
-    // 3 days after
     {
       id: 7,
       date: "3 days after",
@@ -219,7 +210,6 @@ const appointmentsData = {
         },
       ],
     },
-    // Continue for remaining days...
     {
       id: 8,
       date: "4 days after",
@@ -350,39 +340,15 @@ const appointmentsData = {
   ],
 };
 
-const menuItems = [
-  {
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    label: "Dashboard",
-    active: true,
-  },
-  { href: "/dashboard/users", icon: Users, label: "Users", active: false },
-  {
-    href: "/dashboard/appointments",
-    icon: Calendar,
-    label: "Appointments",
-    active: false,
-  },
-  {
-    href: "/dashboard/reports",
-    icon: FileText,
-    label: "Reports",
-    active: false,
-  },
-  {
-    href: "/dashboard/settings",
-    icon: Settings,
-    label: "Settings",
-    active: false,
-  },
-];
+interface AppointmentsPageProps {
+  onNavigate: (page: string) => void;
+}
 
-export default function AppointmentsPage() {
+export default function AppointmentsPage({
+  onNavigate,
+}: AppointmentsPageProps) {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
-  const [collapsed, setCollapsed] = useState(false);
-  const [currentPage, setCurrentPage] = useState("Dashboard");
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -431,7 +397,6 @@ export default function AppointmentsPage() {
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>{appointment.patient.avatar}</AvatarFallback>
             </Avatar>
-
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-lg">
@@ -442,7 +407,6 @@ export default function AppointmentsPage() {
                     appointment.status.slice(1)}
                 </Badge>
               </div>
-
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
@@ -464,7 +428,6 @@ export default function AppointmentsPage() {
                   <span>{appointment.patient.email}</span>
                 </div>
               </div>
-
               <div className="mb-3">
                 <p className="text-sm">
                   <strong>Type:</strong> {appointment.type}
@@ -481,14 +444,12 @@ export default function AppointmentsPage() {
                   </p>
                 )}
               </div>
-
               <div className="text-xs text-gray-500">
                 Patient: {appointment.patient.age} years old,{" "}
                 {appointment.patient.gender}
               </div>
             </div>
           </div>
-
           <div className="flex flex-col gap-2 ml-4">
             {getStatusIcon(appointment.status)}
             {!isPrevious && (
@@ -516,311 +477,216 @@ export default function AppointmentsPage() {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Navigation Sidebar */}
-      <div
-        className={`bg-white border-r border-gray-200 transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}
-      >
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              {!collapsed && (
-                <h1 className="text-xl font-bold text-gray-900">MedDash</h1>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCollapsed(!collapsed)}
-                className="p-2"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 p-4">
-            <ul className="space-y-2">
-              {menuItems.map((item, index) => (
-                <li key={index}>
-                  <Button
-                    variant={
-                      item.label.toLowerCase() === currentPage
-                        ? "default"
-                        : "ghost"
-                    }
-                    className={`w-full justify-start ${collapsed ? "px-2" : "px-4"} ${
-                      item.label.toLowerCase() === currentPage
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                    onClick={() => setCurrentPage(item.label.toLowerCase())}
-                  >
-                    <item.icon
-                      className={`h-5 w-5 ${collapsed ? "" : "mr-3"}`}
-                    />
-                    {!collapsed && <span>{item.label}</span>}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
-            {!collapsed ? (
-              <div className="flex items-center space-x-3 mb-4">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                  <AvatarFallback>EB</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    Dr. Edward Bailey
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    edward@hospital.com
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex justify-center mb-4">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                  <AvatarFallback className="text-xs">EB</AvatarFallback>
-                </Avatar>
-              </div>
-            )}
-            <Button
-              variant="ghost"
-              className={`w-full justify-start text-gray-700 hover:bg-gray-100 ${collapsed ? "px-2" : "px-4"}`}
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header */}
+      <header className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
+        <div className="flex items-center gap-8">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <button
+              onClick={() => onNavigate("dashboard")}
+              className="hover:text-gray-700"
             >
-              <LogOut className={`h-5 w-5 ${collapsed ? "" : "mr-3"}`} />
-              {!collapsed && <span>Logout</span>}
-            </Button>
+              Dashboard
+            </button>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-gray-900">Appointments</span>
           </div>
         </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Link to="/dashboard" className="hover:text-gray-700">
-                Dashboard
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <span className="text-gray-900">Appointments</span>
-            </div>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search appointments..."
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search appointments..."
-                className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              New Appointment
-            </Button>
-          </div>
-        </header>
+          <Button variant="outline" size="sm">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            New Appointment
+          </Button>
+        </div>
+      </header>
 
-        {/* Main Content - Scrollable */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">
-                      Today's Appointments
-                    </p>
-                    <p className="text-2xl font-bold">
-                      {appointmentsData.today.length}
-                    </p>
-                  </div>
-                  <Calendar className="h-8 w-8 text-blue-500" />
+      {/* Main Content - Scrollable */}
+      <main className="flex-1 overflow-y-auto p-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Today's Appointments</p>
+                  <p className="text-2xl font-bold">
+                    {appointmentsData.today.length}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Upcoming (7 days)</p>
-                    <p className="text-2xl font-bold">
-                      {appointmentsData.upcoming.reduce(
-                        (total, day) => total + day.appointments.length,
-                        0
-                      )}
-                    </p>
-                  </div>
-                  <Clock className="h-8 w-8 text-green-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Completed</p>
-                    <p className="text-2xl font-bold">
-                      {appointmentsData.previous.length}
-                    </p>
-                  </div>
-                  <CheckCircle className="h-8 w-8 text-gray-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Pending</p>
-                    <p className="text-2xl font-bold">
-                      {
-                        [
-                          ...appointmentsData.today,
-                          ...appointmentsData.upcoming.flatMap(
-                            (day) => day.appointments
-                          ),
-                        ].filter((apt) => apt.status === "pending").length
-                      }
-                    </p>
-                  </div>
-                  <AlertTriangle className="h-8 w-8 text-yellow-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Appointments Tabs */}
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming (7 days)</TabsTrigger>
-              <TabsTrigger value="previous">Previous</TabsTrigger>
-            </TabsList>
-
-            {/* Today's Appointments */}
-            <TabsContent value="today" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Today's Appointments - December 9, 2024
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {appointmentsData.today.length > 0 ? (
-                    <div className="space-y-4">
-                      {appointmentsData.today.map((appointment) => (
-                        <AppointmentCard
-                          key={appointment.id}
-                          appointment={appointment}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No appointments scheduled for today</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Upcoming Appointments */}
-            <TabsContent value="upcoming" className="mt-6">
-              <div className="space-y-6">
-                {appointmentsData.upcoming.map((dayData) => (
-                  <Card key={dayData.id}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5" />
-                        {dayData.date} - {dayData.fullDate}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {dayData.appointments.length > 0 ? (
-                        <div className="space-y-4">
-                          {dayData.appointments.map((appointment) => (
-                            <AppointmentCard
-                              key={appointment.id}
-                              appointment={appointment}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-4 text-gray-500">
-                          <p>No appointments scheduled for this day</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                <Calendar className="h-8 w-8 text-blue-500" />
               </div>
-            </TabsContent>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Upcoming (7 days)</p>
+                  <p className="text-2xl font-bold">
+                    {appointmentsData.upcoming.reduce(
+                      (total, day) => total + day.appointments.length,
+                      0
+                    )}
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Completed</p>
+                  <p className="text-2xl font-bold">
+                    {appointmentsData.previous.length}
+                  </p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-gray-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Pending</p>
+                  <p className="text-2xl font-bold">
+                    {
+                      [
+                        ...appointmentsData.today,
+                        ...appointmentsData.upcoming.flatMap(
+                          (day) => day.appointments
+                        ),
+                      ].filter((apt) => apt.status === "pending").length
+                    }
+                  </p>
+                </div>
+                <AlertTriangle className="h-8 w-8 text-yellow-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* Previous Appointments */}
-            <TabsContent value="previous" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5" />
-                    Previous Appointments
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {appointmentsData.previous.length > 0 ? (
-                    <div className="space-y-4">
-                      {appointmentsData.previous.map((appointment) => (
-                        <AppointmentCard
-                          key={appointment.id}
-                          appointment={appointment}
-                          showDate={true}
-                          isPrevious={true}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No previous appointments found</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </main>
-      </div>
+        {/* Appointments Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="upcoming">Upcoming (7 days)</TabsTrigger>
+            <TabsTrigger value="previous">Previous</TabsTrigger>
+          </TabsList>
+
+          {/* Today's Appointments */}
+          <TabsContent value="today" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Today's Appointments - December 9, 2024
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {appointmentsData.today.length > 0 ? (
+                  <div className="space-y-4">
+                    {appointmentsData.today.map((appointment) => (
+                      <AppointmentCard
+                        key={appointment.id}
+                        appointment={appointment}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No appointments scheduled for today</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Upcoming Appointments */}
+          <TabsContent value="upcoming" className="mt-6">
+            <div className="space-y-6">
+              {appointmentsData.upcoming.map((dayData) => (
+                <Card key={dayData.id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      {dayData.date} - {dayData.fullDate}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {dayData.appointments.length > 0 ? (
+                      <div className="space-y-4">
+                        {dayData.appointments.map((appointment) => (
+                          <AppointmentCard
+                            key={appointment.id}
+                            appointment={appointment}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-gray-500">
+                        <p>No appointments scheduled for this day</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Previous Appointments */}
+          <TabsContent value="previous" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5" />
+                  Previous Appointments
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {appointmentsData.previous.length > 0 ? (
+                  <div className="space-y-4">
+                    {appointmentsData.previous.map((appointment) => (
+                      <AppointmentCard
+                        key={appointment.id}
+                        appointment={appointment}
+                        showDate={true}
+                        isPrevious={true}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No previous appointments found</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   );
 }
