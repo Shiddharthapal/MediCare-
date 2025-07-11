@@ -5,8 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Video, MapPin, Phone } from "lucide-react";
-import Doctors from "./doctors";
+import {
+  Calendar,
+  Clock,
+  Video,
+  MapPin,
+  Phone,
+  Upload,
+  Eye,
+  Download,
+  X,
+  FileText,
+} from "lucide-react";
 
 // Mock appointment data
 const appointmentsData = {
@@ -194,6 +204,177 @@ const appointmentsData = {
   ],
 };
 
+const prescriptionsData = {
+  9: [
+    {
+      id: 1,
+      medication: "Estradiol",
+      dosage: "2mg",
+      frequency: "Once daily",
+      duration: "30 days",
+      instructions: "Take with food in the morning",
+      prescribedDate: "2024-01-05",
+    },
+    {
+      id: 2,
+      medication: "Progesterone",
+      dosage: "100mg",
+      frequency: "Once daily at bedtime",
+      duration: "30 days",
+      instructions: "Take before sleep",
+      prescribedDate: "2024-01-05",
+    },
+  ],
+  10: [
+    {
+      id: 3,
+      medication: "Multivitamin",
+      dosage: "1 tablet",
+      frequency: "Once daily",
+      duration: "90 days",
+      instructions: "Take with breakfast",
+      prescribedDate: "2024-01-03",
+    },
+  ],
+  11: [
+    {
+      id: 4,
+      medication: "Eye Drops",
+      dosage: "2 drops",
+      frequency: "Twice daily",
+      duration: "14 days",
+      instructions: "Apply to both eyes morning and evening",
+      prescribedDate: "2023-12-28",
+    },
+  ],
+  12: [
+    {
+      id: 5,
+      medication: "Ibuprofen",
+      dosage: "400mg",
+      frequency: "As needed",
+      duration: "7 days",
+      instructions: "Take with food for headache relief",
+      prescribedDate: "2023-12-20",
+    },
+  ],
+  13: [
+    {
+      id: 6,
+      medication: "Antibiotics",
+      dosage: "500mg",
+      frequency: "Twice daily",
+      duration: "10 days",
+      instructions: "Complete full course even if feeling better",
+      prescribedDate: "2023-12-15",
+    },
+  ],
+  15: [
+    {
+      id: 7,
+      medication: "Fluoride Toothpaste",
+      dosage: "As directed",
+      frequency: "Twice daily",
+      duration: "Ongoing",
+      instructions: "Use for daily oral hygiene",
+      prescribedDate: "2023-12-05",
+    },
+  ],
+  16: [
+    {
+      id: 8,
+      medication: "Anti-inflammatory",
+      dosage: "200mg",
+      frequency: "Three times daily",
+      duration: "21 days",
+      instructions: "Take with meals to reduce joint inflammation",
+      prescribedDate: "2023-11-28",
+    },
+  ],
+};
+
+const reportsData = {
+  9: [
+    {
+      id: 1,
+      name: "Blood Test Results.pdf",
+      uploadDate: "2024-01-04",
+      size: "2.3 MB",
+      type: "Lab Report",
+    },
+    {
+      id: 2,
+      name: "Hormone Panel Results.pdf",
+      uploadDate: "2024-01-04",
+      size: "1.8 MB",
+      type: "Lab Report",
+    },
+  ],
+  10: [
+    {
+      id: 3,
+      name: "Previous Medical History.pdf",
+      uploadDate: "2024-01-02",
+      size: "1.8 MB",
+      type: "Medical History",
+    },
+  ],
+  11: [
+    {
+      id: 4,
+      name: "Eye Exam Results.pdf",
+      uploadDate: "2023-12-27",
+      size: "3.2 MB",
+      type: "Medical Report",
+    },
+  ],
+  12: [
+    {
+      id: 5,
+      name: "MRI Scan Results.pdf",
+      uploadDate: "2023-12-19",
+      size: "5.4 MB",
+      type: "Imaging Report",
+    },
+  ],
+  13: [
+    {
+      id: 6,
+      name: "Urine Test Results.pdf",
+      uploadDate: "2023-12-14",
+      size: "1.2 MB",
+      type: "Lab Report",
+    },
+  ],
+  14: [
+    {
+      id: 7,
+      name: "Child Growth Chart.pdf",
+      uploadDate: "2023-12-09",
+      size: "2.1 MB",
+      type: "Medical Report",
+    },
+  ],
+  15: [
+    {
+      id: 8,
+      name: "Dental X-rays.pdf",
+      uploadDate: "2023-12-04",
+      size: "4.7 MB",
+      type: "Imaging Report",
+    },
+  ],
+  16: [
+    {
+      id: 9,
+      name: "Joint X-ray Results.pdf",
+      uploadDate: "2023-11-27",
+      size: "3.8 MB",
+      type: "Imaging Report",
+    },
+  ],
+};
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const today = new Date();
@@ -258,6 +439,12 @@ export default function Appointments({
   onNavigate?: (page: string) => void;
 }) {
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [showReportsModal, setShowReportsModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<{ [key: number]: File[] }>(
+    {}
+  );
 
   const futureGrouped = groupAppointmentsByDate(appointmentsData.future);
   const pastGrouped = groupAppointmentsByDate(appointmentsData.past);
@@ -278,9 +465,28 @@ export default function Appointments({
   };
 
   const handleBookNewAppointment = () => {
+    console.log("Navigating to doctors page to book new appointment");
     if (onNavigate) {
       onNavigate("doctors");
     }
+  };
+
+  const handleViewPrescription = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setShowPrescriptionModal(true);
+  };
+
+  const handleViewReports = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setShowReportsModal(true);
+  };
+
+  const handleFileUpload = (appointmentId: number, files: FileList) => {
+    const fileArray = Array.from(files);
+    setUploadedFiles((prev) => ({
+      ...prev,
+      [appointmentId]: [...(prev[appointmentId] || []), ...fileArray],
+    }));
   };
 
   const AppointmentCard = ({
@@ -292,10 +498,10 @@ export default function Appointments({
   }) => (
     <Card className="mb-4 hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
             <Avatar className="h-12 w-12">
-              <AvatarImage src="/placeholder.svg" />
+              <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
                 {appointment.avatar}
               </AvatarFallback>
@@ -332,38 +538,61 @@ export default function Appointments({
             </div>
           </div>
 
-          {showActions && (
-            <div className="flex gap-2">
-              {appointment.status === "confirmed" &&
-                appointment.mode === "video" && (
-                  <Button
-                    className="bg-pink-500 hover:bg-pink-600 text-white"
-                    onClick={() => handleJoinSession(appointment.id)}
-                  >
-                    <Video className="h-4 w-4 mr-2" />
-                    Join
-                  </Button>
+          <div className="flex gap-2 flex-wrap">
+            {/* Appointment Management Actions (only for upcoming/today) */}
+            {showActions && (
+              <>
+                {appointment.status === "confirmed" &&
+                  appointment.mode === "video" && (
+                    <Button
+                      className="bg-pink-500 hover:bg-pink-600 text-white"
+                      onClick={() => handleJoinSession(appointment.id)}
+                    >
+                      <Video className="h-4 w-4 mr-2" />
+                      Join
+                    </Button>
+                  )}
+                {appointment.status === "confirmed" && (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
+                      onClick={() => handleCancelAppointment(appointment.id)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
+                      onClick={() =>
+                        handleRescheduleAppointment(appointment.id)
+                      }
+                    >
+                      Reschedule
+                    </Button>
+                  </>
                 )}
-              {appointment.status === "confirmed" && (
-                <>
-                  <Button
-                    variant="outline"
-                    className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                    onClick={() => handleCancelAppointment(appointment.id)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                    onClick={() => handleRescheduleAppointment(appointment.id)}
-                  >
-                    Reschedule
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
+              </>
+            )}
+
+            {/* Prescription and Reports options (always visible) */}
+            <Button
+              variant="outline"
+              className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+              onClick={() => handleViewPrescription(appointment)}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Prescription
+            </Button>
+            <Button
+              variant="outline"
+              className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+              onClick={() => handleViewReports(appointment)}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Reports
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -446,21 +675,21 @@ export default function Appointments({
       <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
         <Button
           variant={activeTab === "upcoming" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-white shadow-sm" : ""}`}
+          className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("upcoming")}
         >
           Upcoming ({appointmentsData.future.length})
         </Button>
         <Button
           variant={activeTab === "today" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "today" ? "bg-white shadow-sm" : ""}`}
+          className={`px-4 py-2 ${activeTab === "today" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("today")}
         >
           Today ({appointmentsData.today.length})
         </Button>
         <Button
           variant={activeTab === "past" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "past" ? "bg-white shadow-sm" : ""}`}
+          className={`px-4 py-2 ${activeTab === "past" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("past")}
         >
           Past ({appointmentsData.past.length})
@@ -596,10 +825,234 @@ export default function Appointments({
                   <AppointmentCard
                     key={appointment.id}
                     appointment={appointment}
+                    showActions={false}
                   />
                 ))}
               </div>
             ))}
+        </div>
+      )}
+
+      {/* Prescription Modal */}
+      {showPrescriptionModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Prescription - {selectedAppointment.type}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowPrescriptionModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-sm text-gray-600">
+                  {selectedAppointment.doctor} •{" "}
+                  {formatDate(selectedAppointment.date)}
+                </p>
+              </div>
+
+              {selectedAppointment.status === "completed" &&
+              prescriptionsData[selectedAppointment.id] ? (
+                <div className="space-y-4">
+                  {prescriptionsData[selectedAppointment.id].map(
+                    (prescription: any) => (
+                      <Card
+                        key={prescription.id}
+                        className="border-l-4 border-l-blue-500"
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-semibold text-gray-900">
+                              {prescription.medication}
+                            </h3>
+                            <Badge variant="outline">
+                              {prescription.dosage}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1 text-sm text-gray-600">
+                            <p>
+                              <strong>Frequency:</strong>{" "}
+                              {prescription.frequency}
+                            </p>
+                            <p>
+                              <strong>Duration:</strong> {prescription.duration}
+                            </p>
+                            <p>
+                              <strong>Instructions:</strong>{" "}
+                              {prescription.instructions}
+                            </p>
+                            <p>
+                              <strong>Prescribed:</strong>{" "}
+                              {prescription.prescribedDate}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Prescription Available
+                  </h3>
+                  <p className="text-gray-600">
+                    {selectedAppointment.status === "completed"
+                      ? "No prescription was provided for this appointment."
+                      : "Prescription will be available after the appointment is completed."}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reports Modal */}
+      {showReportsModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Reports - {selectedAppointment.type}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowReportsModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-sm text-gray-600">
+                  {selectedAppointment.doctor} •{" "}
+                  {formatDate(selectedAppointment.date)}
+                </p>
+              </div>
+
+              {/* Upload Section for Upcoming Appointments */}
+              {selectedAppointment.status !== "completed" && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">
+                    Upload Reports
+                  </h3>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600 mb-2">
+                      Upload medical reports, lab results, or other documents
+                      for your doctor
+                    </p>
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      onChange={(e) =>
+                        e.target.files &&
+                        handleFileUpload(selectedAppointment.id, e.target.files)
+                      }
+                      className="hidden"
+                      id={`file-upload-${selectedAppointment.id}`}
+                    />
+                    <label
+                      htmlFor={`file-upload-${selectedAppointment.id}`}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                    >
+                      Choose Files
+                    </label>
+                  </div>
+
+                  {/* Show uploaded files */}
+                  {uploadedFiles[selectedAppointment.id] &&
+                    uploadedFiles[selectedAppointment.id].length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="text-sm font-medium text-gray-900 mb-2">
+                          Uploaded Files:
+                        </h4>
+                        <div className="space-y-2">
+                          {uploadedFiles[selectedAppointment.id].map(
+                            (file, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                              >
+                                <span className="text-sm text-gray-700">
+                                  {file.name}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                                </span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              )}
+
+              {/* Existing Reports */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">
+                  {selectedAppointment.status === "completed"
+                    ? "Uploaded Reports"
+                    : "Previously Uploaded"}
+                </h3>
+
+                {reportsData[selectedAppointment.id] ? (
+                  <div className="space-y-3">
+                    {reportsData[selectedAppointment.id].map((report: any) => (
+                      <Card key={report.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <FileText className="h-8 w-8 text-blue-500" />
+                              <div>
+                                <h4 className="font-medium text-gray-900">
+                                  {report.name}
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  {report.type} • Uploaded {report.uploadDate} •{" "}
+                                  {report.size}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-2" />
+                                View
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Download className="h-4 w-4 mr-2" />
+                                Download
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">
+                      No reports uploaded yet
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
