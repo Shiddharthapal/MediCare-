@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Video, MapPin, Phone } from "lucide-react";
+import Doctors from "./doctors";
 
 // Mock appointment data
 const appointmentsData = {
@@ -251,7 +252,11 @@ const getModeIcon = (mode: string) => {
   }
 };
 
-export default function Appointments() {
+export default function Appointments({
+  onNavigate,
+}: {
+  onNavigate?: (page: string) => void;
+}) {
   const [activeTab, setActiveTab] = useState("upcoming");
 
   const futureGrouped = groupAppointmentsByDate(appointmentsData.future);
@@ -273,8 +278,9 @@ export default function Appointments() {
   };
 
   const handleBookNewAppointment = () => {
-    console.log("Opening book new appointment modal");
-    // Add booking logic here
+    if (onNavigate) {
+      onNavigate("doctors");
+    }
   };
 
   const AppointmentCard = ({

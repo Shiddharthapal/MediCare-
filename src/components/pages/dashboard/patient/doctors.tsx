@@ -226,7 +226,11 @@ const availabilityFilters = [
   "Available This Week",
 ];
 
-export default function Doctors() {
+export default function Doctors({
+  onNavigate,
+}: {
+  onNavigate?: (page: string) => void;
+}) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties");
   const [selectedAvailability, setSelectedAvailability] = useState("All");
@@ -276,6 +280,12 @@ export default function Doctors() {
         return <MapPin className="h-4 w-4" />;
       default:
         return <Calendar className="h-4 w-4" />;
+    }
+  };
+
+  const handleBookNewAppointment = () => {
+    if (onNavigate) {
+      onNavigate("doctors");
     }
   };
 
