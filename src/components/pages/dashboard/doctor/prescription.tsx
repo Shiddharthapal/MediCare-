@@ -1,24 +1,27 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, CheckCircle, XCircle, Plus } from "lucide-react"
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, CheckCircle, XCircle, Plus } from "lucide-react";
 
 interface PrescriptionProps {
   patientData: {
-    name: string
-    avatar: string
-    phone: string
-    email: string
-    age: number
-    gender: string
-  }
-  onClose: () => void
+    name: string;
+    avatar: string;
+    phone: string;
+    email: string;
+    age: number;
+    gender: string;
+  };
+  onClose: () => void;
 }
 
-export default function Prescription({ patientData, onClose }: PrescriptionProps) {
+export default function Prescription({
+  patientData,
+  onClose,
+}: PrescriptionProps) {
   const [prescriptionForm, setPrescriptionForm] = useState({
     medications: [
       {
@@ -46,15 +49,15 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
     followUpDate: "",
     labTests: [],
     restrictions: "",
-  })
+  });
 
   const handleSavePrescription = () => {
-    alert(`Prescription saved successfully for ${patientData.name}!`)
-    onClose()
-  }
+    alert(`Prescription saved successfully for ${patientData.name}!`);
+    onClose();
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen overflow-auto bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center gap-4">
@@ -69,7 +72,8 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
             <div>
               <h1 className="text-xl font-semibold">Create Prescription</h1>
               <p className="text-gray-600">
-                {patientData.name} • Age: {patientData.age} • {patientData.gender}
+                {patientData.name} • Age: {patientData.age} •{" "}
+                {patientData.gender}
               </p>
             </div>
           </div>
@@ -110,7 +114,9 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Blood Pressure</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Blood Pressure
+                  </label>
                   <input
                     type="text"
                     placeholder="120/80"
@@ -119,13 +125,18 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: { ...prev.vitalSigns, bloodPressure: e.target.value },
+                        vitalSigns: {
+                          ...prev.vitalSigns,
+                          bloodPressure: e.target.value,
+                        },
                       }))
                     }
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Heart Rate</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Heart Rate
+                  </label>
                   <input
                     type="text"
                     placeholder="72 bpm"
@@ -134,13 +145,18 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: { ...prev.vitalSigns, heartRate: e.target.value },
+                        vitalSigns: {
+                          ...prev.vitalSigns,
+                          heartRate: e.target.value,
+                        },
                       }))
                     }
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Temperature</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Temperature
+                  </label>
                   <input
                     type="text"
                     placeholder="98.6°F"
@@ -149,13 +165,18 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: { ...prev.vitalSigns, temperature: e.target.value },
+                        vitalSigns: {
+                          ...prev.vitalSigns,
+                          temperature: e.target.value,
+                        },
                       }))
                     }
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Weight</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Weight
+                  </label>
                   <input
                     type="text"
                     placeholder="70 kg"
@@ -164,13 +185,18 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: { ...prev.vitalSigns, weight: e.target.value },
+                        vitalSigns: {
+                          ...prev.vitalSigns,
+                          weight: e.target.value,
+                        },
                       }))
                     }
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Height</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Height
+                  </label>
                   <input
                     type="text"
                     placeholder="175 cm"
@@ -179,7 +205,10 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: { ...prev.vitalSigns, height: e.target.value },
+                        vitalSigns: {
+                          ...prev.vitalSigns,
+                          height: e.target.value,
+                        },
                       }))
                     }
                   />
@@ -199,7 +228,12 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                   placeholder="Enter primary diagnosis..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
                   value={prescriptionForm.diagnosis}
-                  onChange={(e) => setPrescriptionForm((prev) => ({ ...prev, diagnosis: e.target.value }))}
+                  onChange={(e) =>
+                    setPrescriptionForm((prev) => ({
+                      ...prev,
+                      diagnosis: e.target.value,
+                    }))
+                  }
                 />
               </CardContent>
             </Card>
@@ -212,7 +246,12 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                   placeholder="List patient symptoms..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
                   value={prescriptionForm.symptoms}
-                  onChange={(e) => setPrescriptionForm((prev) => ({ ...prev, symptoms: e.target.value }))}
+                  onChange={(e) =>
+                    setPrescriptionForm((prev) => ({
+                      ...prev,
+                      symptoms: e.target.value,
+                    }))
+                  }
                 />
               </CardContent>
             </Card>
@@ -228,10 +267,16 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                 placeholder="Enter recommended tests, lab work, or reports (leave empty if no tests required)..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 resize-none"
                 value={prescriptionForm.testsAndReports}
-                onChange={(e) => setPrescriptionForm((prev) => ({ ...prev, testsAndReports: e.target.value }))}
+                onChange={(e) =>
+                  setPrescriptionForm((prev) => ({
+                    ...prev,
+                    testsAndReports: e.target.value,
+                  }))
+                }
               />
               <p className="text-xs text-gray-500 mt-2">
-                Examples: Blood test (CBC, LFT), X-ray chest, ECG, Urine analysis, etc.
+                Examples: Blood test (CBC, LFT), X-ray chest, ECG, Urine
+                analysis, etc.
               </p>
             </CardContent>
           </Card>
@@ -258,7 +303,7 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                           quantity: "",
                         },
                       ],
-                    }))
+                    }));
                   }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -269,7 +314,10 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
             <CardContent>
               <div className="space-y-4">
                 {prescriptionForm.medications.map((medication, index) => (
-                  <div key={medication.id} className="border rounded-lg p-4 bg-gray-50">
+                  <div
+                    key={medication.id}
+                    className="border rounded-lg p-4 bg-gray-50"
+                  >
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-medium">Medication {index + 1}</h4>
                       {prescriptionForm.medications.length > 1 && (
@@ -279,8 +327,10 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                           onClick={() => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.filter((med) => med.id !== medication.id),
-                            }))
+                              medications: prev.medications.filter(
+                                (med) => med.id !== medication.id
+                              ),
+                            }));
                           }}
                         >
                           <XCircle className="h-4 w-4" />
@@ -289,7 +339,9 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Medicine Name</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Medicine Name
+                        </label>
                         <input
                           type="text"
                           placeholder="e.g., Lisinopril"
@@ -299,14 +351,18 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                             setPrescriptionForm((prev) => ({
                               ...prev,
                               medications: prev.medications.map((med) =>
-                                med.id === medication.id ? { ...med, name: e.target.value } : med,
+                                med.id === medication.id
+                                  ? { ...med, name: e.target.value }
+                                  : med
                               ),
-                            }))
+                            }));
                           }}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Dosage</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Dosage
+                        </label>
                         <input
                           type="text"
                           placeholder="e.g., 10mg"
@@ -316,14 +372,18 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                             setPrescriptionForm((prev) => ({
                               ...prev,
                               medications: prev.medications.map((med) =>
-                                med.id === medication.id ? { ...med, dosage: e.target.value } : med,
+                                med.id === medication.id
+                                  ? { ...med, dosage: e.target.value }
+                                  : med
                               ),
-                            }))
+                            }));
                           }}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Frequency
+                        </label>
                         <select
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={medication.frequency}
@@ -331,23 +391,31 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                             setPrescriptionForm((prev) => ({
                               ...prev,
                               medications: prev.medications.map((med) =>
-                                med.id === medication.id ? { ...med, frequency: e.target.value } : med,
+                                med.id === medication.id
+                                  ? { ...med, frequency: e.target.value }
+                                  : med
                               ),
-                            }))
+                            }));
                           }}
                         >
                           <option value="">Select frequency</option>
                           <option value="Once daily">Once daily</option>
                           <option value="Twice daily">Twice daily</option>
-                          <option value="Three times daily">Three times daily</option>
-                          <option value="Four times daily">Four times daily</option>
+                          <option value="Three times daily">
+                            Three times daily
+                          </option>
+                          <option value="Four times daily">
+                            Four times daily
+                          </option>
                           <option value="As needed">As needed</option>
                           <option value="Before meals">Before meals</option>
                           <option value="After meals">After meals</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Duration
+                        </label>
                         <input
                           type="text"
                           placeholder="e.g., 30 days"
@@ -357,14 +425,18 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                             setPrescriptionForm((prev) => ({
                               ...prev,
                               medications: prev.medications.map((med) =>
-                                med.id === medication.id ? { ...med, duration: e.target.value } : med,
+                                med.id === medication.id
+                                  ? { ...med, duration: e.target.value }
+                                  : med
                               ),
-                            }))
+                            }));
                           }}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Quantity
+                        </label>
                         <input
                           type="text"
                           placeholder="e.g., 30 tablets"
@@ -374,14 +446,18 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                             setPrescriptionForm((prev) => ({
                               ...prev,
                               medications: prev.medications.map((med) =>
-                                med.id === medication.id ? { ...med, quantity: e.target.value } : med,
+                                med.id === medication.id
+                                  ? { ...med, quantity: e.target.value }
+                                  : med
                               ),
-                            }))
+                            }));
                           }}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Special Instructions
+                        </label>
                         <input
                           type="text"
                           placeholder="e.g., Take with food"
@@ -391,9 +467,11 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
                             setPrescriptionForm((prev) => ({
                               ...prev,
                               medications: prev.medications.map((med) =>
-                                med.id === medication.id ? { ...med, instructions: e.target.value } : med,
+                                med.id === medication.id
+                                  ? { ...med, instructions: e.target.value }
+                                  : med
                               ),
-                            }))
+                            }));
                           }}
                         />
                       </div>
@@ -408,25 +486,41 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Allergies & Restrictions</CardTitle>
+                <CardTitle className="text-lg">
+                  Allergies & Restrictions
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Known Allergies</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Known Allergies
+                  </label>
                   <textarea
                     placeholder="List any known allergies..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
                     value={prescriptionForm.allergies}
-                    onChange={(e) => setPrescriptionForm((prev) => ({ ...prev, allergies: e.target.value }))}
+                    onChange={(e) =>
+                      setPrescriptionForm((prev) => ({
+                        ...prev,
+                        allergies: e.target.value,
+                      }))
+                    }
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Activity Restrictions</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Activity Restrictions
+                  </label>
                   <textarea
                     placeholder="Any activity restrictions..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
                     value={prescriptionForm.restrictions}
-                    onChange={(e) => setPrescriptionForm((prev) => ({ ...prev, restrictions: e.target.value }))}
+                    onChange={(e) =>
+                      setPrescriptionForm((prev) => ({
+                        ...prev,
+                        restrictions: e.target.value,
+                      }))
+                    }
                   />
                 </div>
               </CardContent>
@@ -437,21 +531,35 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Follow-up Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Follow-up Date
+                  </label>
                   <input
                     type="date"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={prescriptionForm.followUpDate}
-                    onChange={(e) => setPrescriptionForm((prev) => ({ ...prev, followUpDate: e.target.value }))}
+                    onChange={(e) =>
+                      setPrescriptionForm((prev) => ({
+                        ...prev,
+                        followUpDate: e.target.value,
+                      }))
+                    }
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Additional Notes
+                  </label>
                   <textarea
                     placeholder="Any additional notes or instructions..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
                     value={prescriptionForm.notes}
-                    onChange={(e) => setPrescriptionForm((prev) => ({ ...prev, notes: e.target.value }))}
+                    onChange={(e) =>
+                      setPrescriptionForm((prev) => ({
+                        ...prev,
+                        notes: e.target.value,
+                      }))
+                    }
                   />
                 </div>
               </CardContent>
@@ -463,7 +571,10 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button className="bg-blue-500 hover:bg-blue-600" onClick={handleSavePrescription}>
+            <Button
+              className="bg-blue-500 hover:bg-blue-600"
+              onClick={handleSavePrescription}
+            >
               <CheckCircle className="h-4 w-4 mr-2" />
               Save Prescription
             </Button>
@@ -471,5 +582,5 @@ export default function Prescription({ patientData, onClose }: PrescriptionProps
         </div>
       </main>
     </div>
-  )
+  );
 }

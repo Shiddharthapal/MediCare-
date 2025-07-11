@@ -362,11 +362,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Left Sidebar - Fixed */}
-      <aside className="w-64 border-r border-gray-100 bg-white overflow-y-auto">
-        {/* Header */}
-
-        {/* Navigation */}
-
+      <aside className="w-min-44 border-r border-gray-100 bg-white overflow-y-auto">
         {/* Patient List */}
         {showPatientList && (
           <div className="p-4">
@@ -436,7 +432,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         </header>
 
         {/* Tabs */}
-        <div className="flex gap-6 px-6 py-4 border-b border-gray-100 bg-white">
+        <div className="grid grid-cols-4 md:gap-10 px-6 py-4 border-b border-gray-100 bg-white">
           <button
             className={`pb-2 border-b-2 transition-colors ${
               activeTab === "overview"
@@ -483,9 +479,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         <div className="flex-1 overflow-hidden">
           <div className="flex h-full">
             {/* Scrollable Content */}
-            <main className="flex-1 overflow-y-auto p-6">
+            <main className="flex-1 w-full overflow-y-auto ">
               {activeTab === "overview" && (
-                <div className="">
+                <div className="p-6">
                   {/* Personal Information */}
                   <div className="mb-6">
                     <Card>
@@ -1029,7 +1025,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     {disease.diagnosedDate}
                                   </p>
                                 </div>
-                                <div>
+                                <div className="pl-10">
                                   <p className="text-gray-500">
                                     Current Status
                                   </p>
@@ -1091,7 +1087,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     {appointment.time}
                                   </p>
                                 </div>
-                                <div>
+                                <div className="pl-11">
                                   <p className="text-gray-500">Status</p>
                                   <p className="font-medium text-green-600">
                                     {appointment.status}
