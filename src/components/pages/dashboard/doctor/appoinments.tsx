@@ -20,7 +20,10 @@ import {
   Plus,
   Filter,
   Download,
+  Video,
+  FileEdit,
 } from "lucide-react";
+import Prescription from "./prescription";
 
 // Mock data for appointments
 const appointmentsData = {
@@ -340,15 +343,120 @@ const appointmentsData = {
   ],
 };
 
-interface AppointmentsPageProps {
-  onNavigate: (page: string) => void;
-}
+const appointmentRequests = [
+  {
+    id: 1,
+    patient: {
+      name: "Sarah Wilson",
+      avatar: "SW",
+      phone: "(555) 234-5678",
+      email: "sarah.wilson@email.com",
+      age: 31,
+      gender: "Female",
+    },
+    requestedDate: "December 12, 2024",
+    requestedTime: "10:30 AM",
+    alternativeTime: "2:00 PM",
+    duration: "30 min",
+    type: "General Consultation",
+    reason: "Persistent headaches and fatigue for the past 2 weeks",
+    urgency: "Medium",
+    requestDate: "December 8, 2024",
+    status: "pending",
+    notes: "Patient reports difficulty sleeping and increased stress levels",
+  },
+  {
+    id: 2,
+    patient: {
+      name: "Michael Brown",
+      avatar: "MB",
+      phone: "(555) 345-6789",
+      email: "michael.brown@email.com",
+      age: 45,
+      gender: "Male",
+    },
+    requestedDate: "December 13, 2024",
+    requestedTime: "9:15 AM",
+    alternativeTime: "11:00 AM",
+    duration: "45 min",
+    type: "Follow-up Consultation",
+    reason: "Blood pressure medication review and adjustment",
+    urgency: "High",
+    requestDate: "December 7, 2024",
+    status: "pending",
+    notes: "Patient experiencing side effects from current medication",
+  },
+  {
+    id: 3,
+    patient: {
+      name: "Emily Davis",
+      avatar: "ED",
+      phone: "(555) 456-7890",
+      email: "emily.davis@email.com",
+      age: 28,
+      gender: "Female",
+    },
+    requestedDate: "December 14, 2024",
+    requestedTime: "3:30 PM",
+    alternativeTime: "4:15 PM",
+    duration: "30 min",
+    type: "Routine Checkup",
+    reason: "Annual physical examination and health screening",
+    urgency: "Low",
+    requestDate: "December 6, 2024",
+    status: "pending",
+    notes: "Patient is due for annual wellness visit",
+  },
+  {
+    id: 4,
+    patient: {
+      name: "Robert Johnson",
+      avatar: "RJ",
+      phone: "(555) 567-8901",
+      email: "robert.johnson@email.com",
+      age: 52,
+      gender: "Male",
+    },
+    requestedDate: "December 15, 2024",
+    requestedTime: "1:45 PM",
+    alternativeTime: "3:00 PM",
+    duration: "30 min",
+    type: "Diabetes Management",
+    reason: "Quarterly diabetes check and blood sugar monitoring",
+    urgency: "Medium",
+    requestDate: "December 5, 2024",
+    status: "pending",
+    notes: "Patient reports fluctuating blood sugar levels",
+  },
+  {
+    id: 5,
+    patient: {
+      name: "Lisa Anderson",
+      avatar: "LA",
+      phone: "(555) 678-9012",
+      email: "lisa.anderson@email.com",
+      age: 38,
+      gender: "Female",
+    },
+    requestedDate: "December 16, 2024",
+    requestedTime: "11:30 AM",
+    alternativeTime: "2:30 PM",
+    duration: "45 min",
+    type: "Specialist Consultation",
+    reason: "Chronic back pain evaluation and treatment options",
+    urgency: "High",
+    requestDate: "December 4, 2024",
+    status: "pending",
+    notes: "Patient unable to perform daily activities due to pain",
+  },
+];
 
-export default function AppointmentsPage({
-  onNavigate,
-}: AppointmentsPageProps) {
+export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
+  const [requests, setRequests] = useState(appointmentRequests);
+  const [showPrescription, setShowPrescription] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -383,6 +491,69 @@ export default function AppointmentsPage({
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
+
+  const handleAcceptRequest = (
+    requestId: number,
+    timeSlot: "primary" | "alternative"
+  ) => {
+    setRequests((prevRequests) =>
+      prevRequests.map((request) =>
+        request.id === requestId
+          ? {
+              ...request,
+              status: "accepted",
+              confirmedTime:
+                timeSlot === "primary"
+                  ? request.requestedTime
+                  : request.alternativeTime,
+            }
+          : request
+      )
+    );
+    alert(`Appointment request accepted and confirmation sent to patient!`);
+  };
+
+  const handleRejectRequest = (requestId: number) => {
+    setRequests((prevRequests) =>
+      prevRequests.map((request) =>
+        request.id === requestId ? { ...request, status: "rejected" } : request
+      )
+    );
+    alert(`Appointment request rejected and notification sent to patient.`);
+  };
+
+  const getUrgencyColor = (urgency: string) => {
+    switch (urgency.toLowerCase()) {
+      case "high":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "low":
+        return "bg-green-100 text-green-800 border-green-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const handleCreatePrescription = (patient: any) => {
+    setSelectedPatient(patient);
+    setShowPrescription(true);
+  };
+
+  const handleClosePrescription = () => {
+    setShowPrescription(false);
+    setSelectedPatient(null);
+  };
+
+  // If prescription is shown, render only the prescription component
+  if (showPrescription && selectedPatient) {
+    return (
+      <Prescription
+        patientData={selectedPatient}
+        onClose={handleClosePrescription}
+      />
+    );
+  }
 
   const AppointmentCard = ({
     appointment,
@@ -461,6 +632,25 @@ export default function AppointmentsPage({
                 >
                   Edit
                 </Button>
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    className="text-xs bg-blue-500 hover:bg-blue-600 text-white flex-1"
+                  >
+                    <Video className="h-3 w-3 mr-1" />
+                    Start
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
+                    onClick={() =>
+                      handleCreatePrescription(appointment.patient)
+                    }
+                  >
+                    <FileEdit className="h-3 w-3 mr-1" />
+                    Create
+                  </Button>
+                </div>
                 <Button
                   size="sm"
                   variant="outline"
@@ -477,17 +667,12 @@ export default function AppointmentsPage({
   );
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden min-h-screen bg-gray-50">
       {/* Header */}
       <header className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2 text-sm text-gray-500">
-            <button
-              onClick={() => onNavigate("dashboard")}
-              className="hover:text-gray-700"
-            >
-              Dashboard
-            </button>
+            <button className="hover:text-gray-700">Dashboard</button>
             <ChevronRight className="h-4 w-4" />
             <span className="text-gray-900">Appointments</span>
           </div>
@@ -526,12 +711,27 @@ export default function AppointmentsPage({
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Today's Appointments</p>
+                  <p className="text-sm text-gray-600">
+                    {"Today's Appointments"}
+                  </p>
                   <p className="text-2xl font-bold">
                     {appointmentsData.today.length}
                   </p>
                 </div>
                 <Calendar className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Pending Requests</p>
+                  <p className="text-2xl font-bold">
+                    {requests.filter((r) => r.status === "pending").length}
+                  </p>
+                </div>
+                <AlertTriangle className="h-8 w-8 text-orange-500" />
               </div>
             </CardContent>
           </Card>
@@ -564,32 +764,20 @@ export default function AppointmentsPage({
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Pending</p>
-                  <p className="text-2xl font-bold">
-                    {
-                      [
-                        ...appointmentsData.today,
-                        ...appointmentsData.upcoming.flatMap(
-                          (day) => day.appointments
-                        ),
-                      ].filter((apt) => apt.status === "pending").length
-                    }
-                  </p>
-                </div>
-                <AlertTriangle className="h-8 w-8 text-yellow-500" />
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Appointments Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="requests">
+              Requests
+              {requests.filter((r) => r.status === "pending").length > 0 && (
+                <Badge className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5">
+                  {requests.filter((r) => r.status === "pending").length}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming (7 days)</TabsTrigger>
             <TabsTrigger value="previous">Previous</TabsTrigger>
           </TabsList>
@@ -600,7 +788,7 @@ export default function AppointmentsPage({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  Today's Appointments - December 9, 2024
+                  {"Today's Appointments - December 9, 2024"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -621,6 +809,231 @@ export default function AppointmentsPage({
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Request Appointments */}
+          <TabsContent value="requests" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Appointment Requests - Pending Approval
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {requests.filter((r) => r.status === "pending").length > 0 ? (
+                  <div className="space-y-4">
+                    {requests
+                      .filter((request) => request.status === "pending")
+                      .map((request) => (
+                        <Card
+                          key={request.id}
+                          className="border-l-4 border-l-blue-500"
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-4 flex-1">
+                                <Avatar className="w-12 h-12">
+                                  <AvatarImage src="/placeholder.svg?height=48&width=48" />
+                                  <AvatarFallback>
+                                    {request.patient.avatar}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-semibold text-lg">
+                                      {request.patient.name}
+                                    </h3>
+                                    <Badge
+                                      className={getUrgencyColor(
+                                        request.urgency
+                                      )}
+                                    >
+                                      {request.urgency} Priority
+                                    </Badge>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                                    <div className="flex items-center gap-1">
+                                      <Phone className="h-4 w-4" />
+                                      <span>{request.patient.phone}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Mail className="h-4 w-4" />
+                                      <span>{request.patient.email}</span>
+                                    </div>
+                                  </div>
+                                  <div className="mb-3">
+                                    <p className="text-sm">
+                                      <strong>Appointment Type:</strong>{" "}
+                                      {request.type}
+                                    </p>
+                                    <p className="text-sm">
+                                      <strong>Reason:</strong> {request.reason}
+                                    </p>
+                                    <p className="text-sm">
+                                      <strong>Duration:</strong>{" "}
+                                      {request.duration}
+                                    </p>
+                                    <p className="text-sm">
+                                      <strong>Notes:</strong> {request.notes}
+                                    </p>
+                                  </div>
+                                  <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                                    <p className="text-sm font-medium mb-2">
+                                      Requested Time Slots:
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div className="flex items-center gap-2 p-2 bg-white rounded border">
+                                        <Clock className="h-4 w-4 text-blue-500" />
+                                        <div>
+                                          <p className="text-sm font-medium">
+                                            Primary Choice
+                                          </p>
+                                          <p className="text-xs text-gray-500">
+                                            {request.requestedDate} at{" "}
+                                            {request.requestedTime}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 p-2 bg-white rounded border">
+                                        <Clock className="h-4 w-4 text-green-500" />
+                                        <div>
+                                          <p className="text-sm font-medium">
+                                            Alternative
+                                          </p>
+                                          <p className="text-xs text-gray-500">
+                                            {request.requestedDate} at{" "}
+                                            {request.alternativeTime}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    Patient: {request.patient.age} years old,{" "}
+                                    {request.patient.gender} • Request
+                                    submitted: {request.requestDate}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-2 ml-4">
+                                <div className="flex flex-col gap-1">
+                                  <Button
+                                    size="sm"
+                                    className="bg-green-500 hover:bg-green-600 text-xs"
+                                    onClick={() =>
+                                      handleAcceptRequest(request.id, "primary")
+                                    }
+                                  >
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Accept Primary
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="bg-blue-500 hover:bg-blue-600 text-xs"
+                                    onClick={() =>
+                                      handleAcceptRequest(
+                                        request.id,
+                                        "alternative"
+                                      )
+                                    }
+                                  >
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Accept Alt.
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    className="text-xs"
+                                    onClick={() =>
+                                      handleRejectRequest(request.id)
+                                    }
+                                  >
+                                    <XCircle className="h-3 w-3 mr-1" />
+                                    Reject
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No pending appointment requests</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Processed Requests Section */}
+            {requests.filter((r) => r.status !== "pending").length > 0 && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5" />
+                    Recently Processed Requests
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {requests
+                      .filter((request) => request.status !== "pending")
+                      .slice(0, 3)
+                      .map((request) => (
+                        <div
+                          key={request.id}
+                          className={`p-3 rounded-lg border-l-4 ${
+                            request.status === "accepted"
+                              ? "bg-green-50 border-l-green-500"
+                              : "bg-red-50 border-l-red-500"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage src="/placeholder.svg?height=32&width=32" />
+                                <AvatarFallback className="text-xs">
+                                  {request.patient.avatar}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium text-sm">
+                                  {request.patient.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {request.type}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge
+                                className={
+                                  request.status === "accepted"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                }
+                              >
+                                {request.status === "accepted"
+                                  ? "Accepted"
+                                  : "Rejected"}
+                              </Badge>
+                              {request.status === "accepted" &&
+                                (request as any).confirmedTime && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Confirmed: {(request as any).confirmedTime}
+                                  </p>
+                                )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Upcoming Appointments */}

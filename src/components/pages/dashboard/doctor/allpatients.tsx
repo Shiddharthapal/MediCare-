@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Search,
   Bell,
-  LayoutDashboard,
   Calendar,
   Users,
   ChevronRight,
-  ChevronDown,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -22,9 +21,8 @@ import {
   Pill,
   ClipboardList,
   ImageIcon,
+  Clock,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Clock } from "lucide-react";
 
 // Mock data for patients
 const patients = [
@@ -326,7 +324,11 @@ const patients = [
   },
 ];
 
-export default function AllPatientsPage() {
+interface PatientsPageProps {
+  onNavigate: (page: string) => void;
+}
+
+export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [selectedPatient, setSelectedPatient] = useState(patients[0]);
   const [showPatientList, setShowPatientList] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
@@ -358,20 +360,69 @@ export default function AllPatientsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-full bg-white shadow-sm overflow-hidden">
-        {/* Header - Fixed */}
-        <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-6 border-b border-gray-100 bg-white">
-          <div className="flex items-center gap-8">
-            <Link to="/dashboard" className="text-2xl font-bold text-green-600">
-              Helsi
-            </Link>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Link to="/dashboard" className="hover:text-gray-700">
-                Dashboard
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <span className="text-gray-900">Patients Information</span>
+    <div className="flex h-screen bg-gray-50">
+      {/* Left Sidebar - Fixed */}
+      <aside className="w-64 border-r border-gray-100 bg-white overflow-y-auto">
+        {/* Header */}
+
+        {/* Navigation */}
+
+        {/* Patient List */}
+        {showPatientList && (
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium text-gray-900">Patient Lists (817)</h3>
+              <Button variant="ghost" size="icon">
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {patients.map((patient) => (
+                <div
+                  key={patient.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                    selectedPatient.id === patient.id
+                      ? "bg-blue-50 border border-blue-200"
+                      : "hover:bg-gray-50"
+                  }`}
+                  onClick={() => setSelectedPatient(patient)}
+                >
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={`/placeholder.svg?height=32&width=32`} />
+                    <AvatarFallback className="text-xs">
+                      {patient.avatar}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-gray-900 truncate">
+                      {patient.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {patient.address}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
+          <div className="flex items-center gap-4">
+            <Avatar className="w-12 h-12">
+              <AvatarImage src="/placeholder.svg?height=48&width=48" />
+              <AvatarFallback>{selectedPatient.avatar}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {selectedPatient.name}
+              </h2>
+              <p className="text-sm text-gray-500">ID: #78146284/201</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -384,151 +435,55 @@ export default function AllPatientsPage() {
           </div>
         </header>
 
-        <div className="flex pt-20">
-          {/* Left Sidebar - Fixed */}
-          <aside className="fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 border-r border-gray-100 bg-white overflow-y-auto">
-            {/* Navigation */}
-            <div className="p-6 border-b border-gray-100">
-              <nav className="space-y-2">
-                <Link
-                  to="/dashboard"
-                  className="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg cursor-pointer"
-                >
-                  <LayoutDashboard className="h-5 w-5" />
-                  Dashboard
-                </Link>
-                <div className="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg cursor-pointer">
-                  <Calendar className="h-5 w-5" />
-                  Calendar
-                </div>
-                <div
-                  className="flex items-center gap-3 px-3 py-2 bg-green-50 text-green-700 font-medium rounded-lg cursor-pointer"
-                  onClick={() => setShowPatientList(!showPatientList)}
-                >
-                  <Users className="h-5 w-5" />
-                  Patients
-                  {showPatientList ? (
-                    <ChevronDown className="h-4 w-4 ml-auto" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 ml-auto" />
-                  )}
-                </div>
-              </nav>
-            </div>
+        {/* Tabs */}
+        <div className="flex gap-6 px-6 py-4 border-b border-gray-100 bg-white">
+          <button
+            className={`pb-2 border-b-2 transition-colors ${
+              activeTab === "overview"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+            onClick={() => setActiveTab("overview")}
+          >
+            Overview
+          </button>
+          <button
+            className={`pb-2 border-b-2 transition-colors ${
+              activeTab === "history"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+            onClick={() => setActiveTab("history")}
+          >
+            Medical History
+          </button>
+          <button
+            className={`pb-2 border-b-2 transition-colors ${
+              activeTab === "appointments"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+            onClick={() => setActiveTab("appointments")}
+          >
+            Appointments History
+          </button>
+          <button
+            className={`pb-2 border-b-2 transition-colors ${
+              activeTab === "documents"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+            onClick={() => setActiveTab("documents")}
+          >
+            Documents
+          </button>
+        </div>
 
-            {/* Patient List */}
-            {showPatientList && (
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-medium text-gray-900">
-                    Patient Lists (817)
-                  </h3>
-                  <Button variant="ghost" size="icon">
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {patients.map((patient) => (
-                    <div
-                      key={patient.id}
-                      className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                        selectedPatient.id === patient.id
-                          ? "bg-blue-50 border border-blue-200"
-                          : "hover:bg-gray-50"
-                      }`}
-                      onClick={() => setSelectedPatient(patient)}
-                    >
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage
-                          src={`/placeholder.svg?height=32&width=32`}
-                        />
-                        <AvatarFallback className="text-xs">
-                          {patient.avatar}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-gray-900 truncate">
-                          {patient.name}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {patient.address}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </aside>
-
-          {/* Main Content - Scrollable */}
-          <main className="flex-1 ml-64 mr-80">
-            {/* Patient Header - Sticky */}
-            <div className="sticky top-20 z-40 bg-white p-6 border-b border-gray-100 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src="/placeholder.svg?height=48&width=48" />
-                    <AvatarFallback>{selectedPatient.avatar}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      {selectedPatient.name}
-                    </h2>
-                    <p className="text-sm text-gray-500">ID: #78146284/201</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tabs */}
-              <div className="flex gap-6 mt-6">
-                <button
-                  className={`pb-2 border-b-2 transition-colors ${
-                    activeTab === "overview"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => setActiveTab("overview")}
-                >
-                  Overview
-                </button>
-                <button
-                  className={`pb-2 border-b-2 transition-colors ${
-                    activeTab === "history"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => setActiveTab("history")}
-                >
-                  Medical History
-                </button>
-                <button
-                  className={`pb-2 border-b-2 transition-colors ${
-                    activeTab === "appointments"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => setActiveTab("appointments")}
-                >
-                  Appointments History
-                </button>
-                <button
-                  className={`pb-2 border-b-2 transition-colors ${
-                    activeTab === "documents"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => setActiveTab("documents")}
-                >
-                  Documents
-                </button>
-              </div>
-            </div>
-
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-hidden">
+          <div className="flex h-full">
             {/* Scrollable Content */}
-            <div className="p-6 min-h-screen">
-              {/* Keep all the existing tab content exactly the same */}
+            <main className="flex-1 overflow-y-auto p-6">
               {activeTab === "overview" && (
                 <div className="">
                   {/* Personal Information */}
@@ -705,6 +660,263 @@ export default function AllPatientsPage() {
                     </Card>
                   </div>
 
+                  {/* Upcoming Appointments */}
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Calendar className="h-5 w-5" />
+                        Upcoming Appointments
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {/* Check if patient has upcoming appointments */}
+                        {selectedPatient.id === 1 ? (
+                          <>
+                            <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                              <div className="p-2 bg-blue-100 rounded-lg">
+                                <Calendar className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                  <h3 className="font-semibold">
+                                    Follow-up Consultation
+                                  </h3>
+                                  <Badge className="bg-blue-100 text-blue-800">
+                                    Confirmed
+                                  </Badge>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-4 w-4" />
+                                    <span>December 15, 2024 - 2:30 PM</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Users className="h-4 w-4" />
+                                    <span>Dr. Edward Bailey</span>
+                                  </div>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-2">
+                                  Hypertension and diabetes management review
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-transparent"
+                                >
+                                  Reschedule
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-transparent text-red-600 hover:text-red-700"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                              <div className="p-2 bg-green-100 rounded-lg">
+                                <ClipboardList className="h-5 w-5 text-green-600" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                  <h3 className="font-semibold">
+                                    Lab Work - Blood Test
+                                  </h3>
+                                  <Badge className="bg-green-100 text-green-800">
+                                    Scheduled
+                                  </Badge>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-4 w-4" />
+                                    <span>December 20, 2024 - 9:00 AM</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Users className="h-4 w-4" />
+                                    <span>Lab Department</span>
+                                  </div>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-2">
+                                  Quarterly blood work for diabetes monitoring
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-transparent"
+                                >
+                                  Reschedule
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-transparent text-red-600 hover:text-red-700"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                              <div className="p-2 bg-yellow-100 rounded-lg">
+                                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                  <h3 className="font-semibold">
+                                    Cardiology Consultation
+                                  </h3>
+                                  <Badge className="bg-yellow-100 text-yellow-800">
+                                    Pending Confirmation
+                                  </Badge>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-4 w-4" />
+                                    <span>January 5, 2025 - 11:30 AM</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Users className="h-4 w-4" />
+                                    <span>Dr. Michael Chen</span>
+                                  </div>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-2">
+                                  Annual cardiac evaluation and EKG
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <Button
+                                  size="sm"
+                                  className="text-xs bg-green-600 hover:bg-green-700"
+                                >
+                                  Confirm
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-transparent text-red-600 hover:text-red-700"
+                                >
+                                  Decline
+                                </Button>
+                              </div>
+                            </div>
+                          </>
+                        ) : selectedPatient.id === 2 ? (
+                          <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                              <Calendar className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between mb-1">
+                                <h3 className="font-semibold">Asthma Review</h3>
+                                <Badge className="bg-blue-100 text-blue-800">
+                                  Confirmed
+                                </Badge>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>December 18, 2024 - 3:15 PM</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  <span>Dr. Robert Kim</span>
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-500 mt-2">
+                                Quarterly asthma control assessment and inhaler
+                                review
+                              </p>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs bg-transparent"
+                              >
+                                Reschedule
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs bg-transparent text-red-600 hover:text-red-700"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : selectedPatient.id === 3 ? (
+                          <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                              <Calendar className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between mb-1">
+                                <h3 className="font-semibold">
+                                  Physical Therapy Session
+                                </h3>
+                                <Badge className="bg-blue-100 text-blue-800">
+                                  Confirmed
+                                </Badge>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>December 16, 2024 - 1:00 PM</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  <span>Dr. Amanda Lee</span>
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-500 mt-2">
+                                Continued lower back pain treatment and
+                                exercises
+                              </p>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs bg-transparent"
+                              >
+                                Reschedule
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs bg-transparent text-red-600 hover:text-red-700"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <p className="text-lg font-medium mb-2">
+                              No Upcoming Appointments
+                            </p>
+                            <p className="text-sm">
+                              This patient has no scheduled appointments at this
+                              time.
+                            </p>
+                            <Button className="mt-4" size="sm">
+                              <Plus className="h-4 w-4 mr-2" />
+                              Schedule Appointment
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   {/* Recent Activity */}
                   <Card>
                     <CardHeader>
@@ -754,7 +966,6 @@ export default function AllPatientsPage() {
                 </div>
               )}
 
-              {/* Keep the existing history and appointments tabs exactly the same */}
               {activeTab === "history" && (
                 <div className="space-y-6">
                   <Card>
@@ -1008,7 +1219,6 @@ export default function AllPatientsPage() {
                                       {document.status}
                                     </Badge>
                                   </div>
-
                                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
                                     <div className="flex items-center gap-1">
                                       <FileText className="h-4 w-4" />
@@ -1027,12 +1237,10 @@ export default function AllPatientsPage() {
                                       <span>{document.doctor}</span>
                                     </div>
                                   </div>
-
                                   <p className="text-sm text-gray-700 mb-2">
                                     <strong>Description:</strong>{" "}
                                     {document.description}
                                   </p>
-
                                   <div className="flex items-center gap-4 text-xs text-gray-500">
                                     <span>Size: {document.size}</span>
                                     <span>Format: {document.format}</span>
@@ -1104,154 +1312,8 @@ export default function AllPatientsPage() {
                   </Card>
                 </div>
               )}
-            </div>
-          </main>
-
-          {/* Right Sidebar - Fixed */}
-          <aside className="fixed right-0 top-20 h-[calc(100vh-5rem)] w-80 border-l border-gray-100 bg-white overflow-y-auto">
-            <div className="p-6">
-              {/* Patient Quick Info */}
-              <Card className="mb-6">
-                <CardContent className="p-4">
-                  <div className="text-center">
-                    <Avatar className="w-16 h-16 mx-auto mb-3">
-                      <AvatarImage src="/placeholder.svg?height=64&width=64" />
-                      <AvatarFallback className="text-lg">
-                        {selectedPatient.avatar}
-                      </AvatarFallback>
-                    </Avatar>
-                    <h3 className="font-semibold text-lg">
-                      {selectedPatient.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 mb-4">
-                      ID: #78146284/201
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="bg-gray-50 p-2 rounded">
-                        <p className="text-gray-500">Age</p>
-                        <p className="font-medium">{selectedPatient.age}</p>
-                      </div>
-                      <div className="bg-gray-50 p-2 rounded">
-                        <p className="text-gray-500">Gender</p>
-                        <p className="font-medium">{selectedPatient.gender}</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Actions */}
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button
-                    className="w-full justify-start bg-transparent"
-                    variant="outline"
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Schedule Appointment
-                  </Button>
-                  <Button
-                    className="w-full justify-start bg-transparent"
-                    variant="outline"
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    View Medical Records
-                  </Button>
-                  <Button
-                    className="w-full justify-start bg-transparent"
-                    variant="outline"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Note
-                  </Button>
-                  <Button
-                    className="w-full justify-start bg-transparent"
-                    variant="outline"
-                  >
-                    <Bell className="h-4 w-4 mr-2" />
-                    Set Reminder
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Vital Signs */}
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">Latest Vital Signs</CardTitle>
-                  <p className="text-sm text-gray-500">
-                    Last updated: Dec 1, 2024
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <span className="text-sm">Blood Pressure</span>
-                    <span className="font-medium text-red-600">
-                      140/90 mmHg
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <span className="text-sm">Heart Rate</span>
-                    <span className="font-medium">72 bpm</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <span className="text-sm">Temperature</span>
-                    <span className="font-medium">98.6°F</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <span className="text-sm">Weight</span>
-                    <span className="font-medium">185 lbs</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Upcoming Appointments */}
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    Upcoming Appointments
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="border-l-4 border-blue-500 pl-3 py-2">
-                    <p className="font-medium text-sm">
-                      Follow-up Consultation
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Dec 15, 2024 at 2:30 PM
-                    </p>
-                    <p className="text-xs text-gray-500">Dr. Edward Bailey</p>
-                  </div>
-                  <div className="border-l-4 border-green-500 pl-3 py-2">
-                    <p className="font-medium text-sm">Lab Work</p>
-                    <p className="text-xs text-gray-500">
-                      Dec 20, 2024 at 9:00 AM
-                    </p>
-                    <p className="text-xs text-gray-500">Lab Department</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Emergency Contacts */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Emergency Contact</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="font-medium">Sarah Miles (Spouse)</p>
-                    <p className="text-sm text-gray-600">(603) 555-0124</p>
-                    <p className="text-sm text-gray-600">
-                      sarah.miles@email.com
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </aside>
+            </main>
+          </div>
         </div>
       </div>
     </div>
