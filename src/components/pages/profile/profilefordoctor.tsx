@@ -32,6 +32,7 @@ import {
 interface Doctor {
   name: string;
   specialist: string;
+  areasofexpertise: string[];
   hospital: string;
   fees: number;
   rating: number;
@@ -47,6 +48,7 @@ interface Doctor {
 const mockDoctor: Doctor = {
   name: "",
   specialist: "",
+  areasofexpertise: [],
   hospital: "",
   fees: 0,
   rating: 0,

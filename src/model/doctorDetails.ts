@@ -13,6 +13,16 @@ const doctorDetailsSchema = new mongoose.Schema({
     type: String,
     require: true,
   },
+  areasofexpertise: {
+    type: [String],
+    require: true,
+    validate: {
+      validator: function (arr) {
+        return arr.length > 0;
+      },
+      message: "Available slot must contain at least one slot",
+    },
+  },
   hospital: {
     type: String,
     require: true,

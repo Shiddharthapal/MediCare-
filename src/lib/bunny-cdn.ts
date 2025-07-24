@@ -1,23 +1,4 @@
-export interface StorageObject {
-  Guid: string;
-  StorageZoneName: string;
-  Path: string;
-  ObjectName: string;
-  Length: number;
-  LastChanged: string;
-  ServerId: number;
-  IsDirectory: boolean;
-  UserId: string;
-  DateCreated: string;
-  StorageZoneId: number;
-  Checksum: string | null;
-  ReplicatedZones: string;
-}
-
-export interface ApiResponse {
-  HttpCode: number;
-  Message: string;
-}
+import type { StorageObject, ApiResponse } from "@/types/bunny_cdn_type";
 
 const BUNNY_STORAGE_ZONE_NAME = process.env.BUNNY_STORAGE_ZONE_NAME || "";
 const BUNNY_STORAGE_REGION_HOSTNAME =
@@ -71,7 +52,6 @@ export class BunnyStorageService {
    * @returns A promise that resolves to an array of storage objects.
    */
   async listFiles(path: string = ""): Promise<StorageObject[]> {
-    // A trailing slash is required by the Bunny API for listing a directory.
     const bunnyPath = path.endsWith("/") || path === "" ? path : `${path}/`;
 
     const response = await fetch(this.getApiUrl(bunnyPath), {

@@ -14,6 +14,7 @@ export const POST: APIRoute = async ({ request }) => {
     const {
       name,
       specialist,
+      areasofexpertise,
       hospital,
       fees,
       experience,
@@ -25,6 +26,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (
       !name ||
       !specialist ||
+      !areasofexpertise ||
       !hospital ||
       !fees ||
       !experience ||
@@ -39,6 +41,9 @@ export const POST: APIRoute = async ({ request }) => {
           details: {
             name: !name ? "Name is required" : null,
             specialist: !specialist ? "Specialist is required" : null,
+            areasofexpertise: !areasofexpertise
+              ? "Area of expertise is required"
+              : null,
             hospital: !hospital ? "Hospital is required" : null,
             fees: !fees ? "Fees is required" : null,
             experience: !experience ? "Exprience is required" : null,
@@ -71,6 +76,7 @@ export const POST: APIRoute = async ({ request }) => {
         userId: tokenDetails?.userId,
         name,
         specialist,
+        areasofexpertise,
         hospital,
         fees,
         experience,
@@ -85,6 +91,8 @@ export const POST: APIRoute = async ({ request }) => {
     } else {
       (doctordetails.name = name || doctordetails.name),
         (doctordetails.specialist = specialist || doctordetails.specialist),
+        (doctordetails.areasofexpertise =
+          areasofexpertise || doctordetails.areasofexpertise),
         (doctordetails.hospital = hospital || doctordetails.specialist),
         (doctordetails.fees = fees || doctordetails.fees),
         (doctordetails.experience = experience || doctordetails.experience),
