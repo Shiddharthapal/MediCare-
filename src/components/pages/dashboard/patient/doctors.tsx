@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -232,12 +232,30 @@ export default function Doctors({
   onNavigate?: (page: string) => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [doctordata, setDoctordata] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties");
   const [selectedAvailability, setSelectedAvailability] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      let response = await fetch("/api/doctor/doctorDetails", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Status:${response.status}`);
+      }
+      let doctordetails = await response.json();
+      setDoctordata(doctordetails);
+    };
+
+    fetchData();
+  });
   const handleBookAppointment = (doctorId: number, doctorName: string) => {
     const doctor = doctorsData.find((d) => d.id === doctorId);
     if (doctor) {
