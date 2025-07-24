@@ -8,6 +8,7 @@ import {
   Building2,
   Clock,
   Edit3,
+  Languages,
   Save,
   X,
   Plus,
@@ -39,6 +40,7 @@ interface Doctor {
   experience: string;
   education: string;
   degree: string;
+  language: string[];
   about: string;
   image: string;
   availableSlots: string[];
@@ -55,6 +57,7 @@ const mockDoctor: Doctor = {
   experience: "",
   education: "",
   degree: "",
+  language: [],
   about: "",
   image: "",
   availableSlots: [],
@@ -65,6 +68,7 @@ export default function DoctorProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDoctor, setEditedDoctor] = useState<Doctor>(mockDoctor);
   const [newSlot, setNewSlot] = useState("");
+  const [language, setLanguage] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
   const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.auth.token);
@@ -165,6 +169,23 @@ export default function DoctorProfilePage() {
     setEditedDoctor({
       ...editedDoctor,
       availableSlots: editedDoctor.availableSlots.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleAddLanguage = () => {
+    if (language.trim()) {
+      setEditedDoctor({
+        ...editedDoctor,
+        language: [...(editedDoctor?.language || []), language.trim()],
+      });
+      setLanguage("");
+    }
+  };
+
+  const handleRemoveLanguage = (index: number) => {
+    setEditedDoctor({
+      ...editedDoctor,
+      language: editedDoctor.language.filter((_, i) => i !== index),
     });
   };
 
@@ -368,19 +389,6 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold mb-3 block">
-                    Rating
-                  </Label>
-
-                  <div className="flex items-center">
-                    <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-                    <span className="ml-2 text-2xl font-bold">
-                      {currentDoctor?.rating || "0.0"}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
                   <Label className="text-lg font-semibold flex items-center mb-3">
                     <Clock className="h-5 w-5 mr-2" />
                     Available Time Slots
@@ -420,6 +428,52 @@ export default function DoctorProfilePage() {
                           className="flex-1"
                         />
                         <Button onClick={handleAddSlot} size="sm">
+                          Add
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <Languages className="h-5 w-5 mr-2" />
+                    Language
+                  </Label>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      {currentDoctor?.language?.length > 0
+                        ? currentDoctor?.language.map((slot, index) => (
+                            <div key={index} className="flex items-center">
+                              <Badge variant="outline" className="text-sm">
+                                {slot}
+                              </Badge>
+                              {isEditing && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleRemoveLanguage(index)}
+                                  className="ml-1 h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          ))
+                        : !isEditing && (
+                            <p className="text-gray-500 text-sm">
+                              Not Provided
+                            </p>
+                          )}
+                    </div>
+                    {isEditing && (
+                      <div className="flex gap-2 mt-3">
+                        <Input
+                          value={language}
+                          onChange={(e) => setLanguage(e.target.value)}
+                          placeholder="Add language (English, other)"
+                          className="flex-1"
+                        />
+                        <Button onClick={handleAddLanguage} size="sm">
                           Add
                         </Button>
                       </div>

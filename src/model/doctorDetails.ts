@@ -59,6 +59,16 @@ const doctorDetailsSchema = new mongoose.Schema({
       message: "Available slot must contain at least one slot",
     },
   },
+  language: {
+    type: [String],
+    require: true,
+    validate: {
+      validator: function (arr) {
+        return arr.length > 0;
+      },
+      message: "Atleast one language",
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

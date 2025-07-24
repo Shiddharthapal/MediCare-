@@ -20,6 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
       experience,
       education,
       degree,
+      language,
       about,
       availableSlots,
     } = editedDoctor;
@@ -32,6 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
       !experience ||
       !education ||
       !degree ||
+      !language ||
       !about ||
       !availableSlots
     ) {
@@ -49,6 +51,7 @@ export const POST: APIRoute = async ({ request }) => {
             experience: !experience ? "Exprience is required" : null,
             education: !education ? "Education is required" : null,
             degree: !degree ? "Degree is required" : null,
+            language: !language ? "Language is required" : null,
             about: !about ? "About is required" : null,
             availableSlots: !availableSlots
               ? "AvailableSlots is required"
@@ -82,6 +85,7 @@ export const POST: APIRoute = async ({ request }) => {
         experience,
         education,
         degree,
+        language,
         about,
         availableSlots,
       });
@@ -98,6 +102,7 @@ export const POST: APIRoute = async ({ request }) => {
         (doctordetails.experience = experience || doctordetails.experience),
         (doctordetails.education = education || doctordetails.education),
         (doctordetails.degree = degree || doctordetails.degree),
+        (doctordetails.language = language || doctordetails.language),
         (doctordetails.about = about || doctordetails.about),
         (doctordetails.availableSlots =
           availableSlots || doctordetails.availableSlots),

@@ -10,6 +10,7 @@ export interface Doctor {
   experience: string;
   education: string;
   degree: string;
+  language: string[];
   about: string;
   availableSlots: string[];
   createdAt: Date;

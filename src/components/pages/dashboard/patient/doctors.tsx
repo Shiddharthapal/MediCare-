@@ -24,6 +24,24 @@ import {
 import BookAppointment from "./bookAppoinment";
 
 // Mock doctors data
+
+interface DoctorDetails {
+  _id: string;
+  userId: string;
+  name: string;
+  specialist: string;
+  areasofexpertise: string[];
+  hospital: string;
+  fees: number;
+  rating?: number;
+  experience: string;
+  education: string;
+  degree: string;
+  language: string[];
+  about: string;
+  availableSlots: string[];
+  createdAt: Date;
+}
 const doctorsData = [
   {
     id: 1,
@@ -232,6 +250,7 @@ export default function Doctors({
   onNavigate?: (page: string) => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
   const [doctordata, setDoctordata] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties");
   const [selectedAvailability, setSelectedAvailability] = useState("All");
@@ -241,23 +260,31 @@ export default function Doctors({
 
   useEffect(() => {
     const fetchData = async () => {
-      let response = await fetch("/api/doctor/doctorDetails", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`Status:${response.status}`);
+      try {
+        setLoading(true);
+        let response = await fetch("/api/doctor/doctorDetails", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Status:${response.status}`);
+        }
+        let doctordetails = await response.json();
+        setDoctordata(doctordetails?.doctorDetails);
+        console.log("🧞‍♂️doctordetails --->", doctordata);
+      } catch (error) {
+        console.log("Error:", error);
+      } finally {
+        setLoading(false);
       }
-      let doctordetails = await response.json();
-      setDoctordata(doctordetails);
     };
 
     fetchData();
-  });
+  }, []);
   const handleBookAppointment = (doctorId: number, doctorName: string) => {
-    const doctor = doctorsData.find((d) => d.id === doctorId);
+    const doctor = doctorsData.find((d) => d.userId === doctorId);
     if (doctor) {
       setSelectedDoctor(doctor);
       setIsBookingOpen(true);
