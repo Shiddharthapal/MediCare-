@@ -38,7 +38,7 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
+            <div className="flex-shrink-0 flex items-center pl-4">
               <div className="w-8 h-8 bg-green-600 pb-2 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-3xl">+</span>
               </div>

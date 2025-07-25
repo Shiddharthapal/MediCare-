@@ -272,7 +272,8 @@ export default function Doctors({
           throw new Error(`Status:${response.status}`);
         }
         let doctordetails = await response.json();
-        setDoctordata(doctordetails?.doctorDetails);
+        let tempdata = doctordetails?.doctordetails;
+        setDoctordata(tempdata);
         console.log("🧞‍♂️doctordetails --->", doctordata);
       } catch (error) {
         console.log("Error:", error);

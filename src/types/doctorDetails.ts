@@ -3,7 +3,7 @@ export interface Doctor {
   userId: string;
   name: string;
   specialist: string;
-  areasofexpertise: string[];
+  specializations: string[];
   hospital: string;
   fees: number;
   rating?: number;

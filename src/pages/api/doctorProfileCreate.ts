@@ -14,7 +14,7 @@ export const POST: APIRoute = async ({ request }) => {
     const {
       name,
       specialist,
-      areasofexpertise,
+      specializations,
       hospital,
       fees,
       experience,
@@ -27,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (
       !name ||
       !specialist ||
-      !areasofexpertise ||
+      !specializations ||
       !hospital ||
       !fees ||
       !experience ||
@@ -43,8 +43,8 @@ export const POST: APIRoute = async ({ request }) => {
           details: {
             name: !name ? "Name is required" : null,
             specialist: !specialist ? "Specialist is required" : null,
-            areasofexpertise: !areasofexpertise
-              ? "Area of expertise is required"
+            specializations: !specializations
+              ? "Area of specializations is required"
               : null,
             hospital: !hospital ? "Hospital is required" : null,
             fees: !fees ? "Fees is required" : null,
@@ -79,7 +79,7 @@ export const POST: APIRoute = async ({ request }) => {
         userId: tokenDetails?.userId,
         name,
         specialist,
-        areasofexpertise,
+        specializations,
         hospital,
         fees,
         experience,
@@ -91,12 +91,12 @@ export const POST: APIRoute = async ({ request }) => {
       });
       console.log("doctordetails=>", doctordetails);
 
-      doctorDetails.save();
+      await doctorDetails.save();
     } else {
       (doctordetails.name = name || doctordetails.name),
         (doctordetails.specialist = specialist || doctordetails.specialist),
-        (doctordetails.areasofexpertise =
-          areasofexpertise || doctordetails.areasofexpertise),
+        (doctordetails.specializations =
+          specializations || doctordetails.specializations),
         (doctordetails.hospital = hospital || doctordetails.specialist),
         (doctordetails.fees = fees || doctordetails.fees),
         (doctordetails.experience = experience || doctordetails.experience),
@@ -106,9 +106,9 @@ export const POST: APIRoute = async ({ request }) => {
         (doctordetails.about = about || doctordetails.about),
         (doctordetails.availableSlots =
           availableSlots || doctordetails.availableSlots),
-        doctordetails.save();
+        await doctordetails.save();
     }
-    return new Response(JSON.stringify({}), {
+    return new Response(JSON.stringify({ doctordetails }), {
       status: 200,
       headers,
     });

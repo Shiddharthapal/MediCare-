@@ -13,14 +13,14 @@ const doctorDetailsSchema = new mongoose.Schema({
     type: String,
     require: true,
   },
-  areasofexpertise: {
+  specializations: {
     type: [String],
     require: true,
     validate: {
       validator: function (arr) {
         return arr.length > 0;
       },
-      message: "Available slot must contain at least one slot",
+      message: "Specializations must contain at least one Specializations",
     },
   },
   hospital: {
@@ -46,6 +46,16 @@ const doctorDetailsSchema = new mongoose.Schema({
     type: String,
     require: true,
   },
+  language: {
+    type: [String],
+    require: true,
+    validate: {
+      validator: function (arr) {
+        return arr.length > 0;
+      },
+      message: "Atleast one language",
+    },
+  },
   about: {
     type: String,
   },
@@ -59,16 +69,7 @@ const doctorDetailsSchema = new mongoose.Schema({
       message: "Available slot must contain at least one slot",
     },
   },
-  language: {
-    type: [String],
-    require: true,
-    validate: {
-      validator: function (arr) {
-        return arr.length > 0;
-      },
-      message: "Atleast one language",
-    },
-  },
+
   createdAt: {
     type: Date,
     default: Date.now,

@@ -296,7 +296,7 @@ export default function DoctorProfilePage() {
 
             <div className="mb-4">
               <Label className="text-lg font-semibold flex items-center ">
-                specializations
+                Specializations
               </Label>
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">

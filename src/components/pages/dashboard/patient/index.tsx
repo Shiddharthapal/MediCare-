@@ -42,7 +42,7 @@ export default function Dashboard() {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 lg:hidden"
+        className="fixed top-3  z-50 lg:hidden hover:bg-gray-300"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
         {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -52,12 +52,12 @@ export default function Dashboard() {
       <div
         className={`fixed inset-y-0 left-0 z-40 bg-white shadow-lg transform transition-all duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } ${collapsed ? "lg:w-16" : "lg:w-64"} w-64`}
+        } ${collapsed ? "md:w-16" : "md:w-64"} w-64`}
       >
         <div className="flex flex-col h-full">
           {/* Logo/Header */}
           <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center">
+            <div className="flex items-center pl-6">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">M</span>
               </div>
