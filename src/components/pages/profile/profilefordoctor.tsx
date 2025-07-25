@@ -12,6 +12,8 @@ import {
   Save,
   X,
   Plus,
+  BookText,
+  BadgeDollarSign,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -33,7 +35,7 @@ import {
 interface Doctor {
   name: string;
   specialist: string;
-  areasofexpertise: string[];
+  specializations: string[];
   hospital: string;
   fees: number;
   rating: number;
@@ -50,7 +52,7 @@ interface Doctor {
 const mockDoctor: Doctor = {
   name: "",
   specialist: "",
-  areasofexpertise: [],
+  specializations: [],
   hospital: "",
   fees: 0,
   rating: 0,
@@ -69,6 +71,7 @@ export default function DoctorProfilePage() {
   const [editedDoctor, setEditedDoctor] = useState<Doctor>(mockDoctor);
   const [newSlot, setNewSlot] = useState("");
   const [language, setLanguage] = useState("");
+  const [specializations, setSpecializations] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
   const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.auth.token);
@@ -189,6 +192,28 @@ export default function DoctorProfilePage() {
     });
   };
 
+  const handleAddSpecializations = () => {
+    if (specializations.trim()) {
+      setEditedDoctor({
+        ...editedDoctor,
+        specializations: [
+          ...(editedDoctor?.specializations || []),
+          specializations.trim(),
+        ],
+      });
+      setSpecializations("");
+    }
+  };
+
+  const handleRemoveSpecializations = (index: number) => {
+    setEditedDoctor({
+      ...editedDoctor,
+      specializations: editedDoctor.specializations.filter(
+        (_, i) => i !== index
+      ),
+    });
+  };
+
   const currentDoctor = isEditing ? editedDoctor : doctor;
 
   const displayValue = (
@@ -236,22 +261,13 @@ export default function DoctorProfilePage() {
                       handleInputChange("specialist", e.target.value)
                     }
                     className="mt-2 bg-white/10 border-white/20 text-white placeholder:text-white/70"
-                    placeholder="Enter your specialization"
+                    placeholder="Enter your specialty"
                   />
                 ) : (
                   <p className="text-xl text-blue-100 mt-1">
                     {currentDoctor?.specialist || "Specialization not provided"}
                   </p>
                 )}
-                <div className="flex items-center mt-3">
-                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="ml-2 text-lg font-medium">
-                    {currentDoctor?.rating || "0.0"}
-                  </span>
-                  <span className="ml-4 text-blue-100">
-                    ({currentDoctor?.experience || "Experience not provided"})
-                  </span>
-                </div>
               </div>
             </div>
           </CardHeader>
@@ -278,6 +294,51 @@ export default function DoctorProfilePage() {
               </div>
             )}
 
+            <div className="mb-4">
+              <Label className="text-lg font-semibold flex items-center ">
+                specializations
+              </Label>
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {currentDoctor?.specializations?.length > 0
+                    ? currentDoctor?.specializations.map((slot, index) => (
+                        <div key={index} className="flex items-center">
+                          <Badge variant="outline" className="text-sm">
+                            {slot}
+                          </Badge>
+                          {isEditing && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleRemoveSpecializations(index)}
+                              className="ml-1 h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      ))
+                    : !isEditing && (
+                        <p className="text-gray-500 text-sm">
+                          No specializations available
+                        </p>
+                      )}
+                </div>
+                {isEditing && (
+                  <div className="flex gap-2 mt-3">
+                    <Input
+                      value={specializations}
+                      onChange={(e) => setSpecializations(e.target.value)}
+                      placeholder="Add your specializations(e.g., Heart Surgery, Skin Cancer )"
+                      className="flex-1"
+                    />
+                    <Button onClick={handleAddSpecializations} size="sm">
+                      Add
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column */}
               <div className="space-y-6">
@@ -322,7 +383,8 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold mb-3 block">
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <BookText className="h-5 w-5 mr-2" />
                     Medical Degree
                   </Label>
                   {isEditing ? (
@@ -364,7 +426,8 @@ export default function DoctorProfilePage() {
               {/* Right Column */}
               <div className="space-y-6">
                 <div>
-                  <Label className="text-lg font-semibold mb-3 block">
+                  <Label className="text-lg font-semibold flex items-center mb-3 ">
+                    <BadgeDollarSign className="h-5 w-5 mr-2" />
                     Consultation Fees
                   </Label>
                   {isEditing ? (
@@ -389,7 +452,7 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
+                  <Label className="text-lg font-semibold flex items-center mb-1">
                     <Clock className="h-5 w-5 mr-2" />
                     Available Time Slots
                   </Label>
@@ -435,7 +498,7 @@ export default function DoctorProfilePage() {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
+                  <Label className="text-lg font-semibold flex items-center mb-1 ">
                     <Languages className="h-5 w-5 mr-2" />
                     Language
                   </Label>
