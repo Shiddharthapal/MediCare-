@@ -251,7 +251,7 @@ export default function Doctors({
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [doctordata, setDoctordata] = useState("");
+  const [doctordata, setDoctordata] = useState<any[]>([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties");
   const [selectedAvailability, setSelectedAvailability] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
@@ -272,8 +272,7 @@ export default function Doctors({
           throw new Error(`Status:${response.status}`);
         }
         let doctordetails = await response.json();
-        let tempdata = doctordetails?.doctordetails;
-        setDoctordata(tempdata);
+        setDoctordata(doctordetails?.doctordetails);
         console.log("🧞‍♂️doctordetails --->", doctordata);
       } catch (error) {
         console.log("Error:", error);
@@ -285,14 +284,14 @@ export default function Doctors({
     fetchData();
   }, []);
   const handleBookAppointment = (doctorId: number, doctorName: string) => {
-    const doctor = doctorsData.find((d) => d.userId === doctorId);
+    const doctor = doctorsData.find((d) => d.id === doctorId);
     if (doctor) {
       setSelectedDoctor(doctor);
       setIsBookingOpen(true);
     }
   };
 
-  const filteredDoctors = doctorsData.filter((doctor) => {
+  const filteredDoctors = doctordata.filter((doctor) => {
     const matchesSearch =
       doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase());
@@ -353,7 +352,7 @@ export default function Doctors({
               </h3>
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-medium">{doctor.rating}</span>
+                <span className="text-sm font-medium">4.5</span>
                 <span className="text-sm text-gray-500">
                   ({doctor.reviews})
                 </span>
@@ -364,7 +363,7 @@ export default function Doctors({
               <div className="flex items-center gap-2">
                 <doctor.icon className="h-4 w-4 text-blue-600" />
                 <span className="text-gray-700 font-medium">
-                  {doctor.specialty}
+                  {doctor.specialist}
                 </span>
                 <span className="text-gray-500">
                   • {doctor.experience} experience
@@ -373,13 +372,13 @@ export default function Doctors({
 
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-600 text-sm">{doctor.location}</span>
+                <span className="text-gray-600 text-sm">{doctor.hos}</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-gray-400" />
                 <span className="text-gray-600 text-sm">
-                  Next available: {doctor.nextAvailable}
+                  Next available: {doctor.availableSlots}
                 </span>
               </div>
             </div>
@@ -407,26 +406,16 @@ export default function Doctors({
             </div>
 
             <div className="flex items-center gap-1">
-              {doctor.consultationModes.map((mode: string, index: number) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-1 text-gray-500"
-                >
-                  {getModeIcon(mode)}
-                  {index < doctor.consultationModes.length - 1 && (
-                    <span className="mx-1">•</span>
-                  )}
-                </div>
-              ))}
+              <div className="flex items-center gap-1 text-gray-500">video</div>
             </div>
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t">
             <div className="text-lg font-semibold text-gray-900">
-              ${doctor.consultationFee}
+              ${doctor.fees}
               <span className="text-sm font-normal text-gray-500">
                 {" "}
-                / consultation
+                consultation
               </span>
             </div>
 
@@ -529,7 +518,7 @@ export default function Doctors({
                   Total Doctors
                 </p>
                 <p className="text-2xl font-bold text-blue-900">
-                  {doctorsData.length}
+                  {doctordata.length}
                 </p>
               </div>
               <Stethoscope className="h-8 w-8 text-blue-500" />
@@ -546,8 +535,9 @@ export default function Doctors({
                 </p>
                 <p className="text-2xl font-bold text-green-900">
                   {
-                    doctorsData.filter((d) => d.availability.includes("Today"))
-                      .length
+                    doctordata.filter((d) =>
+                      d.availability.includes("availableSlots")
+                    ).length
                   }
                 </p>
               </div>
