@@ -1,23 +1,44 @@
 "use client";
-import { ChevronDown, Shield, Users } from "lucide-react";
+import {
+  ChevronDown,
+  Shield,
+  Users,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { logout } from "@/redux/slices/authSlice";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import { useNavigate } from "react-router-dom";
 
 export default function Navigation() {
+  const token = useAppSelector((state) => state.auth.token);
+  const authuser = JSON.parse(localStorage.getItem("authUser")) || "";
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  console.log("Token:", token);
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  };
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
+            <div className="flex-shrink-0 flex items-center pl-4">
               <div className="w-8 h-8 bg-green-600 pb-2 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-3xl">+</span>
               </div>
@@ -44,25 +65,30 @@ export default function Navigation() {
                 Services
                 <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
               </Link>
-              <Link
-                to="/how-it-works"
-                className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
-              >
-                How It Works
-                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
-              </Link>
+              {authuser.role !== "doctor" && (
+                <Link
+                  to="/patient"
+                  className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
+                >
+                  Dashboard
+                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
+                </Link>
+              )}
+
+              {authuser.role === "doctor" && (
+                <Link
+                  to="/doctor"
+                  className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
+                >
+                  Dashboard
+                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
+                </Link>
+              )}
               <Link
                 to="/about"
                 className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
               >
                 About
-                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
-              </Link>
-              <Link
-                to="/contact"
-                className="relative text-gray-900 hover:text-green-600 px-3 py-2 text-sm font-medium transition-colors duration-300 group"
-              >
-                Contact
                 <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
               </Link>
             </div>
@@ -90,24 +116,90 @@ export default function Navigation() {
 
           {/* Login Dropdown */}
           <div className="flex items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  Login
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem className="cursor-pointer">
-                  <Users className="mr-2 h-4 w-4" />
-                  As a Patient
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Shield className="mr-2 h-4 w-4" />
-                  As an Admin
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {token ? (
+              <div className="flex items-center space-x-3">
+                {/* Active Status Indicator */}
+                <div className="flex items-center space-x-2">
+                  <div className="relative">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75"></div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="text-green-600 border-green-600"
+                  >
+                    {authuser.role === "doctor"
+                      ? "Doctor Active"
+                      : "Patient Active"}
+                  </Badge>
+                </div>
+
+                {/* User Profile Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className=" flex items-center justify-center w-8 h-8 broder-1 rounded-full bg-green-600 hover:bg-green-700 hover:shadow-md">
+                      <ChevronDown className="h-4 w-4" />
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuSeparator />
+                    {authuser.role !== "doctor" && (
+                      <Link
+                        to="/profile"
+                        className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-100 hover:rounded-sm"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    )}
+                    {authuser.role === "doctor" && (
+                      <Link
+                        to="/profilefordoctor"
+                        className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-100 hover:rounded-sm"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    )}
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer text-red-600"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    Login
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Users className="mr-2 h-4 w-4" />
+                    <Link to="/loginasUser" className="text-gray-900">
+                      <p>As a Patient</p>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Shield className="mr-2 h-4 w-4" />
+                    <Link to="/loginasDoctor">
+                      <p>As an Doctor</p>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
@@ -126,23 +218,28 @@ export default function Navigation() {
             >
               Services
             </Link>
-            <Link
-              to="/how-it-works"
-              className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
-            >
-              How It Works
-            </Link>
+            {authuser.role === "user" && (
+              <Link
+                to="/how-it-works"
+                className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
+              >
+                How It Works
+              </Link>
+            )}
+
+            {authuser.role === "doctor" && (
+              <Link
+                to="/appoinments"
+                className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
+              >
+                Appoinments
+              </Link>
+            )}
             <Link
               to="/about"
               className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
             >
               About
-            </Link>
-            <Link
-              to="/contact"
-              className="text-gray-600 hover:text-green-600 block px-3 py-2 text-base font-medium transition-colors"
-            >
-              Contact
             </Link>
           </div>
         </div>

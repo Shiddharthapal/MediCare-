@@ -4,6 +4,17 @@ import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "@/redux/store";
 import Home from "./pages/home";
 import Layout from "../layouts/Layout";
+import LoginAsUser from "./pages/loginasUser";
+import LoginAsDoctor from "./pages/loginasDoctor";
+import RegisterAsUser from "./pages/registerasUser";
+import RegisterAsDoctor from "./pages/registerasDoctor";
+import Services from "./pages/services";
+import Profile from "./pages/profile";
+import DashboardofDoctor from "./pages/dashboard/doctor";
+import DashboardofPatient from "./pages/dashboard/patient";
+import ProfileofDoctor from "./pages/profile/profilefordoctor";
+// import DoctorAppoinments from "./pages/dashboard/doctor/appoinments";
+import ProtectedRoute from "./ProctedRoute";
 export default function App() {
   return (
     <Provider store={store}>
@@ -12,6 +23,15 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
+              <Route path="/loginasUser" element={<LoginAsUser />} />
+              <Route path="/loginasDoctor" element={<LoginAsDoctor />} />
+              <Route path="/registerasUser" element={<RegisterAsUser />} />
+              <Route path="/registerasDoctor" element={<RegisterAsDoctor />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profilefordoctor" element={<ProfileofDoctor />} />
+              <Route path="/doctor" element={<DashboardofDoctor />} />
+              <Route path="/patient" element={<DashboardofPatient />} />
             </Route>
           </Routes>
         </Router>

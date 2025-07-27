@@ -1,19 +1,6 @@
 "use client";
 import { useState } from "react";
-import {
-  Clock,
-  Truck,
-  Star,
-  Phone,
-  Mail,
-  MapPin,
-  Shield,
-  Users,
-  BarChart3,
-  Zap,
-  BookOpen,
-  Activity,
-} from "lucide-react";
+import { Star, Phone, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -25,16 +12,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  FileText,
+  CheckSquare,
+  BarChart3,
+  Zap,
+  BookOpen,
+  Activity,
+} from "lucide-react";
 import ReportAnalysisForm from "@/components/pages/services/form/report-analysis-form";
 import DiagnosisForm from "@/components/pages/services/form/diagnosis-form";
 import TreatmentPlanForm from "@/components/pages/services/form/treatment-plan-form";
 import HealthMonitoringForm from "@/components/pages/services/form/health-monitoring-form";
 
-import { motion } from "framer-motion";
 type ServiceType = "report" | "diagnosis" | "treatment" | "monitoring" | null;
 
-export default function MedicationLandingPage() {
+export default function HealthcareServices() {
   const [activeService, setActiveService] = useState<ServiceType>(null);
+
   const services = [
     {
       id: "diagnosis" as const,
@@ -43,7 +38,7 @@ export default function MedicationLandingPage() {
         "Receive AI-powered disease predictions with confidence scores and detailed explanations",
       icon: Zap,
       buttonText: "View Diagnosis",
-      color: "bg-green-200",
+      color: "bg-green-100",
     },
     {
       id: "report" as const,
@@ -52,7 +47,7 @@ export default function MedicationLandingPage() {
         "Upload your test reports and medical documents for AI-powered analysis and disease prediction",
       icon: BarChart3,
       buttonText: "Upload Reports",
-      color: "bg-green-200",
+      color: "bg-green-100",
     },
     {
       id: "treatment" as const,
@@ -61,25 +56,25 @@ export default function MedicationLandingPage() {
         "Get personalized treatment recommendations and medication suggestions based on AI diagnosis",
       icon: BookOpen,
       buttonText: "Get Treatment",
-      color: "bg-green-200",
+      color: "bg-green-100",
     },
     {
       id: "monitoring" as const,
       title: "Health Monitoring",
       description:
-        "Continuous AI-powered health monitoring actively and recommendations for preventive care",
+        "Continuous AI-powered health monitoring with alerts and recommendations for preventive care",
       icon: Activity,
       buttonText: "Start Monitoring",
-      color: "bg-green-200",
+      color: "bg-green-100",
     },
   ];
 
   const renderForm = () => {
     switch (activeService) {
-      case "diagnosis":
-        return <DiagnosisForm onClose={() => setActiveService(null)} />;
       case "report":
         return <ReportAnalysisForm onClose={() => setActiveService(null)} />;
+      case "diagnosis":
+        return <DiagnosisForm onClose={() => setActiveService(null)} />;
       case "treatment":
         return <TreatmentPlanForm onClose={() => setActiveService(null)} />;
       case "monitoring":
@@ -92,219 +87,57 @@ export default function MedicationLandingPage() {
   if (activeService) {
     return renderForm();
   }
-  function ServiceCard({ service }: { service: (typeof services)[0] }) {
-    const Icon = service.icon;
-
-    return (
-      <Card className="flex-shrink-0 w-80 mx-4 bg-green-100 border-0 shadow-sm">
-        <CardContent className="p-1 text-center">
-          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
-            <Icon className="w-8 h-8 text-white" />
-          </div>
-
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {service.title}
-          </h3>
-
-          <p className="text-gray-600 mb-4 leading-relaxed">
-            {service.description}
-          </p>
-
-          <Button
-            onClick={() => setActiveService(service.id)}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-1 rounded-md font-medium"
-          >
-            {service.buttonText}
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-  const cardWidth = 320 + 32;
-  const totalWidth = services.length * cardWidth;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
-      <section className="relative py-20 lg:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
-            <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
-              <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
-                Your Health,
-                <span className="text-green-600"> Delivered</span>
+      {/* AI-Powered Services Section */}
+      <section id="services" className="py-16">
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Healthcare AI Services
               </h1>
-              <p className="mt-3 text-base text-gray-600 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Get your medications delivered safely and securely to your
-                doorstep. Our platform connects patients with licensed
-                pharmacies and healthcare providers for seamless medication
-                management.
+              <p className="text-xl text-gray-600">
+                Advanced AI-powered healthcare solutions for better diagnosis
+                and treatment
               </p>
-              <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                    Order Medication
-                  </Button>
-                  <Button variant="outline" size="lg">
-                    Learn More
-                  </Button>
-                </div>
-              </div>
-              <div className="mt-8 flex items-center justify-center lg:justify-start space-x-6">
-                <div className="flex items-center">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="ml-2 text-sm text-gray-600">
-                    4.9/5 from 2,000+ reviews
-                  </span>
-                </div>
-              </div>
             </div>
-            <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
-              <div className="relative mx-auto w-full rounded-lg shadow-xl lg:max-w-md">
-                <img
-                  className="w-96 h-110 rounded-lg"
-                  src="/image (4).jpg"
-                  alt="Online medication delivery"
-                />
-              </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {services.map((service) => {
+                const IconComponent = service.icon;
+                return (
+                  <Card
+                    key={service.id}
+                    className={` bg-green-100 hover:shadow-lg hover:ring-4 transition-all duration-300 border-0 shadow-md`}
+                    onClick={() => setActiveService(service.id)}
+                  >
+                    <CardHeader className="text-center pb-4">
+                      <div
+                        className={`w-16 h-16 ${service.color} rounded-full flex items-center justify-center mx-auto mb-4`}
+                      >
+                        <IconComponent className="w-8 h-8 text-green-600" />
+                      </div>
+                      <CardTitle className="text-xl font-semibold text-gray-900">
+                        {service.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-center">
+                      <CardDescription className="text-gray-600 mb-6 leading-relaxed">
+                        {service.description}
+                      </CardDescription>
+                      <Button
+                        onClick={() => setActiveService(service.id)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                      >
+                        {service.buttonText}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/*service section */}
-      <section id="services" className="py-16 bg-white">
-        <div className="w-full py-16 bg-white overflow-hidden">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Services</h2>
-            <p className="text-lg text-gray-600">
-              Choose any services for better medication
-            </p>
-          </div>
-
-          <div className="overflow-hidden">
-            <motion.div
-              className="flex"
-              animate={{
-                x: [0, -totalWidth],
-              }}
-              transition={{
-                x: {
-                  repeat: Number.POSITIVE_INFINITY,
-                  repeatType: "loop",
-                  duration: 25,
-                  ease: "linear",
-                },
-              }}
-            >
-              {/* First set */}
-              {services.map((service, index) => (
-                <ServiceCard key={`original-${index}`} service={service} />
-              ))}
-              {/* Second set - exact duplicate for seamless loop */}
-              {services.map((service, index) => (
-                <ServiceCard key={`duplicate-${index}`} service={service} />
-              ))}
-              {/* Third set - extra buffer for ultra smooth transition */}
-              {services.map((service, index) => (
-                <ServiceCard key={`buffer-${index}`} service={service} />
-              ))}
-            </motion.div>
-          </div>
-
-          <style>{`
-            @keyframes scroll {
-              0% {
-                transform: translateX(0);
-              }
-              100% {
-                transform: translateX(-50%);
-              }
-            }
-
-            .animate-scroll {
-              animation: scroll 20s linear infinite;
-            }
-          `}</style>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="services" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-              Why Choose MediCare+?
-            </h2>
-            <p className="mt-4 text-lg text-gray-600">
-              We provide comprehensive medication management solutions for
-              patients and healthcare providers
-            </p>
-          </div>
-
-          <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="text-center border-0 shadow-lg">
-              <CardHeader>
-                <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Shield className="h-6 w-6 text-green-600" />
-                </div>
-                <CardTitle className="text-lg">Secure & Licensed</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  All medications sourced from licensed pharmacies with full
-                  regulatory compliance
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center border-0 shadow-lg">
-              <CardHeader>
-                <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-green-600" />
-                </div>
-                <CardTitle className="text-lg">24/7 Support</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Round-the-clock customer support and pharmacist consultation
-                  available
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center border-0 shadow-lg">
-              <CardHeader>
-                <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Truck className="h-6 w-6 text-green-600" />
-                </div>
-                <CardTitle className="text-lg">Fast Delivery</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Same-day delivery available in major cities, next-day delivery
-                  nationwide
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center border-0 shadow-lg">
-              <CardHeader>
-                <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Users className="h-6 w-6 text-green-600" />
-                </div>
-                <CardTitle className="text-lg">Expert Care</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Licensed pharmacists and healthcare professionals managing
-                  your care
-                </CardDescription>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </section>
@@ -330,8 +163,8 @@ export default function MedicationLandingPage() {
                 Upload Prescription
               </h3>
               <p className="mt-2 text-gray-600">
-                Upload your prescription or have your doctor send it directly to
-                our platform
+                Upload your prescription or have your doctor suggestion or test
+                report send it directly to our platform
               </p>
             </div>
 
@@ -343,8 +176,8 @@ export default function MedicationLandingPage() {
                 Verify & Process
               </h3>
               <p className="mt-2 text-gray-600">
-                Our licensed pharmacists verify your prescription and prepare
-                your medication
+                Our licensed system verify your prescription, test report and
+                prepare your medication
               </p>
             </div>
 
@@ -399,11 +232,17 @@ export default function MedicationLandingPage() {
             needs
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-green-600 hover:bg-green-700">
-              Start Your Order
+            <Button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              size="lg"
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Start Your Medication
             </Button>
             <Button variant="outline" size="lg">
-              Contact Support
+              <Link to="/contact" className="text-gray-900">
+                Contact Support
+              </Link>
             </Button>
           </div>
         </div>

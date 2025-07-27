@@ -1,17 +1,15 @@
+"use client";
+
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import {
-  loginStart,
-  loginSuccess,
-  loginFailure,
-} from "@/redux/slices/authSlice";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { loginStart, loginSuccess } from "@/redux/slices/authSlice";
 
 interface RegisterFormData {
   email: string;
@@ -22,9 +20,14 @@ interface RegisterFormData {
 export default function Register() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.auth);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [registrationType, setRegistrationType] = useState<"user" | "doctor">(
+    "user"
+  );
+
   const {
     register,
     handleSubmit,
@@ -36,6 +39,8 @@ export default function Register() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
+      setLoading(true);
+      setError(null);
       dispatch(loginStart());
 
       const response = await fetch("/api/register", {
@@ -44,8 +49,9 @@ export default function Register() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: data.email,
+          email: data.email, // Using the same field name for simplicity
           password: data.password,
+          registrationNo: null,
         }),
       });
 
@@ -54,25 +60,25 @@ export default function Register() {
       if (!response.ok) {
         throw new Error(result.message || "Registration failed");
       }
-
       dispatch(
         loginSuccess({
+          _id: result.userId,
           email: data.email,
           token: result.token,
         })
       );
 
       // Redirect to user page after successful registration
-      navigate("/user");
+      navigate("/");
     } catch (err) {
-      dispatch(
-        loginFailure(err instanceof Error ? err.message : "Registration failed")
-      );
+      setError(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background">
+    <div className="flex justify-center items-center min-h-screen bg-gray-200">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Register</CardTitle>
@@ -80,21 +86,25 @@ export default function Register() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address",
-                  },
-                })}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
+              <>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="medicare+@aiuser.com"
+                  className="bordar-2 border-black shadow-md"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern:
+                      registrationType === "user"
+                        ? {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Invalid email address",
+                          }
+                        : undefined,
+                  })}
+                />
+              </>
             </div>
 
             <div className="space-y-2">
@@ -103,6 +113,7 @@ export default function Register() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  className="bordar-2 border-black shadow-md"
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
@@ -137,6 +148,7 @@ export default function Register() {
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
+                  className="bordar-2 border-black shadow-md"
                   {...register("confirmPassword", {
                     required: "Please confirm your password",
                     validate: (value) =>
@@ -165,12 +177,16 @@ export default function Register() {
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full bg-gray-800"
+              disabled={loading}
+            >
               {loading ? "Loading..." : "Register"}
             </Button>
 
             <div className="text-center text-sm">
-              <Link to="/login" className="text-primary hover:underline">
+              <Link to="/loginasUser" className="text-primary hover:underline">
                 Already have an account? Login
               </Link>
             </div>
