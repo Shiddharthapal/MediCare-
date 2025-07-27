@@ -69,6 +69,16 @@ const doctorDetailsSchema = new mongoose.Schema({
       message: "Available slot must contain at least one slot",
     },
   },
+  consultationModes: {
+    type: [String],
+    require: true,
+    validate: {
+      validator: function (arr) {
+        return arr.length > 0;
+      },
+      message: "consultation Modes slot must contain at least one Modes",
+    },
+  },
 
   createdAt: {
     type: Date,

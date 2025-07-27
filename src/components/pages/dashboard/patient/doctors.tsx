@@ -281,7 +281,7 @@ export default function Doctors({
     };
 
     fetchData();
-  }, [doctordata]);
+  }, []);
   const handleBookAppointment = (doctorId: number, doctorName: string) => {
     const doctor = doctordata.find((d) => d.userId === String(doctorId));
     if (doctor) {
