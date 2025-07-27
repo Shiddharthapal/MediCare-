@@ -283,8 +283,8 @@ export default function Doctors({
 
     fetchData();
   }, []);
-  const handleBookAppointment = (doctorId: number, doctorName: string) => {
-    const doctor = doctordata.find((d) => d.userId === String(doctorId));
+  const handleBookAppointment = (doctorId: number) => {
+    const doctor = doctordata.find((d) => d._id === String(doctorId));
     if (doctor) {
       setSelectedDoctor(doctor);
       setIsBookingOpen(true);
@@ -417,13 +417,13 @@ export default function Doctors({
               ${doctor.fees}
               <span className="text-sm font-normal text-gray-500">
                 {" "}
-                consultation
+                /consultation
               </span>
             </div>
 
             <Button
               className="bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => handleBookAppointment(doctor.id, doctor.name)}
+              onClick={() => handleBookAppointment(doctor._id)}
             >
               <Calendar className="h-4 w-4 mr-2" />
               Book Appointment
@@ -560,7 +560,7 @@ export default function Doctors({
                   Specialties
                 </p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {doctordata.length - 1}
+                  {doctordata.length}
                 </p>
               </div>
               <Heart className="h-8 w-8 text-purple-500" />
@@ -587,7 +587,7 @@ export default function Doctors({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredDoctors.length > 0 ? (
           filteredDoctors.map((doctor) => (
-            <DoctorCard key={doctor.userId} doctor={doctor} />
+            <DoctorCard key={doctor._id} doctor={doctor} />
           ))
         ) : (
           <div className="col-span-full">

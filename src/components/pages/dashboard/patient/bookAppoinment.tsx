@@ -415,7 +415,9 @@ export default function BookAppointment({
                           handleInputChange("patientEmail", e.target.value)
                         }
                         placeholder="Enter your email"
-                        className={errors.patientEmail ? "border-red-500" : ""}
+                        className={
+                          errors.patientEmail ? "border-red-500 mt-2" : "mt-2"
+                        }
                       />
                       {errors.patientEmail && (
                         <p className="text-red-500 text-sm mt-1">
@@ -433,7 +435,9 @@ export default function BookAppointment({
                           handleInputChange("patientPhone", e.target.value)
                         }
                         placeholder="Enter your phone number"
-                        className={errors.patientPhone ? "border-red-500" : ""}
+                        className={
+                          errors.patientPhone ? "border-red-500 mt-2" : "mt-2"
+                        }
                       />
                       {errors.patientPhone && (
                         <p className="text-red-500 text-sm mt-1">
@@ -543,7 +547,7 @@ export default function BookAppointment({
                   <div>
                     <Label>Consultation Type *</Label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
-                      {consultationTypes
+                      {/* {consultationTypes
                         .filter((type) =>
                           doctor.consultationModes.includes(type.value)
                         )
@@ -573,29 +577,27 @@ export default function BookAppointment({
                               </CardContent>
                             </Card>
                           );
-                        })}
-                      :
-                      {
-                        <Card
-                          key={"video"}
-                          className={`cursor-pointer transition-all ${
-                            formData.consultationType === "video"
-                              ? "border-blue-500 bg-blue-50"
-                              : "hover:border-gray-300"
-                          } ${errors.consultationType ? "border-red-500 mt-2" : "m2-t"}`}
-                          onClick={() =>
-                            handleInputChange("consultationType", "video")
-                          }
-                        >
-                          <CardContent className="p-4 text-center">
-                            <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                            <h4 className="font-medium">"Video Call"</h4>
-                            <p className="text-xs text-gray-600 mt-1">
-                              "Online consultation via video call"
-                            </p>
-                          </CardContent>
-                        </Card>
-                      }
+                        })} */}
+
+                      <Card
+                        key={"video"}
+                        className={`cursor-pointer transition-all ${
+                          formData.consultationType === "video"
+                            ? "border-blue-500 bg-blue-50"
+                            : "hover:border-gray-300"
+                        } ${errors.consultationType ? "border-red-500 mt-2" : "mt-2"}`}
+                        onClick={() =>
+                          handleInputChange("consultationType", "video")
+                        }
+                      >
+                        <CardContent className="p-4 text-center">
+                          <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                          <h4 className="font-medium">"Video Call"</h4>
+                          <p className="text-xs text-gray-600 mt-1">
+                            "Online consultation via video call"
+                          </p>
+                        </CardContent>
+                      </Card>
                     </div>
                     {errors.consultationType && (
                       <p className="text-red-500 text-sm mt-1">
