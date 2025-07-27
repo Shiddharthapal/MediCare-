@@ -23,6 +23,7 @@ export const POST: APIRoute = async ({ request }) => {
       language,
       about,
       availableSlots,
+      consultationModes,
     } = editedDoctor;
     if (
       !name ||
@@ -35,7 +36,8 @@ export const POST: APIRoute = async ({ request }) => {
       !degree ||
       !language ||
       !about ||
-      !availableSlots
+      !availableSlots ||
+      !consultationModes
     ) {
       return new Response(
         JSON.stringify({
@@ -55,6 +57,9 @@ export const POST: APIRoute = async ({ request }) => {
             about: !about ? "About is required" : null,
             availableSlots: !availableSlots
               ? "AvailableSlots is required"
+              : null,
+            consultationModes: !consultationModes
+              ? "Consultation Modes is required"
               : null,
           },
         }),
@@ -88,6 +93,7 @@ export const POST: APIRoute = async ({ request }) => {
         language,
         about,
         availableSlots,
+        consultationModes,
       });
       console.log("doctordetails=>", doctordetails);
 
@@ -106,6 +112,8 @@ export const POST: APIRoute = async ({ request }) => {
         (doctordetails.about = about || doctordetails.about),
         (doctordetails.availableSlots =
           availableSlots || doctordetails.availableSlots),
+        (doctordetails.consultationModes =
+          consultationModes || doctordetails.consultationModes),
         await doctordetails.save();
     }
     return new Response(JSON.stringify({ doctordetails }), {

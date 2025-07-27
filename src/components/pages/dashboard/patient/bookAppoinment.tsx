@@ -35,17 +35,21 @@ import {
 } from "lucide-react";
 
 interface Doctor {
-  id: number;
+  _id: string;
+  userId: string;
   name: string;
-  specialty: string;
+  specialist: string;
+  specializations: string[];
+  hospital: string;
+  fees: number;
+  rating?: number;
   experience: string;
-  rating: number;
-  reviews: number;
-  location: string;
-  consultationFee: number;
-  avatar: string;
+  education: string;
+  degree: string;
+  language: string[];
+  about: string;
+  availableSlots: string[];
   consultationModes: string[];
-  nextAvailable: string;
 }
 
 interface BookAppointmentProps {
@@ -124,11 +128,11 @@ const reasonsForVisit = [
 ];
 
 const paymentMethods = [
+  "Bikash",
+  "Nagad",
+  "Rocket",
   "Credit Card",
   "Debit Card",
-  "Insurance",
-  "Cash",
-  "Health Savings Account (HSA)",
 ];
 
 export default function BookAppointment({
@@ -324,7 +328,7 @@ export default function BookAppointment({
                   <Avatar className="h-12 w-12">
                     <AvatarImage src="/placeholder.svg" />
                     <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                      {doctor.avatar}
+                      DR
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
@@ -332,7 +336,7 @@ export default function BookAppointment({
                       {doctor.name}
                     </h3>
                     <p className="text-gray-600">
-                      {doctor.specialty} • {doctor.experience} experience
+                      {doctor.specialist} • {doctor.experience} years experience
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex items-center gap-1">
@@ -341,7 +345,7 @@ export default function BookAppointment({
                       </div>
                       <span className="text-gray-400">•</span>
                       <span className="text-sm text-gray-600">
-                        ${doctor.consultationFee} consultation
+                        ${doctor.fees} consultation
                       </span>
                     </div>
                   </div>
@@ -390,7 +394,9 @@ export default function BookAppointment({
                           handleInputChange("patientName", e.target.value)
                         }
                         placeholder="Enter your full name"
-                        className={errors.patientName ? "border-red-500" : ""}
+                        className={
+                          errors.patientName ? "border-red-500 mt-2" : "mt-2"
+                        }
                       />
                       {errors.patientName && (
                         <p className="text-red-500 text-sm mt-1">
@@ -447,6 +453,7 @@ export default function BookAppointment({
                           handleInputChange("emergencyContact", e.target.value)
                         }
                         placeholder="Emergency contact name"
+                        className="mt-2"
                       />
                     </div>
 
@@ -461,6 +468,7 @@ export default function BookAppointment({
                           handleInputChange("emergencyPhone", e.target.value)
                         }
                         placeholder="Emergency contact phone number"
+                        className="mt-2"
                       />
                     </div>
                   </div>
@@ -487,7 +495,9 @@ export default function BookAppointment({
                         min={getMinDate()}
                         max={getMaxDate()}
                         className={
-                          errors.appointmentDate ? "border-red-500" : ""
+                          errors.appointmentDate
+                            ? "border-red-500 mt-2"
+                            : "mt-2"
                         }
                       />
                       {errors.appointmentDate && (
@@ -507,7 +517,9 @@ export default function BookAppointment({
                       >
                         <SelectTrigger
                           className={
-                            errors.appointmentTime ? "border-red-500" : ""
+                            errors.appointmentTime
+                              ? "border-red-500 mt-2"
+                              : "mt-2"
                           }
                         >
                           <SelectValue placeholder="Select time" />
@@ -544,7 +556,7 @@ export default function BookAppointment({
                                 formData.consultationType === type.value
                                   ? "border-blue-500 bg-blue-50"
                                   : "hover:border-gray-300"
-                              } ${errors.consultationType ? "border-red-500" : ""}`}
+                              } ${errors.consultationType ? "border-red-500 mt-2" : "m2-t"}`}
                               onClick={() =>
                                 handleInputChange(
                                   "consultationType",
@@ -562,6 +574,28 @@ export default function BookAppointment({
                             </Card>
                           );
                         })}
+                      :
+                      {
+                        <Card
+                          key={"video"}
+                          className={`cursor-pointer transition-all ${
+                            formData.consultationType === "video"
+                              ? "border-blue-500 bg-blue-50"
+                              : "hover:border-gray-300"
+                          } ${errors.consultationType ? "border-red-500 mt-2" : "m2-t"}`}
+                          onClick={() =>
+                            handleInputChange("consultationType", "video")
+                          }
+                        >
+                          <CardContent className="p-4 text-center">
+                            <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                            <h4 className="font-medium">"Video Call"</h4>
+                            <p className="text-xs text-gray-600 mt-1">
+                              "Online consultation via video call"
+                            </p>
+                          </CardContent>
+                        </Card>
+                      }
                     </div>
                     {errors.consultationType && (
                       <p className="text-red-500 text-sm mt-1">
@@ -589,7 +623,7 @@ export default function BookAppointment({
                     >
                       <SelectTrigger
                         className={
-                          errors.reasonForVisit ? "border-red-500" : ""
+                          errors.reasonForVisit ? "border-red-500 mt-2" : "mt-2"
                         }
                       >
                         <SelectValue placeholder="Select reason for visit" />
@@ -619,11 +653,12 @@ export default function BookAppointment({
                       }
                       placeholder="Describe your current symptoms (optional)"
                       rows={3}
+                      className="mt-2"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="previousVisit">
+                    <Label htmlFor="previousVisit" className="mb-2">
                       Previous Visit with this Doctor
                     </Label>
                     <Select
@@ -636,42 +671,12 @@ export default function BookAppointment({
                         <SelectValue placeholder="Have you visited this doctor before?" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="yes">
-                          Yes, I'm a returning patient
-                        </SelectItem>
+                        <SelectItem value="yes">Yes</SelectItem>
                         <SelectItem value="no">
                           No, this is my first visit
                         </SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="insuranceProvider">
-                        Insurance Provider
-                      </Label>
-                      <Input
-                        id="insuranceProvider"
-                        value={formData.insuranceProvider}
-                        onChange={(e) =>
-                          handleInputChange("insuranceProvider", e.target.value)
-                        }
-                        placeholder="Enter insurance provider"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="insuranceNumber">Insurance Number</Label>
-                      <Input
-                        id="insuranceNumber"
-                        value={formData.insuranceNumber}
-                        onChange={(e) =>
-                          handleInputChange("insuranceNumber", e.target.value)
-                        }
-                        placeholder="Enter insurance number"
-                      />
-                    </div>
                   </div>
                 </div>
               )}
@@ -692,7 +697,9 @@ export default function BookAppointment({
                       }
                     >
                       <SelectTrigger
-                        className={errors.paymentMethod ? "border-red-500" : ""}
+                        className={
+                          errors.paymentMethod ? "border-red-500 mt-2" : "mt-2"
+                        }
                       >
                         <SelectValue placeholder="Select payment method" />
                       </SelectTrigger>
@@ -723,6 +730,7 @@ export default function BookAppointment({
                       }
                       placeholder="Any special requests or additional information (optional)"
                       rows={3}
+                      className="mt-2"
                     />
                   </div>
 
@@ -777,7 +785,7 @@ export default function BookAppointment({
                       <div className="flex justify-between border-t pt-2">
                         <span className="text-gray-600">Consultation Fee:</span>
                         <span className="font-semibold text-lg">
-                          ${doctor.consultationFee}
+                          ${doctor.fees}
                         </span>
                       </div>
                     </CardContent>
@@ -790,15 +798,15 @@ export default function BookAppointment({
                         <p className="font-medium mb-1">Important Notes:</p>
                         <ul className="list-disc list-inside space-y-1">
                           <li>
-                            Please arrive 15 minutes early for in-person
-                            appointments
+                            Please connect with internet 15 minutes early for
+                            video appointments
                           </li>
                           <li>
                             You will receive a confirmation email with
                             appointment details
                           </li>
                           <li>
-                            Cancellations must be made at least 24 hours in
+                            Cancellations must be made at least 6 hours in
                             advance
                           </li>
                         </ul>

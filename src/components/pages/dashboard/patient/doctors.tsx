@@ -40,6 +40,7 @@ interface DoctorDetails {
   language: string[];
   about: string;
   availableSlots: string[];
+  consultationModes: string[];
   createdAt: Date;
 }
 // const doctorsData = [
