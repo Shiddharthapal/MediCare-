@@ -161,7 +161,7 @@ export default function Dashboard() {
         className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
         {currentPage === "appointments" && (
-          <div className="h-screen overflow-y-auto p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Appointments onNavigate={setCurrentPage} />
             </div>
@@ -169,7 +169,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "doctors" && (
-          <div className="h-screen overflow-y-auto p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Doctors onNavigate={setCurrentPage} />
             </div>
@@ -177,7 +177,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "dashboard" && (
-          <main className="h-screen overflow-y-auto p-6 lg:p-6 pt-16 lg:pt-6">
+          <main className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto space-y-6">
               {/* Header */}
               <div className="space-y-1">
@@ -507,7 +507,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "appointments" && (
-          <div className="h-screen overflow-y-auto p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Appointments />
             </div>
@@ -515,7 +515,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "doctors" && (
-          <div className="h-screen overflow-y-auto p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Doctors />
             </div>
@@ -523,7 +523,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "reports" && (
-          <div className="h-screen overflow-y-auto p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Reports />
             </div>

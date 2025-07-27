@@ -226,18 +226,6 @@ interface DoctorDetails {
 //   },
 // ];
 
-const specialties = [
-  "All Specialties",
-  "Cardiologist",
-  "Dermatologist",
-  "Endocrinologist",
-  "Orthopedist",
-  "Nutritionist",
-  "General Physician",
-  "Psychiatrist",
-  "Ophthalmologist",
-];
-
 const availabilityFilters = [
   "All",
   "Available Today",
@@ -261,6 +249,7 @@ export default function Doctors({
 
   useEffect(() => {
     const fetchData = async () => {
+      if (doctordata.length > 0) return;
       try {
         setLoading(true);
         let response = await fetch("/api/doctor/doctorDetails", {
@@ -282,7 +271,7 @@ export default function Doctors({
     };
 
     fetchData();
-  }, []);
+  }, [doctordata]);
   const handleBookAppointment = (doctorId: number) => {
     const doctor = doctordata.find((d) => d._id === String(doctorId));
     if (doctor) {
@@ -607,11 +596,11 @@ export default function Doctors({
       </div>
       <BookAppointment
         isOpen={isBookingOpen}
+        doctor={selectedDoctor}
         onClose={() => {
           setIsBookingOpen(false);
           setSelectedDoctor(null);
         }}
-        doctor={selectedDoctor}
       />
     </div>
   );
