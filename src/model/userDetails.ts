@@ -35,6 +35,16 @@ const userDetailsSchema = new mongoose.Schema({
   height: {
     type: Number,
   },
+  appoinments: {
+    type: [String],
+    require: true,
+    validate: {
+      validator: function (arr) {
+        return arr.length > 0;
+      },
+      message: "consultation Modes slot must contain at least one Modes",
+    },
+  },
 
   lastTreatmentDate: {
     type: Date,

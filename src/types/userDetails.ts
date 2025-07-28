@@ -10,6 +10,7 @@ export interface User {
   bloodGroup: string;
   weight: number;
   height?: number;
+  appoinments: string[];
   lastTreatmentDate?: Date;
   createdAt: Date;
 }

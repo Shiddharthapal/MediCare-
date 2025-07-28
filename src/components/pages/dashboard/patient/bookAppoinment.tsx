@@ -33,6 +33,7 @@ import {
   Star,
   AlertCircle,
 } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
 
 interface Doctor {
   _id: string;
@@ -159,6 +160,8 @@ export default function BookAppointment({
 
   const [errors, setErrors] = useState<Partial<AppointmentData>>({});
 
+  const token = useAppSelector((state) => state.auth.token);
+
   const handleInputChange = (field: keyof AppointmentData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
@@ -220,7 +223,13 @@ export default function BookAppointment({
 
     // Simulate API call
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await fetch("./api/user/bookAppointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ formData, doctor, token }),
+      });
 
       console.log("Appointment booked:", {
         doctor: doctor,
