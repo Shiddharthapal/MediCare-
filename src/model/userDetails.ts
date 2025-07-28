@@ -1,5 +1,60 @@
 import mongoose from "mongoose";
 
+// Define the appointment data schema as a subdocument
+const appointmentDataSchema = new mongoose.Schema(
+  {
+    patientName: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    patientEmail: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    patientPhone: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    appointmentDate: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    appointmentTime: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    consultationType: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    reasonForVisit: {
+      type: String,
+    },
+    symptoms: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    previousVisit: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    emergencyContact: {
+      type: String,
+    },
+    emergencyPhone: {
+      type: String,
+    },
+    paymentMethod: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    specialRequests: {
+      type: String,
+    },
+  },
+  { _id: true }
+); // This will auto-generate _id for each appointment
+
 const userDetailsSchema = new mongoose.Schema({
   userId: {
     type: String,
@@ -35,17 +90,17 @@ const userDetailsSchema = new mongoose.Schema({
   height: {
     type: Number,
   },
-  appoinments: {
-    type: [String],
-    require: true,
+  appointments: {
+    type: [appointmentDataSchema], // Changed from [String] to [appointmentDataSchema]
+    required: true, // Fixed: was 'require'
+    default: [], // Optional: set default empty array
     validate: {
       validator: function (arr) {
-        return arr.length > 0;
+        return arr.length >= 0; // Changed from > 0 to >= 0 to allow empty initially
       },
-      message: "consultation Modes slot must contain at least one Modes",
+      message: "Appointments array must be valid",
     },
   },
-
   lastTreatmentDate: {
     type: Date,
   },

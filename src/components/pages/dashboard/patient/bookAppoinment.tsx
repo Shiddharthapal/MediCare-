@@ -223,7 +223,7 @@ export default function BookAppointment({
 
     // Simulate API call
     try {
-      await fetch("./api/user/bookAppointments", {
+      let response = await fetch("./api/user/bookAppointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

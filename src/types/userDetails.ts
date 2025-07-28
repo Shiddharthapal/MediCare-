@@ -1,3 +1,18 @@
+interface AppointmentData {
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  consultationType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+}
 export interface User {
   _id: string;
   userId: string;
@@ -10,7 +25,7 @@ export interface User {
   bloodGroup: string;
   weight: number;
   height?: number;
-  appoinments: string[];
+  appoinments: AppointmentData[];
   lastTreatmentDate?: Date;
   createdAt: Date;
 }

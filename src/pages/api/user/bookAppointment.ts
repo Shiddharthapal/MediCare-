@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { verifyToken } from "@/utils/token";
 import connect from "@/lib/connection";
 import BookAppoinments from "@/model/bookAppointment";
+import userDetails from "@/model/userDetails";
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
     "Content-Type": "application/json",
@@ -9,14 +10,14 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     console.log("🧞‍♂️body --->", body);
-    const { bookingData, token } = body;
+    const { formData, doctor, token } = body;
     const {
       patientName,
       patientEmail,
       patientPhone,
       appointmentDate,
       appointmentTime,
-      consultationTyp,
+      consultationType,
       reasonForVisit,
       symptoms,
       previousVisit,
@@ -24,7 +25,7 @@ export const POST: APIRoute = async ({ request }) => {
       emergencyPhone,
       paymentMethod,
       specialRequests,
-    } = bookingData;
+    } = formData;
 
     if (
       !patientName ||
@@ -32,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
       !patientPhone ||
       !appointmentDate ||
       !appointmentTime ||
-      !consultationTyp ||
+      !consultationType ||
       !symptoms ||
       !previousVisit ||
       !paymentMethod
@@ -50,7 +51,7 @@ export const POST: APIRoute = async ({ request }) => {
             appointmentTime: !appointmentTime
               ? "Appointment time is required"
               : null,
-            consultationTyp: !consultationTyp
+            consultationTyp: !consultationType
               ? "Consultation Type is required"
               : null,
             symptoms: !symptoms ? "Symptoms is required" : null,
@@ -67,22 +68,20 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    console.log("🧞‍♂️tokenDetails --->", bookingData);
-    const tokenDetails = await verifyToken(token);
-    console.log("🧞‍♂️tokenDetails --->", tokenDetails);
+    console.log("🧞‍♂️tokenDetails --->", formData);
     await connect();
-    const bookappoinmentsdetails = await BookAppoinments.findOne({
-      userId: tokenDetails?.userId,
+    const bookappoinmentsdetails = await userDetails.findOne({
+      userId: doctor?.userId,
+      "appoinments.patientId": doctor?.userId,
     });
     if (!bookappoinmentsdetails) {
       const bookAppoinmentsDetails = new BookAppoinments({
-        userId: tokenDetails?.userId,
         patientName,
         patientEmail,
         patientPhone,
         appointmentDate,
         appointmentTime,
-        consultationTyp,
+        consultationType,
         reasonForVisit,
         symptoms,
         previousVisit,
@@ -107,7 +106,7 @@ export const POST: APIRoute = async ({ request }) => {
         (bookappoinmentsdetails.appointmentTime =
           appointmentTime || bookappoinmentsdetails.appointmentTime),
         (bookappoinmentsdetails.consultationTyp =
-          consultationTyp || bookappoinmentsdetails.consultationTyp),
+          consultationType || bookappoinmentsdetails.consultationTyp),
         (bookappoinmentsdetails.reasonForVisit =
           reasonForVisit || bookappoinmentsdetails.reasonForVisit),
         (bookappoinmentsdetails.symptoms =
