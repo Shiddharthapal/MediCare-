@@ -160,22 +160,6 @@ export default function Dashboard() {
       <div
         className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
-        {currentPage === "appointments" && (
-          <div className="h-screen p-6 lg:p-6 pt-16 lg:pt-6">
-            <div className="max-w-6xl mx-auto">
-              <Appointments onNavigate={setCurrentPage} />
-            </div>
-          </div>
-        )}
-
-        {currentPage === "doctors" && (
-          <div className="h-screen p-6 lg:p-6 pt-16 lg:pt-6">
-            <div className="max-w-6xl mx-auto">
-              <Doctors onNavigate={setCurrentPage} />
-            </div>
-          </div>
-        )}
-
         {currentPage === "dashboard" && (
           <main className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto space-y-6">
