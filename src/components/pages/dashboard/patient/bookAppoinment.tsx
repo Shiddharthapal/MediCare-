@@ -70,8 +70,6 @@ interface AppointmentData {
   previousVisit: string;
   emergencyContact: string;
   emergencyPhone: string;
-  insuranceProvider: string;
-  insuranceNumber: string;
   paymentMethod: string;
   specialRequests: string;
 }
@@ -155,8 +153,6 @@ export default function BookAppointment({
     previousVisit: "",
     emergencyContact: "",
     emergencyPhone: "",
-    insuranceProvider: "",
-    insuranceNumber: "",
     paymentMethod: "",
     specialRequests: "",
   });
@@ -254,8 +250,6 @@ export default function BookAppointment({
       previousVisit: "",
       emergencyContact: "",
       emergencyPhone: "",
-      insuranceProvider: "",
-      insuranceNumber: "",
       paymentMethod: "",
       specialRequests: "",
     });
