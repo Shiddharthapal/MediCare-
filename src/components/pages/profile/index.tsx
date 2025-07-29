@@ -22,6 +22,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
+import { useNavigate } from "react-router-dom";
 
 interface PatientData {
   email: string;
@@ -37,7 +38,7 @@ interface PatientData {
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
-export function PatientProfileForm() {
+export default function PatientProfileForm() {
   const [formData, setFormData] = useState<PatientData>({
     email: "",
     name: "",
@@ -56,6 +57,7 @@ export function PatientProfileForm() {
   const [savedPatientId, setSavedPatientId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
+  const navigate = useNavigate();
 
   // Dummy data representing an existing patient
   const dummyPatientData: PatientData = {
@@ -159,7 +161,9 @@ export function PatientProfileForm() {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
-
+  const handleClose = () => {
+    navigate(-1);
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -267,15 +271,26 @@ export function PatientProfileForm() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Personal Information</h3>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-                disabled={isLoading}
-              >
-                {isEditing ? "Cancel Edit" : "Edit Profile"}
-              </Button>
+              <div className="flex flex-col items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditing(!isEditing)}
+                  disabled={isLoading}
+                >
+                  {isEditing ? "Cancel Edit" : "Edit Profile"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleClose()}
+                  disabled={isLoading}
+                >
+                  Cancle
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -287,7 +302,7 @@ export function PatientProfileForm() {
                   <>
                     <Input
                       id="name"
-                      value={formData.name}
+                      value={formData?.name}
                       onChange={(e) =>
                         handleInputChange("name", e.target.value)
                       }
@@ -310,7 +325,7 @@ export function PatientProfileForm() {
                 {isEditing ? (
                   <Input
                     id="fatherName"
-                    value={formData.fatherName}
+                    value={formData?.fatherName}
                     onChange={(e) =>
                       handleInputChange("fatherName", e.target.value)
                     }
@@ -327,13 +342,15 @@ export function PatientProfileForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">
+                  Email Address <span className="text-red-500">*</span>
+                </Label>
                 {isEditing ? (
                   <>
                     <Input
                       id="email"
                       type="email"
-                      value={formData.email}
+                      value={formData?.email}
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
                       }
@@ -359,7 +376,7 @@ export function PatientProfileForm() {
                   <>
                     <Input
                       id="contactNumber"
-                      value={formData.contactNumber}
+                      value={formData?.contactNumber}
                       onChange={(e) =>
                         handleInputChange("contactNumber", e.target.value)
                       }
@@ -370,7 +387,7 @@ export function PatientProfileForm() {
                     />
                     {errors.contactNumber && (
                       <p className="text-sm text-red-500">
-                        {errors.contactNumber}
+                        {errors?.contactNumber}
                       </p>
                     )}
                   </>
@@ -390,7 +407,7 @@ export function PatientProfileForm() {
                 <>
                   <Input
                     id="address"
-                    value={formData.address}
+                    value={formData?.address}
                     onChange={(e) =>
                       handleInputChange("address", e.target.value)
                     }
@@ -422,7 +439,7 @@ export function PatientProfileForm() {
                     <Input
                       id="age"
                       type="number"
-                      value={formData.age}
+                      value={formData?.age}
                       onChange={(e) => handleInputChange("age", e.target.value)}
                       placeholder="Enter age"
                       min="1"
@@ -441,10 +458,13 @@ export function PatientProfileForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bloodGroup">Blood Group</Label>
+                <Label htmlFor="bloodGroup">
+                  Blood Group
+                  <span className="text-red-500">*</span>
+                </Label>
                 {isEditing ? (
                   <Select
-                    value={formData.bloodGroup}
+                    value={formData?.bloodGroup}
                     onValueChange={(value) =>
                       handleInputChange("bloodGroup", value)
                     }
@@ -468,13 +488,15 @@ export function PatientProfileForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="weight">Weight (kg)</Label>
+                <Label htmlFor="weight">
+                  Weight (kg) <span className="text-red-500">*</span>
+                </Label>
                 {isEditing ? (
                   <>
                     <Input
                       id="weight"
                       type="number"
-                      value={formData.weight}
+                      value={formData?.weight}
                       onChange={(e) =>
                         handleInputChange("weight", e.target.value)
                       }
@@ -505,7 +527,7 @@ export function PatientProfileForm() {
                     <Input
                       id="height"
                       type="number"
-                      value={formData.height}
+                      value={formData?.height}
                       onChange={(e) =>
                         handleInputChange("height", e.target.value)
                       }
