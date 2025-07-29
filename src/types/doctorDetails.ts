@@ -1,3 +1,19 @@
+interface AppointmentData {
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  consultationType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+}
 export interface DoctorDetails {
   _id: string;
   userId: string;
@@ -13,6 +29,7 @@ export interface DoctorDetails {
   language: string[];
   about: string;
   availableSlots: string[];
+  appointments: AppointmentData[];
   consultationModes: string[];
   createdAt: Date;
 }

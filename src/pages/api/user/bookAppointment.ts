@@ -1,8 +1,7 @@
 import type { APIRoute } from "astro";
-import { verifyToken } from "@/utils/token";
 import connect from "@/lib/connection";
-import BookAppoinments from "@/model/bookAppointment";
 import userDetails from "@/model/userDetails";
+import doctorDetails from "@/model/doctorDetails";
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
     "Content-Type": "application/json",
@@ -73,6 +72,7 @@ export const POST: APIRoute = async ({ request }) => {
     const userdetails = await userDetails.findOne({
       userId: id,
     });
+
     //console.log("🧞‍♂️userdetails --->", userdetails);
 
     if (userdetails) {
@@ -97,6 +97,33 @@ export const POST: APIRoute = async ({ request }) => {
         userdetails._id,
         {
           $push: { appointments: newbookAppoinmentsDetails },
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+      const newbookAppoinmentsDataforDoctor = {
+        patientId: userdetails._id,
+        patientName,
+        patientEmail,
+        patientPhone,
+        appointmentDate,
+        appointmentTime,
+        consultationType,
+        reasonForVisit,
+        symptoms,
+        previousVisit,
+        emergencyContac,
+        emergencyPhone,
+        paymentMethod,
+        specialRequests,
+      };
+      const updateDoctor = await doctorDetails.findByIdAndUpdate(
+        doctor.userId,
+        {
+          $push: { appointments: newbookAppoinmentsDataforDoctor },
         },
         {
           new: true,

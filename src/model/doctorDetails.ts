@@ -1,5 +1,61 @@
 import mongoose from "mongoose";
 
+const appointmentDataSchema = new mongoose.Schema(
+  {
+    patientId: {
+      type: String,
+    },
+    patientName: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    patientEmail: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    patientPhone: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    appointmentDate: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    appointmentTime: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    consultationType: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    reasonForVisit: {
+      type: String,
+    },
+    symptoms: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    previousVisit: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    emergencyContact: {
+      type: String,
+    },
+    emergencyPhone: {
+      type: String,
+    },
+    paymentMethod: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    specialRequests: {
+      type: String,
+    },
+  },
+  { _id: true }
+); // This will auto-generate _id for each appointment
 const doctorDetailsSchema = new mongoose.Schema({
   userId: {
     type: String,
@@ -68,6 +124,10 @@ const doctorDetailsSchema = new mongoose.Schema({
       },
       message: "Available slot must contain at least one slot",
     },
+  },
+  appointments: {
+    type: [appointmentDataSchema],
+    default: [],
   },
   consultationModes: {
     type: [String],
