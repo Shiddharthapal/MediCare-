@@ -57,6 +57,7 @@ export default function PatientProfileForm() {
   const [savedPatientId, setSavedPatientId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
+  console.log("🧞‍♂️user --->", user);
   const navigate = useNavigate();
 
   // Dummy data representing an existing patient
@@ -85,6 +86,7 @@ export default function PatientProfileForm() {
     }
     const fetchData = async () => {
       let id = user?._id;
+      console.log("🧞‍♂️id --->", id);
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -97,7 +99,7 @@ export default function PatientProfileForm() {
           throw new Error(`Status:${response.status}`);
         }
         const responseData = await response.json();
-        //console.log("🧞‍♂️responseData --->", responseData.userdetails);
+        console.log("🧞‍♂️responseData --->", responseData.userdetails);
         setFormData(responseData?.userdetails);
       } catch (err) {
         console.log(err);
@@ -177,14 +179,14 @@ export default function PatientProfileForm() {
     }
 
     setIsLoading(true);
-
+    let id = user?._id;
     try {
       const response = await fetch("/api/createProfile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ formData, id }),
       });
 
       const result = await response.json();
@@ -205,7 +207,8 @@ export default function PatientProfileForm() {
 
       // Success
       setIsShowingSavedData(true);
-      setSavedPatientId(result.patient.id);
+      setSavedPatientId(result?.userdetails.userId);
+      setFormData(result?.userdetails);
       toast({
         title: "Success!",
         description: `Patient profile created successfully. Patient ID: ${result.patient.id}`,

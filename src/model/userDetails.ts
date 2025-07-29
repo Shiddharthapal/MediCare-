@@ -96,6 +96,7 @@ const userDetailsSchema = new mongoose.Schema({
   },
   lastTreatmentDate: {
     type: Date,
+    default: Date.now,
   },
   createdAt: {
     type: Date,

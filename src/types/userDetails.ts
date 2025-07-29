@@ -13,7 +13,7 @@ interface AppointmentData {
   paymentMethod: string;
   specialRequests: string;
 }
-export interface User {
+export interface UserDetails {
   _id: string;
   userId: string;
   email: string;

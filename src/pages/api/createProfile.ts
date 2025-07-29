@@ -8,7 +8,9 @@ export const POST: APIRoute = async ({ request }) => {
     "Content-Type": "application/json",
   };
   try {
-    const { updatedProfile, token } = await request.json();
+    const body = await request.json();
+    console.log("🧞‍♂️body --->", body);
+    const { formData, id } = body;
     const {
       name,
       fatherName,
@@ -18,8 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
       bloodGroup,
       weight,
       height,
-      lastTreatmentDate,
-    } = updatedProfile;
+    } = formData;
     if (!name || !address || !bloodGroup || !age || !weight || !contactNumber) {
       return new Response(
         JSON.stringify({
@@ -40,14 +41,11 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
     await connect();
-    const tokenData = await verifyToken(token);
-    let userId = tokenData.userId;
-    console.log("🧞‍♂️tokenData --->", tokenData);
-    const userdetails = await UserDetails.findOne({ userId: userId });
-    console.log("userId=>", userId);
+    const userdetails = await UserDetails.findOne({ userId: id });
+    console.log("userId=>", id);
     if (!userdetails) {
       const userDetails = new UserDetails({
-        userId: userId,
+        userId: id,
         name,
         fatherName,
         address,
@@ -56,7 +54,6 @@ export const POST: APIRoute = async ({ request }) => {
         bloodGroup,
         weight,
         height,
-        lastTreatmentDate,
       });
       //console.log("user=>", userDetails);
       userDetails.save();
