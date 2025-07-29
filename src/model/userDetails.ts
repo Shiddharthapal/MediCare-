@@ -92,14 +92,7 @@ const userDetailsSchema = new mongoose.Schema({
   },
   appointments: {
     type: [appointmentDataSchema], // Changed from [String] to [appointmentDataSchema]
-    required: true, // Fixed: was 'require'
     default: [], // Optional: set default empty array
-    validate: {
-      validator: function (arr) {
-        return arr.length >= 0; // Changed from > 0 to >= 0 to allow empty initially
-      },
-      message: "Appointments array must be valid",
-    },
   },
   lastTreatmentDate: {
     type: Date,
