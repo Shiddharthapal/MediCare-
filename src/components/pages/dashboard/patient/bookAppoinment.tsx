@@ -160,7 +160,7 @@ export default function BookAppointment({
 
   const [errors, setErrors] = useState<Partial<AppointmentData>>({});
 
-  const token = useAppSelector((state) => state.auth.token);
+  const user = useAppSelector((state) => state.auth.user);
 
   const handleInputChange = (field: keyof AppointmentData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -221,6 +221,7 @@ export default function BookAppointment({
 
     setIsSubmitting(true);
 
+    const id = user?._id;
     // Simulate API call
     try {
       let response = await fetch("./api/user/bookAppointment", {
@@ -228,7 +229,7 @@ export default function BookAppointment({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ formData, doctor, token }),
+        body: JSON.stringify({ formData, doctor, id }),
       });
 
       console.log("Appointment booked:", {

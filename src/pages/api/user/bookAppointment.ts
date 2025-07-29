@@ -9,8 +9,8 @@ export const POST: APIRoute = async ({ request }) => {
   };
   try {
     const body = await request.json();
-    console.log("🧞‍♂️body --->", body);
-    const { formData, doctor, token } = body;
+    // console.log("🧞‍♂️body --->", body);
+    const { formData, doctor, id } = body;
     const {
       patientName,
       patientEmail,
@@ -26,6 +26,7 @@ export const POST: APIRoute = async ({ request }) => {
       paymentMethod,
       specialRequests,
     } = formData;
+    //console.log("🧞‍♂️formData --->", formData);
 
     if (
       !patientName ||
@@ -68,14 +69,14 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    console.log("🧞‍♂️tokenDetails --->", formData);
     await connect();
-    const bookappoinmentsdetails = await userDetails.findOne({
-      userId: doctor?.userId,
-      "appoinments.patientId": doctor?.userId,
+    const userdetails = await userDetails.findOne({
+      userId: id,
     });
-    if (!bookappoinmentsdetails) {
-      const bookAppoinmentsDetails = new BookAppoinments({
+    //console.log("🧞‍♂️userdetails --->", userdetails);
+
+    if (userdetails) {
+      const newbookAppoinmentsDetails = {
         patientName,
         patientEmail,
         patientPhone,
@@ -89,46 +90,35 @@ export const POST: APIRoute = async ({ request }) => {
         emergencyPhone,
         paymentMethod,
         specialRequests,
+      };
+      //console.log("newbookAppoinmentsDetails --->", newbookAppoinmentsDetails);
+
+      const updatedUser = await userDetails.findByIdAndUpdate(
+        userdetails._id,
+        {
+          $push: { appointments: newbookAppoinmentsDetails },
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+      return new Response(JSON.stringify({ userdetails }), {
+        status: 200,
+        headers,
       });
-
-      console.log("doctordetails=>", bookAppoinmentsDetails);
-
-      await bookAppoinmentsDetails.save();
     } else {
-      (bookappoinmentsdetails.patientName =
-        patientName || bookappoinmentsdetails.patientName),
-        (bookappoinmentsdetails.patientEmail =
-          patientEmail || bookappoinmentsdetails.patientEmail),
-        (bookappoinmentsdetails.patientPhone =
-          patientPhone || bookappoinmentsdetails.patientPhone),
-        (bookappoinmentsdetails.appointmentDate =
-          appointmentDate || bookappoinmentsdetails.appointmentDate),
-        (bookappoinmentsdetails.appointmentTime =
-          appointmentTime || bookappoinmentsdetails.appointmentTime),
-        (bookappoinmentsdetails.consultationTyp =
-          consultationType || bookappoinmentsdetails.consultationTyp),
-        (bookappoinmentsdetails.reasonForVisit =
-          reasonForVisit || bookappoinmentsdetails.reasonForVisit),
-        (bookappoinmentsdetails.symptoms =
-          symptoms || bookappoinmentsdetails.symptoms),
-        (bookappoinmentsdetails.previousVisit =
-          previousVisit || bookappoinmentsdetails.previousVisit),
-        (bookappoinmentsdetails.emergencyContac =
-          emergencyContac || bookappoinmentsdetails.emergencyContac),
-        (bookappoinmentsdetails.emergencyPhone =
-          emergencyPhone || bookappoinmentsdetails.emergencyPhone),
-        (bookappoinmentsdetails.paymentMethod =
-          paymentMethod || bookappoinmentsdetails.paymentMethod),
-        (bookappoinmentsdetails.specialRequests =
-          specialRequests || bookappoinmentsdetails.specialRequests),
-        await bookappoinmentsdetails.save();
+      return new Response(
+        JSON.stringify({
+          message: "Your profile is not created.",
+        }),
+        {
+          status: 403,
+          headers,
+        }
+      );
     }
-
-    return new Response(JSON.stringify({}), {
-      status: 200,
-
-      headers,
-    });
   } catch (error) {
     return new Response(
       JSON.stringify({
