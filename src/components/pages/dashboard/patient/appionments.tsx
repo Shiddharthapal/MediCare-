@@ -563,7 +563,13 @@ export default function Appointments({
   const user = useAppSelector((state) => state.auth.user);
 
   const categorizedAppointments = useMemo(() => {
-    return categorizeAppointments(appointmentsData);
+    return categorizeAppointments(
+      appointmentsData
+        ? Array.isArray(appointmentsData)
+          ? appointmentsData
+          : []
+        : []
+    );
   }, [appointmentsData]);
 
   useEffect(() => {
@@ -766,7 +772,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-blue-600 font-medium">Upcoming</p>
                 <p className="text-2xl font-bold text-blue-900">
-                  {appointmentsData.future.length}
+                  {futureGrouped?.appointments?.length}
                 </p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
@@ -780,7 +786,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-green-600 font-medium">Today</p>
                 <p className="text-2xl font-bold text-green-900">
-                  {appointmentsData.today.length}
+                  {todayGrouped?.appointments?.length}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-green-500" />
@@ -794,7 +800,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-purple-600 font-medium">Completed</p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {appointmentsData.past.length}
+                  {pastGrouped?.appointments?.length}
                 </p>
               </div>
               <Badge className="h-8 w-8 text-purple-500 bg-transparent p-0">
@@ -822,21 +828,21 @@ export default function Appointments({
           className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("upcoming")}
         >
-          Upcoming ({appointmentsData.future.length})
+          Upcoming ({futureGrouped?.appointments?.length})
         </Button>
         <Button
           variant={activeTab === "today" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "today" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("today")}
         >
-          Today ({appointmentsData.today.length})
+          Today ({todayGrouped?.appointments?.length})
         </Button>
         <Button
           variant={activeTab === "past" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "past" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("past")}
         >
-          Past ({appointmentsData.past.length})
+          Past ({pastGrouped?.appointments?.length})
         </Button>
       </div>
 
@@ -906,12 +912,12 @@ export default function Appointments({
               Today's Appointments
             </h2>
             <Badge className="bg-green-100 text-green-800">
-              {appointmentsData.today.length} appointments
+              {todayGrouped.appointments.length} appointments
             </Badge>
           </div>
 
-          {appointmentsData.today.length > 0 ? (
-            appointmentsData.today.map((appointment) => (
+          {todayGrouped.appointments.length > 0 ? (
+            todayGrouped.appointments.map((appointment) => (
               <AppointmentCard
                 key={appointment.id}
                 appointment={appointment}
@@ -942,7 +948,7 @@ export default function Appointments({
               Appointment History
             </h2>
             <Badge variant="outline">
-              {appointmentsData.past.length} completed
+              {pastGrouped.appointments.length} completed
             </Badge>
           </div>
 
