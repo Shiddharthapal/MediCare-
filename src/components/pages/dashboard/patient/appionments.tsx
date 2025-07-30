@@ -20,6 +20,7 @@ import {
 import { useAppSelector } from "@/redux/hooks";
 
 interface appointmentdata {
+  _id: string;
   doctorUserId: string;
   doctorName: string;
   doctorSpecialist: string;
@@ -575,17 +576,22 @@ export default function Appointments({
   useEffect(() => {
     let id = user?._id;
     const fetchData = async () => {
-      let response = await fetch(`/api/user/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      let userdata = await response.json();
+      try {
+        let response = await fetch(`/api/user/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        let userdata = await response.json();
+        console.log("🧞‍♂️userdata --->", userdata?.userdetails.appointments);
+        setAppointmentsData(userdata?.userdetails?.appointments);
+      } catch (err) {
+        console.log(err);
+      }
     };
-
     fetchData();
-  });
+  }, [user?._id]);
   // Group appointments by date
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
@@ -594,6 +600,7 @@ export default function Appointments({
   const futureGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.future);
   }, [categorizedAppointments.future]);
+  console.log("future appointment=>", futureGrouped);
 
   const pastGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.past);
@@ -772,7 +779,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-blue-600 font-medium">Upcoming</p>
                 <p className="text-2xl font-bold text-blue-900">
-                  {futureGrouped?.appointments?.length}
+                  {Object.keys(futureGrouped).length}
                 </p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
@@ -786,7 +793,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-green-600 font-medium">Today</p>
                 <p className="text-2xl font-bold text-green-900">
-                  {todayGrouped?.appointments?.length}
+                  {Object.keys(todayGrouped).length}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-green-500" />
@@ -800,7 +807,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-purple-600 font-medium">Completed</p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {pastGrouped?.appointments?.length}
+                  {Object.keys(pastGrouped).length}
                 </p>
               </div>
               <Badge className="h-8 w-8 text-purple-500 bg-transparent p-0">
@@ -828,21 +835,21 @@ export default function Appointments({
           className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("upcoming")}
         >
-          Upcoming ({futureGrouped?.appointments?.length})
+          Upcoming ({Object.keys(futureGrouped).length})
         </Button>
         <Button
           variant={activeTab === "today" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "today" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("today")}
         >
-          Today ({todayGrouped?.appointments?.length})
+          Today ({Object.keys(todayGrouped).length})
         </Button>
         <Button
           variant={activeTab === "past" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "past" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("past")}
         >
-          Past ({pastGrouped?.appointments?.length})
+          Past ({Object.keys(pastGrouped).length})
         </Button>
       </div>
 
@@ -877,7 +884,7 @@ export default function Appointments({
 
                   {appointments.map((appointment: any) => (
                     <AppointmentCard
-                      key={appointment.id}
+                      key={appointment._id}
                       appointment={appointment}
                       showActions={true}
                     />
@@ -919,7 +926,7 @@ export default function Appointments({
           {todayGrouped.appointments.length > 0 ? (
             todayGrouped.appointments.map((appointment) => (
               <AppointmentCard
-                key={appointment.id}
+                key={appointment._id}
                 appointment={appointment}
                 showActions={true}
               />
