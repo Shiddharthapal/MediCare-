@@ -3,6 +3,15 @@ import mongoose from "mongoose";
 // Define the appointment data schema as a subdocument
 const appointmentDataSchema = new mongoose.Schema(
   {
+    doctorUserId: {
+      type: String,
+    },
+    doctorName: {
+      type: String,
+    },
+    doctorSpecialist: {
+      type: String,
+    },
     patientName: {
       type: String,
       required: true, // Fixed: was 'require'

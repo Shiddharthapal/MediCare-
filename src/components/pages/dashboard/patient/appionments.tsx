@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,192 +17,230 @@ import {
   X,
   FileText,
 } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
 
-// Mock appointment data
-const appointmentsData = {
-  future: [
-    {
-      id: 1,
-      date: "2024-01-09",
-      time: "09:00 AM - 09:30 AM",
-      doctor: "Dr. Sarah Wilson",
-      specialty: "Cardiologist",
-      type: "Heart Checkup",
-      status: "confirmed",
-      mode: "video",
-      avatar: "SW",
-    },
-    {
-      id: 2,
-      date: "2024-01-09",
-      time: "02:00 PM - 02:45 PM",
-      doctor: "Dr. Michael Chen",
-      specialty: "Dermatologist",
-      type: "Skin Consultation",
-      status: "confirmed",
-      mode: "in-person",
-      avatar: "MC",
-    },
-    {
-      id: 3,
-      date: "2024-01-10",
-      time: "11:00 AM - 11:30 AM",
-      doctor: "Dr. Tina Murphy",
-      specialty: "Endocrinologist",
-      type: "Hormone Therapy Consultation",
-      status: "confirmed",
-      mode: "video",
-      avatar: "TM",
-    },
-    {
-      id: 4,
-      date: "2024-01-11",
-      time: "03:30 PM - 04:00 PM",
-      doctor: "Dr. James Rodriguez",
-      specialty: "Orthopedist",
-      type: "Knee Pain Assessment",
-      status: "pending",
-      mode: "in-person",
-      avatar: "JR",
-    },
-    {
-      id: 5,
-      date: "2024-01-12",
-      time: "10:00 AM - 10:30 AM",
-      doctor: "Dr. Lisa Thompson",
-      specialty: "Nutritionist",
-      type: "Diet Consultation",
-      status: "confirmed",
-      mode: "phone",
-      avatar: "LT",
-    },
-    {
-      id: 6,
-      date: "2024-01-15",
-      time: "01:00 PM - 01:30 PM",
-      doctor: "Dr. Micheal Hussey",
-      specialty: "Anti-Aging Specialist",
-      type: "Anti-Aging Consultation",
-      status: "confirmed",
-      mode: "video",
-      avatar: "MH",
-    },
-  ],
-  today: [
-    {
-      id: 7,
-      date: "2024-01-08",
-      time: "10:00 AM - 10:30 AM",
-      doctor: "Dr. Emily Davis",
-      specialty: "General Physician",
-      type: "Regular Checkup",
-      status: "confirmed",
-      mode: "video",
-      avatar: "ED",
-    },
-    {
-      id: 8,
-      date: "2024-01-08",
-      time: "03:00 PM - 03:30 PM",
-      doctor: "Dr. Robert Kim",
-      specialty: "Psychiatrist",
-      type: "Mental Health Session",
-      status: "confirmed",
-      mode: "in-person",
-      avatar: "RK",
-    },
-  ],
-  past: [
-    {
-      id: 9,
-      date: "2024-01-05",
-      time: "11:00 AM - 11:30 AM",
-      doctor: "Dr. Tina Murphy",
-      specialty: "Endocrinologist",
-      type: "Hormone Therapy Follow-up",
-      status: "completed",
-      mode: "video",
-      avatar: "TM",
-    },
-    {
-      id: 10,
-      date: "2024-01-03",
-      time: "02:00 PM - 02:30 PM",
-      doctor: "Dr. Amanda Foster",
-      specialty: "Gynecologist",
-      type: "Annual Checkup",
-      status: "completed",
-      mode: "in-person",
-      avatar: "AF",
-    },
-    {
-      id: 11,
-      date: "2023-12-28",
-      time: "09:30 AM - 10:00 AM",
-      doctor: "Dr. David Park",
-      specialty: "Ophthalmologist",
-      type: "Eye Examination",
-      status: "completed",
-      mode: "in-person",
-      avatar: "DP",
-    },
-    {
-      id: 12,
-      date: "2023-12-20",
-      time: "04:00 PM - 04:30 PM",
-      doctor: "Dr. Maria Garcia",
-      specialty: "Neurologist",
-      type: "Headache Consultation",
-      status: "completed",
-      mode: "video",
-      avatar: "MG",
-    },
-    {
-      id: 13,
-      date: "2023-12-15",
-      time: "01:30 PM - 02:00 PM",
-      doctor: "Dr. Kevin Lee",
-      specialty: "Urologist",
-      type: "Routine Checkup",
-      status: "completed",
-      mode: "in-person",
-      avatar: "KL",
-    },
-    {
-      id: 14,
-      date: "2023-12-10",
-      time: "11:00 AM - 11:30 AM",
-      doctor: "Dr. Rachel Green",
-      specialty: "Pediatrician",
-      type: "Child Health Checkup",
-      status: "completed",
-      mode: "in-person",
-      avatar: "RG",
-    },
-    {
-      id: 15,
-      date: "2023-12-05",
-      time: "02:30 PM - 03:00 PM",
-      doctor: "Dr. Thomas Brown",
-      specialty: "Dentist",
-      type: "Dental Cleaning",
-      status: "completed",
-      mode: "in-person",
-      avatar: "TB",
-    },
-    {
-      id: 16,
-      date: "2023-11-28",
-      time: "09:00 AM - 09:30 AM",
-      doctor: "Dr. Jennifer White",
-      specialty: "Rheumatologist",
-      type: "Joint Pain Consultation",
-      status: "completed",
-      mode: "video",
-      avatar: "JW",
-    },
-  ],
+interface appointmentdata {
+  doctorUserId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  consultationType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+}
+
+const mockappointmentdata = {
+  doctorUserId: "",
+  doctorName: "",
+  doctorSpecialist: "",
+  patientName: "",
+  patientEmail: "",
+  patientPhone: "",
+  appointmentDate: "",
+  appointmentTime: "",
+  consultationType: "",
+  reasonForVisit: "",
+  symptoms: "",
+  previousVisit: "",
+  emergencyContact: "",
+  emergencyPhone: "",
+  paymentMethod: "",
+  specialRequests: "",
 };
+// Mock appointment data
+// const appointmentsData = {
+//   future: [
+//     {
+//       id: 1,
+//       date: "2024-01-09",
+//       time: "09:00 AM - 09:30 AM",
+//       doctor: "Dr. Sarah Wilson",
+//       specialty: "Cardiologist",
+//       type: "Heart Checkup",
+//       status: "confirmed",
+//       mode: "video",
+//       avatar: "SW",
+//     },
+//     {
+//       id: 2,
+//       date: "2024-01-09",
+//       time: "02:00 PM - 02:45 PM",
+//       doctor: "Dr. Michael Chen",
+//       specialty: "Dermatologist",
+//       type: "Skin Consultation",
+//       status: "confirmed",
+//       mode: "in-person",
+//       avatar: "MC",
+//     },
+//     {
+//       id: 3,
+//       date: "2024-01-10",
+//       time: "11:00 AM - 11:30 AM",
+//       doctor: "Dr. Tina Murphy",
+//       specialty: "Endocrinologist",
+//       type: "Hormone Therapy Consultation",
+//       status: "confirmed",
+//       mode: "video",
+//       avatar: "TM",
+//     },
+//     {
+//       id: 4,
+//       date: "2024-01-11",
+//       time: "03:30 PM - 04:00 PM",
+//       doctor: "Dr. James Rodriguez",
+//       specialty: "Orthopedist",
+//       type: "Knee Pain Assessment",
+//       status: "pending",
+//       mode: "in-person",
+//       avatar: "JR",
+//     },
+//     {
+//       id: 5,
+//       date: "2024-01-12",
+//       time: "10:00 AM - 10:30 AM",
+//       doctor: "Dr. Lisa Thompson",
+//       specialty: "Nutritionist",
+//       type: "Diet Consultation",
+//       status: "confirmed",
+//       mode: "phone",
+//       avatar: "LT",
+//     },
+//     {
+//       id: 6,
+//       date: "2024-01-15",
+//       time: "01:00 PM - 01:30 PM",
+//       doctor: "Dr. Micheal Hussey",
+//       specialty: "Anti-Aging Specialist",
+//       type: "Anti-Aging Consultation",
+//       status: "confirmed",
+//       mode: "video",
+//       avatar: "MH",
+//     },
+//   ],
+//   today: [
+//     {
+//       id: 7,
+//       date: "2024-01-08",
+//       time: "10:00 AM - 10:30 AM",
+//       doctor: "Dr. Emily Davis",
+//       specialty: "General Physician",
+//       type: "Regular Checkup",
+//       status: "confirmed",
+//       mode: "video",
+//       avatar: "ED",
+//     },
+//     {
+//       id: 8,
+//       date: "2024-01-08",
+//       time: "03:00 PM - 03:30 PM",
+//       doctor: "Dr. Robert Kim",
+//       specialty: "Psychiatrist",
+//       type: "Mental Health Session",
+//       status: "confirmed",
+//       mode: "in-person",
+//       avatar: "RK",
+//     },
+//   ],
+//   past: [
+//     {
+//       id: 9,
+//       date: "2024-01-05",
+//       time: "11:00 AM - 11:30 AM",
+//       doctor: "Dr. Tina Murphy",
+//       specialty: "Endocrinologist",
+//       type: "Hormone Therapy Follow-up",
+//       status: "completed",
+//       mode: "video",
+//       avatar: "TM",
+//     },
+//     {
+//       id: 10,
+//       date: "2024-01-03",
+//       time: "02:00 PM - 02:30 PM",
+//       doctor: "Dr. Amanda Foster",
+//       specialty: "Gynecologist",
+//       type: "Annual Checkup",
+//       status: "completed",
+//       mode: "in-person",
+//       avatar: "AF",
+//     },
+//     {
+//       id: 11,
+//       date: "2023-12-28",
+//       time: "09:30 AM - 10:00 AM",
+//       doctor: "Dr. David Park",
+//       specialty: "Ophthalmologist",
+//       type: "Eye Examination",
+//       status: "completed",
+//       mode: "in-person",
+//       avatar: "DP",
+//     },
+//     {
+//       id: 12,
+//       date: "2023-12-20",
+//       time: "04:00 PM - 04:30 PM",
+//       doctor: "Dr. Maria Garcia",
+//       specialty: "Neurologist",
+//       type: "Headache Consultation",
+//       status: "completed",
+//       mode: "video",
+//       avatar: "MG",
+//     },
+//     {
+//       id: 13,
+//       date: "2023-12-15",
+//       time: "01:30 PM - 02:00 PM",
+//       doctor: "Dr. Kevin Lee",
+//       specialty: "Urologist",
+//       type: "Routine Checkup",
+//       status: "completed",
+//       mode: "in-person",
+//       avatar: "KL",
+//     },
+//     {
+//       id: 14,
+//       date: "2023-12-10",
+//       time: "11:00 AM - 11:30 AM",
+//       doctor: "Dr. Rachel Green",
+//       specialty: "Pediatrician",
+//       type: "Child Health Checkup",
+//       status: "completed",
+//       mode: "in-person",
+//       avatar: "RG",
+//     },
+//     {
+//       id: 15,
+//       date: "2023-12-05",
+//       time: "02:30 PM - 03:00 PM",
+//       doctor: "Dr. Thomas Brown",
+//       specialty: "Dentist",
+//       type: "Dental Cleaning",
+//       status: "completed",
+//       mode: "in-person",
+//       avatar: "TB",
+//     },
+//     {
+//       id: 16,
+//       date: "2023-11-28",
+//       time: "09:00 AM - 09:30 AM",
+//       doctor: "Dr. Jennifer White",
+//       specialty: "Rheumatologist",
+//       type: "Joint Pain Consultation",
+//       status: "completed",
+//       mode: "video",
+//       avatar: "JW",
+//     },
+//   ],
+// };
 
 const prescriptionsData = {
   9: [
@@ -394,17 +432,6 @@ const formatDate = (dateString: string) => {
   }
 };
 
-const groupAppointmentsByDate = (appointments: any[]) => {
-  return appointments.reduce((groups: any, appointment) => {
-    const date = appointment.date;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(appointment);
-    return groups;
-  }, {});
-};
-
 const getStatusColor = (status: string) => {
   switch (status) {
     case "confirmed":
@@ -433,6 +460,91 @@ const getModeIcon = (mode: string) => {
   }
 };
 
+// Interface for categorized appointments
+interface CategorizedAppointments {
+  today: appointmentdata[];
+  future: appointmentdata[];
+  past: appointmentdata[];
+}
+
+// Interface for grouped appointments by date
+interface GroupedAppointments {
+  [date: string]: appointmentdata[];
+}
+
+// Helper function to get today's date in YYYY-MM-DD format
+const getTodayDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+// Helper function to compare dates
+const compareDates = (
+  appointmentDate: string,
+  todayDate: string
+): "past" | "today" | "future" => {
+  if (appointmentDate < todayDate) return "past";
+  if (appointmentDate === todayDate) return "today";
+  return "future";
+};
+
+// Function to categorize appointments
+const categorizeAppointments = (
+  appointments: appointmentdata[]
+): CategorizedAppointments => {
+  const todayDate = getTodayDate();
+
+  const categorized: CategorizedAppointments = {
+    today: [],
+    future: [],
+    past: [],
+  };
+
+  appointments.forEach((appointment) => {
+    const category = compareDates(appointment.appointmentDate, todayDate);
+    categorized[category].push(appointment);
+  });
+
+  // Sort appointments within each category
+  categorized.today.sort((a, b) =>
+    a.appointmentTime.localeCompare(b.appointmentTime)
+  );
+  categorized.future.sort((a, b) => {
+    if (a.appointmentDate === b.appointmentDate) {
+      return a.appointmentTime.localeCompare(b.appointmentTime);
+    }
+    return a.appointmentDate.localeCompare(b.appointmentDate);
+  });
+  categorized.past.sort((a, b) => {
+    if (b.appointmentDate === a.appointmentDate) {
+      return b.appointmentTime.localeCompare(a.appointmentTime);
+    }
+    return b.appointmentDate.localeCompare(a.appointmentDate);
+  });
+
+  return categorized;
+};
+
+// Function to group appointments by date
+const groupAppointmentsByDate = (
+  appointments: appointmentdata[]
+): GroupedAppointments => {
+  return appointments.reduce((grouped: GroupedAppointments, appointment) => {
+    const date = appointment.appointmentDate;
+    if (!grouped[date]) {
+      grouped[date] = [];
+    }
+    grouped[date].push(appointment);
+
+    // Sort appointments within the same date by time
+    grouped[date].sort((a, b) =>
+      a.appointmentTime.localeCompare(b.appointmentTime)
+    );
+
+    return grouped;
+  }, {});
+};
+
 export default function Appointments({
   onNavigate,
 }: {
@@ -445,9 +557,41 @@ export default function Appointments({
   const [uploadedFiles, setUploadedFiles] = useState<{ [key: number]: File[] }>(
     {}
   );
+  const [appointmentsData, setAppointmentsData] =
+    useState<appointmentdata | null>(null);
 
-  const futureGrouped = groupAppointmentsByDate(appointmentsData.future);
-  const pastGrouped = groupAppointmentsByDate(appointmentsData.past);
+  const user = useAppSelector((state) => state.auth.user);
+
+  const categorizedAppointments = useMemo(() => {
+    return categorizeAppointments(appointmentsData);
+  }, [appointmentsData]);
+
+  useEffect(() => {
+    let id = user?._id;
+    const fetchData = async () => {
+      let response = await fetch(`/api/user/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      let userdata = await response.json();
+    };
+
+    fetchData();
+  });
+  // Group appointments by date
+  const todayGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.today);
+  }, [categorizedAppointments.today]);
+
+  const futureGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.future);
+  }, [categorizedAppointments.future]);
+
+  const pastGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.past);
+  }, [categorizedAppointments.past]);
 
   const handleJoinSession = (appointmentId: number) => {
     console.log(`Joining session for appointment ${appointmentId}`);

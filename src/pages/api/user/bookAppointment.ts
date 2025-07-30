@@ -27,6 +27,24 @@ export const POST: APIRoute = async ({ request }) => {
     } = formData;
     //console.log("🧞‍♂️formData --->", formData);
 
+    const {
+      userId,
+      name,
+      specialist,
+      specializations,
+      hospital,
+      fees,
+      rating,
+      experience,
+      education,
+      degree,
+      language,
+      about,
+      availableSlots,
+      Appointments,
+      consultationModes,
+    } = doctor;
+
     if (
       !patientName ||
       !patientEmail ||
@@ -77,6 +95,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (userdetails) {
       const newbookAppoinmentsDetails = {
+        doctorUserId: doctor.userId,
+        doctorName: name,
+        doctorSpecialist: specialist,
         patientName,
         patientEmail,
         patientPhone,
