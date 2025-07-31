@@ -12,18 +12,6 @@ const appointmentDataSchema = new mongoose.Schema(
     doctorSpecialist: {
       type: String,
     },
-    patientName: {
-      type: String,
-      required: true, // Fixed: was 'require'
-    },
-    patientEmail: {
-      type: String,
-      required: true, // Fixed: was 'require'
-    },
-    patientPhone: {
-      type: String,
-      required: true, // Fixed: was 'require'
-    },
     appointmentDate: {
       type: String,
       required: true, // Fixed: was 'require'

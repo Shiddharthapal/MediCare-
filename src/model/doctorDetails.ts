@@ -11,7 +11,6 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     patientEmail: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     patientPhone: {
       type: String,

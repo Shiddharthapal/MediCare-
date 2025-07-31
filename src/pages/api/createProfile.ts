@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import connect from "@/lib/connection";
 import UserDetails from "@/model/userDetails";
-import { verifyToken } from "@/utils/token";
+import User from "@/model/user";
 
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
@@ -42,10 +42,12 @@ export const POST: APIRoute = async ({ request }) => {
     }
     await connect();
     const userdetails = await UserDetails.findOne({ userId: id });
+    let userdata = await User.findOne({ _id: id });
     console.log("userId=>", id);
     if (!userdetails) {
       const userDetails = new UserDetails({
         userId: id,
+        email: userdata?.email,
         name,
         fatherName,
         address,

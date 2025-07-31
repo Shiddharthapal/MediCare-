@@ -11,9 +11,6 @@ export const POST: APIRoute = async ({ request }) => {
     // console.log("🧞‍♂️body --->", body);
     const { formData, doctor, id } = body;
     const {
-      patientName,
-      patientEmail,
-      patientPhone,
       appointmentDate,
       appointmentTime,
       consultationType,
@@ -46,9 +43,6 @@ export const POST: APIRoute = async ({ request }) => {
     } = doctor;
 
     if (
-      !patientName ||
-      !patientEmail ||
-      !patientPhone ||
       !appointmentDate ||
       !appointmentTime ||
       !consultationType ||
@@ -60,9 +54,6 @@ export const POST: APIRoute = async ({ request }) => {
         JSON.stringify({
           message: "Missing field required",
           details: {
-            patientName: !patientName ? "patient name is required" : null,
-            patientEmail: !patientEmail ? "patient email is required" : null,
-            patientPhone: !patientPhone ? "patient phone is required" : null,
             appointmentDate: !appointmentDate
               ? "Appointment date is required"
               : null,
@@ -98,9 +89,6 @@ export const POST: APIRoute = async ({ request }) => {
         doctorUserId: doctor.userId,
         doctorName: name,
         doctorSpecialist: specialist,
-        patientName,
-        patientEmail,
-        patientPhone,
         appointmentDate,
         appointmentTime,
         consultationType,
@@ -125,11 +113,24 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
 
+      const doctordetails = await doctorDetails.findOne({ userId: userId });
+      console.log("🧞‍♂️updatedDoctor --->", doctordetails);
+      if (!doctordetails) {
+        return new Response(
+          JSON.stringify({
+            message: "No doctor found",
+          }),
+          {
+            status: 500,
+            headers,
+          }
+        );
+      }
       const newbookAppoinmentsDataforDoctor = {
         patientId: userdetails._id,
-        patientName,
-        patientEmail,
-        patientPhone,
+        patientName: userdetails.name,
+        patientEmail: userdetails.email || "",
+        patientPhone: userdetails.contactNumber,
         appointmentDate,
         appointmentTime,
         consultationType,
@@ -141,8 +142,12 @@ export const POST: APIRoute = async ({ request }) => {
         paymentMethod,
         specialRequests,
       };
+      console.log(
+        "🧞‍♂️newbookAppoinmentsDataforDoctor --->",
+        newbookAppoinmentsDataforDoctor
+      );
       const updateDoctor = await doctorDetails.findByIdAndUpdate(
-        doctor.userId,
+        doctordetails._id,
         {
           $push: { appointments: newbookAppoinmentsDataforDoctor },
         },

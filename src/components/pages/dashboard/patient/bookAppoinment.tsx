@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,6 +53,14 @@ interface Doctor {
   consultationModes: string[];
 }
 
+interface User {
+  userId: String;
+  email: String;
+  name: String;
+  address: String;
+  contactNumber: String;
+}
+
 interface BookAppointmentProps {
   isOpen: boolean;
   onClose: () => void;
@@ -60,9 +68,6 @@ interface BookAppointmentProps {
 }
 
 interface AppointmentData {
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
@@ -135,9 +140,6 @@ export default function BookAppointment({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState<AppointmentData>({
-    patientName: "",
-    patientEmail: "",
-    patientPhone: "",
     appointmentDate: "",
     appointmentTime: "",
     consultationType: "",
@@ -151,7 +153,13 @@ export default function BookAppointment({
   });
 
   const [errors, setErrors] = useState<Partial<AppointmentData>>({});
-
+  const [patientdata, setPatientdata] = useState<User>({
+    userId: "",
+    email: "",
+    name: "",
+    address: "",
+    contactNumber: "",
+  });
   const user = useAppSelector((state) => state.auth.user);
 
   const handleInputChange = (field: keyof AppointmentData, value: string) => {
@@ -166,16 +174,6 @@ export default function BookAppointment({
     const newErrors: Partial<AppointmentData> = {};
 
     switch (step) {
-      case 1:
-        if (!formData.patientName.trim())
-          newErrors.patientName = "Name is required";
-        if (!formData.patientEmail.trim())
-          newErrors.patientEmail = "Email is required";
-        else if (!/\S+@\S+\.\S+/.test(formData.patientEmail))
-          newErrors.patientEmail = "Invalid email format";
-        if (!formData.patientPhone.trim())
-          newErrors.patientPhone = "Phone number is required";
-        break;
       case 2:
         if (!formData.appointmentDate)
           newErrors.appointmentDate = "Date is required";
@@ -197,6 +195,33 @@ export default function BookAppointment({
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  useEffect(() => {
+    let id = user?._id;
+    const fetchData = async () => {
+      try {
+        let response = await fetch(`/api/user/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        let userdata = await response.json();
+        console.log("🧞‍♂️userdata --->", userdata);
+        setPatientdata({
+          userId: userdata?.userdetails?.userId || userdata?.userId,
+          email: userdata?.userdetails?.email || userdata?.email,
+          name: userdata?.userdetails?.name || userdata?.name,
+          address: userdata?.userdetails?.address || userdata?.address,
+          contactNumber:
+            userdata?.userdetails?.contactNumber || userdata?.contactNumber,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, [user?._id]);
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
@@ -241,9 +266,6 @@ export default function BookAppointment({
     setCurrentStep(1);
     setIsSuccess(false);
     setFormData({
-      patientName: "",
-      patientEmail: "",
-      patientPhone: "",
       appointmentDate: "",
       appointmentTime: "",
       consultationType: "",
@@ -270,7 +292,7 @@ export default function BookAppointment({
 
   const getMaxDate = () => {
     const maxDate = new Date();
-    maxDate.setMonth(maxDate.getMonth() + 3); // 3 months from now
+    maxDate.setDate(maxDate.getDate() + 7); // 7 days from now
     return maxDate.toISOString().split("T")[0];
   };
 
@@ -382,64 +404,30 @@ export default function BookAppointment({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="patientName">Full Name *</Label>
-                      <Input
-                        id="patientName"
-                        value={formData.patientName}
-                        onChange={(e) =>
-                          handleInputChange("patientName", e.target.value)
-                        }
-                        placeholder="Enter your full name"
-                        className={
-                          errors.patientName ? "border-red-500 mt-2" : "mt-2"
-                        }
-                      />
-                      {errors.patientName && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.patientName}
-                        </p>
-                      )}
+                      <div className="font-medium text-gray-900">
+                        Full Name *
+                      </div>
+                      <div className="font-small text-gray-900">
+                        {patientdata?.name}
+                      </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="patientEmail">Email Address *</Label>
-                      <Input
-                        id="patientEmail"
-                        type="email"
-                        value={formData.patientEmail}
-                        onChange={(e) =>
-                          handleInputChange("patientEmail", e.target.value)
-                        }
-                        placeholder="Enter your email"
-                        className={
-                          errors.patientEmail ? "border-red-500 mt-2" : "mt-2"
-                        }
-                      />
-                      {errors.patientEmail && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.patientEmail}
-                        </p>
-                      )}
+                      <div className="font-medium text-gray-900">
+                        Email Address *
+                      </div>
+                      <div className="font-small text-gray-900">
+                        {patientdata?.email}
+                      </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="patientPhone">Phone Number *</Label>
-                      <Input
-                        id="patientPhone"
-                        value={formData.patientPhone}
-                        onChange={(e) =>
-                          handleInputChange("patientPhone", e.target.value)
-                        }
-                        placeholder="Enter your phone number"
-                        className={
-                          errors.patientPhone ? "border-red-500 mt-2" : "mt-2"
-                        }
-                      />
-                      {errors.patientPhone && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.patientPhone}
-                        </p>
-                      )}
+                      <div className="font-medium text-gray-900">
+                        Contact Number *
+                      </div>
+                      <div className="font-small text-gray-900">
+                        {patientdata?.contactNumber}
+                      </div>
                     </div>
 
                     <div>
