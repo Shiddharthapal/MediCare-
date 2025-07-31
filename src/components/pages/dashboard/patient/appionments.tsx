@@ -40,6 +40,7 @@ interface appointmentdata {
 }
 
 const mockappointmentdata = {
+  _id: "",
   doctorUserId: "",
   doctorName: "",
   doctorSpecialist: "",
@@ -242,7 +243,7 @@ const mockappointmentdata = {
 //     },
 //   ],
 // };
-
+const status = "confirmed";
 const prescriptionsData = {
   9: [
     {
@@ -584,7 +585,7 @@ export default function Appointments({
           },
         });
         let userdata = await response.json();
-        console.log("🧞‍♂️userdata --->", userdata?.userdetails.appointments);
+        //console.log("🧞‍♂️userdata --->", userdata?.userdetails.appointments);
         setAppointmentsData(userdata?.userdetails?.appointments);
       } catch (err) {
         console.log(err);
@@ -596,6 +597,7 @@ export default function Appointments({
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
   }, [categorizedAppointments.today]);
+  console.log("today appointment=>", todayGrouped);
 
   const futureGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.future);
@@ -646,6 +648,30 @@ export default function Appointments({
     }));
   };
 
+  const getDoctorInitials = (doctorName: string) => {
+    if (!doctorName) return "DR";
+
+    // Remove DR/Dr prefix and clean the name
+    const cleanName = doctorName
+      .replace(/^(DR\.?|Dr\.?)\s*/i, "") // Remove DR/Dr at the beginning
+      .trim();
+
+    if (!cleanName) return "DR";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "DR";
+    }
+  };
+
   const AppointmentCard = ({
     appointment,
     showActions = false,
@@ -660,34 +686,32 @@ export default function Appointments({
             <Avatar className="h-12 w-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                {appointment.avatar}
+                {getDoctorInitials(appointment.doctorName)}
               </AvatarFallback>
             </Avatar>
 
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-gray-900">
-                  {appointment.type}
+                  {appointment.reasonForVisit}
                 </h3>
-                <Badge className={getStatusColor(appointment.status)}>
-                  {appointment.status}
-                </Badge>
+                <Badge className={getStatusColor(status)}>{status}</Badge>
               </div>
 
               <p className="text-sm text-gray-600 mb-1">
-                {appointment.doctor} • {appointment.specialty}
+                {appointment.doctorName} • {appointment.doctorSpecialist}
               </p>
 
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  {appointment.time}
+                  {appointment.appointmentTime}
                 </div>
                 <div className="flex items-center gap-1">
-                  {getModeIcon(appointment.mode)}
-                  {appointment.mode === "in-person"
+                  {getModeIcon(appointment.consultationType)}
+                  {appointment.consultationType === "in-person"
                     ? "In-person"
-                    : appointment.mode === "video"
+                    : appointment.consultationType === "video"
                       ? "Video Call"
                       : "Phone Call"}
                 </div>
@@ -699,22 +723,22 @@ export default function Appointments({
             {/* Appointment Management Actions (only for upcoming/today) */}
             {showActions && (
               <>
-                {appointment.status === "confirmed" &&
-                  appointment.mode === "video" && (
+                {status === "confirmed" &&
+                  appointment.consultationType === "video" && (
                     <Button
                       className="bg-pink-500 hover:bg-pink-600 text-white"
-                      onClick={() => handleJoinSession(appointment.id)}
+                      onClick={() => handleJoinSession(appointment._id)}
                     >
                       <Video className="h-4 w-4 mr-2" />
                       Join
                     </Button>
                   )}
-                {appointment.status === "confirmed" && (
+                {status === "confirmed" && (
                   <>
                     <Button
                       variant="outline"
                       className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                      onClick={() => handleCancelAppointment(appointment.id)}
+                      onClick={() => handleCancelAppointment(appointment._id)}
                     >
                       Cancel
                     </Button>
@@ -722,7 +746,7 @@ export default function Appointments({
                       variant="outline"
                       className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
                       onClick={() =>
-                        handleRescheduleAppointment(appointment.id)
+                        handleRescheduleAppointment(appointment._id)
                       }
                     >
                       Reschedule
@@ -863,7 +887,7 @@ export default function Appointments({
 
           {Object.keys(futureGrouped).length > 0 ? (
             Object.entries(futureGrouped).map(
-              ([date, appointments]: [string, any]) => (
+              ([date, appointments]: [string, appointmentdata[]]) => (
                 <div key={date} className="space-y-3">
                   <div className="flex items-center gap-2 pb-2 border-b">
                     <h3 className="text-lg font-medium text-gray-800">
@@ -882,13 +906,27 @@ export default function Appointments({
                     </Badge>
                   </div>
 
-                  {appointments.map((appointment: any) => (
-                    <AppointmentCard
-                      key={appointment._id}
-                      appointment={appointment}
-                      showActions={true}
-                    />
-                  ))}
+                  {appointments && appointments.length > 0 ? (
+                    appointments.map((appointment: appointmentdata) => {
+                      // Add individual appointment validation
+                      if (!appointment || !appointment._id) {
+                        console.warn("Invalid appointment data:", appointment);
+                        return null;
+                      }
+
+                      return (
+                        <AppointmentCard
+                          key={appointment._id}
+                          appointment={appointment}
+                          showActions={true}
+                        />
+                      );
+                    })
+                  ) : (
+                    <div className="text-gray-500 text-center py-4">
+                      No appointments found for this date
+                    </div>
+                  )}
                 </div>
               )
             )
@@ -919,30 +957,39 @@ export default function Appointments({
               Today's Appointments
             </h2>
             <Badge className="bg-green-100 text-green-800">
-              {todayGrouped.appointments.length} appointments
+              {Object.keys(todayGrouped).length} appointments
             </Badge>
           </div>
 
-          {todayGrouped.appointments.length > 0 ? (
-            todayGrouped.appointments.map((appointment) => (
-              <AppointmentCard
-                key={appointment._id}
-                appointment={appointment}
-                showActions={true}
-              />
-            ))
+          {Object.keys(todayGrouped).length > 0 ? (
+            todayGrouped && Object.keys(todayGrouped).length > 0 ? (
+              Object.entries(todayGrouped).map(
+                ([date, appointments]: [string, appointmentdata[]]) =>
+                  appointments.map((appointment: appointmentdata) => {
+                    // Add individual appointment validation
+                    if (!appointment || !appointment._id) {
+                      console.warn("Invalid appointment data:", appointment);
+                      return null;
+                    }
+
+                    return (
+                      <AppointmentCard
+                        key={appointment._id}
+                        appointment={appointment}
+                        showActions={true}
+                      />
+                    );
+                  })
+              )
+            ) : (
+              <div className="text-gray-500 text-center py-4">
+                No appointments found for today
+              </div>
+            )
           ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No appointments today
-                </h3>
-                <p className="text-gray-600">
-                  You have a free day! Enjoy your time.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="text-gray-500 text-center py-4">
+              No appointment data available
+            </div>
           )}
         </div>
       )}
