@@ -2,6 +2,9 @@ interface AppointmentData {
   doctorUserId: string;
   doctorName: string;
   doctorSpecialist: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;

@@ -16,6 +16,7 @@ import {
   Download,
   X,
   FileText,
+  Info,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -58,191 +59,7 @@ const mockappointmentdata = {
   paymentMethod: "",
   specialRequests: "",
 };
-// Mock appointment data
-// const appointmentsData = {
-//   future: [
-//     {
-//       id: 1,
-//       date: "2024-01-09",
-//       time: "09:00 AM - 09:30 AM",
-//       doctor: "Dr. Sarah Wilson",
-//       specialty: "Cardiologist",
-//       type: "Heart Checkup",
-//       status: "confirmed",
-//       mode: "video",
-//       avatar: "SW",
-//     },
-//     {
-//       id: 2,
-//       date: "2024-01-09",
-//       time: "02:00 PM - 02:45 PM",
-//       doctor: "Dr. Michael Chen",
-//       specialty: "Dermatologist",
-//       type: "Skin Consultation",
-//       status: "confirmed",
-//       mode: "in-person",
-//       avatar: "MC",
-//     },
-//     {
-//       id: 3,
-//       date: "2024-01-10",
-//       time: "11:00 AM - 11:30 AM",
-//       doctor: "Dr. Tina Murphy",
-//       specialty: "Endocrinologist",
-//       type: "Hormone Therapy Consultation",
-//       status: "confirmed",
-//       mode: "video",
-//       avatar: "TM",
-//     },
-//     {
-//       id: 4,
-//       date: "2024-01-11",
-//       time: "03:30 PM - 04:00 PM",
-//       doctor: "Dr. James Rodriguez",
-//       specialty: "Orthopedist",
-//       type: "Knee Pain Assessment",
-//       status: "pending",
-//       mode: "in-person",
-//       avatar: "JR",
-//     },
-//     {
-//       id: 5,
-//       date: "2024-01-12",
-//       time: "10:00 AM - 10:30 AM",
-//       doctor: "Dr. Lisa Thompson",
-//       specialty: "Nutritionist",
-//       type: "Diet Consultation",
-//       status: "confirmed",
-//       mode: "phone",
-//       avatar: "LT",
-//     },
-//     {
-//       id: 6,
-//       date: "2024-01-15",
-//       time: "01:00 PM - 01:30 PM",
-//       doctor: "Dr. Micheal Hussey",
-//       specialty: "Anti-Aging Specialist",
-//       type: "Anti-Aging Consultation",
-//       status: "confirmed",
-//       mode: "video",
-//       avatar: "MH",
-//     },
-//   ],
-//   today: [
-//     {
-//       id: 7,
-//       date: "2024-01-08",
-//       time: "10:00 AM - 10:30 AM",
-//       doctor: "Dr. Emily Davis",
-//       specialty: "General Physician",
-//       type: "Regular Checkup",
-//       status: "confirmed",
-//       mode: "video",
-//       avatar: "ED",
-//     },
-//     {
-//       id: 8,
-//       date: "2024-01-08",
-//       time: "03:00 PM - 03:30 PM",
-//       doctor: "Dr. Robert Kim",
-//       specialty: "Psychiatrist",
-//       type: "Mental Health Session",
-//       status: "confirmed",
-//       mode: "in-person",
-//       avatar: "RK",
-//     },
-//   ],
-//   past: [
-//     {
-//       id: 9,
-//       date: "2024-01-05",
-//       time: "11:00 AM - 11:30 AM",
-//       doctor: "Dr. Tina Murphy",
-//       specialty: "Endocrinologist",
-//       type: "Hormone Therapy Follow-up",
-//       status: "completed",
-//       mode: "video",
-//       avatar: "TM",
-//     },
-//     {
-//       id: 10,
-//       date: "2024-01-03",
-//       time: "02:00 PM - 02:30 PM",
-//       doctor: "Dr. Amanda Foster",
-//       specialty: "Gynecologist",
-//       type: "Annual Checkup",
-//       status: "completed",
-//       mode: "in-person",
-//       avatar: "AF",
-//     },
-//     {
-//       id: 11,
-//       date: "2023-12-28",
-//       time: "09:30 AM - 10:00 AM",
-//       doctor: "Dr. David Park",
-//       specialty: "Ophthalmologist",
-//       type: "Eye Examination",
-//       status: "completed",
-//       mode: "in-person",
-//       avatar: "DP",
-//     },
-//     {
-//       id: 12,
-//       date: "2023-12-20",
-//       time: "04:00 PM - 04:30 PM",
-//       doctor: "Dr. Maria Garcia",
-//       specialty: "Neurologist",
-//       type: "Headache Consultation",
-//       status: "completed",
-//       mode: "video",
-//       avatar: "MG",
-//     },
-//     {
-//       id: 13,
-//       date: "2023-12-15",
-//       time: "01:30 PM - 02:00 PM",
-//       doctor: "Dr. Kevin Lee",
-//       specialty: "Urologist",
-//       type: "Routine Checkup",
-//       status: "completed",
-//       mode: "in-person",
-//       avatar: "KL",
-//     },
-//     {
-//       id: 14,
-//       date: "2023-12-10",
-//       time: "11:00 AM - 11:30 AM",
-//       doctor: "Dr. Rachel Green",
-//       specialty: "Pediatrician",
-//       type: "Child Health Checkup",
-//       status: "completed",
-//       mode: "in-person",
-//       avatar: "RG",
-//     },
-//     {
-//       id: 15,
-//       date: "2023-12-05",
-//       time: "02:30 PM - 03:00 PM",
-//       doctor: "Dr. Thomas Brown",
-//       specialty: "Dentist",
-//       type: "Dental Cleaning",
-//       status: "completed",
-//       mode: "in-person",
-//       avatar: "TB",
-//     },
-//     {
-//       id: 16,
-//       date: "2023-11-28",
-//       time: "09:00 AM - 09:30 AM",
-//       doctor: "Dr. Jennifer White",
-//       specialty: "Rheumatologist",
-//       type: "Joint Pain Consultation",
-//       status: "completed",
-//       mode: "video",
-//       avatar: "JW",
-//     },
-//   ],
-// };
+
 const prescriptionsData = {
   9: [
     {
@@ -553,8 +370,10 @@ export default function Appointments({
 }) {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReportsModal, setShowReportsModal] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<appointmentdata | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<{ [key: number]: File[] }>(
     {}
   );
@@ -644,6 +463,10 @@ export default function Appointments({
     }
   };
 
+  const handleViewDetails = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setShowDetailsModal(true);
+  };
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);
@@ -779,6 +602,14 @@ export default function Appointments({
             >
               <FileText className="h-4 w-4 mr-2" />
               Prescription
+            </Button>
+            <Button
+              variant="outline"
+              className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+              onClick={() => handleViewDetails(appointment)}
+            >
+              <Info className="h-4 w-4 mr-2" />
+              See Details
             </Button>
             <Button
               variant="outline"
@@ -1060,6 +891,112 @@ export default function Appointments({
         </div>
       )}
 
+      {showDetailsModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Appointment Details - {selectedAppointment.reasonForVisit}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDetailsModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600">
+                  {selectedAppointment.doctorName} •{" "}
+                  {formatDate(selectedAppointment.appointmentDate)}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Patient Information
+                  </h3>
+                  <p>
+                    <strong>Name:</strong> {selectedAppointment.patientName}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {selectedAppointment.patientEmail}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> {selectedAppointment.patientPhone}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Appointment Specifics
+                  </h3>
+                  <p>
+                    <strong>Date:</strong> {selectedAppointment.appointmentDate}
+                  </p>
+                  <p>
+                    <strong>Time:</strong> {selectedAppointment.appointmentTime}
+                  </p>
+                  <p>
+                    <strong>Consultation Type:</strong>{" "}
+                    {selectedAppointment.consultationType}
+                  </p>
+                  <p>
+                    <strong>Mode:</strong>{" "}
+                    {selectedAppointment.consultationType}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {}
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Medical Details
+                  </h3>
+                  <p>
+                    <strong>Reason for Visit:</strong>{" "}
+                    {selectedAppointment.reasonForVisit}
+                  </p>
+                  <p>
+                    <strong>Symptoms:</strong> {selectedAppointment.symptoms}
+                  </p>
+                  <p>
+                    <strong>Previous Visit:</strong>{" "}
+                    {selectedAppointment.previousVisit}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Emergency Contact
+                  </h3>
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {selectedAppointment.emergencyContact}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> {selectedAppointment.emergencyPhone}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Other Information
+                  </h3>
+                  <p>
+                    <strong>Payment Method:</strong>{" "}
+                    {selectedAppointment.paymentMethod}
+                  </p>
+                  <p>
+                    <strong>Special Requests:</strong>{" "}
+                    {selectedAppointment.specialRequests}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Prescription Modal */}
       {showPrescriptionModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -1067,7 +1004,7 @@ export default function Appointments({
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Prescription - {selectedAppointment.type}
+                  Prescription -
                 </h2>
                 <Button
                   variant="ghost"
@@ -1080,8 +1017,8 @@ export default function Appointments({
 
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
-                  {selectedAppointment.doctor} •{" "}
-                  {formatDate(selectedAppointment.date)}
+                  {selectedAppointment.doctorName} •{" "}
+                  {formatDate(selectedAppointment.appointmentDate)}
                 </p>
               </div>
 

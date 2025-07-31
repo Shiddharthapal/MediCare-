@@ -12,6 +12,15 @@ const appointmentDataSchema = new mongoose.Schema(
     doctorSpecialist: {
       type: String,
     },
+    patientName: {
+      type: String,
+    },
+    patientEmail: {
+      type: String,
+    },
+    patientPhone: {
+      type: String,
+    },
     appointmentDate: {
       type: String,
       required: true, // Fixed: was 'require'
