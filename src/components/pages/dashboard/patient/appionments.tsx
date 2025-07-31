@@ -243,7 +243,6 @@ const mockappointmentdata = {
 //     },
 //   ],
 // };
-const status = "confirmed";
 const prescriptionsData = {
   9: [
     {
@@ -671,11 +670,13 @@ export default function Appointments({
       return "DR";
     }
   };
-
+  const appointmentStatus = "completed";
   const AppointmentCard = ({
+    status,
     appointment,
     showActions = false,
   }: {
+    status: string;
     appointment: any;
     showActions?: boolean;
   }) => (
@@ -916,6 +917,7 @@ export default function Appointments({
 
                       return (
                         <AppointmentCard
+                          status="future"
                           key={appointment._id}
                           appointment={appointment}
                           showActions={true}
@@ -974,6 +976,7 @@ export default function Appointments({
 
                     return (
                       <AppointmentCard
+                        status="today"
                         key={appointment._id}
                         appointment={appointment}
                         showActions={true}
@@ -1002,38 +1005,44 @@ export default function Appointments({
               Appointment History
             </h2>
             <Badge variant="outline">
-              {pastGrouped.appointments.length} completed
+              {Object.keys(pastGrouped).length} completed
             </Badge>
           </div>
+          {Object.keys(pastGrouped).length > 0 ? (
+            Object.entries(pastGrouped)
+              .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+              .map(([date, appointments]: [string, any]) => (
+                <div key={date} className="space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b">
+                    <h3 className="text-lg font-medium text-gray-800">
+                      {new Date(date).toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </h3>
+                    <Badge variant="outline" className="ml-2">
+                      {appointments.length} appointment
+                      {appointments.length !== 1 ? "s" : ""}
+                    </Badge>
+                  </div>
 
-          {Object.entries(pastGrouped)
-            .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
-            .map(([date, appointments]: [string, any]) => (
-              <div key={date} className="space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b">
-                  <h3 className="text-lg font-medium text-gray-800">
-                    {new Date(date).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </h3>
-                  <Badge variant="outline" className="ml-2">
-                    {appointments.length} appointment
-                    {appointments.length !== 1 ? "s" : ""}
-                  </Badge>
+                  {appointments.map((appointment: any) => (
+                    <AppointmentCard
+                      status="past"
+                      key={appointment.id}
+                      appointment={appointment}
+                      showActions={false}
+                    />
+                  ))}
                 </div>
-
-                {appointments.map((appointment: any) => (
-                  <AppointmentCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    showActions={false}
-                  />
-                ))}
-              </div>
-            ))}
+              ))
+          ) : (
+            <div className="text-gray-500 text-center py-4">
+              No appointment data available
+            </div>
+          )}
         </div>
       )}
 
