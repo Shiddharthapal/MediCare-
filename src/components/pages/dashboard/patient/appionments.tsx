@@ -612,9 +612,24 @@ export default function Appointments({
     // Add video call logic here
   };
 
-  const handleCancelAppointment = (appointmentId: number) => {
+  const handleCancelAppointment = async (appointmentId: number) => {
     console.log(`Cancelling appointment ${appointmentId}`);
-    // Add cancellation logic here
+    let id = user?._id;
+    let appointmentDeleteResponse = await fetch(
+      "./api/user/deleteAppointment",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId: appointmentId,
+          userId: id,
+        }),
+      }
+    );
+    let appointmentdeleteresponse = await appointmentDeleteResponse.json();
+    setAppointmentsData(appointmentdeleteresponse?.userdetails?.appointments);
   };
 
   const handleRescheduleAppointment = (appointmentId: number) => {
