@@ -670,7 +670,6 @@ export default function Appointments({
       return "DR";
     }
   };
-  const appointmentStatus = "completed";
   const AppointmentCard = ({
     status,
     appointment,
@@ -917,7 +916,7 @@ export default function Appointments({
 
                       return (
                         <AppointmentCard
-                          status="future"
+                          status="pending"
                           key={appointment._id}
                           appointment={appointment}
                           showActions={true}
@@ -976,7 +975,7 @@ export default function Appointments({
 
                     return (
                       <AppointmentCard
-                        status="today"
+                        status="confirmed"
                         key={appointment._id}
                         appointment={appointment}
                         showActions={true}
@@ -1030,7 +1029,7 @@ export default function Appointments({
 
                   {appointments.map((appointment: any) => (
                     <AppointmentCard
-                      status="past"
+                      status="completed"
                       key={appointment.id}
                       appointment={appointment}
                       showActions={false}
