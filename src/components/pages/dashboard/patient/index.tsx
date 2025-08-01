@@ -90,6 +90,7 @@ const mockappointmentdata = {
   status: "",
 };
 const getStatusColor = (status: string) => {
+  console.log("🧞‍♂️status --->", status);
   switch (status) {
     case "confirmed":
       return "bg-green-100 text-green-800";
@@ -349,7 +350,9 @@ export default function Dashboard() {
                 <h3 className="font-semibold text-gray-900">
                   {appointment.reasonForVisit}
                 </h3>
-                <Badge className={getStatusColor(status)}>{status}</Badge>
+                <Badge className={getStatusColor(status)}>
+                  {status || appointment.status}
+                </Badge>
               </div>
 
               <p className="text-sm text-gray-600 mb-1">
@@ -357,6 +360,10 @@ export default function Dashboard() {
               </p>
 
               <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {appointment.appointmentDate}
+                </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
                   {appointment.appointmentTime}
