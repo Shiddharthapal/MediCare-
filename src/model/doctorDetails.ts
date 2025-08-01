@@ -2,6 +2,15 @@ import mongoose from "mongoose";
 
 const appointmentDataSchema = new mongoose.Schema(
   {
+    doctorName: {
+      type: String,
+    },
+    doctorSpecialist: {
+      type: String,
+    },
+    doctorEmail: {
+      type: String,
+    },
     patientId: {
       type: String,
     },
@@ -67,6 +76,9 @@ const doctorDetailsSchema = new mongoose.Schema({
   name: {
     type: String,
     require: true,
+  },
+  email: {
+    type: String,
   },
   specialist: {
     type: String,

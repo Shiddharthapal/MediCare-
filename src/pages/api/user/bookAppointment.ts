@@ -133,6 +133,9 @@ export const POST: APIRoute = async ({ request }) => {
         );
       }
       const newbookAppoinmentsDataforDoctor = {
+        doctorName: name,
+        doctorSpecialist: specialist,
+        doctorEmail: "",
         patientId: userdetails._id,
         patientName: userdetails.name,
         patientEmail: userdetails.email || "",

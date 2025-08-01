@@ -1,4 +1,5 @@
 import connect from "@/lib/connection";
+import Doctor from "@/model/doctor";
 import DoctorDetails from "@/model/doctorDetails";
 import { verifyToken } from "@/utils/token";
 import type { APIRoute } from "astro";
@@ -76,6 +77,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     await connect();
 
+    const doctordata = await Doctor.findOne({ _id: tokenDetails?.userId });
     const doctordetails = await DoctorDetails.findOne({
       userId: tokenDetails?.userId,
     });
@@ -83,6 +85,7 @@ export const POST: APIRoute = async ({ request }) => {
       const doctorDetails = new DoctorDetails({
         userId: tokenDetails?.userId,
         name,
+        email: doctordata?.email,
         specialist,
         specializations,
         hospital,
@@ -100,6 +103,7 @@ export const POST: APIRoute = async ({ request }) => {
       await doctorDetails.save();
     } else {
       (doctordetails.name = name || doctordetails.name),
+        (doctordetails.email = doctordata?.email || doctordetails.email),
         (doctordetails.specialist = specialist || doctordetails.specialist),
         (doctordetails.specializations =
           specializations || doctordetails.specializations),

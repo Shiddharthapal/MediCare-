@@ -1,4 +1,7 @@
 interface AppointmentData {
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorEmail: string;
   patientId: string;
   patientName: string;
   patientEmail: string;
@@ -19,6 +22,7 @@ export interface DoctorDetails {
   _id: string;
   userId: string;
   name: string;
+  email: string;
   specialist: string;
   specializations: string[];
   hospital: string;
