@@ -33,6 +33,10 @@ const appointmentDataSchema = new mongoose.Schema(
       type: String,
       required: true, // Fixed: was 'require'
     },
+    consultedType: {
+      type: String,
+      required: true,
+    },
     reasonForVisit: {
       type: String,
     },

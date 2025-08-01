@@ -31,6 +31,7 @@ interface appointmentdata {
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
+  consultedType: string;
   reasonForVisit: string;
   symptoms: string;
   previousVisit: string;
@@ -38,6 +39,7 @@ interface appointmentdata {
   emergencyPhone: string;
   paymentMethod: string;
   specialRequests: string;
+  status: string;
 }
 
 const mockappointmentdata = {
@@ -50,7 +52,8 @@ const mockappointmentdata = {
   patientPhone: "",
   appointmentDate: "",
   appointmentTime: "",
-  consultationType: "",
+  mode: "",
+  consultedType: "",
   reasonForVisit: "",
   symptoms: "",
   previousVisit: "",
@@ -58,6 +61,7 @@ const mockappointmentdata = {
   emergencyPhone: "",
   paymentMethod: "",
   specialRequests: "",
+  status: "",
 };
 
 const prescriptionsData = {
@@ -463,8 +467,12 @@ export default function Appointments({
     }
   };
 
-  const handleViewDetails = (appointment: any) => {
-    setSelectedAppointment(appointment);
+  const handleViewDetails = (appointment: appointmentdata, status: string) => {
+    let appointmentWithStatus = {
+      ...appointment,
+      status: status,
+    };
+    setSelectedAppointment(appointmentWithStatus);
     setShowDetailsModal(true);
   };
   const handleViewPrescription = (appointment: any) => {
@@ -606,7 +614,7 @@ export default function Appointments({
             <Button
               variant="outline"
               className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-              onClick={() => handleViewDetails(appointment)}
+              onClick={() => handleViewDetails(appointment, status)}
             >
               <Info className="h-4 w-4 mr-2" />
               See Details
@@ -940,14 +948,14 @@ export default function Appointments({
                   </p>
                   <p>
                     <strong>Consultation Type:</strong>{" "}
-                    {selectedAppointment.consultationType}
+                    {selectedAppointment.consultedType}
                   </p>
                   <p>
                     <strong>Mode:</strong>{" "}
                     {selectedAppointment.consultationType}
                   </p>
                   <p>
-                    <strong>Status:</strong> {}
+                    <strong>Status:</strong> {selectedAppointment.status}
                   </p>
                 </div>
                 <div className="md:col-span-2">

@@ -8,21 +8,22 @@ export const POST: APIRoute = async ({ request }) => {
   };
   try {
     const body = await request.json();
-    // console.log("🧞‍♂️body --->", body);
+    console.log("🧞‍♂️body --->", body);
     const { formData, doctor, id } = body;
     const {
       appointmentDate,
       appointmentTime,
       consultationType,
+      consultedType,
       reasonForVisit,
       symptoms,
       previousVisit,
-      emergencyContac,
+      emergencyContact,
       emergencyPhone,
       paymentMethod,
       specialRequests,
     } = formData;
-    //console.log("🧞‍♂️formData --->", formData);
+    console.log("🧞‍♂️formData --->", formData);
 
     const {
       userId,
@@ -82,7 +83,7 @@ export const POST: APIRoute = async ({ request }) => {
       userId: id,
     });
 
-    //console.log("🧞‍♂️userdetails --->", userdetails);
+    console.log("🧞‍♂️userdetails --->", userdetails);
 
     if (userdetails) {
       const newbookAppoinmentsDetails = {
@@ -95,15 +96,16 @@ export const POST: APIRoute = async ({ request }) => {
         appointmentDate,
         appointmentTime,
         consultationType,
+        consultedType,
         reasonForVisit,
         symptoms,
         previousVisit,
-        emergencyContac,
+        emergencyContact,
         emergencyPhone,
         paymentMethod,
         specialRequests,
       };
-      //console.log("newbookAppoinmentsDetails --->", newbookAppoinmentsDetails);
+      console.log("newbookAppoinmentsDetails --->", newbookAppoinmentsDetails);
 
       const updatedUser = await userDetails.findByIdAndUpdate(
         userdetails._id,
@@ -116,6 +118,7 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
 
+      console.log("🧞‍♂️updatedDoctor --->", updatedUser);
       const doctordetails = await doctorDetails.findOne({ userId: userId });
       console.log("🧞‍♂️updatedDoctor --->", doctordetails);
       if (!doctordetails) {
@@ -137,10 +140,11 @@ export const POST: APIRoute = async ({ request }) => {
         appointmentDate,
         appointmentTime,
         consultationType,
+        consultedType,
         reasonForVisit,
         symptoms,
         previousVisit,
-        emergencyContac,
+        emergencyContact,
         emergencyPhone,
         paymentMethod,
         specialRequests,

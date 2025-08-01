@@ -8,6 +8,7 @@ interface AppointmentData {
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
+  consultedType: string;
   reasonForVisit: string;
   symptoms: string;
   previousVisit: string;

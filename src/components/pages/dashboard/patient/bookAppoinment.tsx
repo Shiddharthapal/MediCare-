@@ -71,6 +71,7 @@ interface AppointmentData {
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
+  consultedType: string;
   reasonForVisit: string;
   symptoms: string;
   previousVisit: string;
@@ -91,7 +92,7 @@ const timeSlots = [
   "05:00 PM - 05:30 PM",
 ];
 
-const consultationTypes = [
+const consultationType = [
   {
     value: "video",
     label: "Video Call",
@@ -123,6 +124,70 @@ const reasonsForVisit = [
   "Other",
 ];
 
+const categorizedReasonsForVisit = {
+  "Preventive Care": [
+    "Annual physical examination",
+    "Routine checkup",
+    "Health screening",
+    "Vaccination/Immunization",
+    "Well-child visit",
+    "Sports physical",
+  ],
+  Cardiovascular: [
+    "Routine heart checkup",
+    "Chest pain evaluation",
+    "High blood pressure management",
+    "Heart palpitations",
+    "Shortness of breath",
+  ],
+  Respiratory: [
+    "Cough and cold symptoms",
+    "Breathing difficulties",
+    "Asthma management",
+    "Allergic reactions",
+    "Sinus infection",
+  ],
+  Digestive: [
+    "Stomach pain/Abdominal pain",
+    "Nausea and vomiting",
+    "Diarrhea",
+    "Constipation",
+    "Acid reflux/Heartburn",
+  ],
+  Musculoskeletal: [
+    "Back pain",
+    "Joint pain",
+    "Muscle strain",
+    "Arthritis management",
+    "Sports injury",
+  ],
+  "Mental Health": [
+    "Anxiety symptoms",
+    "Depression screening",
+    "Stress management",
+    "Mental health consultation",
+  ],
+  "Women's Health": [
+    "Annual gynecological exam",
+    "Pap smear",
+    "Menstrual irregularities",
+    "Pregnancy consultation",
+    "Birth control consultation",
+  ],
+  "General Symptoms": [
+    "Headache/Migraine",
+    "Fever",
+    "Fatigue/Weakness",
+    "Skin rash",
+    "Weight loss/gain",
+  ],
+  "Follow-up": [
+    "Post-surgery follow-up",
+    "Medication review",
+    "Lab result discussion",
+    "Treatment follow-up",
+  ],
+};
 const paymentMethods = [
   "Bikash",
   "Nagad",
@@ -143,6 +208,7 @@ export default function BookAppointment({
     appointmentDate: "",
     appointmentTime: "",
     consultationType: "",
+    consultedType: "",
     reasonForVisit: "",
     symptoms: "",
     previousVisit: "",
@@ -269,6 +335,7 @@ export default function BookAppointment({
       appointmentDate: "",
       appointmentTime: "",
       consultationType: "",
+      consultedType: "",
       reasonForVisit: "",
       symptoms: "",
       previousVisit: "",
@@ -297,7 +364,7 @@ export default function BookAppointment({
   };
 
   const getConsultationIcon = (type: string) => {
-    const consultation = consultationTypes.find((c) => c.value === type);
+    const consultation = consultationType.find((c) => c.value === type);
     return consultation ? consultation.icon : Calendar;
   };
 
@@ -598,7 +665,37 @@ export default function BookAppointment({
                     <FileText className="h-5 w-5" />
                     Medical Information
                   </h3>
-
+                  {/* New Select for Consulted Type */}
+                  <div>
+                    <Label htmlFor="consultedType">Consulted Type *</Label>
+                    <Select
+                      value={formData.consultedType}
+                      onValueChange={(value) =>
+                        handleInputChange("consultedType", value)
+                      }
+                    >
+                      <SelectTrigger
+                        className={
+                          errors.consultedType ? "border-red-500 mt-2" : "mt-2"
+                        }
+                      >
+                        <SelectValue placeholder="Select consulted type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.keys(categorizedReasonsForVisit).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.consultedType && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.consultedType}
+                      </p>
+                    )}
+                  </div>
+                  {/* Reason for Visit now depends on Consulted Type */}
                   <div>
                     <Label htmlFor="reasonForVisit">Reason for Visit *</Label>
                     <Select
@@ -606,6 +703,7 @@ export default function BookAppointment({
                       onValueChange={(value) =>
                         handleInputChange("reasonForVisit", value)
                       }
+                      disabled={!formData.consultedType} // Disable if no consulted type is selected
                     >
                       <SelectTrigger
                         className={
@@ -615,11 +713,14 @@ export default function BookAppointment({
                         <SelectValue placeholder="Select reason for visit" />
                       </SelectTrigger>
                       <SelectContent>
-                        {reasonsForVisit.map((reason) => (
-                          <SelectItem key={reason} value={reason}>
-                            {reason}
-                          </SelectItem>
-                        ))}
+                        {formData.consultedType &&
+                          categorizedReasonsForVisit[
+                            formData.consultedType as keyof typeof categorizedReasonsForVisit
+                          ]?.map((reason) => (
+                            <SelectItem key={reason} value={reason}>
+                              {reason}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     {errors.reasonForVisit && (
@@ -628,7 +729,6 @@ export default function BookAppointment({
                       </p>
                     )}
                   </div>
-
                   <div>
                     <Label htmlFor="symptoms">Current Symptoms</Label>
                     <Textarea
@@ -642,7 +742,6 @@ export default function BookAppointment({
                       className="mt-2"
                     />
                   </div>
-
                   <div>
                     <Label htmlFor="previousVisit" className="mb-2">
                       Previous Visit with this Doctor
@@ -760,7 +859,7 @@ export default function BookAppointment({
                                 return <Icon className="h-4 w-4" />;
                               })()}
                               {
-                                consultationTypes.find(
+                                consultationType.find(
                                   (t) => t.value === formData.consultationType
                                 )?.label
                               }
