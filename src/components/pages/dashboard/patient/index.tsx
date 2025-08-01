@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useAppSelector } from "@/redux/hooks";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +17,12 @@ import {
   Menu,
   X,
   LogOut,
+  Badge,
+  Clock,
+  Info,
+  Upload,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import Appointments from "./appionments";
 import Doctors from "./doctors";
@@ -31,10 +38,408 @@ const menuItems = [
   { icon: Settings, label: "Settings", active: false },
 ];
 
+interface appointmentdata {
+  _id: string;
+  doctorUserId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  status: string;
+}
+
+interface GroupedAppointments {
+  [date: string]: {
+    appointments: appointmentdata[];
+    status: string;
+    dayLabel: string;
+  };
+}
+
+const mockappointmentdata = {
+  _id: "",
+  doctorUserId: "",
+  doctorName: "",
+  doctorSpecialist: "",
+  patientName: "",
+  patientEmail: "",
+  patientPhone: "",
+  appointmentDate: "",
+  appointmentTime: "",
+  mode: "",
+  consultedType: "",
+  reasonForVisit: "",
+  symptoms: "",
+  previousVisit: "",
+  emergencyContact: "",
+  emergencyPhone: "",
+  paymentMethod: "",
+  specialRequests: "",
+  status: "",
+};
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "confirmed":
+      return "bg-green-100 text-green-800";
+    case "pending":
+      return "bg-yellow-100 text-yellow-800";
+    case "completed":
+      return "bg-blue-100 text-blue-800";
+    case "cancelled":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+const getTodayDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+const getAppointmentStatus = (appointmentDate: string): string => {
+  const today = getTodayDate();
+
+  if (appointmentDate === today) {
+    return "confirmed"; // Today's appointments
+  } else if (appointmentDate > today) {
+    return "pending"; // Future appointments
+  } else {
+    return "completed"; // Past appointments (shouldn't appear in this view)
+  }
+};
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // Reset time to compare only dates
+  today.setHours(0, 0, 0, 0);
+  tomorrow.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+
+  if (date.getTime() === today.getTime()) {
+    return "Today";
+  } else if (date.getTime() === tomorrow.getTime()) {
+    return "Tomorrow";
+  } else {
+    // For all other future dates, show day name with date
+    const diffTime = date.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 7) {
+      // Within a week - show day name
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+      });
+    } else {
+      // Beyond a week - show full date
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year:
+          date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+      });
+    }
+  }
+};
+
+const groupTodayToFutureAppointments = (
+  appointments: appointmentdata[]
+): GroupedAppointments => {
+  const todayDate = getTodayDate();
+
+  // Filter appointments from today onwards
+  const todayToFutureAppointments = appointments.filter(
+    (appointment) => appointment.appointmentDate >= todayDate
+  );
+
+  const grouped: GroupedAppointments = {};
+  todayToFutureAppointments.forEach((appointment) => {
+    const date = appointment.appointmentDate;
+    const status = getAppointmentStatus(date);
+    const dayLabel = formatDate(date);
+    if (!grouped[date]) {
+      grouped[date] = {
+        appointments: [],
+        status,
+        dayLabel,
+      };
+    }
+
+    grouped[date].appointments.push(appointment);
+  });
+
+  // Sort appointments within each date by time
+  Object.keys(grouped).forEach((date) => {
+    grouped[date].appointments.sort((a, b) =>
+      a.appointmentTime.localeCompare(b.appointmentTime)
+    );
+  });
+
+  return grouped;
+};
+const getModeIcon = (mode: string) => {
+  switch (mode) {
+    case "video":
+      return <Video className="h-4 w-4" />;
+    case "phone":
+      return <Phone className="h-4 w-4" />;
+    case "in-person":
+      return <MapPin className="h-4 w-4" />;
+    default:
+      return <Calendar className="h-4 w-4" />;
+  }
+};
+
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [collapsed, setCollapsed] = useState(false);
+  const [appointmentsData, setAppointmentsData] = useState<appointmentdata[]>(
+    []
+  );
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showReportsModal, setShowReportsModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<appointmentdata | null>(null);
+
+  const user = useAppSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    let id = user?._id;
+    const fetchData = async () => {
+      try {
+        let response = await fetch(`/api/user/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        let userdata = await response.json();
+        //console.log("🧞‍♂️userdata --->", userdata?.userdetails.appointments);
+        setAppointmentsData(userdata?.userdetails?.appointments);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, [user?._id]);
+
+  // Group appointments from today to future
+  const groupedAppointments = useMemo(() => {
+    return groupTodayToFutureAppointments(appointmentsData);
+  }, [appointmentsData]);
+
+  // Get sorted dates for chronological display
+  const sortedDates = useMemo(() => {
+    return Object.keys(groupedAppointments).sort();
+  }, [groupedAppointments]);
+
+  const getDoctorInitials = (doctorName: string) => {
+    if (!doctorName) return "DR";
+
+    // Remove DR/Dr prefix and clean the name
+    const cleanName = doctorName
+      .replace(/^(DR\.?|Dr\.?)\s*/i, "") // Remove DR/Dr at the beginning
+      .trim();
+
+    if (!cleanName) return "DR";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "DR";
+    }
+  };
+
+  const handleJoinSession = (appointmentId: number) => {
+    console.log(`Joining session for appointment ${appointmentId}`);
+    // Add video call logic here
+  };
+
+  const handleRescheduleAppointment = (appointmentId: number) => {
+    console.log(`Rescheduling appointment ${appointmentId}`);
+    // Add reschedule logic here
+  };
+
+  const handleViewDetails = (appointment: appointmentdata, status: string) => {
+    let appointmentWithStatus = {
+      ...appointment,
+      status: status,
+    };
+    setSelectedAppointment(appointmentWithStatus);
+    setShowDetailsModal(true);
+  };
+  const handleViewPrescription = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setShowPrescriptionModal(true);
+  };
+
+  const handleViewReports = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setShowReportsModal(true);
+  };
+
+  const handleCancelAppointment = async (appointmentId: number) => {
+    console.log(`Cancelling appointment ${appointmentId}`);
+    let id = user?._id;
+    let appointmentDeleteResponse = await fetch(
+      "./api/user/deleteAppointment",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId: appointmentId,
+          userId: id,
+        }),
+      }
+    );
+    let appointmentdeleteresponse = await appointmentDeleteResponse.json();
+    setAppointmentsData(appointmentdeleteresponse?.userdetails?.appointments);
+  };
+
+  const AppointmentCard = ({
+    status,
+    appointment,
+    showActions = false,
+  }: {
+    status: string;
+    appointment: any;
+    showActions?: boolean;
+  }) => (
+    <Card className="mb-4 hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src="/placeholder.svg?height=48&width=48" />
+              <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                {getDoctorInitials(appointment.doctorName)}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-gray-900">
+                  {appointment.reasonForVisit}
+                </h3>
+                <Badge className={getStatusColor(status)}>{status}</Badge>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-1">
+                {appointment.doctorName} • {appointment.doctorSpecialist}
+              </p>
+
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {appointment.appointmentTime}
+                </div>
+                <div className="flex items-center gap-1">
+                  {getModeIcon(appointment.consultationType)}
+                  {appointment.consultationType === "in-person"
+                    ? "In-person"
+                    : appointment.consultationType === "video"
+                      ? "Video Call"
+                      : "Phone Call"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            {/* Appointment Management Actions (only for upcoming/today) */}
+            {showActions && (
+              <>
+                {status === "confirmed" &&
+                  appointment.consultationType === "video" && (
+                    <Button
+                      className="bg-pink-500 hover:bg-pink-600 text-white"
+                      onClick={() => handleJoinSession(appointment._id)}
+                    >
+                      <Video className="h-4 w-4 mr-2" />
+                      Join
+                    </Button>
+                  )}
+                {status === "confirmed" && (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
+                      onClick={() => handleCancelAppointment(appointment._id)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
+                      onClick={() =>
+                        handleRescheduleAppointment(appointment._id)
+                      }
+                    >
+                      Reschedule
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
+
+            {/* Prescription and Reports options (always visible) */}
+            <Button
+              variant="outline"
+              className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+              onClick={() => handleViewPrescription(appointment)}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Prescription
+            </Button>
+            <Button
+              variant="outline"
+              className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+              onClick={() => handleViewDetails(appointment, status)}
+            >
+              <Info className="h-4 w-4 mr-2" />
+              See Details
+            </Button>
+            <Button
+              variant="outline"
+              className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+              onClick={() => handleViewReports(appointment)}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Reports
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -286,101 +691,186 @@ export default function Dashboard() {
               </div>
 
               {/* Upcoming Appointments */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    Upcoming Appointments
-                  </h2>
-                  <Button
-                    variant="link"
-                    className="text-pink-500 p-0 h-auto font-normal"
-                  >
-                    View all
-                  </Button>
-                </div>
-                <div className="space-y-4">
-                  {/* Hormone Therapy Consultation */}
-                  <Card className="bg-white">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        <div className="space-y-3">
-                          <h3 className="font-semibold text-gray-900">
-                            Hormone Therapy Consultation
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                              <AvatarFallback className="bg-gray-200 text-gray-600 text-sm">
-                                TM
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="text-sm text-gray-600">
-                              Dr. Tina Murphy
-                            </span>
-                            <span className="text-gray-400">•</span>
-                            <span className="text-sm text-gray-600">
-                              05 Feb, 2024
-                            </span>
-                            <span className="text-gray-400">•</span>
-                            <span className="text-sm text-gray-600">
-                              11:00 AM - 11:30 AM
-                            </span>
-                          </div>
-                        </div>
-                        <Button className="bg-pink-500 hover:bg-pink-600 text-white">
-                          <Video className="h-4 w-4 mr-2" />
-                          Join Session
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <div className="space-y-4 p-4 md:p-2 lg:p-3">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Upcomming Appointments
+                </h2>
+                {/* Appointments List - All appointments from today to future */}
+                <div className="space-y-6">
+                  {sortedDates?.length > 0 ? (
+                    sortedDates?.map((date) => {
+                      const group = groupedAppointments[date];
+                      const appointmentDate = new Date(date);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      appointmentDate.setHours(0, 0, 0, 0);
 
-                  {/* Anti-Aging Consultation */}
-                  <Card className="bg-white">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        <div className="space-y-3">
-                          <h3 className="font-semibold text-gray-900">
-                            Anti-Aging Consultation
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                              <AvatarFallback className="bg-gray-200 text-gray-600 text-sm">
-                                MH
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="text-sm text-gray-600">
-                              Dr. Micheal Hussey
-                            </span>
-                            <span className="text-gray-400">•</span>
-                            <span className="text-sm text-gray-600">
-                              05 Feb, 2024
-                            </span>
-                            <span className="text-gray-400">•</span>
-                            <span className="text-sm text-gray-600">
-                              11:00 AM - 11:30 AM
-                            </span>
+                      // Calculate days from today
+                      const diffTime =
+                        appointmentDate.getTime() - today.getTime();
+                      const diffDays = Math.ceil(
+                        diffTime / (1000 * 60 * 60 * 24)
+                      );
+
+                      let dateSubtext = "";
+                      if (diffDays === 0) {
+                        dateSubtext = "Today";
+                      } else if (diffDays <= 7) {
+                        dateSubtext = `In ${diffDays} days`;
+                      }
+                      return (
+                        <div key={date} className="space-y-3">
+                          {group.appointments.map((appointment) => {
+                            if (!appointment || !appointment._id) {
+                              console.warn(
+                                "Invalid appointment data:",
+                                appointment
+                              );
+                              return null;
+                            }
+                            return (
+                              <AppointmentCard
+                                key={appointment._id}
+                                status={group.status}
+                                appointment={appointment}
+                                showActions={true}
+                              />
+                            );
+                          })}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          No upcoming appointments
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          You don't have any appointments scheduled from today
+                          onwards.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Details Modal */}
+                {showDetailsModal && selectedAppointment && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-xl font-semibold text-gray-900">
+                            Appointment Details -{" "}
+                            {selectedAppointment.reasonForVisit}
+                          </h2>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setShowDetailsModal(false)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="mb-4">
+                          <p className="text-sm text-gray-600">
+                            {selectedAppointment.doctorName} •{" "}
+                            {formatDate(selectedAppointment.appointmentDate)}
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2">
+                              Patient Information
+                            </h3>
+                            <p>
+                              <strong>Name:</strong>{" "}
+                              {selectedAppointment.patientName}
+                            </p>
+                            <p>
+                              <strong>Email:</strong>{" "}
+                              {selectedAppointment.patientEmail}
+                            </p>
+                            <p>
+                              <strong>Phone:</strong>{" "}
+                              {selectedAppointment.patientPhone}
+                            </p>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2">
+                              Appointment Specifics
+                            </h3>
+                            <p>
+                              <strong>Date:</strong>{" "}
+                              {selectedAppointment.appointmentDate}
+                            </p>
+                            <p>
+                              <strong>Time:</strong>{" "}
+                              {selectedAppointment.appointmentTime}
+                            </p>
+                            <p>
+                              <strong>Consultation Type:</strong>{" "}
+                              {selectedAppointment.consultedType}
+                            </p>
+                            <p>
+                              <strong>Mode:</strong>{" "}
+                              {selectedAppointment.consultationType}
+                            </p>
+                            <p>
+                              <strong>Status:</strong>{" "}
+                              {selectedAppointment.status}
+                            </p>
+                          </div>
+                          <div className="md:col-span-2">
+                            <h3 className="font-semibold text-gray-900 mb-2">
+                              Medical Details
+                            </h3>
+                            <p>
+                              <strong>Reason for Visit:</strong>{" "}
+                              {selectedAppointment.reasonForVisit}
+                            </p>
+                            <p>
+                              <strong>Symptoms:</strong>{" "}
+                              {selectedAppointment.symptoms}
+                            </p>
+                            <p>
+                              <strong>Previous Visit:</strong>{" "}
+                              {selectedAppointment.previousVisit}
+                            </p>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2">
+                              Emergency Contact
+                            </h3>
+                            <p>
+                              <strong>Name:</strong>{" "}
+                              {selectedAppointment.emergencyContact}
+                            </p>
+                            <p>
+                              <strong>Phone:</strong>{" "}
+                              {selectedAppointment.emergencyPhone}
+                            </p>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2">
+                              Other Information
+                            </h3>
+                            <p>
+                              <strong>Payment Method:</strong>{" "}
+                              {selectedAppointment.paymentMethod}
+                            </p>
+                            <p>
+                              <strong>Special Requests:</strong>{" "}
+                              {selectedAppointment.specialRequests}
+                            </p>
                           </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button
-                            variant="outline"
-                            className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                          >
-                            Cancel Appointment
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                          >
-                            Reschedule
-                          </Button>
-                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Medications */}
