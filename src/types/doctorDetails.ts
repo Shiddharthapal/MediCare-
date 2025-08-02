@@ -23,6 +23,7 @@ export interface DoctorDetails {
   userId: string;
   name: string;
   email: string;
+  registrationNo: string;
   specialist: string;
   specializations: string[];
   hospital: string;

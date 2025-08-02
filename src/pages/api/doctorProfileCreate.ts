@@ -86,6 +86,7 @@ export const POST: APIRoute = async ({ request }) => {
         userId: tokenDetails?.userId,
         name,
         email: doctordata?.email,
+        registrationNo: doctordata?.registrationNo,
         specialist,
         specializations,
         hospital,
@@ -104,6 +105,8 @@ export const POST: APIRoute = async ({ request }) => {
     } else {
       (doctordetails.name = name || doctordetails.name),
         (doctordetails.email = doctordata?.email || doctordetails.email),
+        (doctordata.registrationNo =
+          doctordetails.registrationNo || doctordata?.registrationNo),
         (doctordetails.specialist = specialist || doctordetails.specialist),
         (doctordetails.specializations =
           specializations || doctordetails.specializations),

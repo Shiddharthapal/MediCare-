@@ -80,6 +80,10 @@ const doctorDetailsSchema = new mongoose.Schema({
   email: {
     type: String,
   },
+  registrationNo: {
+    type: Number,
+    unique: true,
+  },
   specialist: {
     type: String,
     require: true,
