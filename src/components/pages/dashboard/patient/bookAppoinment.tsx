@@ -42,6 +42,7 @@ interface Doctor {
   specialist: string;
   specializations: string[];
   hospital: string;
+  gender: string;
   fees: number;
   rating?: number;
   experience: string;

@@ -12,6 +12,9 @@ const appointmentDataSchema = new mongoose.Schema(
     doctorSpecialist: {
       type: String,
     },
+    doctorGender: {
+      type: String,
+    },
     patientName: {
       type: String,
     },
@@ -90,6 +93,9 @@ const userDetailsSchema = new mongoose.Schema({
   age: {
     type: Number,
     required: true,
+  },
+  gender: {
+    type: String,
   },
   bloodGroup: {
     type: String,

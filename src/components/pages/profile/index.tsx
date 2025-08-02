@@ -34,6 +34,17 @@ interface PatientData {
   bloodGroup: string;
   weight: string;
   height: string;
+  gender: string;
+}
+interface PatientDataErrors {
+  name?: string;
+  address?: string;
+  contactNumber?: string;
+  age?: string;
+  gender?: string;
+  email?: string;
+  weight?: string;
+  height?: string;
 }
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -46,9 +57,10 @@ export default function PatientProfileForm() {
     address: "",
     contactNumber: "",
     age: "",
-    bloodGroup: "",
+    gender: " ",
     weight: "",
     height: "",
+    bloodGroup: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<PatientData>>({});
@@ -68,6 +80,7 @@ export default function PatientProfileForm() {
     address: "123 Main Street, Springfield, IL 62701",
     contactNumber: "5551234567",
     age: "35",
+    gender: "Male",
     bloodGroup: "A+",
     weight: "75.5",
     height: "175.2",
@@ -109,42 +122,51 @@ export default function PatientProfileForm() {
   }, [user]);
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<PatientData> = {};
+    const newErrors: PatientDataErrors = {};
 
     // Required field validations
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
+
     if (!formData.address.trim()) {
       newErrors.address = "Address is required";
     }
+
     if (!formData.contactNumber.trim()) {
       newErrors.contactNumber = "Contact number is required";
-    } else if (
-      !/^\d{10,15}$/.test(formData.contactNumber.replace(/\s+/g, ""))
-    ) {
-      newErrors.contactNumber = "Please enter a valid contact number";
+    } else {
+      const cleanedNumber = formData.contactNumber.replace(/[^\d+]/g, "");
+      if (!/^\+?\d{10,15}$/.test(cleanedNumber)) {
+        newErrors.contactNumber = "Please enter a valid contact number";
+      }
     }
-    if (!formData.age.trim()) {
+
+    if (!formData.age) {
       newErrors.age = "Age is required";
-    } else if (
-      isNaN(Number(formData.age)) ||
-      Number(formData.age) <= 0 ||
-      Number(formData.age) > 150
-    ) {
-      newErrors.age = "Please enter a valid age (1-150)";
+    } else {
+      const ageNum = Number(formData.age);
+      if (isNaN(ageNum)) {
+        newErrors.age = "Age must be a number";
+      } else if (ageNum <= 0) {
+        newErrors.age = "Age must be greater than 0";
+      } else if (ageNum > 150) {
+        newErrors.age = "Age cannot be greater than 150";
+      }
     }
 
     // Optional field validations
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
+
     if (
       formData.weight &&
       (isNaN(Number(formData.weight)) || Number(formData.weight) <= 0)
     ) {
       newErrors.weight = "Please enter a valid weight";
     }
+
     if (
       formData.height &&
       (isNaN(Number(formData.height)) || Number(formData.height) <= 0)
@@ -180,6 +202,7 @@ export default function PatientProfileForm() {
 
     setIsLoading(true);
     let id = user?._id;
+    console.log("formdata=>", formData);
     try {
       const response = await fetch("/api/createProfile", {
         method: "POST",
@@ -548,6 +571,41 @@ export default function PatientProfileForm() {
                     {formData?.height
                       ? `${formData.height} cm`
                       : "Not provided"}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>
+                  Gender <span className="text-red-500">*</span>
+                </Label>
+                {isEditing ? (
+                  <>
+                    <Select
+                      value={formData?.gender}
+                      onValueChange={(value) =>
+                        handleInputChange("gender", value)
+                      }
+                    >
+                      <SelectTrigger
+                        className={
+                          errors.gender ? "border-red-500 bg-white" : "bg-white"
+                        }
+                      >
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.gender && (
+                      <p className="text-sm text-red-500">{errors.gender}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    {formData?.gender || "Not provided"}
                   </p>
                 )}
               </div>

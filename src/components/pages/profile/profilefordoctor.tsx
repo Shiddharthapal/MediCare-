@@ -12,6 +12,7 @@ import {
   Save,
   X,
   Plus,
+  Transgender,
   BookText,
   Video,
   BadgeDollarSign,
@@ -25,6 +26,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   setEditMode,
@@ -38,6 +46,7 @@ interface Doctor {
   specialist: string;
   specializations: string[];
   hospital: string;
+  gender: string;
   fees: number;
   rating: number;
   experience: string;
@@ -56,6 +65,7 @@ const mockDoctor: Doctor = {
   specialist: "",
   specializations: [],
   hospital: "",
+  gender: " ",
   fees: 0,
   rating: 0,
   experience: "",
@@ -479,51 +489,82 @@ export default function DoctorProfilePage() {
                     </p>
                   )}
                 </div>
-                <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Video className="h-5 w-5 mr-2" />
-                    Consultation Mode
-                  </Label>
-                  {isEditing ? (
-                    <div className="flex flex-wrap gap-2">
-                      {(["video", "phone", "in-person"] as const).map(
-                        (mode) => (
-                          <Badge
-                            key={mode}
-                            variant={
-                              editedDoctor.consultationModes.includes(mode)
-                                ? "default"
-                                : "outline"
-                            }
-                            className={`cursor-pointer px-4 py-2 text-base ${
-                              editedDoctor.consultationModes.includes(mode)
-                                ? "bg-blue-500 text-white hover:bg-blue-600"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            }`}
-                            onClick={() => handleToggleConsultationMode(mode)}
-                          >
-                            {mode}
-                          </Badge>
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {currentDoctor?.consultationModes?.length > 0 ? (
-                        currentDoctor.consultationModes.map((mode, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="text-sm"
-                          >
-                            {mode}
-                          </Badge>
-                        ))
-                      ) : (
-                        <p className="text-gray-500 text-sm">Not Provided</p>
-                      )}
-                    </div>
-                  )}
+                <div className="flex flex-row md:gap-x-96">
+                  <div>
+                    <Label className="text-lg font-semibold flex items-center mb-3">
+                      <Video className="h-5 w-5 mr-2" />
+                      Consultation Mode
+                    </Label>
+                    {isEditing ? (
+                      <div className="flex flex-wrap gap-2">
+                        {(["video", "phone", "in-person"] as const).map(
+                          (mode) => (
+                            <Badge
+                              key={mode}
+                              variant={
+                                editedDoctor.consultationModes.includes(mode)
+                                  ? "default"
+                                  : "outline"
+                              }
+                              className={`cursor-pointer px-4 py-2 text-base ${
+                                editedDoctor.consultationModes.includes(mode)
+                                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              }`}
+                              onClick={() => handleToggleConsultationMode(mode)}
+                            >
+                              {mode}
+                            </Badge>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {currentDoctor?.consultationModes?.length > 0 ? (
+                          currentDoctor.consultationModes.map((mode, index) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-sm"
+                            >
+                              {mode}
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-sm">Not Provided</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-lg font-semibold flex items-center mb-3">
+                      <Transgender className="h-5 w-5 mr-2" />
+                      Gender
+                    </Label>
+                    {isEditing ? (
+                      <>
+                        <Select
+                          value={editedDoctor?.gender}
+                          onValueChange={(value) =>
+                            handleInputChange("gender", value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Male">Male</SelectItem>
+                            <SelectItem value="Female">Female</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </>
+                    ) : (
+                      <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                        {currentDoctor?.gender || "Not provided"}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 

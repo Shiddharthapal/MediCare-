@@ -20,6 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
       bloodGroup,
       weight,
       height,
+      gender,
     } = formData;
     if (!name || !address || !bloodGroup || !age || !weight || !contactNumber) {
       return new Response(
@@ -29,6 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
             name: !name ? "Name is required" : null,
             address: !address ? "Address is required" : null,
             age: !age ? "Age is required" : null,
+            gender: !gender ? "Gender is required" : null,
             weight: !weight ? "Weight is required" : null,
             bloodGroup: !bloodGroup ? "Bloodgroup is required" : null,
             contactNumber: !contactNumber ? "Contact number is required" : null,
@@ -53,6 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
         address,
         contactNumber,
         age,
+        gender,
         bloodGroup,
         weight,
         height,
@@ -61,10 +64,12 @@ export const POST: APIRoute = async ({ request }) => {
       userDetails.save();
     } else {
       userdetails.name = name || userdetails.name;
+      userdetails.email = userdata?.email || userdetails.name;
       userdetails.fatherName = fatherName || userdetails.fatherName;
       userdetails.address = address || userdetails.address;
       userdetails.contactNumber = contactNumber || userdetails.contactNumber;
       userdetails.age = age || userdetails.age;
+      userdetails.gender = gender || userdetails.gender;
       userdetails.bloodGroup = bloodGroup || userdetails.bloodGroup;
       userdetails.weight = weight || userdetails.weight;
       userdetails.height = height || userdetails.height;

@@ -6,6 +6,7 @@ interface AppointmentData {
   patientName: string;
   patientEmail: string;
   patientPhone: string;
+  patinetGender: string;
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
@@ -23,6 +24,7 @@ export interface DoctorDetails {
   userId: string;
   name: string;
   email: string;
+  gender: string;
   registrationNo: string;
   specialist: string;
   specializations: string[];

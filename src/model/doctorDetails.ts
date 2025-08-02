@@ -25,6 +25,9 @@ const appointmentDataSchema = new mongoose.Schema(
       type: String,
       required: true, // Fixed: was 'require'
     },
+    patientGender: {
+      type: String,
+    },
     appointmentDate: {
       type: String,
       required: true, // Fixed: was 'require'
@@ -78,6 +81,9 @@ const doctorDetailsSchema = new mongoose.Schema({
     require: true,
   },
   email: {
+    type: String,
+  },
+  gender: {
     type: String,
   },
   registrationNo: {

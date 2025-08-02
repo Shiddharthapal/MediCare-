@@ -32,6 +32,7 @@ interface DoctorDetails {
   specialist: string;
   specializations: string[];
   hospital: string;
+  gender: string;
   fees: number;
   rating?: number;
   experience: string;
@@ -348,6 +349,7 @@ export default function Doctors({
                 </span>
               </div>
             </div>
+            <div>{doctor.gender || " "}</div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">

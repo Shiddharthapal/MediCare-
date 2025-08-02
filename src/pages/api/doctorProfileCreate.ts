@@ -17,6 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
       specialist,
       specializations,
       hospital,
+      gender,
       fees,
       experience,
       education,
@@ -31,6 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
       !specialist ||
       !specializations ||
       !hospital ||
+      !gender ||
       !fees ||
       !experience ||
       !education ||
@@ -50,6 +52,8 @@ export const POST: APIRoute = async ({ request }) => {
               ? "Area of specializations is required"
               : null,
             hospital: !hospital ? "Hospital is required" : null,
+            gender: !gender ? "Gender is required" : null,
+
             fees: !fees ? "Fees is required" : null,
             experience: !experience ? "Exprience is required" : null,
             education: !education ? "Education is required" : null,
@@ -90,6 +94,7 @@ export const POST: APIRoute = async ({ request }) => {
         specialist,
         specializations,
         hospital,
+        gender,
         fees,
         experience,
         education,
@@ -110,7 +115,8 @@ export const POST: APIRoute = async ({ request }) => {
         (doctordetails.specialist = specialist || doctordetails.specialist),
         (doctordetails.specializations =
           specializations || doctordetails.specializations),
-        (doctordetails.hospital = hospital || doctordetails.specialist),
+        (doctordetails.hospital = hospital || doctordetails.hospital),
+        (doctordetails.gender = gender || doctordetails.gender),
         (doctordetails.fees = fees || doctordetails.fees),
         (doctordetails.experience = experience || doctordetails.experience),
         (doctordetails.education = education || doctordetails.education),

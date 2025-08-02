@@ -2,6 +2,7 @@ interface AppointmentData {
   doctorUserId: string;
   doctorName: string;
   doctorSpecialist: string;
+  doctorGender: string;
   patientName: string;
   patientEmail: string;
   patientPhone: string;
@@ -26,6 +27,7 @@ export interface UserDetails {
   address: string;
   contactNumber: string;
   age: number;
+  gender: string;
   bloodGroup: string;
   weight: number;
   height?: number;
