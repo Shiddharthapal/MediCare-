@@ -114,17 +114,6 @@ const consultationType = [
   },
 ];
 
-const reasonsForVisit = [
-  "Regular Checkup",
-  "Follow-up Appointment",
-  "New Symptoms",
-  "Medication Review",
-  "Test Results Discussion",
-  "Second Opinion",
-  "Emergency Consultation",
-  "Other",
-];
-
 const categorizedReasonsForVisit = {
   "Preventive Care": [
     "Annual physical examination",
@@ -581,7 +570,7 @@ export default function BookAppointment({
                           <SelectValue placeholder="Select time" />
                         </SelectTrigger>
                         <SelectContent>
-                          {timeSlots.map((time) => (
+                          {doctor.availableSlots.map((time) => (
                             <SelectItem key={time} value={time}>
                               {time}
                             </SelectItem>
@@ -881,21 +870,61 @@ export default function BookAppointment({
                       <div className="flex justify-between">
                         <span className="text-gray-600">Type:</span>
                         <span className="font-medium flex items-center gap-1">
-                          {formData.consultationType && (
-                            <>
-                              {(() => {
-                                const Icon = getConsultationIcon(
-                                  formData.consultationType
-                                );
-                                return <Icon className="h-4 w-4" />;
-                              })()}
-                              {
-                                consultationType.find(
-                                  (t) => t.value === formData.consultationType
-                                )?.label
+                          {(() => {
+                            // Icon mapping
+                            const getIcon = (mode: string) => {
+                              switch (mode.toLowerCase()) {
+                                case "video":
+                                  return (
+                                    <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                                  );
+                                case "phone":
+                                  return (
+                                    <Phone className="h-6 w-6 mx-auto mb-2 text-green-600" />
+                                  );
+                                case "in-person":
+                                  return (
+                                    <User className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+                                  );
+                                default:
+                                  return (
+                                    <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                                  );
                               }
-                            </>
-                          )}
+                            };
+
+                            // Color mapping
+                            const getColor = (mode: string) => {
+                              switch (mode.toLowerCase()) {
+                                case "video":
+                                  return "blue";
+                                case "phone":
+                                  return "green";
+                                case "in-person":
+                                  return "purple";
+                                default:
+                                  return "blue";
+                              }
+                            };
+
+                            const color = getColor(formData.consultationType);
+                            const capitalizedMode =
+                              formData.consultationType
+                                .charAt(0)
+                                .toUpperCase() +
+                              formData.consultationType.slice(1);
+
+                            return (
+                              <div
+                                className={`flex flex-row gap-2 text-${color}-500`}
+                              >
+                                {getIcon(formData.consultationType)}
+                                <h4 className="font-medium">
+                                  {capitalizedMode}
+                                </h4>
+                              </div>
+                            );
+                          })()}
                         </span>
                       </div>
                       <div className="flex justify-between border-t pt-2">
