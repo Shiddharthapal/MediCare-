@@ -599,57 +599,87 @@ export default function BookAppointment({
                   <div>
                     <Label>Consultation Type *</Label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
-                      {/* {consultationTypes
-                        .filter((type) =>
-                          doctor.consultationModes.includes(type.value)
-                        )
-                        .map((type) => {
-                          const Icon = type.icon;
-                          return (
-                            <Card
-                              key={type.value}
-                              className={`cursor-pointer transition-all ${
-                                formData.consultationType === type.value
-                                  ? "border-blue-500 bg-blue-50"
-                                  : "hover:border-gray-300"
-                              } ${errors.consultationType ? "border-red-500 mt-2" : "m2-t"}`}
-                              onClick={() =>
-                                handleInputChange(
-                                  "consultationType",
-                                  type.value
-                                )
-                              }
-                            >
-                              <CardContent className="p-4 text-center">
-                                <Icon className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                                <h4 className="font-medium">{type.label}</h4>
-                                <p className="text-xs text-gray-600 mt-1">
-                                  {type.description}
-                                </p>
-                              </CardContent>
-                            </Card>
-                          );
-                        })} */}
+                      {(doctor.consultationModes &&
+                      doctor.consultationModes.length > 0
+                        ? doctor.consultationModes
+                        : ["video", "phone", "in-person"]
+                      ).map((mode) => {
+                        // Icon mapping
+                        const getIcon = (mode: string) => {
+                          switch (mode.toLowerCase()) {
+                            case "video":
+                              return (
+                                <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                              );
+                            case "phone":
+                              return (
+                                <Phone className="h-6 w-6 mx-auto mb-2 text-green-600" />
+                              );
+                            case "in-person":
+                              return (
+                                <User className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+                              );
+                            default:
+                              return (
+                                <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                              );
+                          }
+                        };
 
-                      <Card
-                        key={"video"}
-                        className={`cursor-pointer transition-all ${
-                          formData.consultationType === "video"
-                            ? "border-blue-500 bg-blue-50"
-                            : "hover:border-gray-300"
-                        } ${errors.consultationType ? "border-red-500 mt-2" : "mt-2"}`}
-                        onClick={() =>
-                          handleInputChange("consultationType", "video")
-                        }
-                      >
-                        <CardContent className="p-4 text-center">
-                          <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                          <h4 className="font-medium">"Video Call"</h4>
-                          <p className="text-xs text-gray-600 mt-1">
-                            "Online consultation via video call"
-                          </p>
-                        </CardContent>
-                      </Card>
+                        // Description mapping
+                        const getDescription = (mode: string) => {
+                          switch (mode.toLowerCase()) {
+                            case "video":
+                              return "Online consultation via video call";
+                            case "phone":
+                              return "Consultation via phone call";
+                            case "in-person":
+                              return "Face-to-face consultation";
+                            default:
+                              return "Online consultation";
+                          }
+                        };
+
+                        // Color mapping
+                        const getColor = (mode: string) => {
+                          switch (mode.toLowerCase()) {
+                            case "video":
+                              return "blue";
+                            case "phone":
+                              return "green";
+                            case "in-person":
+                              return "purple";
+                            default:
+                              return "blue";
+                          }
+                        };
+
+                        const color = getColor(mode);
+                        const capitalizedMode =
+                          mode.charAt(0).toUpperCase() + mode.slice(1);
+
+                        return (
+                          <Card
+                            key={mode}
+                            className={`cursor-pointer transition-all ${
+                              formData.consultationType === mode
+                                ? `border-${color}-500 bg-${color}-50`
+                                : "hover:border-gray-300"
+                            } ${errors.consultationType ? "border-red-500 mt-2" : "mt-2"}`}
+                            onClick={() =>
+                              handleInputChange("consultationType", mode)
+                            }
+                          >
+                            <CardContent className="p-4 text-center">
+                              {getIcon(mode)}
+                              <h4 className="font-medium">{capitalizedMode}</h4>
+                              <p className="text-xs text-gray-600 mt-1">
+                                {getDescription(mode)}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                     {errors.consultationType && (
                       <p className="text-red-500 text-sm mt-1">

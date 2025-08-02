@@ -43,6 +43,7 @@ interface appointmentdata {
   doctorUserId: string;
   doctorName: string;
   doctorSpecialist: string;
+  doctorGender: string;
   patientName: string;
   patientEmail: string;
   patientPhone: string;
@@ -73,6 +74,7 @@ const mockappointmentdata = {
   doctorUserId: "",
   doctorName: "",
   doctorSpecialist: "",
+  doctorGender: " ",
   patientName: "",
   patientEmail: "",
   patientPhone: "",
@@ -234,7 +236,7 @@ export default function Dashboard() {
           },
         });
         let userdata = await response.json();
-        //console.log("🧞‍♂️userdata --->", userdata?.userdetails.appointments);
+        console.log("🧞‍♂️userdata --->", userdata?.userdetails.appointments);
         setAppointmentsData(userdata?.userdetails?.appointments);
       } catch (err) {
         console.log(err);
