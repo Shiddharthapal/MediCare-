@@ -118,7 +118,8 @@ export default function PatientProfileForm() {
       return null;
     }
   };
-
+  let id = user?._id || null;
+  console.log("🧞‍♂️id --->", id);
   useEffect(() => {
     if (user) {
       setFormData((prev) => ({
@@ -128,8 +129,7 @@ export default function PatientProfileForm() {
       }));
     }
     const fetchData = async () => {
-      let id = await getUserId();
-      console.log("🧞‍♂️id --->", id);
+      id = id || (await getUserId());
 
       try {
         let response = await fetch(`/api/user/${id}`, {
@@ -219,8 +219,8 @@ export default function PatientProfileForm() {
     e.preventDefault();
 
     setIsLoading(true);
-    let id = await getUserId();
-
+    id = user?._id || (await getUserId());
+    console.log("formData=>", formData);
     try {
       const response = await fetch("/api/createProfile", {
         method: "POST",
@@ -247,12 +247,14 @@ export default function PatientProfileForm() {
       }
 
       // Success
+      setIsEditing(false);
       setIsShowingSavedData(true);
       setSavedPatientId(result?.userdetails?.userId);
       setFormData(result?.userdetails);
+
       toast({
         title: "Success!",
-        description: `Patient profile created successfully. Patient ID: ${result.patient.id}`,
+        description: `Patient profile created successfully`,
       });
     } catch (error) {
       console.error("Error:", error);
@@ -616,12 +618,7 @@ export default function PatientProfileForm() {
           {/* Action Buttons - only show when editing */}
           {isEditing && (
             <div className="flex gap-4 pt-4">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                onClick={() => setIsEditing(!isEditing)}
-                className="flex-1"
-              >
+              <Button type="submit" disabled={isLoading} className="flex-1">
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? "Updating Profile..." : "Update Patient Profile"}
               </Button>

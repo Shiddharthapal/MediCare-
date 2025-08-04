@@ -45,7 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
     await connect();
     const userdetails = await UserDetails.findOne({ userId: id });
     let userdata = await User.findOne({ _id: id });
-    console.log("userId=>", id);
+    //console.log("userId=>", id);
     if (!userdetails) {
       const userDetails = new UserDetails({
         userId: id,
@@ -77,7 +77,7 @@ export const POST: APIRoute = async ({ request }) => {
       await userdetails.save();
     }
 
-    return new Response(JSON.stringify({}), {
+    return new Response(JSON.stringify({ userdetails }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
