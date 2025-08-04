@@ -9,6 +9,7 @@ export const POST: APIRoute = async ({ request }) => {
     let body = await request.json();
     let tokenDetails = await verifyToken(body?.token);
     let userId = tokenDetails?.userId;
+    console.log("🧞‍♂️userId --->", userId);
     return new Response(
       JSON.stringify({
         userId,

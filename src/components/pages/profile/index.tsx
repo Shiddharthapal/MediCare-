@@ -25,7 +25,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { useNavigate } from "react-router-dom";
 
 interface PatientData {
-  email: string;
+  email?: string;
   name: string;
   fatherName: string;
   address: string;
@@ -51,7 +51,6 @@ const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export default function PatientProfileForm() {
   const [formData, setFormData] = useState<PatientData>({
-    email: "",
     name: "",
     fatherName: "",
     address: "",
@@ -74,20 +73,51 @@ export default function PatientProfileForm() {
 
   // Dummy data representing an existing patient
   const dummyPatientData: PatientData = {
-    email: "john.doe@email.com",
-    name: "John Doe",
-    fatherName: "Robert Doe",
-    address: "123 Main Street, Springfield, IL 62701",
-    contactNumber: "5551234567",
-    age: "35",
-    gender: "Male",
-    bloodGroup: "A+",
-    weight: "75.5",
-    height: "175.2",
+    email: "",
+    name: "",
+    fatherName: "",
+    address: "",
+    contactNumber: "",
+    age: "",
+    gender: "",
+    bloodGroup: "",
+    weight: "",
+    height: "",
   };
 
   // Update the initial formData state to use dummy data:
   const initialFormData = dummyPatientData;
+  const getUserId = async (): Promise<string | null> => {
+    // First try to get from user object
+    if (user?._id) {
+      return user._id;
+    }
+
+    // Fallback to token verification
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No auth token found");
+      }
+      let response = await fetch("/api/getId/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+      let userid = await response.json();
+      console.log("🧞‍♂️userid --->", userid);
+      if (!userid) {
+        throw new Error("Invalid token or no user ID");
+      }
+
+      return userid.userId;
+    } catch (error) {
+      console.error("Failed to get user ID:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -98,8 +128,9 @@ export default function PatientProfileForm() {
       }));
     }
     const fetchData = async () => {
-      let id = user?._id;
+      let id = await getUserId();
       console.log("🧞‍♂️id --->", id);
+
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -121,62 +152,58 @@ export default function PatientProfileForm() {
     fetchData();
   }, [user]);
 
-  const validateForm = (): boolean => {
-    const newErrors: PatientDataErrors = {};
+  // const validateForm = (): boolean => {
+  //   const newErrors: PatientDataErrors = {};
 
-    // Required field validations
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
+  //   // Required field validations
+  //   if (!formData.name.trim()) {
+  //     newErrors.name = "Name is required";
+  //   }
 
-    if (!formData.address.trim()) {
-      newErrors.address = "Address is required";
-    }
+  //   if (!formData.address.trim()) {
+  //     newErrors.address = "Address is required";
+  //   }
 
-    if (!formData.contactNumber.trim()) {
-      newErrors.contactNumber = "Contact number is required";
-    } else {
-      const cleanedNumber = formData.contactNumber.replace(/[^\d+]/g, "");
-      if (!/^\+?\d{10,15}$/.test(cleanedNumber)) {
-        newErrors.contactNumber = "Please enter a valid contact number";
-      }
-    }
+  //   if (!formData.contactNumber.trim()) {
+  //     newErrors.contactNumber = "Contact number is required";
+  //   } else {
+  //     const cleanedNumber = formData.contactNumber.replace(/[^\d+]/g, "");
+  //     if (!/^\+?\d{10,15}$/.test(cleanedNumber)) {
+  //       newErrors.contactNumber = "Please enter a valid contact number";
+  //     }
+  //   }
 
-    if (!formData.age) {
-      newErrors.age = "Age is required";
-    } else {
-      const ageNum = Number(formData.age);
-      if (isNaN(ageNum)) {
-        newErrors.age = "Age must be a number";
-      } else if (ageNum <= 0) {
-        newErrors.age = "Age must be greater than 0";
-      } else if (ageNum > 150) {
-        newErrors.age = "Age cannot be greater than 150";
-      }
-    }
+  //   if (!formData.age) {
+  //     newErrors.age = "Age is required";
+  //   } else {
+  //     const ageNum = Number(formData.age);
+  //     if (isNaN(ageNum)) {
+  //       newErrors.age = "Age must be a number";
+  //     } else if (ageNum <= 0) {
+  //       newErrors.age = "Age must be greater than 0";
+  //     } else if (ageNum > 150) {
+  //       newErrors.age = "Age cannot be greater than 150";
+  //     }
+  //   }
 
-    // Optional field validations
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
+  //   // Optional field validations
+  //   if (
+  //     formData.weight &&
+  //     (isNaN(Number(formData.weight)) || Number(formData.weight) <= 0)
+  //   ) {
+  //     newErrors.weight = "Please enter a valid weight";
+  //   }
 
-    if (
-      formData.weight &&
-      (isNaN(Number(formData.weight)) || Number(formData.weight) <= 0)
-    ) {
-      newErrors.weight = "Please enter a valid weight";
-    }
+  //   if (
+  //     formData.height &&
+  //     (isNaN(Number(formData.height)) || Number(formData.height) <= 0)
+  //   ) {
+  //     newErrors.height = "Please enter a valid height";
+  //   }
 
-    if (
-      formData.height &&
-      (isNaN(Number(formData.height)) || Number(formData.height) <= 0)
-    ) {
-      newErrors.height = "Please enter a valid height";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
   const handleInputChange = (field: keyof PatientData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -191,18 +218,9 @@ export default function PatientProfileForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      toast({
-        title: "Validation Error",
-        description: "Please fix the errors in the form",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
-    let id = user?._id;
-    console.log("formdata=>", formData);
+    let id = await getUserId();
+
     try {
       const response = await fetch("/api/createProfile", {
         method: "POST",
@@ -230,7 +248,7 @@ export default function PatientProfileForm() {
 
       // Success
       setIsShowingSavedData(true);
-      setSavedPatientId(result?.userdetails.userId);
+      setSavedPatientId(result?.userdetails?.userId);
       setFormData(result?.userdetails);
       toast({
         title: "Success!",
@@ -368,30 +386,13 @@ export default function PatientProfileForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="email">
+                <Label>
                   Email Address <span className="text-red-500">*</span>
                 </Label>
-                {isEditing ? (
-                  <>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData?.email}
-                      onChange={(e) =>
-                        handleInputChange("email", e.target.value)
-                      }
-                      placeholder="Enter email address"
-                      className={errors.email ? "border-red-500" : "bg-white"}
-                    />
-                    {errors.email && (
-                      <p className="text-sm text-red-500">{errors.email}</p>
-                    )}
-                  </>
-                ) : (
-                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                    {formData?.email || "Not provided"}
-                  </p>
-                )}
+
+                <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                  {formData?.email || "Not provided"}
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -615,7 +616,12 @@ export default function PatientProfileForm() {
           {/* Action Buttons - only show when editing */}
           {isEditing && (
             <div className="flex gap-4 pt-4">
-              <Button type="submit" disabled={isLoading} className="flex-1">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                onClick={() => setIsEditing(!isEditing)}
+                className="flex-1"
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? "Updating Profile..." : "Update Patient Profile"}
               </Button>

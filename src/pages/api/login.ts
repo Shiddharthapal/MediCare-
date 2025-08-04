@@ -8,20 +8,21 @@ import Doctor from "@/model/doctor";
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
-    // console.log("🧞‍♂️body --->", body);
-    const { email, password, loginType } = body;
-    //console.log("email=>", email);
-    ///console.log("pass=>", password);
-    //console.log("registrationMethod=>", loginType);
+    console.log("🧞‍♂️body --->", body);
+    const { email, password, registrationType } = body;
+    console.log("email=>", email);
+    console.log("pass=>", password);
+    console.log("registrationMethod=>", registrationType);
 
     // Connect to database
     await connect();
 
     //check login for user or doctor
-    if (loginType === "user") {
+    if (registrationType === "user") {
       const users = await User.findOne({
         email: email,
       });
+      console.log("🧞‍♂️users --->", users);
       if (!users) {
         return new Response(
           JSON.stringify({
