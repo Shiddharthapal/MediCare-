@@ -86,6 +86,9 @@ const doctorDetailsSchema = new mongoose.Schema({
   gender: {
     type: String,
   },
+  contact: {
+    type: String,
+  },
   registrationNo: {
     type: Number,
     unique: true,

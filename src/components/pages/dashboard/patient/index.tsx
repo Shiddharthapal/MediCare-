@@ -37,6 +37,23 @@ const menuItems = [
   { icon: Heart, label: "Health Records", active: false },
   { icon: Settings, label: "Settings", active: false },
 ];
+interface UserDetails {
+  _id: string;
+  userId: string;
+  email: string;
+  name: string;
+  fatherName?: string;
+  address: string;
+  contactNumber: string;
+  age: number;
+  gender: string;
+  bloodGroup: string;
+  weight: number;
+  height?: number;
+  appoinments: appointmentdata[];
+  lastTreatmentDate?: Date;
+  createdAt: Date;
+}
 
 interface appointmentdata {
   _id: string;
@@ -90,6 +107,24 @@ const mockappointmentdata = {
   paymentMethod: "",
   specialRequests: "",
   status: "",
+};
+
+const mockpatientData = {
+  _id: "",
+  userId: "",
+  email: "",
+  name: "",
+  fatherName: "",
+  address: "",
+  contactNumber: "",
+  age: "",
+  gender: "",
+  bloodGroup: "",
+  weight: "",
+  height: "",
+  appoinments: mockappointmentdata,
+  lastTreatmentDate: Date.now(),
+  createdAt: Date.now(),
 };
 const getStatusColor = (status: string) => {
   console.log("🧞‍♂️status --->", status);
@@ -177,6 +212,7 @@ const groupTodayToFutureAppointments = (
     const date = appointment.appointmentDate;
     const status = getAppointmentStatus(date);
     const dayLabel = formatDate(date);
+    console.log("🧞‍♂️dayLabel --->", dayLabel);
     if (!grouped[date]) {
       grouped[date] = {
         appointments: [],
@@ -219,6 +255,8 @@ export default function Dashboard() {
   );
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [patientData, setPatientData] = useState<UserDetails[]>([]);
+
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<appointmentdata | null>(null);
@@ -236,7 +274,8 @@ export default function Dashboard() {
           },
         });
         let userdata = await response.json();
-        console.log("🧞‍♂️userdata --->", userdata?.userdetails.appointments);
+        console.log("🧞‍♂️userdata --->", userdata?.userdetails);
+        setPatientData(userdata?.userdetails);
         setAppointmentsData(userdata?.userdetails?.appointments);
       } catch (err) {
         console.log(err);
@@ -276,6 +315,30 @@ export default function Dashboard() {
       return words[0].substring(0, 2).toUpperCase();
     } else {
       return "DR";
+    }
+  };
+
+  const getPatientInitials = (doctorName: string) => {
+    if (!doctorName) return "DR";
+
+    // Remove DR/Dr prefix and clean the name
+    const cleanName = doctorName
+      // Remove DR/Dr at the beginning
+      .trim();
+
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
     }
   };
 
@@ -520,15 +583,15 @@ export default function Dashboard() {
                   <Avatar className="h-10 w-10">
                     <AvatarImage src="/placeholder.svg?height=40&width=40" />
                     <AvatarFallback className="bg-blue-100 text-blue-600">
-                      OJ
+                      {getPatientInitials(patientData?.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
-                      Olivia Johnson
+                      {patientData?.name}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                      Patient ID: #12345
+                      {patientData?.email}
                     </p>
                   </div>
                 </div>
@@ -580,10 +643,14 @@ export default function Dashboard() {
               {/* Header */}
               <div className="space-y-1">
                 <h1 className="text-2xl font-semibold text-gray-900">
-                  Welcome Olivia,
+                  Welcome {patientData.name},
                 </h1>
                 <p className="text-gray-600">
-                  You have got no appointments for today
+                  {patientData.appointments.length > 0 ? (
+                    " "
+                  ) : (
+                    <p>You have got no appointments for today</p>
+                  )}
                 </p>
               </div>
 

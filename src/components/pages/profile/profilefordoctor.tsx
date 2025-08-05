@@ -16,6 +16,8 @@ import {
   BookText,
   Video,
   BadgeDollarSign,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -47,6 +49,8 @@ interface Doctor {
   specializations: string[];
   hospital: string;
   gender: string;
+  contact: string;
+  email: string;
   fees: number;
   rating: number;
   experience: string;
@@ -65,7 +69,9 @@ const mockDoctor: Doctor = {
   specialist: "",
   specializations: [],
   hospital: "",
-  gender: " ",
+  gender: "",
+  contact: "",
+  email: "",
   fees: 0,
   rating: 0,
   experience: "",
@@ -183,6 +189,7 @@ export default function DoctorProfilePage() {
       dispatch(updateProfileSuccess(doctor));
       dispatch(setEditMode(false));
       setHasProfile(true);
+      setDoctor(responseData?.doctordetails);
       setIsEditing(false);
     } catch (error) {
       dispatch(
@@ -489,14 +496,46 @@ export default function DoctorProfilePage() {
                     </p>
                   )}
                 </div>
-                <div className="flex flex-row md:gap-x-96">
+                <div>
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <Phone className="h-5 w-5 mr-2" />
+                    Contact Number
+                  </Label>
+                  {isEditing ? (
+                    <Input
+                      type="tel"
+                      value={editedDoctor.contact}
+                      onChange={(e) =>
+                        handleInputChange("contact", e.target.value)
+                      }
+                      placeholder="Enter your contact number"
+                    />
+                  ) : (
+                    <p className="text-gray-700 text-lg">
+                      {displayValue(currentDoctor?.contact)}
+                    </p>
+                  )}
+                </div>
+                {/* New Email Field */}
+                <div>
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <Mail className="h-5 w-5 mr-2" />
+                    Email
+                  </Label>
+
+                  <p className="text-gray-700 text-lg">
+                    {displayValue(currentDoctor?.email) ||
+                      "Not need to provide"}
+                  </p>
+                </div>
+                <div className="">
                   <div>
                     <Label className="text-lg font-semibold flex items-center mb-3">
                       <Video className="h-5 w-5 mr-2" />
                       Consultation Mode
                     </Label>
                     {isEditing ? (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap lg:flex-nowrap gap-2">
                         {(["video", "phone", "in-person"] as const).map(
                           (mode) => (
                             <Badge
@@ -534,35 +573,6 @@ export default function DoctorProfilePage() {
                           <p className="text-gray-500 text-sm">Not Provided</p>
                         )}
                       </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-lg font-semibold flex items-center mb-3">
-                      <Transgender className="h-5 w-5 mr-2" />
-                      Gender
-                    </Label>
-                    {isEditing ? (
-                      <>
-                        <Select
-                          value={editedDoctor?.gender}
-                          onValueChange={(value) =>
-                            handleInputChange("gender", value)
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select gender" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Male">Male</SelectItem>
-                            <SelectItem value="Female">Female</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </>
-                    ) : (
-                      <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                        {currentDoctor?.gender || "Not provided"}
-                      </p>
                     )}
                   </div>
                 </div>
@@ -687,6 +697,35 @@ export default function DoctorProfilePage() {
                       </div>
                     )}
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <Transgender className="h-5 w-5 mr-2" />
+                    Gender
+                  </Label>
+                  {isEditing ? (
+                    <>
+                      <Select
+                        value={editedDoctor?.gender}
+                        onValueChange={(value) =>
+                          handleInputChange("gender", value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </>
+                  ) : (
+                    <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                      {currentDoctor?.gender || "Not provided"}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

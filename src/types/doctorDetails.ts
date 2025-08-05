@@ -24,6 +24,7 @@ export interface DoctorDetails {
   userId: string;
   name: string;
   email: string;
+  contact: string;
   gender: string;
   registrationNo: string;
   specialist: string;
