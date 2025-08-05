@@ -161,6 +161,7 @@ export default function DoctorProfilePage() {
       const responseData = await response.json();
       setHasProfile(Boolean(responseData.doctordetails));
       setDoctor(responseData.doctordetails);
+      setEditedDoctor(responseData.doctordetails);
     };
     fetchDetails();
   }, [user]);
@@ -783,14 +784,16 @@ export default function DoctorProfilePage() {
                       <Edit3 className="h-4 w-4" />
                       {hasProfile ? "Edit Profile" : "Create Profile"}
                     </Button>
-                    <Button
-                      onClick={handleCancel}
-                      variant="outline"
-                      className="flex items-center gap-2 bg-transparent"
-                    >
-                      <X className="h-4 w-4" />
-                      Cancel
-                    </Button>
+                    {isEditing && (
+                      <Button
+                        onClick={handleCancel}
+                        variant="outline"
+                        className="flex items-center gap-2 bg-transparent"
+                      >
+                        <X className="h-4 w-4" />
+                        Cancel
+                      </Button>
+                    )}
                   </>
                 )}
               </div>

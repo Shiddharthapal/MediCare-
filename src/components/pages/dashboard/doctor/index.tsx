@@ -47,6 +47,7 @@ interface AppointmentData {
   patientName: string;
   patientEmail: string;
   patientPhone: string;
+  patientGender: string;
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
@@ -80,6 +81,18 @@ export interface DoctorDetails {
   consultationModes: string[];
   createdAt: Date;
 }
+
+export interface GenderCount {
+  Male: number;
+  Female: number;
+  Other: number;
+}
+
+const mockGenderCount: GenderCount = {
+  Male: 10,
+  Female: 7,
+  Other: 1,
+};
 const mockAppointmentData: AppointmentData = {
   doctorName: "",
   doctorSpecialist: "",
@@ -88,6 +101,7 @@ const mockAppointmentData: AppointmentData = {
   patientName: "",
   patientEmail: "",
   patientPhone: "",
+  patientGender: "",
   appointmentDate: "",
   appointmentTime: "",
   consultationType: "",
@@ -132,12 +146,7 @@ const menuItems = [
   { icon: Settings, label: "Settings", active: false },
 ];
 
-const datagender = [
-  { name: "Male", value: 145, color: "#3b82f6" },
-  { name: "Female", value: 113, color: "#ec4899" },
-];
-
-const COLORS = ["#3b82f6", "#ec4899"];
+const COLORS = ["#3b82f6", "#ec4899", "#047857"];
 
 const data = [
   { name: "Mon", appointments: 12 },
@@ -227,12 +236,52 @@ const requests = [
 ];
 export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
+  const [genderOfPatient, setGenderOfPatient] =
+    useState<GenderCount>(mockGenderCount);
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [doctorData, setDoctorData] =
     useState<DoctorDetails>(mockDoctorDetails);
 
   let doctor = useAppSelector((state) => state.auth.user);
+  const datagender = [
+    { name: "Male", value: genderOfPatient?.Male || 10, color: "#3b82f6" },
+    { name: "Female", value: genderOfPatient?.Female || 7, color: "#ec4899" },
+    { name: "Other", value: genderOfPatient?.Other || 1, color: "#047857" },
+  ];
+  let genderCountofPatients = (
+    appointments: AppointmentData[]
+  ): GenderCount => {
+    let countgender: GenderCount = {
+      Male: 0,
+      Female: 0,
+      Other: 0,
+    };
+
+    appointments.forEach((appointment: AppointmentData) => {
+      let gender = appointment.patientGender;
+      if (gender === "Male") {
+        countgender.Male++;
+      } else if (gender === "Female") {
+        countgender.Female++;
+      } else {
+        countgender.Other++;
+      }
+    });
+
+    return countgender;
+  };
+
+  const handleGenderCountofPatient = (appointments: AppointmentData[]) => {
+    if (!appointments) {
+      throw new Error("No appointments are availavle now");
+    }
+
+    let result = genderCountofPatients(appointments);
+    setGenderOfPatient(result);
+    return true;
+  };
+
   const getUserId = async (): Promise<string | null> => {
     // First try to get from user object
     if (doctor?._id) {
@@ -284,6 +333,7 @@ export default function DashboardPage() {
       }
     };
     fetchData();
+    handleGenderCountofPatient(doctorData.appointments);
   }, [doctor]);
   const getDoctorInitials = (doctorName: string) => {
     if (!doctorName) return "DR";
@@ -591,12 +641,23 @@ export default function DashboardPage() {
                                 paddingAngle={5}
                                 dataKey="value"
                               >
-                                {datagender.map((entry, index) => (
-                                  <Cell
-                                    key={`cell-${index}`}
-                                    fill={COLORS[index % COLORS.length]}
-                                  />
-                                ))}
+                                {genderOfPatient
+                                  ? Object.entries(genderOfPatient).map(
+                                      (entry, index) => (
+                                        <Cell
+                                          key={`cell-${index}`}
+                                          fill={COLORS[index % COLORS.length]}
+                                        />
+                                      )
+                                    )
+                                  : Object.entries(mockGenderCount).map(
+                                      (entry, index) => (
+                                        <Cell
+                                          key={`cell-${index}`}
+                                          fill={COLORS[index % COLORS.length]}
+                                        />
+                                      )
+                                    )}
                               </Pie>
                               <Tooltip
                                 contentStyle={{
