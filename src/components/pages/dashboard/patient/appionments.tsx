@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,192 +16,52 @@ import {
   Download,
   X,
   FileText,
+  Info,
 } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
 
-// Mock appointment data
-const appointmentsData = {
-  future: [
-    {
-      id: 1,
-      date: "2024-01-09",
-      time: "09:00 AM - 09:30 AM",
-      doctor: "Dr. Sarah Wilson",
-      specialty: "Cardiologist",
-      type: "Heart Checkup",
-      status: "confirmed",
-      mode: "video",
-      avatar: "SW",
-    },
-    {
-      id: 2,
-      date: "2024-01-09",
-      time: "02:00 PM - 02:45 PM",
-      doctor: "Dr. Michael Chen",
-      specialty: "Dermatologist",
-      type: "Skin Consultation",
-      status: "confirmed",
-      mode: "in-person",
-      avatar: "MC",
-    },
-    {
-      id: 3,
-      date: "2024-01-10",
-      time: "11:00 AM - 11:30 AM",
-      doctor: "Dr. Tina Murphy",
-      specialty: "Endocrinologist",
-      type: "Hormone Therapy Consultation",
-      status: "confirmed",
-      mode: "video",
-      avatar: "TM",
-    },
-    {
-      id: 4,
-      date: "2024-01-11",
-      time: "03:30 PM - 04:00 PM",
-      doctor: "Dr. James Rodriguez",
-      specialty: "Orthopedist",
-      type: "Knee Pain Assessment",
-      status: "pending",
-      mode: "in-person",
-      avatar: "JR",
-    },
-    {
-      id: 5,
-      date: "2024-01-12",
-      time: "10:00 AM - 10:30 AM",
-      doctor: "Dr. Lisa Thompson",
-      specialty: "Nutritionist",
-      type: "Diet Consultation",
-      status: "confirmed",
-      mode: "phone",
-      avatar: "LT",
-    },
-    {
-      id: 6,
-      date: "2024-01-15",
-      time: "01:00 PM - 01:30 PM",
-      doctor: "Dr. Micheal Hussey",
-      specialty: "Anti-Aging Specialist",
-      type: "Anti-Aging Consultation",
-      status: "confirmed",
-      mode: "video",
-      avatar: "MH",
-    },
-  ],
-  today: [
-    {
-      id: 7,
-      date: "2024-01-08",
-      time: "10:00 AM - 10:30 AM",
-      doctor: "Dr. Emily Davis",
-      specialty: "General Physician",
-      type: "Regular Checkup",
-      status: "confirmed",
-      mode: "video",
-      avatar: "ED",
-    },
-    {
-      id: 8,
-      date: "2024-01-08",
-      time: "03:00 PM - 03:30 PM",
-      doctor: "Dr. Robert Kim",
-      specialty: "Psychiatrist",
-      type: "Mental Health Session",
-      status: "confirmed",
-      mode: "in-person",
-      avatar: "RK",
-    },
-  ],
-  past: [
-    {
-      id: 9,
-      date: "2024-01-05",
-      time: "11:00 AM - 11:30 AM",
-      doctor: "Dr. Tina Murphy",
-      specialty: "Endocrinologist",
-      type: "Hormone Therapy Follow-up",
-      status: "completed",
-      mode: "video",
-      avatar: "TM",
-    },
-    {
-      id: 10,
-      date: "2024-01-03",
-      time: "02:00 PM - 02:30 PM",
-      doctor: "Dr. Amanda Foster",
-      specialty: "Gynecologist",
-      type: "Annual Checkup",
-      status: "completed",
-      mode: "in-person",
-      avatar: "AF",
-    },
-    {
-      id: 11,
-      date: "2023-12-28",
-      time: "09:30 AM - 10:00 AM",
-      doctor: "Dr. David Park",
-      specialty: "Ophthalmologist",
-      type: "Eye Examination",
-      status: "completed",
-      mode: "in-person",
-      avatar: "DP",
-    },
-    {
-      id: 12,
-      date: "2023-12-20",
-      time: "04:00 PM - 04:30 PM",
-      doctor: "Dr. Maria Garcia",
-      specialty: "Neurologist",
-      type: "Headache Consultation",
-      status: "completed",
-      mode: "video",
-      avatar: "MG",
-    },
-    {
-      id: 13,
-      date: "2023-12-15",
-      time: "01:30 PM - 02:00 PM",
-      doctor: "Dr. Kevin Lee",
-      specialty: "Urologist",
-      type: "Routine Checkup",
-      status: "completed",
-      mode: "in-person",
-      avatar: "KL",
-    },
-    {
-      id: 14,
-      date: "2023-12-10",
-      time: "11:00 AM - 11:30 AM",
-      doctor: "Dr. Rachel Green",
-      specialty: "Pediatrician",
-      type: "Child Health Checkup",
-      status: "completed",
-      mode: "in-person",
-      avatar: "RG",
-    },
-    {
-      id: 15,
-      date: "2023-12-05",
-      time: "02:30 PM - 03:00 PM",
-      doctor: "Dr. Thomas Brown",
-      specialty: "Dentist",
-      type: "Dental Cleaning",
-      status: "completed",
-      mode: "in-person",
-      avatar: "TB",
-    },
-    {
-      id: 16,
-      date: "2023-11-28",
-      time: "09:00 AM - 09:30 AM",
-      doctor: "Dr. Jennifer White",
-      specialty: "Rheumatologist",
-      type: "Joint Pain Consultation",
-      status: "completed",
-      mode: "video",
-      avatar: "JW",
-    },
-  ],
+interface appointmentdata {
+  _id: string;
+  doctorUserId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  status: string;
+}
+
+const mockappointmentdata = {
+  _id: "",
+  doctorUserId: "",
+  doctorName: "",
+  doctorSpecialist: "",
+  patientName: "",
+  patientEmail: "",
+  patientPhone: "",
+  appointmentDate: "",
+  appointmentTime: "",
+  mode: "",
+  consultedType: "",
+  reasonForVisit: "",
+  symptoms: "",
+  previousVisit: "",
+  emergencyContact: "",
+  emergencyPhone: "",
+  paymentMethod: "",
+  specialRequests: "",
+  status: "",
 };
 
 const prescriptionsData = {
@@ -394,17 +254,6 @@ const formatDate = (dateString: string) => {
   }
 };
 
-const groupAppointmentsByDate = (appointments: any[]) => {
-  return appointments.reduce((groups: any, appointment) => {
-    const date = appointment.date;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(appointment);
-    return groups;
-  }, {});
-};
-
 const getStatusColor = (status: string) => {
   switch (status) {
     case "confirmed":
@@ -433,6 +282,91 @@ const getModeIcon = (mode: string) => {
   }
 };
 
+// Interface for categorized appointments
+interface CategorizedAppointments {
+  today: appointmentdata[];
+  future: appointmentdata[];
+  past: appointmentdata[];
+}
+
+// Interface for grouped appointments by date
+interface GroupedAppointments {
+  [date: string]: appointmentdata[];
+}
+
+// Helper function to get today's date in YYYY-MM-DD format
+const getTodayDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+// Helper function to compare dates
+const compareDates = (
+  appointmentDate: string,
+  todayDate: string
+): "past" | "today" | "future" => {
+  if (appointmentDate < todayDate) return "past";
+  if (appointmentDate === todayDate) return "today";
+  return "future";
+};
+
+// Function to categorize appointments
+const categorizeAppointments = (
+  appointments: appointmentdata[]
+): CategorizedAppointments => {
+  const todayDate = getTodayDate();
+
+  const categorized: CategorizedAppointments = {
+    today: [],
+    future: [],
+    past: [],
+  };
+
+  appointments.forEach((appointment) => {
+    const category = compareDates(appointment.appointmentDate, todayDate);
+    categorized[category].push(appointment);
+  });
+
+  // Sort appointments within each category
+  categorized.today.sort((a, b) =>
+    a.appointmentTime.localeCompare(b.appointmentTime)
+  );
+  categorized.future.sort((a, b) => {
+    if (a.appointmentDate === b.appointmentDate) {
+      return a.appointmentTime.localeCompare(b.appointmentTime);
+    }
+    return a.appointmentDate.localeCompare(b.appointmentDate);
+  });
+  categorized.past.sort((a, b) => {
+    if (b.appointmentDate === a.appointmentDate) {
+      return b.appointmentTime.localeCompare(a.appointmentTime);
+    }
+    return b.appointmentDate.localeCompare(a.appointmentDate);
+  });
+
+  return categorized;
+};
+
+// Function to group appointments by date
+const groupAppointmentsByDate = (
+  appointments: appointmentdata[]
+): GroupedAppointments => {
+  return appointments.reduce((grouped: GroupedAppointments, appointment) => {
+    const date = appointment.appointmentDate;
+    if (!grouped[date]) {
+      grouped[date] = [];
+    }
+    grouped[date].push(appointment);
+
+    // Sort appointments within the same date by time
+    grouped[date].sort((a, b) =>
+      a.appointmentTime.localeCompare(b.appointmentTime)
+    );
+
+    return grouped;
+  }, {});
+};
+
 export default function Appointments({
   onNavigate,
 }: {
@@ -440,23 +374,85 @@ export default function Appointments({
 }) {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReportsModal, setShowReportsModal] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<appointmentdata | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<{ [key: number]: File[] }>(
     {}
   );
+  const [appointmentsData, setAppointmentsData] =
+    useState<appointmentdata | null>(null);
 
-  const futureGrouped = groupAppointmentsByDate(appointmentsData.future);
-  const pastGrouped = groupAppointmentsByDate(appointmentsData.past);
+  const user = useAppSelector((state) => state.auth.user);
+
+  const categorizedAppointments = useMemo(() => {
+    return categorizeAppointments(
+      appointmentsData
+        ? Array.isArray(appointmentsData)
+          ? appointmentsData
+          : []
+        : []
+    );
+  }, [appointmentsData]);
+
+  useEffect(() => {
+    let id = user?._id;
+    const fetchData = async () => {
+      try {
+        let response = await fetch(`/api/user/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        let userdata = await response.json();
+        //console.log("🧞‍♂️userdata --->", userdata?.userdetails.appointments);
+        setAppointmentsData(userdata?.userdetails?.appointments);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, [user?._id]);
+  // Group appointments by date
+  const todayGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.today);
+  }, [categorizedAppointments.today]);
+  console.log("today appointment=>", todayGrouped);
+
+  const futureGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.future);
+  }, [categorizedAppointments.future]);
+  console.log("future appointment=>", futureGrouped);
+
+  const pastGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.past);
+  }, [categorizedAppointments.past]);
 
   const handleJoinSession = (appointmentId: number) => {
     console.log(`Joining session for appointment ${appointmentId}`);
     // Add video call logic here
   };
 
-  const handleCancelAppointment = (appointmentId: number) => {
+  const handleCancelAppointment = async (appointmentId: number) => {
     console.log(`Cancelling appointment ${appointmentId}`);
-    // Add cancellation logic here
+    let id = user?._id;
+    let appointmentDeleteResponse = await fetch(
+      "./api/user/deleteAppointment",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId: appointmentId,
+          userId: id,
+        }),
+      }
+    );
+    let appointmentdeleteresponse = await appointmentDeleteResponse.json();
+    setAppointmentsData(appointmentdeleteresponse?.userdetails?.appointments);
   };
 
   const handleRescheduleAppointment = (appointmentId: number) => {
@@ -471,6 +467,14 @@ export default function Appointments({
     }
   };
 
+  const handleViewDetails = (appointment: appointmentdata, status: string) => {
+    let appointmentWithStatus = {
+      ...appointment,
+      status: status,
+    };
+    setSelectedAppointment(appointmentWithStatus);
+    setShowDetailsModal(true);
+  };
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);
@@ -489,10 +493,35 @@ export default function Appointments({
     }));
   };
 
+  const getDoctorInitials = (doctorName: string) => {
+    if (!doctorName) return "DR";
+
+    // Remove DR/Dr prefix and clean the name
+    const cleanName = doctorName
+      .replace(/^(DR\.?|Dr\.?)\s*/i, "") // Remove DR/Dr at the beginning
+      .trim();
+
+    if (!cleanName) return "DR";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "DR";
+    }
+  };
   const AppointmentCard = ({
+    status,
     appointment,
     showActions = false,
   }: {
+    status: string;
     appointment: any;
     showActions?: boolean;
   }) => (
@@ -503,34 +532,32 @@ export default function Appointments({
             <Avatar className="h-12 w-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                {appointment.avatar}
+                {getDoctorInitials(appointment.doctorName)}
               </AvatarFallback>
             </Avatar>
 
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-gray-900">
-                  {appointment.type}
+                  {appointment.reasonForVisit}
                 </h3>
-                <Badge className={getStatusColor(appointment.status)}>
-                  {appointment.status}
-                </Badge>
+                <Badge className={getStatusColor(status)}>{status}</Badge>
               </div>
 
               <p className="text-sm text-gray-600 mb-1">
-                {appointment.doctor} • {appointment.specialty}
+                {appointment.doctorName} • {appointment.doctorSpecialist}
               </p>
 
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  {appointment.time}
+                  {appointment.appointmentTime}
                 </div>
                 <div className="flex items-center gap-1">
-                  {getModeIcon(appointment.mode)}
-                  {appointment.mode === "in-person"
+                  {getModeIcon(appointment.consultationType)}
+                  {appointment.consultationType === "in-person"
                     ? "In-person"
-                    : appointment.mode === "video"
+                    : appointment.consultationType === "video"
                       ? "Video Call"
                       : "Phone Call"}
                 </div>
@@ -542,22 +569,22 @@ export default function Appointments({
             {/* Appointment Management Actions (only for upcoming/today) */}
             {showActions && (
               <>
-                {appointment.status === "confirmed" &&
-                  appointment.mode === "video" && (
+                {status === "confirmed" &&
+                  appointment.consultationType === "video" && (
                     <Button
                       className="bg-pink-500 hover:bg-pink-600 text-white"
-                      onClick={() => handleJoinSession(appointment.id)}
+                      onClick={() => handleJoinSession(appointment._id)}
                     >
                       <Video className="h-4 w-4 mr-2" />
                       Join
                     </Button>
                   )}
-                {appointment.status === "confirmed" && (
+                {status === "confirmed" && (
                   <>
                     <Button
                       variant="outline"
                       className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                      onClick={() => handleCancelAppointment(appointment.id)}
+                      onClick={() => handleCancelAppointment(appointment._id)}
                     >
                       Cancel
                     </Button>
@@ -565,7 +592,7 @@ export default function Appointments({
                       variant="outline"
                       className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
                       onClick={() =>
-                        handleRescheduleAppointment(appointment.id)
+                        handleRescheduleAppointment(appointment._id)
                       }
                     >
                       Reschedule
@@ -583,6 +610,14 @@ export default function Appointments({
             >
               <FileText className="h-4 w-4 mr-2" />
               Prescription
+            </Button>
+            <Button
+              variant="outline"
+              className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+              onClick={() => handleViewDetails(appointment, status)}
+            >
+              <Info className="h-4 w-4 mr-2" />
+              See Details
             </Button>
             <Button
               variant="outline"
@@ -622,7 +657,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-blue-600 font-medium">Upcoming</p>
                 <p className="text-2xl font-bold text-blue-900">
-                  {appointmentsData.future.length}
+                  {Object.keys(futureGrouped).length}
                 </p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
@@ -636,7 +671,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-green-600 font-medium">Today</p>
                 <p className="text-2xl font-bold text-green-900">
-                  {appointmentsData.today.length}
+                  {Object.keys(todayGrouped).length}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-green-500" />
@@ -650,7 +685,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-purple-600 font-medium">Completed</p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {appointmentsData.past.length}
+                  {Object.keys(pastGrouped).length}
                 </p>
               </div>
               <Badge className="h-8 w-8 text-purple-500 bg-transparent p-0">
@@ -678,21 +713,21 @@ export default function Appointments({
           className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("upcoming")}
         >
-          Upcoming ({appointmentsData.future.length})
+          Upcoming ({Object.keys(futureGrouped).length})
         </Button>
         <Button
           variant={activeTab === "today" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "today" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("today")}
         >
-          Today ({appointmentsData.today.length})
+          Today ({Object.keys(todayGrouped).length})
         </Button>
         <Button
           variant={activeTab === "past" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "past" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
           onClick={() => setActiveTab("past")}
         >
-          Past ({appointmentsData.past.length})
+          Past ({Object.keys(pastGrouped).length})
         </Button>
       </div>
 
@@ -706,7 +741,7 @@ export default function Appointments({
 
           {Object.keys(futureGrouped).length > 0 ? (
             Object.entries(futureGrouped).map(
-              ([date, appointments]: [string, any]) => (
+              ([date, appointments]: [string, appointmentdata[]]) => (
                 <div key={date} className="space-y-3">
                   <div className="flex items-center gap-2 pb-2 border-b">
                     <h3 className="text-lg font-medium text-gray-800">
@@ -725,13 +760,28 @@ export default function Appointments({
                     </Badge>
                   </div>
 
-                  {appointments.map((appointment: any) => (
-                    <AppointmentCard
-                      key={appointment.id}
-                      appointment={appointment}
-                      showActions={true}
-                    />
-                  ))}
+                  {appointments && appointments.length > 0 ? (
+                    appointments.map((appointment: appointmentdata) => {
+                      // Add individual appointment validation
+                      if (!appointment || !appointment._id) {
+                        console.warn("Invalid appointment data:", appointment);
+                        return null;
+                      }
+
+                      return (
+                        <AppointmentCard
+                          status="pending"
+                          key={appointment._id}
+                          appointment={appointment}
+                          showActions={true}
+                        />
+                      );
+                    })
+                  ) : (
+                    <div className="text-gray-500 text-center py-4">
+                      No appointments found for this date
+                    </div>
+                  )}
                 </div>
               )
             )
@@ -762,30 +812,40 @@ export default function Appointments({
               Today's Appointments
             </h2>
             <Badge className="bg-green-100 text-green-800">
-              {appointmentsData.today.length} appointments
+              {Object.keys(todayGrouped).length} appointments
             </Badge>
           </div>
 
-          {appointmentsData.today.length > 0 ? (
-            appointmentsData.today.map((appointment) => (
-              <AppointmentCard
-                key={appointment.id}
-                appointment={appointment}
-                showActions={true}
-              />
-            ))
+          {Object.keys(todayGrouped).length > 0 ? (
+            todayGrouped && Object.keys(todayGrouped).length > 0 ? (
+              Object.entries(todayGrouped).map(
+                ([date, appointments]: [string, appointmentdata[]]) =>
+                  appointments.map((appointment: appointmentdata) => {
+                    // Add individual appointment validation
+                    if (!appointment || !appointment._id) {
+                      console.warn("Invalid appointment data:", appointment);
+                      return null;
+                    }
+
+                    return (
+                      <AppointmentCard
+                        status="confirmed"
+                        key={appointment._id}
+                        appointment={appointment}
+                        showActions={true}
+                      />
+                    );
+                  })
+              )
+            ) : (
+              <div className="text-gray-500 text-center py-4">
+                No appointments found for today
+              </div>
+            )
           ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No appointments today
-                </h3>
-                <p className="text-gray-600">
-                  You have a free day! Enjoy your time.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="text-gray-500 text-center py-4">
+              No appointment data available
+            </div>
           )}
         </div>
       )}
@@ -798,38 +858,150 @@ export default function Appointments({
               Appointment History
             </h2>
             <Badge variant="outline">
-              {appointmentsData.past.length} completed
+              {Object.keys(pastGrouped).length} completed
             </Badge>
           </div>
+          {Object.keys(pastGrouped).length > 0 ? (
+            Object.entries(pastGrouped)
+              .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+              .map(([date, appointments]: [string, any]) => (
+                <div key={date} className="space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b">
+                    <h3 className="text-lg font-medium text-gray-800">
+                      {new Date(date).toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </h3>
+                    <Badge variant="outline" className="ml-2">
+                      {appointments.length} appointment
+                      {appointments.length !== 1 ? "s" : ""}
+                    </Badge>
+                  </div>
 
-          {Object.entries(pastGrouped)
-            .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
-            .map(([date, appointments]: [string, any]) => (
-              <div key={date} className="space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b">
-                  <h3 className="text-lg font-medium text-gray-800">
-                    {new Date(date).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </h3>
-                  <Badge variant="outline" className="ml-2">
-                    {appointments.length} appointment
-                    {appointments.length !== 1 ? "s" : ""}
-                  </Badge>
+                  {appointments.map((appointment: any) => (
+                    <AppointmentCard
+                      status="completed"
+                      key={appointment.id}
+                      appointment={appointment}
+                      showActions={false}
+                    />
+                  ))}
                 </div>
+              ))
+          ) : (
+            <div className="text-gray-500 text-center py-4">
+              No appointment data available
+            </div>
+          )}
+        </div>
+      )}
 
-                {appointments.map((appointment: any) => (
-                  <AppointmentCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    showActions={false}
-                  />
-                ))}
+      {showDetailsModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Appointment Details - {selectedAppointment.reasonForVisit}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDetailsModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-            ))}
+              <div className="mb-4">
+                <p className="text-sm text-gray-600">
+                  {selectedAppointment.doctorName} •{" "}
+                  {formatDate(selectedAppointment.appointmentDate)}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Patient Information
+                  </h3>
+                  <p>
+                    <strong>Name:</strong> {selectedAppointment.patientName}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {selectedAppointment.patientEmail}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> {selectedAppointment.patientPhone}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Appointment Specifics
+                  </h3>
+                  <p>
+                    <strong>Date:</strong> {selectedAppointment.appointmentDate}
+                  </p>
+                  <p>
+                    <strong>Time:</strong> {selectedAppointment.appointmentTime}
+                  </p>
+                  <p>
+                    <strong>Consultation Type:</strong>{" "}
+                    {selectedAppointment.consultedType}
+                  </p>
+                  <p>
+                    <strong>Mode:</strong>{" "}
+                    {selectedAppointment.consultationType}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {selectedAppointment.status}
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Medical Details
+                  </h3>
+                  <p>
+                    <strong>Reason for Visit:</strong>{" "}
+                    {selectedAppointment.reasonForVisit}
+                  </p>
+                  <p>
+                    <strong>Symptoms:</strong> {selectedAppointment.symptoms}
+                  </p>
+                  <p>
+                    <strong>Previous Visit:</strong>{" "}
+                    {selectedAppointment.previousVisit}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Emergency Contact
+                  </h3>
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {selectedAppointment.emergencyContact}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> {selectedAppointment.emergencyPhone}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Other Information
+                  </h3>
+                  <p>
+                    <strong>Payment Method:</strong>{" "}
+                    {selectedAppointment.paymentMethod}
+                  </p>
+                  <p>
+                    <strong>Special Requests:</strong>{" "}
+                    {selectedAppointment.specialRequests}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -840,7 +1012,7 @@ export default function Appointments({
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Prescription - {selectedAppointment.type}
+                  Prescription -
                 </h2>
                 <Button
                   variant="ghost"
@@ -853,8 +1025,8 @@ export default function Appointments({
 
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
-                  {selectedAppointment.doctor} •{" "}
-                  {formatDate(selectedAppointment.date)}
+                  {selectedAppointment.doctorName} •{" "}
+                  {formatDate(selectedAppointment.appointmentDate)}
                 </p>
               </div>
 

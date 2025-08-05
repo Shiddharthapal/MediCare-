@@ -32,6 +32,7 @@ interface DoctorDetails {
   specialist: string;
   specializations: string[];
   hospital: string;
+  gender: string;
   fees: number;
   rating?: number;
   experience: string;
@@ -348,6 +349,7 @@ export default function Doctors({
                 </span>
               </div>
             </div>
+            <div>{doctor.gender || " "}</div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -390,15 +392,19 @@ export default function Doctors({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Badge className={getAvailabilityColor(doctor.availability)}>
-                <Video className="" />
-                {doctor.availability}
-              </Badge>
+              {doctor.consultationModes.map((mode: String) => (
+                <Badge className={getAvailabilityColor(doctor.availability)}>
+                  {mode.charAt(0).toUpperCase() + mode.slice(1).toLowerCase()}
+                </Badge>
+              ))}
             </div>
 
-            <div className="flex items-center gap-1">
-              <div className="flex items-center gap-1 text-gray-500">video</div>
-            </div>
+            {/* <div className="flex items-center gap-1">
+              <Video className="text-blue-700" />
+              <div className=" text-md flex items-center gap-1 text-gray-800">
+                Video
+              </div>
+            </div> */}
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t">

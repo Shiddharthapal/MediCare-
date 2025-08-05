@@ -8,7 +8,9 @@ export const GET: APIRoute = async ({ params, request }) => {
   };
   try {
     let { id } = params;
+    console.log("🧞‍♂️id --->", id);
     await connect();
+
     let doctordetails = await DoctorDetails.findOne({ userId: id });
     //console.log("🧞‍♂️doctordetails --->", doctordetails);
 

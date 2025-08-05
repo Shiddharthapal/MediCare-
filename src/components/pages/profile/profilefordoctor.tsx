@@ -12,8 +12,12 @@ import {
   Save,
   X,
   Plus,
+  Transgender,
   BookText,
+  Video,
   BadgeDollarSign,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -24,6 +28,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   setEditMode,
@@ -37,9 +48,13 @@ interface Doctor {
   specialist: string;
   specializations: string[];
   hospital: string;
+  gender: string;
+  contact: string;
+  email: string;
   fees: number;
   rating: number;
   experience: string;
+  consultationModes: ("video" | "phone" | "in-person")[];
   education: string;
   degree: string;
   language: string[];
@@ -54,9 +69,13 @@ const mockDoctor: Doctor = {
   specialist: "",
   specializations: [],
   hospital: "",
+  gender: "",
+  contact: "",
+  email: "",
   fees: 0,
   rating: 0,
   experience: "",
+  consultationModes: ["video", "phone"],
   education: "",
   degree: "",
   language: [],
@@ -88,8 +107,45 @@ export default function DoctorProfilePage() {
     // setHasProfile(Boolean(profileExists));
     // setEditedDoctor({ ...doctor });
 
+    const getUserId = async (): Promise<string | null> => {
+      // First try to get from user object
+      if (user?._id) {
+        return user._id;
+      }
+
+      // Fallback to token verification
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          throw new Error("No auth token found");
+        }
+        let response = await fetch("/api/getId/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token }),
+        });
+        let userid = await response.json();
+        console.log("🧞‍♂️userid --->", userid);
+        if (!userid) {
+          throw new Error("Invalid token or no user ID");
+        }
+
+        return userid.userId;
+      } catch (error) {
+        console.error("Failed to get user ID:", error);
+        return null;
+      }
+    };
     const fetchDetails = async () => {
-      let id = user?._id;
+      let id = await getUserId();
+      console.log("🧞‍♂️id --->", id);
+      if (!id) {
+        // Handle auth error - redirect to login or show error
+        console.error("Unable to authenticate user");
+        return;
+      }
       const response = await fetch(`/api/doctor/${id}`, {
         method: "GET",
         headers: {
@@ -105,9 +161,10 @@ export default function DoctorProfilePage() {
       const responseData = await response.json();
       setHasProfile(Boolean(responseData.doctordetails));
       setDoctor(responseData.doctordetails);
+      setEditedDoctor(responseData.doctordetails);
     };
     fetchDetails();
-  }, [doctor]);
+  }, [user]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -133,6 +190,7 @@ export default function DoctorProfilePage() {
       dispatch(updateProfileSuccess(doctor));
       dispatch(setEditMode(false));
       setHasProfile(true);
+      setDoctor(responseData?.doctordetails);
       setIsEditing(false);
     } catch (error) {
       dispatch(
@@ -143,6 +201,24 @@ export default function DoctorProfilePage() {
     }
   };
 
+  const handleToggleConsultationMode = (
+    mode: "video" | "phone" | "in-person"
+  ) => {
+    setEditedDoctor((prev) => {
+      const currentModes = prev.consultationModes || [];
+      if (currentModes.includes(mode)) {
+        return {
+          ...prev,
+          consultationModes: currentModes.filter((m) => m !== mode),
+        };
+      } else {
+        return {
+          ...prev,
+          consultationModes: [...currentModes, mode],
+        };
+      }
+    });
+  };
   const handleCancel = () => {
     setEditedDoctor({ ...doctor });
     setIsEditing(false);
@@ -421,6 +497,86 @@ export default function DoctorProfilePage() {
                     </p>
                   )}
                 </div>
+                <div>
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <Phone className="h-5 w-5 mr-2" />
+                    Contact Number
+                  </Label>
+                  {isEditing ? (
+                    <Input
+                      type="tel"
+                      value={editedDoctor.contact}
+                      onChange={(e) =>
+                        handleInputChange("contact", e.target.value)
+                      }
+                      placeholder="Enter your contact number"
+                    />
+                  ) : (
+                    <p className="text-gray-700 text-lg">
+                      {displayValue(currentDoctor?.contact)}
+                    </p>
+                  )}
+                </div>
+                {/* New Email Field */}
+                <div>
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <Mail className="h-5 w-5 mr-2" />
+                    Email
+                  </Label>
+
+                  <p className="text-gray-700 text-lg">
+                    {displayValue(currentDoctor?.email) ||
+                      "Not need to provide"}
+                  </p>
+                </div>
+                <div className="">
+                  <div>
+                    <Label className="text-lg font-semibold flex items-center mb-3">
+                      <Video className="h-5 w-5 mr-2" />
+                      Consultation Mode
+                    </Label>
+                    {isEditing ? (
+                      <div className="flex flex-wrap lg:flex-nowrap gap-2">
+                        {(["video", "phone", "in-person"] as const).map(
+                          (mode) => (
+                            <Badge
+                              key={mode}
+                              variant={
+                                editedDoctor.consultationModes.includes(mode)
+                                  ? "default"
+                                  : "outline"
+                              }
+                              className={`cursor-pointer px-4 py-2 text-base ${
+                                editedDoctor.consultationModes.includes(mode)
+                                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              }`}
+                              onClick={() => handleToggleConsultationMode(mode)}
+                            >
+                              {mode}
+                            </Badge>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {currentDoctor?.consultationModes?.length > 0 ? (
+                          currentDoctor.consultationModes.map((mode, index) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-sm"
+                            >
+                              {mode}
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-sm">Not Provided</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Right Column */}
@@ -543,6 +699,35 @@ export default function DoctorProfilePage() {
                     )}
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <Transgender className="h-5 w-5 mr-2" />
+                    Gender
+                  </Label>
+                  {isEditing ? (
+                    <>
+                      <Select
+                        value={editedDoctor?.gender}
+                        onValueChange={(value) =>
+                          handleInputChange("gender", value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </>
+                  ) : (
+                    <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                      {currentDoctor?.gender || "Not provided"}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -599,14 +784,16 @@ export default function DoctorProfilePage() {
                       <Edit3 className="h-4 w-4" />
                       {hasProfile ? "Edit Profile" : "Create Profile"}
                     </Button>
-                    <Button
-                      onClick={handleCancel}
-                      variant="outline"
-                      className="flex items-center gap-2 bg-transparent"
-                    >
-                      <X className="h-4 w-4" />
-                      Cancel
-                    </Button>
+                    {isEditing && (
+                      <Button
+                        onClick={handleCancel}
+                        variant="outline"
+                        className="flex items-center gap-2 bg-transparent"
+                      >
+                        <X className="h-4 w-4" />
+                        Cancel
+                      </Button>
+                    )}
                   </>
                 )}
               </div>

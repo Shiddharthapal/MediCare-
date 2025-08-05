@@ -5,7 +5,7 @@ import { store, persistor } from "@/redux/store";
 import Home from "./pages/home";
 import Layout from "../layouts/Layout";
 import LoginAsUser from "./pages/loginasUser";
-import LoginAsDoctor from "./pages/loginasDoctor";
+import LoginAsDoctor from "./pages/loginasdoctor";
 import RegisterAsUser from "./pages/registerasUser";
 import RegisterAsDoctor from "./pages/registerasDoctor";
 import Services from "./pages/services";

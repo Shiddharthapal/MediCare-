@@ -3,6 +3,5 @@ export interface Doctor {
   email: String;
   registrationNo: Number;
   passward: String;
-  role: String;
   createdAt: Date;
 }

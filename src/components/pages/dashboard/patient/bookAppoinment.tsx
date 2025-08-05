@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,6 +33,7 @@ import {
   Star,
   AlertCircle,
 } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
 
 interface Doctor {
   _id: string;
@@ -41,6 +42,7 @@ interface Doctor {
   specialist: string;
   specializations: string[];
   hospital: string;
+  gender: string;
   fees: number;
   rating?: number;
   experience: string;
@@ -52,6 +54,14 @@ interface Doctor {
   consultationModes: string[];
 }
 
+interface User {
+  userId: String;
+  email: String;
+  name: String;
+  address: String;
+  contactNumber: String;
+}
+
 interface BookAppointmentProps {
   isOpen: boolean;
   onClose: () => void;
@@ -59,43 +69,31 @@ interface BookAppointmentProps {
 }
 
 interface AppointmentData {
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
+  consultedType: string;
   reasonForVisit: string;
   symptoms: string;
   previousVisit: string;
   emergencyContact: string;
   emergencyPhone: string;
-  insuranceProvider: string;
-  insuranceNumber: string;
   paymentMethod: string;
   specialRequests: string;
 }
 
 const timeSlots = [
-  "09:00 AM",
-  "09:30 AM",
-  "10:00 AM",
-  "10:30 AM",
-  "11:00 AM",
-  "11:30 AM",
-  "12:00 PM",
-  "12:30 PM",
-  "02:00 PM",
-  "02:30 PM",
-  "03:00 PM",
-  "03:30 PM",
-  "04:00 PM",
-  "04:30 PM",
-  "05:00 PM",
-  "05:30 PM",
+  "09:00 AM - 09:30 AM",
+  "10:00 AM - 10:30 AM",
+  "11:00 AM - 11:30 AM",
+  "12:00 PM - 12:30 PM",
+  "02:00 PM - 02:30 PM",
+  "03:00 PM - 03:30 PM",
+  "04:00 PM - 04:30 PM",
+  "05:00 PM - 05:30 PM",
 ];
 
-const consultationTypes = [
+const consultationType = [
   {
     value: "video",
     label: "Video Call",
@@ -116,17 +114,70 @@ const consultationTypes = [
   },
 ];
 
-const reasonsForVisit = [
-  "Regular Checkup",
-  "Follow-up Appointment",
-  "New Symptoms",
-  "Medication Review",
-  "Test Results Discussion",
-  "Second Opinion",
-  "Emergency Consultation",
-  "Other",
-];
-
+const categorizedReasonsForVisit = {
+  "Preventive Care": [
+    "Annual physical examination",
+    "Routine checkup",
+    "Health screening",
+    "Vaccination/Immunization",
+    "Well-child visit",
+    "Sports physical",
+  ],
+  Cardiovascular: [
+    "Routine heart checkup",
+    "Chest pain evaluation",
+    "High blood pressure management",
+    "Heart palpitations",
+    "Shortness of breath",
+  ],
+  Respiratory: [
+    "Cough and cold symptoms",
+    "Breathing difficulties",
+    "Asthma management",
+    "Allergic reactions",
+    "Sinus infection",
+  ],
+  Digestive: [
+    "Stomach pain/Abdominal pain",
+    "Nausea and vomiting",
+    "Diarrhea",
+    "Constipation",
+    "Acid reflux/Heartburn",
+  ],
+  Musculoskeletal: [
+    "Back pain",
+    "Joint pain",
+    "Muscle strain",
+    "Arthritis management",
+    "Sports injury",
+  ],
+  "Mental Health": [
+    "Anxiety symptoms",
+    "Depression screening",
+    "Stress management",
+    "Mental health consultation",
+  ],
+  "Women's Health": [
+    "Annual gynecological exam",
+    "Pap smear",
+    "Menstrual irregularities",
+    "Pregnancy consultation",
+    "Birth control consultation",
+  ],
+  "General Symptoms": [
+    "Headache/Migraine",
+    "Fever",
+    "Fatigue/Weakness",
+    "Skin rash",
+    "Weight loss/gain",
+  ],
+  "Follow-up": [
+    "Post-surgery follow-up",
+    "Medication review",
+    "Lab result discussion",
+    "Treatment follow-up",
+  ],
+};
 const paymentMethods = [
   "Bikash",
   "Nagad",
@@ -144,24 +195,28 @@ export default function BookAppointment({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState<AppointmentData>({
-    patientName: "",
-    patientEmail: "",
-    patientPhone: "",
     appointmentDate: "",
     appointmentTime: "",
     consultationType: "",
+    consultedType: "",
     reasonForVisit: "",
     symptoms: "",
     previousVisit: "",
     emergencyContact: "",
     emergencyPhone: "",
-    insuranceProvider: "",
-    insuranceNumber: "",
     paymentMethod: "",
     specialRequests: "",
   });
 
   const [errors, setErrors] = useState<Partial<AppointmentData>>({});
+  const [patientdata, setPatientdata] = useState<User>({
+    userId: "",
+    email: "",
+    name: "",
+    address: "",
+    contactNumber: "",
+  });
+  const user = useAppSelector((state) => state.auth.user);
 
   const handleInputChange = (field: keyof AppointmentData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -175,16 +230,6 @@ export default function BookAppointment({
     const newErrors: Partial<AppointmentData> = {};
 
     switch (step) {
-      case 1:
-        if (!formData.patientName.trim())
-          newErrors.patientName = "Name is required";
-        if (!formData.patientEmail.trim())
-          newErrors.patientEmail = "Email is required";
-        else if (!/\S+@\S+\.\S+/.test(formData.patientEmail))
-          newErrors.patientEmail = "Invalid email format";
-        if (!formData.patientPhone.trim())
-          newErrors.patientPhone = "Phone number is required";
-        break;
       case 2:
         if (!formData.appointmentDate)
           newErrors.appointmentDate = "Date is required";
@@ -207,6 +252,33 @@ export default function BookAppointment({
     return Object.keys(newErrors).length === 0;
   };
 
+  useEffect(() => {
+    let id = user?._id;
+    const fetchData = async () => {
+      try {
+        let response = await fetch(`/api/user/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        let userdata = await response.json();
+        console.log("🧞‍♂️userdata --->", userdata);
+        setPatientdata({
+          userId: userdata?.userdetails?.userId || userdata?.userId,
+          email: userdata?.userdetails?.email || userdata?.email,
+          name: userdata?.userdetails?.name || userdata?.name,
+          address: userdata?.userdetails?.address || userdata?.address,
+          contactNumber:
+            userdata?.userdetails?.contactNumber || userdata?.contactNumber,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, [user?._id]);
+
   const handleNext = () => {
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => prev + 1);
@@ -222,9 +294,16 @@ export default function BookAppointment({
 
     setIsSubmitting(true);
 
+    const id = user?._id;
     // Simulate API call
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      let response = await fetch("./api/user/bookAppointment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ formData, doctor, id }),
+      });
 
       console.log("Appointment booked:", {
         doctor: doctor,
@@ -243,19 +322,15 @@ export default function BookAppointment({
     setCurrentStep(1);
     setIsSuccess(false);
     setFormData({
-      patientName: "",
-      patientEmail: "",
-      patientPhone: "",
       appointmentDate: "",
       appointmentTime: "",
       consultationType: "",
+      consultedType: "",
       reasonForVisit: "",
       symptoms: "",
       previousVisit: "",
       emergencyContact: "",
       emergencyPhone: "",
-      insuranceProvider: "",
-      insuranceNumber: "",
       paymentMethod: "",
       specialRequests: "",
     });
@@ -274,12 +349,12 @@ export default function BookAppointment({
 
   const getMaxDate = () => {
     const maxDate = new Date();
-    maxDate.setMonth(maxDate.getMonth() + 3); // 3 months from now
+    maxDate.setDate(maxDate.getDate() + 7); // 7 days from now
     return maxDate.toISOString().split("T")[0];
   };
 
   const getConsultationIcon = (type: string) => {
-    const consultation = consultationTypes.find((c) => c.value === type);
+    const consultation = consultationType.find((c) => c.value === type);
     return consultation ? consultation.icon : Calendar;
   };
 
@@ -386,64 +461,30 @@ export default function BookAppointment({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="patientName">Full Name *</Label>
-                      <Input
-                        id="patientName"
-                        value={formData.patientName}
-                        onChange={(e) =>
-                          handleInputChange("patientName", e.target.value)
-                        }
-                        placeholder="Enter your full name"
-                        className={
-                          errors.patientName ? "border-red-500 mt-2" : "mt-2"
-                        }
-                      />
-                      {errors.patientName && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.patientName}
-                        </p>
-                      )}
+                      <div className="font-medium text-gray-900">
+                        Full Name *
+                      </div>
+                      <div className="font-small text-gray-900">
+                        {patientdata?.name}
+                      </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="patientEmail">Email Address *</Label>
-                      <Input
-                        id="patientEmail"
-                        type="email"
-                        value={formData.patientEmail}
-                        onChange={(e) =>
-                          handleInputChange("patientEmail", e.target.value)
-                        }
-                        placeholder="Enter your email"
-                        className={
-                          errors.patientEmail ? "border-red-500 mt-2" : "mt-2"
-                        }
-                      />
-                      {errors.patientEmail && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.patientEmail}
-                        </p>
-                      )}
+                      <div className="font-medium text-gray-900">
+                        Email Address *
+                      </div>
+                      <div className="font-small text-gray-900">
+                        {patientdata?.email}
+                      </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="patientPhone">Phone Number *</Label>
-                      <Input
-                        id="patientPhone"
-                        value={formData.patientPhone}
-                        onChange={(e) =>
-                          handleInputChange("patientPhone", e.target.value)
-                        }
-                        placeholder="Enter your phone number"
-                        className={
-                          errors.patientPhone ? "border-red-500 mt-2" : "mt-2"
-                        }
-                      />
-                      {errors.patientPhone && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.patientPhone}
-                        </p>
-                      )}
+                      <div className="font-medium text-gray-900">
+                        Contact Number *
+                      </div>
+                      <div className="font-small text-gray-900">
+                        {patientdata?.contactNumber}
+                      </div>
                     </div>
 
                     <div>
@@ -529,7 +570,7 @@ export default function BookAppointment({
                           <SelectValue placeholder="Select time" />
                         </SelectTrigger>
                         <SelectContent>
-                          {timeSlots.map((time) => (
+                          {doctor.availableSlots.map((time) => (
                             <SelectItem key={time} value={time}>
                               {time}
                             </SelectItem>
@@ -547,57 +588,87 @@ export default function BookAppointment({
                   <div>
                     <Label>Consultation Type *</Label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
-                      {/* {consultationTypes
-                        .filter((type) =>
-                          doctor.consultationModes.includes(type.value)
-                        )
-                        .map((type) => {
-                          const Icon = type.icon;
-                          return (
-                            <Card
-                              key={type.value}
-                              className={`cursor-pointer transition-all ${
-                                formData.consultationType === type.value
-                                  ? "border-blue-500 bg-blue-50"
-                                  : "hover:border-gray-300"
-                              } ${errors.consultationType ? "border-red-500 mt-2" : "m2-t"}`}
-                              onClick={() =>
-                                handleInputChange(
-                                  "consultationType",
-                                  type.value
-                                )
-                              }
-                            >
-                              <CardContent className="p-4 text-center">
-                                <Icon className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                                <h4 className="font-medium">{type.label}</h4>
-                                <p className="text-xs text-gray-600 mt-1">
-                                  {type.description}
-                                </p>
-                              </CardContent>
-                            </Card>
-                          );
-                        })} */}
+                      {(doctor.consultationModes &&
+                      doctor.consultationModes.length > 0
+                        ? doctor.consultationModes
+                        : ["video", "phone", "in-person"]
+                      ).map((mode) => {
+                        // Icon mapping
+                        const getIcon = (mode: string) => {
+                          switch (mode.toLowerCase()) {
+                            case "video":
+                              return (
+                                <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                              );
+                            case "phone":
+                              return (
+                                <Phone className="h-6 w-6 mx-auto mb-2 text-green-600" />
+                              );
+                            case "in-person":
+                              return (
+                                <User className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+                              );
+                            default:
+                              return (
+                                <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                              );
+                          }
+                        };
 
-                      <Card
-                        key={"video"}
-                        className={`cursor-pointer transition-all ${
-                          formData.consultationType === "video"
-                            ? "border-blue-500 bg-blue-50"
-                            : "hover:border-gray-300"
-                        } ${errors.consultationType ? "border-red-500 mt-2" : "mt-2"}`}
-                        onClick={() =>
-                          handleInputChange("consultationType", "video")
-                        }
-                      >
-                        <CardContent className="p-4 text-center">
-                          <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                          <h4 className="font-medium">"Video Call"</h4>
-                          <p className="text-xs text-gray-600 mt-1">
-                            "Online consultation via video call"
-                          </p>
-                        </CardContent>
-                      </Card>
+                        // Description mapping
+                        const getDescription = (mode: string) => {
+                          switch (mode.toLowerCase()) {
+                            case "video":
+                              return "Online consultation via video call";
+                            case "phone":
+                              return "Consultation via phone call";
+                            case "in-person":
+                              return "Face-to-face consultation";
+                            default:
+                              return "Online consultation";
+                          }
+                        };
+
+                        // Color mapping
+                        const getColor = (mode: string) => {
+                          switch (mode.toLowerCase()) {
+                            case "video":
+                              return "blue";
+                            case "phone":
+                              return "green";
+                            case "in-person":
+                              return "purple";
+                            default:
+                              return "blue";
+                          }
+                        };
+
+                        const color = getColor(mode);
+                        const capitalizedMode =
+                          mode.charAt(0).toUpperCase() + mode.slice(1);
+
+                        return (
+                          <Card
+                            key={mode}
+                            className={`cursor-pointer transition-all ${
+                              formData.consultationType === mode
+                                ? `border-${color}-500 bg-${color}-50`
+                                : "hover:border-gray-300"
+                            } ${errors.consultationType ? "border-red-500 mt-2" : "mt-2"}`}
+                            onClick={() =>
+                              handleInputChange("consultationType", mode)
+                            }
+                          >
+                            <CardContent className="p-4 text-center">
+                              {getIcon(mode)}
+                              <h4 className="font-medium">{capitalizedMode}</h4>
+                              <p className="text-xs text-gray-600 mt-1">
+                                {getDescription(mode)}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                     {errors.consultationType && (
                       <p className="text-red-500 text-sm mt-1">
@@ -614,7 +685,37 @@ export default function BookAppointment({
                     <FileText className="h-5 w-5" />
                     Medical Information
                   </h3>
-
+                  {/* New Select for Consulted Type */}
+                  <div>
+                    <Label htmlFor="consultedType">Consulted Type *</Label>
+                    <Select
+                      value={formData.consultedType}
+                      onValueChange={(value) =>
+                        handleInputChange("consultedType", value)
+                      }
+                    >
+                      <SelectTrigger
+                        className={
+                          errors.consultedType ? "border-red-500 mt-2" : "mt-2"
+                        }
+                      >
+                        <SelectValue placeholder="Select consulted type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.keys(categorizedReasonsForVisit).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.consultedType && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.consultedType}
+                      </p>
+                    )}
+                  </div>
+                  {/* Reason for Visit now depends on Consulted Type */}
                   <div>
                     <Label htmlFor="reasonForVisit">Reason for Visit *</Label>
                     <Select
@@ -622,6 +723,7 @@ export default function BookAppointment({
                       onValueChange={(value) =>
                         handleInputChange("reasonForVisit", value)
                       }
+                      disabled={!formData.consultedType} // Disable if no consulted type is selected
                     >
                       <SelectTrigger
                         className={
@@ -631,11 +733,14 @@ export default function BookAppointment({
                         <SelectValue placeholder="Select reason for visit" />
                       </SelectTrigger>
                       <SelectContent>
-                        {reasonsForVisit.map((reason) => (
-                          <SelectItem key={reason} value={reason}>
-                            {reason}
-                          </SelectItem>
-                        ))}
+                        {formData.consultedType &&
+                          categorizedReasonsForVisit[
+                            formData.consultedType as keyof typeof categorizedReasonsForVisit
+                          ]?.map((reason) => (
+                            <SelectItem key={reason} value={reason}>
+                              {reason}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     {errors.reasonForVisit && (
@@ -644,7 +749,6 @@ export default function BookAppointment({
                       </p>
                     )}
                   </div>
-
                   <div>
                     <Label htmlFor="symptoms">Current Symptoms</Label>
                     <Textarea
@@ -658,7 +762,6 @@ export default function BookAppointment({
                       className="mt-2"
                     />
                   </div>
-
                   <div>
                     <Label htmlFor="previousVisit" className="mb-2">
                       Previous Visit with this Doctor
@@ -767,21 +870,61 @@ export default function BookAppointment({
                       <div className="flex justify-between">
                         <span className="text-gray-600">Type:</span>
                         <span className="font-medium flex items-center gap-1">
-                          {formData.consultationType && (
-                            <>
-                              {(() => {
-                                const Icon = getConsultationIcon(
-                                  formData.consultationType
-                                );
-                                return <Icon className="h-4 w-4" />;
-                              })()}
-                              {
-                                consultationTypes.find(
-                                  (t) => t.value === formData.consultationType
-                                )?.label
+                          {(() => {
+                            // Icon mapping
+                            const getIcon = (mode: string) => {
+                              switch (mode.toLowerCase()) {
+                                case "video":
+                                  return (
+                                    <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                                  );
+                                case "phone":
+                                  return (
+                                    <Phone className="h-6 w-6 mx-auto mb-2 text-green-600" />
+                                  );
+                                case "in-person":
+                                  return (
+                                    <User className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+                                  );
+                                default:
+                                  return (
+                                    <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                                  );
                               }
-                            </>
-                          )}
+                            };
+
+                            // Color mapping
+                            const getColor = (mode: string) => {
+                              switch (mode.toLowerCase()) {
+                                case "video":
+                                  return "blue";
+                                case "phone":
+                                  return "green";
+                                case "in-person":
+                                  return "purple";
+                                default:
+                                  return "blue";
+                              }
+                            };
+
+                            const color = getColor(formData.consultationType);
+                            const capitalizedMode =
+                              formData.consultationType
+                                .charAt(0)
+                                .toUpperCase() +
+                              formData.consultationType.slice(1);
+
+                            return (
+                              <div
+                                className={`flex flex-row gap-2 text-${color}-500`}
+                              >
+                                {getIcon(formData.consultationType)}
+                                <h4 className="font-medium">
+                                  {capitalizedMode}
+                                </h4>
+                              </div>
+                            );
+                          })()}
                         </span>
                       </div>
                       <div className="flex justify-between border-t pt-2">

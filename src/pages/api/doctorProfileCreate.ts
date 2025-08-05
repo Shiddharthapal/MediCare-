@@ -1,4 +1,5 @@
 import connect from "@/lib/connection";
+import Doctor from "@/model/doctor";
 import DoctorDetails from "@/model/doctorDetails";
 import { verifyToken } from "@/utils/token";
 import type { APIRoute } from "astro";
@@ -16,6 +17,8 @@ export const POST: APIRoute = async ({ request }) => {
       specialist,
       specializations,
       hospital,
+      contact,
+      gender,
       fees,
       experience,
       education,
@@ -30,6 +33,8 @@ export const POST: APIRoute = async ({ request }) => {
       !specialist ||
       !specializations ||
       !hospital ||
+      !contact ||
+      !gender ||
       !fees ||
       !experience ||
       !education ||
@@ -49,6 +54,9 @@ export const POST: APIRoute = async ({ request }) => {
               ? "Area of specializations is required"
               : null,
             hospital: !hospital ? "Hospital is required" : null,
+            contact: !contact ? "Contact is required" : null,
+            gender: !gender ? "Gender is required" : null,
+
             fees: !fees ? "Fees is required" : null,
             experience: !experience ? "Exprience is required" : null,
             education: !education ? "Education is required" : null,
@@ -76,16 +84,21 @@ export const POST: APIRoute = async ({ request }) => {
 
     await connect();
 
+    const doctordata = await Doctor.findOne({ _id: tokenDetails?.userId });
     const doctordetails = await DoctorDetails.findOne({
       userId: tokenDetails?.userId,
     });
     if (!doctordetails) {
-      const doctorDetails = new DoctorDetails({
+      const doctordetails = new DoctorDetails({
         userId: tokenDetails?.userId,
         name,
+        email: doctordata?.email,
+        registrationNo: doctordata?.registrationNo,
+        contact,
         specialist,
         specializations,
         hospital,
+        gender,
         fees,
         experience,
         education,
@@ -97,13 +110,18 @@ export const POST: APIRoute = async ({ request }) => {
       });
       console.log("doctordetails=>", doctordetails);
 
-      await doctorDetails.save();
+      await doctordetails.save();
     } else {
       (doctordetails.name = name || doctordetails.name),
+        (doctordetails.email = doctordata?.email || doctordetails.email),
+        (doctordata.registrationNo =
+          doctordata?.registrationNo || doctordetails.registrationNo),
+        (doctordetails.contact = contact || doctordetails.contact),
         (doctordetails.specialist = specialist || doctordetails.specialist),
         (doctordetails.specializations =
           specializations || doctordetails.specializations),
-        (doctordetails.hospital = hospital || doctordetails.specialist),
+        (doctordetails.hospital = hospital || doctordetails.hospital),
+        (doctordetails.gender = gender || doctordetails.gender),
         (doctordetails.fees = fees || doctordetails.fees),
         (doctordetails.experience = experience || doctordetails.experience),
         (doctordetails.education = education || doctordetails.education),

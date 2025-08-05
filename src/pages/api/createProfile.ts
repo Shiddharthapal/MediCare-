@@ -1,14 +1,16 @@
 import type { APIRoute } from "astro";
 import connect from "@/lib/connection";
 import UserDetails from "@/model/userDetails";
-import { verifyToken } from "@/utils/token";
+import User from "@/model/user";
 
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
     "Content-Type": "application/json",
   };
   try {
-    const { updatedProfile, token } = await request.json();
+    const body = await request.json();
+    console.log("🧞‍♂️body --->", body);
+    const { formData, id } = body;
     const {
       name,
       fatherName,
@@ -18,8 +20,8 @@ export const POST: APIRoute = async ({ request }) => {
       bloodGroup,
       weight,
       height,
-      lastTreatmentDate,
-    } = updatedProfile;
+      gender,
+    } = formData;
     if (!name || !address || !bloodGroup || !age || !weight || !contactNumber) {
       return new Response(
         JSON.stringify({
@@ -28,6 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
             name: !name ? "Name is required" : null,
             address: !address ? "Address is required" : null,
             age: !age ? "Age is required" : null,
+            gender: !gender ? "Gender is required" : null,
             weight: !weight ? "Weight is required" : null,
             bloodGroup: !bloodGroup ? "Bloodgroup is required" : null,
             contactNumber: !contactNumber ? "Contact number is required" : null,
@@ -40,32 +43,33 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
     await connect();
-    const tokenData = await verifyToken(token);
-    let userId = tokenData.userId;
-    console.log("🧞‍♂️tokenData --->", tokenData);
-    const userdetails = await UserDetails.findOne({ userId: userId });
-    console.log("userId=>", userId);
+    const userdetails = await UserDetails.findOne({ userId: id });
+    let userdata = await User.findOne({ _id: id });
+    //console.log("userId=>", id);
     if (!userdetails) {
       const userDetails = new UserDetails({
-        userId: userId,
+        userId: id,
+        email: userdata?.email,
         name,
         fatherName,
         address,
         contactNumber,
         age,
+        gender,
         bloodGroup,
         weight,
         height,
-        lastTreatmentDate,
       });
       //console.log("user=>", userDetails);
       userDetails.save();
     } else {
       userdetails.name = name || userdetails.name;
+      userdetails.email = userdata?.email || userdetails.name;
       userdetails.fatherName = fatherName || userdetails.fatherName;
       userdetails.address = address || userdetails.address;
       userdetails.contactNumber = contactNumber || userdetails.contactNumber;
       userdetails.age = age || userdetails.age;
+      userdetails.gender = gender || userdetails.gender;
       userdetails.bloodGroup = bloodGroup || userdetails.bloodGroup;
       userdetails.weight = weight || userdetails.weight;
       userdetails.height = height || userdetails.height;
@@ -73,7 +77,7 @@ export const POST: APIRoute = async ({ request }) => {
       await userdetails.save();
     }
 
-    return new Response(JSON.stringify({}), {
+    return new Response(JSON.stringify({ userdetails }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

@@ -1,57 +1,125 @@
+"use client";
+
+import type React from "react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { User } from "@/types/userDetails";
 import {
-  setEditMode,
-  updateProfileStart,
-  updateProfileSuccess,
-  updateProfileFailure,
-} from "@/redux/slices/profileSlice";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
+import { useNavigate } from "react-router-dom";
 
-interface FormErrors {
-  [key: string]: string;
-}
-
-interface ProfileFormData {
+interface PatientData {
+  email?: string;
   name: string;
-  fatherName?: string;
+  fatherName: string;
   address: string;
-  age: number;
-  bloodGroup: string;
-  weight: number;
-  height?: number;
   contactNumber: string;
-  lastTreatmentDate?: string;
+  age: string;
+  bloodGroup: string;
+  weight: string;
+  height: string;
+  gender: string;
+}
+interface PatientDataErrors {
+  name?: string;
+  address?: string;
+  contactNumber?: string;
+  age?: string;
+  gender?: string;
+  email?: string;
+  weight?: string;
+  height?: string;
 }
 
-export default function ProfilePage() {
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.auth.user);
-  const { isEditing, isSaving, error } = useAppSelector(
-    (state) => state.profile
-  );
-  const token = useAppSelector((state) => state.auth.token);
-  const [errors, setErrors] = useState<FormErrors>({});
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
-  const defaultProfile: ProfileFormData = {
+export default function PatientProfileForm() {
+  const [formData, setFormData] = useState<PatientData>({
     name: "",
-    fatherName: undefined,
+    fatherName: "",
     address: "",
-    age: 18,
-    bloodGroup: "",
-    weight: 0,
-    height: undefined,
     contactNumber: "",
-    lastTreatmentDate: undefined,
+    age: "",
+    gender: " ",
+    weight: "",
+    height: "",
+    bloodGroup: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Partial<PatientData>>({});
+  const { toast } = useToast();
+  const [isShowingSavedData, setIsShowingSavedData] = useState(false);
+  const [savedPatientId, setSavedPatientId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const user = useAppSelector((state) => state.auth.user);
+  console.log("🧞‍♂️user --->", user);
+  const navigate = useNavigate();
+
+  // Dummy data representing an existing patient
+  const dummyPatientData: PatientData = {
+    email: "",
+    name: "",
+    fatherName: "",
+    address: "",
+    contactNumber: "",
+    age: "",
+    gender: "",
+    bloodGroup: "",
+    weight: "",
+    height: "",
   };
 
-  const [formData, setFormData] = useState<ProfileFormData>(defaultProfile);
+  // Update the initial formData state to use dummy data:
+  const initialFormData = dummyPatientData;
+  const getUserId = async (): Promise<string | null> => {
+    // First try to get from user object
+    if (user?._id) {
+      return user._id;
+    }
 
+    // Fallback to token verification
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No auth token found");
+      }
+      let response = await fetch("/api/getId/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+      let userid = await response.json();
+      console.log("🧞‍♂️userid --->", userid);
+      if (!userid) {
+        throw new Error("Invalid token or no user ID");
+      }
+
+      return userid.userId;
+    } catch (error) {
+      console.error("Failed to get user ID:", error);
+      return null;
+    }
+  };
+  let id = user?._id || null;
+  console.log("🧞‍♂️id --->", id);
   useEffect(() => {
     if (user) {
       setFormData((prev) => ({
@@ -61,7 +129,8 @@ export default function ProfilePage() {
       }));
     }
     const fetchData = async () => {
-      let id = user?._id;
+      id = id || (await getUserId());
+
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -74,7 +143,7 @@ export default function ProfilePage() {
           throw new Error(`Status:${response.status}`);
         }
         const responseData = await response.json();
-        //console.log("🧞‍♂️responseData --->", responseData.userdetails);
+        console.log("🧞‍♂️responseData --->", responseData.userdetails);
         setFormData(responseData?.userdetails);
       } catch (err) {
         console.log(err);
@@ -83,212 +152,296 @@ export default function ProfilePage() {
     fetchData();
   }, [user]);
 
-  const validateForm = () => {
-    const newErrors: FormErrors = {};
+  // const validateForm = (): boolean => {
+  //   const newErrors: PatientDataErrors = {};
 
-    // Required fields validation
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
+  //   // Required field validations
+  //   if (!formData.name.trim()) {
+  //     newErrors.name = "Name is required";
+  //   }
 
-    if (!formData.address.trim()) {
-      newErrors.address = "Address is required";
-    }
+  //   if (!formData.address.trim()) {
+  //     newErrors.address = "Address is required";
+  //   }
 
-    if (!formData.contactNumber.trim()) {
-      newErrors.contactNumber = "Contact number is required";
-    } else if (formData.contactNumber.trim().length < 10) {
-      newErrors.contactNumber = "Contact number must be at least 10 digits";
-    }
+  //   if (!formData.contactNumber.trim()) {
+  //     newErrors.contactNumber = "Contact number is required";
+  //   } else {
+  //     const cleanedNumber = formData.contactNumber.replace(/[^\d+]/g, "");
+  //     if (!/^\+?\d{10,15}$/.test(cleanedNumber)) {
+  //       newErrors.contactNumber = "Please enter a valid contact number";
+  //     }
+  //   }
 
-    if (!formData.bloodGroup.trim()) {
-      newErrors.bloodGroup = "Blood group is required";
-    } else if (!/^(A|B|AB|O)[+-]$/.test(formData.bloodGroup.trim())) {
-      newErrors.bloodGroup = "Invalid blood group format (e.g., A+, B-, O+)";
-    }
+  //   if (!formData.age) {
+  //     newErrors.age = "Age is required";
+  //   } else {
+  //     const ageNum = Number(formData.age);
+  //     if (isNaN(ageNum)) {
+  //       newErrors.age = "Age must be a number";
+  //     } else if (ageNum <= 0) {
+  //       newErrors.age = "Age must be greater than 0";
+  //     } else if (ageNum > 150) {
+  //       newErrors.age = "Age cannot be greater than 150";
+  //     }
+  //   }
 
-    if (!formData.age) {
-      newErrors.age = "Age is required";
-    } else if (formData.age < 0 || formData.age > 150) {
-      newErrors.age = "Age must be between 0 and 150";
-    }
+  //   // Optional field validations
+  //   if (
+  //     formData.weight &&
+  //     (isNaN(Number(formData.weight)) || Number(formData.weight) <= 0)
+  //   ) {
+  //     newErrors.weight = "Please enter a valid weight";
+  //   }
 
-    if (formData.weight && formData.weight < 0) {
-      newErrors.weight = "Weight must be a positive number";
-    }
+  //   if (
+  //     formData.height &&
+  //     (isNaN(Number(formData.height)) || Number(formData.height) <= 0)
+  //   ) {
+  //     newErrors.height = "Please enter a valid height";
+  //   }
 
-    if (formData.height && formData.height < 0) {
-      newErrors.height = "Height must be a positive number";
-    }
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-
-    let parsedValue: string | number | undefined = value;
-
-    // Handle numeric inputs
-    if (type === "number") {
-      parsedValue = value === "" ? undefined : Number(value);
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: parsedValue,
-    }));
+  const handleInputChange = (field: keyof PatientData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
-
-  const handleEdit = () => {
-    dispatch(setEditMode(true));
-  };
-
   const handleClose = () => {
     navigate(-1);
   };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleSave = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
+    setIsLoading(true);
+    id = user?._id || (await getUserId());
+    console.log("formData=>", formData);
     try {
-      dispatch(updateProfileStart());
-
-      // Convert form data to User type
-      // Required fields
-      const updatedProfile: Partial<User> = {
-        name: formData.name.trim(),
-        address: formData.address.trim(),
-        contactNumber: formData.contactNumber.trim(),
-        age: formData.age,
-        bloodGroup: formData.bloodGroup.trim(),
-        weight: formData.weight,
-      };
-
-      // Optional fields
-      if (formData.fatherName?.trim()) {
-        updatedProfile.fatherName = formData.fatherName.trim();
-      }
-      if (formData.height) {
-        updatedProfile.height = formData.height;
-      }
-      if (formData.lastTreatmentDate) {
-        updatedProfile.lastTreatmentDate = new Date(formData.lastTreatmentDate);
-      }
-
-      let response = await fetch("/api/createProfile", {
+      const response = await fetch("/api/createProfile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ updatedProfile, token }),
+        body: JSON.stringify({ formData, id }),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error(`Status: ${response.status}`);
+        if (result.errors) {
+          setErrors(result.errors);
+          toast({
+            title: "Validation Error",
+            description: "Please fix the errors in the form",
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(result.message || "Failed to create patient profile");
+        }
+        return;
       }
 
-      const responseData = await response.json();
+      // Success
+      setIsEditing(false);
+      setIsShowingSavedData(true);
+      setSavedPatientId(result?.userdetails?.userId);
+      setFormData(result?.userdetails);
 
-      // TODO: Add API call to update profile
-      // const response = await updateUserProfile(updatedProfile);
-      dispatch(updateProfileSuccess(updatedProfile));
-      dispatch(setEditMode(false));
-    } catch (err) {
-      dispatch(
-        updateProfileFailure(
-          err instanceof Error ? err.message : "Failed to update profile"
-        )
-      );
+      toast({
+        title: "Success!",
+        description: `Patient profile created successfully`,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create patient profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    setFormData(defaultProfile);
+  const resetForm = () => {
+    setFormData(initialFormData);
     setErrors({});
-    dispatch(setEditMode(false));
+    setIsShowingSavedData(false);
+    setSavedPatientId(null);
+    setIsEditing(false);
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <div className="bg-green-100 shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">
-          Profile Information
-        </h1>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md">
-            {error}
+    <Card>
+      <CardHeader>
+        <CardTitle>Patient Information</CardTitle>
+        <CardDescription>
+          {isEditing
+            ? "Edit the patient information below. Click 'Cancel Edit' to return to view mode."
+            : "Patient profile information. Click 'Edit Profile' to make changes."}
+        </CardDescription>
+        {isShowingSavedData && savedPatientId && (
+          <div className="bg-green-50 border border-green-200 rounded-md p-3 mt-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-green-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-green-800">
+                  Patient profile saved successfully! Patient ID:{" "}
+                  <strong>{savedPatientId}</strong>
+                </p>
+              </div>
+            </div>
           </div>
         )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Personal Information Section */}
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Personal Information */}
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">
-              Personal Details
-            </h2>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Personal Information</h3>
+              <div className="flex flex-col items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditing(!isEditing)}
+                  disabled={isLoading}
+                >
+                  {isEditing ? "Cancel Edit" : "Edit Profile"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleClose()}
+                  disabled={isLoading}
+                >
+                  Cancle
+                </Button>
+              </div>
+            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
-              {isEditing ? (
-                <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">
+                  Full Name <span className="text-red-500">*</span>
+                </Label>
+                {isEditing ? (
+                  <>
+                    <Input
+                      id="name"
+                      value={formData?.name}
+                      onChange={(e) =>
+                        handleInputChange("name", e.target.value)
+                      }
+                      placeholder="Enter full name"
+                      className={errors.name ? "border-red-500" : "bg-white"}
+                    />
+                    {errors.name && (
+                      <p className="text-sm text-red-500">{errors.name}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    {formData?.name || "Not provided"}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fatherName">Father's Name</Label>
+                {isEditing ? (
                   <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className={errors.name ? "border-red-500" : "bg-white"}
+                    id="fatherName"
+                    value={formData?.fatherName}
+                    onChange={(e) =>
+                      handleInputChange("fatherName", e.target.value)
+                    }
+                    placeholder="Enter father's name"
+                    className="bg-white"
                   />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name}</p>
-                  )}
-                </>
-              ) : (
+                ) : (
+                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    {formData?.fatherName || "Not provided"}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>
+                  Email Address <span className="text-red-500">*</span>
+                </Label>
+
                 <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData?.name || "Not provided"}
+                  {formData?.email || "Not provided"}
                 </p>
-              )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contactNumber">
+                  Contact Number <span className="text-red-500">*</span>
+                </Label>
+                {isEditing ? (
+                  <>
+                    <Input
+                      id="contactNumber"
+                      value={formData?.contactNumber}
+                      onChange={(e) =>
+                        handleInputChange("contactNumber", e.target.value)
+                      }
+                      placeholder="Enter contact number"
+                      className={
+                        errors.contactNumber ? "border-red-500" : "bg-white"
+                      }
+                    />
+                    {errors.contactNumber && (
+                      <p className="text-sm text-red-500">
+                        {errors?.contactNumber}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    {formData?.contactNumber || "Not provided"}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fatherName">Father's Name</Label>
-              {isEditing ? (
-                <Input
-                  id="fatherName"
-                  name="fatherName"
-                  value={formData.fatherName}
-                  onChange={handleInputChange}
-                  className="bg-white"
-                />
-              ) : (
-                <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData?.fatherName || "Not provided"}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">Address *</Label>
+              <Label htmlFor="address">
+                Address <span className="text-red-500">*</span>
+              </Label>
               {isEditing ? (
                 <>
                   <Input
                     id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
+                    value={formData?.address}
+                    onChange={(e) =>
+                      handleInputChange("address", e.target.value)
+                    }
+                    placeholder="Enter complete address"
                     className={errors.address ? "border-red-500" : "bg-white"}
-                    required
                   />
                   {errors.address && (
                     <p className="text-sm text-red-500">{errors.address}</p>
@@ -300,202 +453,187 @@ export default function ProfilePage() {
                 </p>
               )}
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contactNumber">Contact Number *</Label>
-              {isEditing ? (
-                <>
-                  <Input
-                    id="contactNumber"
-                    name="contactNumber"
-                    value={formData.contactNumber}
-                    onChange={handleInputChange}
-                    className={
-                      errors.contactNumber ? "border-red-500" : "bg-white"
-                    }
-                    placeholder="01xxxxxxxxx"
-                  />
-                  {errors.contactNumber && (
-                    <p className="text-sm text-red-500">
-                      {errors.contactNumber}
-                    </p>
-                  )}
-                </>
-              ) : (
-                <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData?.contactNumber || "Not provided"}
-                </p>
-              )}
-            </div>
           </div>
 
-          {/* Medical Information Section */}
+          {/* Medical Information */}
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4"></h2>
+            <h3 className="text-lg font-semibold">Medical Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="age">
+                  Age <span className="text-red-500">*</span>
+                </Label>
+                {isEditing ? (
+                  <>
+                    <Input
+                      id="age"
+                      type="number"
+                      value={formData?.age}
+                      onChange={(e) => handleInputChange("age", e.target.value)}
+                      placeholder="Enter age"
+                      min="1"
+                      max="150"
+                      className={errors.age ? "border-red-500" : "bg-white"}
+                    />
+                    {errors.age && (
+                      <p className="text-sm text-red-500">{errors.age}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    {formData?.age ? `${formData.age} years` : "Not provided"}
+                  </p>
+                )}
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bloodGroup">Blood Group *</Label>
-              {isEditing ? (
-                <>
-                  <Input
-                    id="bloodGroup"
-                    name="bloodGroup"
-                    value={formData.bloodGroup}
-                    onChange={handleInputChange}
-                    className={
-                      errors.bloodGroup ? "border-red-500" : "bg-white"
+              <div className="space-y-2">
+                <Label htmlFor="bloodGroup">
+                  Blood Group
+                  <span className="text-red-500">*</span>
+                </Label>
+                {isEditing ? (
+                  <Select
+                    value={formData?.bloodGroup}
+                    onValueChange={(value) =>
+                      handleInputChange("bloodGroup", value)
                     }
-                    placeholder="e.g., A+, B-, O+"
-                  />
-                  {errors.bloodGroup && (
-                    <p className="text-sm text-red-500">{errors.bloodGroup}</p>
-                  )}
-                </>
-              ) : (
-                <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData?.bloodGroup || "Not provided"}
-                </p>
-              )}
+                  >
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Select blood group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {bloodGroups.map((group) => (
+                        <SelectItem key={group} value={group}>
+                          {group}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    {formData?.bloodGroup || "Not provided"}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="weight">
+                  Weight (kg) <span className="text-red-500">*</span>
+                </Label>
+                {isEditing ? (
+                  <>
+                    <Input
+                      id="weight"
+                      type="number"
+                      value={formData?.weight}
+                      onChange={(e) =>
+                        handleInputChange("weight", e.target.value)
+                      }
+                      placeholder="Enter weight"
+                      min="1"
+                      step="0.1"
+                      className={errors.weight ? "border-red-500" : "bg-white"}
+                    />
+                    {errors.weight && (
+                      <p className="text-sm text-red-500">{errors.weight}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    {formData?.weight
+                      ? `${formData.weight} kg`
+                      : "Not provided"}
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="age">Age *</Label>
-              {isEditing ? (
-                <>
-                  <Input
-                    id="age"
-                    name="age"
-                    value={formData.age}
-                    onChange={handleInputChange}
-                    className={errors.age ? "border-red-500" : "bg-white"}
-                  />
-                  {errors.age && (
-                    <p className="text-sm text-red-500">{errors.age}</p>
-                  )}
-                </>
-              ) : (
-                <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData?.age ? `${formData?.age} years` : "Not provided"}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="weight">Weight (kg) *</Label>
-              {isEditing ? (
-                <>
-                  <Input
-                    id="weight"
-                    name="weight"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={formData.weight || ""}
-                    onChange={handleInputChange}
-                    className={errors.weight ? "border-red-500" : "bg-white"}
-                    required
-                  />
-                  {errors.weight && (
-                    <p className="text-sm text-red-500">{errors.weight}</p>
-                  )}
-                </>
-              ) : (
-                <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData?.weight ? `${formData?.weight} kg` : "Not provided"}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="height">Height (inch)</Label>
-              {isEditing ? (
-                <>
-                  <Input
-                    id="height"
-                    name="height"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={formData.height || ""}
-                    onChange={handleInputChange}
-                    className={errors.height ? "border-red-500" : "bg-white"}
-                  />
-                  {errors.height && (
-                    <p className="text-sm text-red-500">{errors.height}</p>
-                  )}
-                </>
-              ) : (
-                <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData?.height
-                    ? `${formData?.height} inch`
-                    : "Not provided"}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="lastTreatmentDate">Last Treatment Date</Label>
-              {!formData?.lastTreatmentDate && isEditing ? (
-                <Input
-                  id="lastTreatmentDate"
-                  name="lastTreatmentDate"
-                  type="date"
-                  max={new Date().toISOString().split("T")[0]}
-                  value={formData.lastTreatmentDate || ""}
-                  onChange={handleInputChange}
-                  className="bg-white"
-                />
-              ) : (
-                <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                  {formData?.lastTreatmentDate
-                    ? new Date(formData?.lastTreatmentDate).toLocaleDateString()
-                    : "Not provided"}
-                </p>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="height">Height (cm)</Label>
+                {isEditing ? (
+                  <>
+                    <Input
+                      id="height"
+                      type="number"
+                      value={formData?.height}
+                      onChange={(e) =>
+                        handleInputChange("height", e.target.value)
+                      }
+                      placeholder="Enter height"
+                      min="1"
+                      step="0.1"
+                      className={errors.height ? "border-red-500" : "bg-white"}
+                    />
+                    {errors.height && (
+                      <p className="text-sm text-red-500">{errors.height}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    {formData?.height
+                      ? `${formData.height} cm`
+                      : "Not provided"}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>
+                  Gender <span className="text-red-500">*</span>
+                </Label>
+                {isEditing ? (
+                  <>
+                    <Select
+                      value={formData?.gender}
+                      onValueChange={(value) =>
+                        handleInputChange("gender", value)
+                      }
+                    >
+                      <SelectTrigger
+                        className={
+                          errors.gender ? "border-red-500 bg-white" : "bg-white"
+                        }
+                      >
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.gender && (
+                      <p className="text-sm text-red-500">{errors.gender}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    {formData?.gender || "Not provided"}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-between mt-8 pt-4 border-t">
-          {isEditing ? (
-            <>
+          {/* Action Buttons - only show when editing */}
+          {isEditing && (
+            <div className="flex gap-4 pt-4">
+              <Button type="submit" disabled={isLoading} className="flex-1">
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? "Updating Profile..." : "Update Patient Profile"}
+              </Button>
               <Button
-                onClick={handleCancel}
+                type="button"
                 variant="outline"
-                disabled={isSaving}
-                className="hover:bg-red-300"
+                onClick={resetForm}
+                disabled={isLoading}
               >
-                Cancel
+                Reset Form
               </Button>
-              <Button
-                onClick={handleSave}
-                className="bg-green-600 hover:bg-green-700"
-                disabled={isSaving}
-              >
-                {isSaving ? "Saving..." : "Save Changes"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                onClick={handleEdit}
-                variant="outline"
-                className="hover:bg-blue-300"
-              >
-                Edit
-              </Button>
-              <Button
-                onClick={handleClose}
-                variant="secondary"
-                className="hover:bg-red-300"
-              >
-                Close
-              </Button>
-            </>
+            </div>
           )}
-        </div>
-      </div>
-    </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
