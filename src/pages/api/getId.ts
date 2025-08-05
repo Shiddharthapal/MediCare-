@@ -7,7 +7,20 @@ export const POST: APIRoute = async ({ request }) => {
   };
   try {
     let body = await request.json();
-    let tokenDetails = await verifyToken(body?.token);
+    console.log("🧞‍♂️body --->", body);
+    if (!body) {
+      return new Response(
+        JSON.stringify({
+          message: "Can't fetch data",
+        }),
+        {
+          status: 401,
+          headers,
+        }
+      );
+    }
+    let tokenDetails = await verifyToken(body.token);
+    console.log("🧞‍♂️tokenDetails --->", tokenDetails);
     let userId = tokenDetails?.userId;
     console.log("🧞‍♂️userId --->", userId);
     return new Response(

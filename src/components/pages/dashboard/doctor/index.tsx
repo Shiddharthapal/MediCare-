@@ -59,6 +59,7 @@ interface AppointmentData {
   emergencyPhone: string;
   paymentMethod: string;
   specialRequests: string;
+  createdAt: Date;
 }
 export interface DoctorDetails {
   _id: string;
@@ -113,6 +114,7 @@ const mockAppointmentData: AppointmentData = {
   emergencyPhone: "",
   paymentMethod: "",
   specialRequests: "",
+  createdAt: new Date(),
 };
 
 // Mock DoctorDetails with empty strings
@@ -234,6 +236,33 @@ const requests = [
     time: "14:00 - 15:00",
   },
 ];
+const findTotalPatient = (appoinments: AppointmentData[]) => {
+  if (!appoinments) {
+    return 0;
+  }
+  let patientIs = new Set(
+    appoinments.map((appoinment) => appoinment.patientId)
+  );
+  return patientIs.size;
+};
+
+const findNewPatient = (appoinments: AppointmentData[]) => {
+  if (!appoinments) {
+    return 0;
+  }
+  let map = new Map();
+  let count = 0;
+  appoinments.forEach((value) => {
+    if (!map.has(value.patientId)) {
+      if (value.createdAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) {
+        map.set(value.patientId, 1);
+        count++;
+      }
+    }
+  });
+  return count;
+};
+
 export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [genderOfPatient, setGenderOfPatient] =
@@ -244,11 +273,44 @@ export default function DashboardPage() {
     useState<DoctorDetails>(mockDoctorDetails);
 
   let doctor = useAppSelector((state) => state.auth.user);
+  console.log("🧞‍♂️doctor --->", doctor);
   const datagender = [
     { name: "Male", value: genderOfPatient?.Male || 10, color: "#3b82f6" },
     { name: "Female", value: genderOfPatient?.Female || 7, color: "#ec4899" },
     { name: "Other", value: genderOfPatient?.Other || 1, color: "#047857" },
   ];
+
+  const stats = [
+    {
+      title: "Appointments",
+      value: doctorData?.appointments.length,
+      change: "-2.5%",
+      trend: "down",
+      icon: Calendar,
+    },
+    {
+      title: "Revenue",
+      value: "$982",
+      change: "-1%",
+      trend: "down",
+      icon: CreditCard,
+    },
+    {
+      title: "Total Patients",
+      value: findTotalPatient(doctorData?.appointments),
+      change: "-1.8%",
+      trend: "down",
+      icon: Users,
+    },
+    {
+      title: "New Patients",
+      value: findNewPatient(doctorData?.appointments),
+      change: "+3.7%",
+      trend: "up",
+      icon: User,
+    },
+  ];
+
   let genderCountofPatients = (
     appointments: AppointmentData[]
   ): GenderCount => {
@@ -411,15 +473,15 @@ export default function DashboardPage() {
                 <Avatar className="h-10 w-10">
                   <AvatarImage src="/placeholder.svg?height=40&width=40" />
                   <AvatarFallback>
-                    {getDoctorInitials(doctorData.name)}
+                    {getDoctorInitials(doctorData?.name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    {doctorData.name}
+                    {doctorData?.name}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    {doctorData.email || ""}
+                    {doctorData?.email || ""}
                   </p>
                 </div>
               </div>
@@ -428,7 +490,7 @@ export default function DashboardPage() {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg?height=32&width=32" />
                   <AvatarFallback className="text-xs">
-                    {getDoctorInitials(doctorData.name)}
+                    {getDoctorInitials(doctorData?.name)}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -505,14 +567,14 @@ export default function DashboardPage() {
                         <Avatar className="h-20 w-20 mx-auto mb-4">
                           <AvatarImage src="/placeholder.svg?height=80&width=80" />
                           <AvatarFallback className="text-lg">
-                            {getDoctorInitials(doctorData.name)}
+                            {getDoctorInitials(doctorData?.name)}
                           </AvatarFallback>
                         </Avatar>
                         <h3 className="font-bold text-xl mb-2">
-                          {doctorData.name}
+                          {doctorData?.name}
                         </h3>
                         <p className="text-gray-600 text-sm mb-6">
-                          {doctorData.specialist}
+                          {doctorData?.specialist}
                         </p>
                         <div className="grid grid-cols-3 gap-3 text-center mb-4">
                           <div className="p-2">
@@ -520,7 +582,7 @@ export default function DashboardPage() {
                               Experience
                             </p>
                             <p className="font-bold text-lg">
-                              {doctorData.experience} yrs
+                              {doctorData?.experience} yrs
                             </p>
                           </div>
                           <div className="p-2">
@@ -534,7 +596,7 @@ export default function DashboardPage() {
                               License
                             </p>
                             <p className="font-bold text-lg">
-                              {doctorData.registrationNo}
+                              {doctorData?.registrationNo}
                             </p>
                           </div>
                         </div>
@@ -853,9 +915,9 @@ export default function DashboardPage() {
         )}
 
         {/* Appointments Page */}
-        {currentPage === "appointments" && (
+        {/* {currentPage === "appointments" && (
           <Appointments onNavigate={setCurrentPage} />
-        )}
+        )} */}
         {currentPage === "patients" && <Patients onNavigate={setCurrentPage} />}
 
         {/* Other Pages Placeholder */}

@@ -18,6 +18,7 @@ interface AppointmentData {
   emergencyPhone: string;
   paymentMethod: string;
   specialRequests: string;
+  createdAt: Date;
 }
 export interface DoctorDetails {
   _id: string;

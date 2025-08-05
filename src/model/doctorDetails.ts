@@ -68,6 +68,9 @@ const appointmentDataSchema = new mongoose.Schema(
     specialRequests: {
       type: String,
     },
+    createdAt: {
+      type: Date,
+    },
   },
   { _id: true }
 ); // This will auto-generate _id for each appointment

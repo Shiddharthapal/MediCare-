@@ -1,3 +1,4 @@
+import { date } from "astro:schema";
 import mongoose from "mongoose";
 
 // Define the appointment data schema as a subdocument
@@ -63,6 +64,9 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     specialRequests: {
       type: String,
+    },
+    createdAt: {
+      type: Date,
     },
   },
   { _id: true }
