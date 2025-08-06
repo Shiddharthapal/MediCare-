@@ -28,6 +28,9 @@ const appointmentDataSchema = new mongoose.Schema(
     patientGender: {
       type: String,
     },
+    patientAge: {
+      type: Number,
+    },
     appointmentDate: {
       type: String,
       required: true, // Fixed: was 'require'

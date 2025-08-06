@@ -144,6 +144,7 @@ export const POST: APIRoute = async ({ request }) => {
         patientEmail: userdetails.email || "",
         patientPhone: userdetails.contactNumber,
         patientGender: userdetails?.gender,
+        patientAge: userdetails?.age,
         appointmentDate,
         appointmentTime,
         consultationType,

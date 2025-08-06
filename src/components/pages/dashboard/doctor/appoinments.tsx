@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +27,7 @@ import Prescription from "./prescription";
 import { useAppSelector } from "@/redux/hooks";
 
 interface AppointmentData {
+  _id: string;
   doctorName: string;
   doctorSpecialist: string;
   doctorEmail: string;
@@ -72,6 +73,7 @@ export interface DoctorDetails {
 }
 
 const mockAppointmentData: AppointmentData = {
+  _id: "",
   doctorName: "",
   doctorSpecialist: "",
   doctorEmail: "",
@@ -543,14 +545,144 @@ const appointmentRequests = [
     notes: "Patient unable to perform daily activities due to pain",
   },
 ];
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  if (date.toDateString() === today.toDateString()) {
+    return "Today";
+  } else if (date.toDateString() === tomorrow.toDateString()) {
+    return "Tomorrow";
+  } else {
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
+  }
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "confirmed":
+      return "bg-green-100 text-green-800";
+    case "pending":
+      return "bg-yellow-100 text-yellow-800";
+    case "completed":
+      return "bg-blue-100 text-blue-800";
+    case "cancelled":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+
+const getModeIcon = (mode: string) => {
+  switch (mode) {
+    case "video":
+      return <Video className="h-4 w-4" />;
+    case "phone":
+      return <Phone className="h-4 w-4" />;
+    case "in-person":
+      return <MapPin className="h-4 w-4" />;
+    default:
+      return <Calendar className="h-4 w-4" />;
+  }
+};
+
+// Interface for categorized appointments
+interface CategorizedAppointments {
+  today: AppointmentData[];
+  future: AppointmentData[];
+  past: AppointmentData[];
+}
+
+// Interface for grouped appointments by date
+interface GroupedAppointments {
+  [date: string]: AppointmentData[];
+}
+
+// Helper function to get today's date in YYYY-MM-DD format
+const getTodayDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+// Helper function to compare dates
+const compareDates = (
+  appointmentDate: string,
+  todayDate: string
+): "past" | "today" | "future" => {
+  if (appointmentDate < todayDate) return "past";
+  if (appointmentDate === todayDate) return "today";
+  return "future";
+};
+
+// Function to categorize appointments
+const categorizeAppointments = (
+  appointments: AppointmentData[]
+): CategorizedAppointments => {
+  const todayDate = getTodayDate();
+
+  const categorized: CategorizedAppointments = {
+    today: [],
+    future: [],
+    past: [],
+  };
+
+  appointments.forEach((appointment) => {
+    const category = compareDates(appointment.appointmentDate, todayDate);
+    categorized[category].push(appointment);
+  });
+
+  // Sort appointments within each category
+  categorized.today.sort((a, b) =>
+    a.appointmentTime.localeCompare(b.appointmentTime)
+  );
+  categorized.future.sort((a, b) => {
+    if (a.appointmentDate === b.appointmentDate) {
+      return a.appointmentTime.localeCompare(b.appointmentTime);
+    }
+    return a.appointmentDate.localeCompare(b.appointmentDate);
+  });
+  categorized.past.sort((a, b) => {
+    if (b.appointmentDate === a.appointmentDate) {
+      return b.appointmentTime.localeCompare(a.appointmentTime);
+    }
+    return b.appointmentDate.localeCompare(a.appointmentDate);
+  });
+
+  return categorized;
+};
+
+// Function to group appointments by date
+const groupAppointmentsByDate = (
+  appointments: AppointmentData[]
+): GroupedAppointments => {
+  return appointments.reduce((grouped: GroupedAppointments, appointment) => {
+    const date = appointment.appointmentDate;
+    if (!grouped[date]) {
+      grouped[date] = [];
+    }
+    grouped[date].push(appointment);
+
+    // Sort appointments within the same date by time
+    grouped[date].sort((a, b) =>
+      a.appointmentTime.localeCompare(b.appointmentTime)
+    );
+
+    return grouped;
+  }, {});
+};
 
 export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
   const [requests, setRequests] = useState(appointmentRequests);
-  const [appointmentData, setAppointmentData] = useState<DoctorDetails | null>(
-    null
-  );
+  const [appointmentData, setAppointmentData] =
+    useState<AppointmentData>(mockAppointmentData);
   const [showPrescription, setShowPrescription] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const doctor = useAppSelector((state) => state.auth.user);
@@ -590,6 +722,16 @@ export default function AppointmentsPage() {
     }
   };
 
+  const categorizedAppointments = useMemo(() => {
+    return categorizeAppointments(
+      appointmentData
+        ? Array.isArray(appointmentData)
+          ? appointmentData
+          : []
+        : []
+    );
+  }, [appointmentData]);
+
   useEffect(() => {
     let id = doctor?._id;
     console.log("🧞‍♂️id --->", id);
@@ -607,6 +749,20 @@ export default function AppointmentsPage() {
 
     fetchData();
   }, [doctor]);
+
+  const todayGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.today);
+  }, [categorizedAppointments.today]);
+  console.log("today appointment=>", todayGrouped);
+
+  const futureGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.future);
+  }, [categorizedAppointments.future]);
+  console.log("future appointment=>", futureGrouped);
+
+  const pastGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.past);
+  }, [categorizedAppointments.past]);
 
   const handleAcceptRequest = (
     requestId: number,
@@ -660,6 +816,26 @@ export default function AppointmentsPage() {
     setShowPrescription(false);
     setSelectedPatient(null);
   };
+  const getPatientInitials = (patientName: string) => {
+    if (!patientName) return "AB";
+
+    const cleanName = patientName.trim();
+
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
+  };
 
   // If prescription is shown, render only the prescription component
   if (showPrescription && selectedPatient) {
@@ -672,35 +848,38 @@ export default function AppointmentsPage() {
   }
 
   const AppointmentCard = ({
+    status,
     appointment,
     showDate = false,
     isPrevious = false,
-  }: any) => (
+  }: {
+    status: string;
+    appointment: any;
+    showDate?: boolean;
+    isPrevious?: boolean;
+  }) => (
     <Card className="mb-4 hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-4 flex-1">
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback>{appointment.patient.avatar}</AvatarFallback>
+              <AvatarFallback>
+                {getPatientInitials(appointment?.patientName)}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-lg">
-                  {appointment.patient.name}
+                  {appointment?.patientName}
                 </h3>
-                <Badge className={getStatusColor(appointment.status)}>
-                  {appointment.status.charAt(0).toUpperCase() +
-                    appointment.status.slice(1)}
-                </Badge>
+                <Badge className={getStatusColor(status)}>{status}</Badge>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  {showDate && <span>{appointment.date} - </span>}
-                  <span>
-                    {appointment.time} ({appointment.duration})
-                  </span>
+                  {showDate && <span>{appointment?.appointmentDate} - </span>}
+                  <span>{appointment.appointmentTime} 30 Minutes</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
@@ -708,19 +887,19 @@ export default function AppointmentsPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Phone className="h-4 w-4" />
-                  <span>{appointment.patient.phone}</span>
+                  <span>{appointment.patientPhone}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Mail className="h-4 w-4" />
-                  <span>{appointment.patient.email}</span>
+                  <span>{appointment.patientEmail}</span>
                 </div>
               </div>
               <div className="mb-3">
                 <p className="text-sm">
-                  <strong>Type:</strong> {appointment.type}
+                  <strong>Type:</strong> {appointment?.consultationType}
                 </p>
                 <p className="text-sm">
-                  <strong>Doctor:</strong> {appointment.doctor}
+                  <strong>Doctor:</strong> {appointment?.doctorName}
                 </p>
                 <p className="text-sm">
                   <strong>Notes:</strong> {appointment.notes}
@@ -732,14 +911,13 @@ export default function AppointmentsPage() {
                 )}
               </div>
               <div className="text-xs text-gray-500">
-                Patient: {appointment.patient.age} years old,{" "}
-                {appointment.patient.gender}
+                Patient: {appointment?.patientAge} years old,{" "}
+                {appointment?.patientGender}
               </div>
             </div>
           </div>
           <div className="flex flex-col gap-2 ml-4">
-            {getStatusIcon(appointment.status)}
-            {!isPrevious && (
+            {status === "pending||confirmed" && (
               <div className="flex flex-col gap-1">
                 <Button
                   size="sm"
@@ -822,7 +1000,7 @@ export default function AppointmentsPage() {
       {/* Main Content - Scrollable */}
       <main className="flex-1 overflow-y-auto p-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -831,14 +1009,14 @@ export default function AppointmentsPage() {
                     {"Today's Appointments"}
                   </p>
                   <p className="text-2xl font-bold">
-                    {appointmentsData.today.length}
+                    {Object.entries(todayGrouped).length}
                   </p>
                 </div>
                 <Calendar className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          {/* <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -850,17 +1028,14 @@ export default function AppointmentsPage() {
                 <AlertTriangle className="h-8 w-8 text-orange-500" />
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Upcoming (7 days)</p>
                   <p className="text-2xl font-bold">
-                    {appointmentsData.upcoming.reduce(
-                      (total, day) => total + day.appointments.length,
-                      0
-                    )}
+                    {Object.entries(futureGrouped).length}
                   </p>
                 </div>
                 <Clock className="h-8 w-8 text-green-500" />
@@ -873,7 +1048,7 @@ export default function AppointmentsPage() {
                 <div>
                   <p className="text-sm text-gray-600">Completed</p>
                   <p className="text-2xl font-bold">
-                    {appointmentsData.previous.length}
+                    {Object.entries(pastGrouped).length}
                   </p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-gray-500" />
@@ -884,16 +1059,16 @@ export default function AppointmentsPage() {
 
         {/* Appointments Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="today">Today</TabsTrigger>
-            <TabsTrigger value="requests">
+            {/* <TabsTrigger value="requests">
               Requests
               {requests.filter((r) => r.status === "pending").length > 0 && (
                 <Badge className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5">
                   {requests.filter((r) => r.status === "pending").length}
                 </Badge>
               )}
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="upcoming">Upcoming (7 days)</TabsTrigger>
             <TabsTrigger value="previous">Previous</TabsTrigger>
           </TabsList>
@@ -904,23 +1079,41 @@ export default function AppointmentsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  {"Today's Appointments - December 9, 2024"}
+                  {`Today's Appointments - ${new Date()}`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {appointmentsData.today.length > 0 ? (
-                  <div className="space-y-4">
-                    {appointmentsData.today.map((appointment) => (
-                      <AppointmentCard
-                        key={appointment.id}
-                        appointment={appointment}
-                      />
-                    ))}
-                  </div>
+                {Object.keys(todayGrouped).length > 0 ? (
+                  todayGrouped && Object.keys(todayGrouped).length > 0 ? (
+                    Object.entries(todayGrouped).map(
+                      ([date, appointments]: [string, AppointmentData[]]) =>
+                        appointments.map((appointment: AppointmentData) => {
+                          // Add individual appointment validation
+                          if (!appointment || !appointment._id) {
+                            console.warn(
+                              "Invalid appointment data:",
+                              appointment
+                            );
+                            return null;
+                          }
+
+                          return (
+                            <AppointmentCard
+                              status="confirmed"
+                              key={appointment._id}
+                              appointment={appointment}
+                            />
+                          );
+                        })
+                    )
+                  ) : (
+                    <div className="text-gray-500 text-center py-4">
+                      No appointments found for today
+                    </div>
+                  )
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No appointments scheduled for today</p>
+                  <div className="text-gray-500 text-center py-4">
+                    No appointment data available
                   </div>
                 )}
               </CardContent>
@@ -928,7 +1121,7 @@ export default function AppointmentsPage() {
           </TabsContent>
 
           {/* Request Appointments */}
-          <TabsContent value="requests" className="mt-6">
+          {/* <TabsContent value="requests" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1083,9 +1276,9 @@ export default function AppointmentsPage() {
                 )}
               </CardContent>
             </Card>
-
-            {/* Processed Requests Section */}
-            {requests.filter((r) => r.status !== "pending").length > 0 && (
+*/}
+          {/* Processed Requests Section */}
+          {/* {requests.filter((r) => r.status !== "pending").length > 0 && (
               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1149,8 +1342,8 @@ export default function AppointmentsPage() {
                   </div>
                 </CardContent>
               </Card>
-            )}
-          </TabsContent>
+            )} */}
+          {/* </TabsContent> */}
 
           {/* Upcoming Appointments */}
           <TabsContent value="upcoming" className="mt-6">

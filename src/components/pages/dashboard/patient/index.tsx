@@ -318,13 +318,10 @@ export default function Dashboard() {
     }
   };
 
-  const getPatientInitials = (doctorName: string) => {
-    if (!doctorName) return "DR";
+  const getPatientInitials = (patientName: string) => {
+    if (!patientName) return "AB";
 
-    // Remove DR/Dr prefix and clean the name
-    const cleanName = doctorName
-      // Remove DR/Dr at the beginning
-      .trim();
+    const cleanName = patientName.trim();
 
     if (!cleanName) return "AB";
 

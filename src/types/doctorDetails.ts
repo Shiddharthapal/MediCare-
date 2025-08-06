@@ -7,6 +7,7 @@ interface AppointmentData {
   patientEmail: string;
   patientPhone: string;
   patientGender: string;
+  patientAge: number;
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
