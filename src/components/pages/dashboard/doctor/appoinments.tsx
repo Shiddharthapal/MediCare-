@@ -850,12 +850,12 @@ export default function AppointmentsPage() {
   const AppointmentCard = ({
     status,
     appointment,
-    showDate = false,
+    showDate,
     isPrevious = false,
   }: {
     status: string;
     appointment: any;
-    showDate?: boolean;
+    showDate: boolean;
     isPrevious?: boolean;
   }) => (
     <Card className="mb-4 hover:shadow-md transition-shadow">
@@ -1084,37 +1084,43 @@ export default function AppointmentsPage() {
               </CardHeader>
               <CardContent>
                 {Object.keys(todayGrouped).length > 0 ? (
-                  todayGrouped && Object.keys(todayGrouped).length > 0 ? (
-                    Object.entries(todayGrouped).map(
-                      ([date, appointments]: [string, AppointmentData[]]) =>
-                        appointments.map((appointment: AppointmentData) => {
-                          // Add individual appointment validation
-                          if (!appointment || !appointment._id) {
-                            console.warn(
-                              "Invalid appointment data:",
-                              appointment
-                            );
-                            return null;
-                          }
-
-                          return (
-                            <AppointmentCard
-                              status="confirmed"
-                              key={appointment._id}
-                              appointment={appointment}
-                            />
+                  Object.entries(todayGrouped).map(
+                    ([date, appointments]: [string, AppointmentData[]]) =>
+                      appointments.map((appointment: AppointmentData) => {
+                        // Add individual appointment validation
+                        if (!appointment || !appointment._id) {
+                          console.warn(
+                            "Invalid appointment data:",
+                            appointment
                           );
-                        })
-                    )
-                  ) : (
-                    <div className="text-gray-500 text-center py-4">
-                      No appointments found for today
-                    </div>
+                          return null;
+                        }
+
+                        return (
+                          <AppointmentCard
+                            status="confirmed"
+                            key={appointment._id}
+                            appointment={appointment}
+                            showDate={true}
+                          />
+                        );
+                      })
                   )
                 ) : (
-                  <div className="text-gray-500 text-center py-4">
-                    No appointment data available
-                  </div>
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No appointments
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        You don't have any appointments scheduled for today.
+                      </p>
+                      {/* <Button onClick={handleBookNewAppointment}>
+                  Book New Appointment
+                </Button> */}
+                    </CardContent>
+                  </Card>
                 )}
               </CardContent>
             </Card>
@@ -1347,33 +1353,86 @@ export default function AppointmentsPage() {
 
           {/* Upcoming Appointments */}
           <TabsContent value="upcoming" className="mt-6">
-            <div className="space-y-6">
-              {appointmentsData.upcoming.map((dayData) => (
-                <Card key={dayData.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      {dayData.date} - {dayData.fullDate}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {dayData.appointments.length > 0 ? (
-                      <div className="space-y-4">
-                        {dayData.appointments.map((appointment) => (
-                          <AppointmentCard
-                            key={appointment.id}
-                            appointment={appointment}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 text-gray-500">
-                        <p>No appointments scheduled for this day</p>
-                      </div>
-                    )}
+            <div className="space-y-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5" />
+                    Previous Appointments
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+              {Object.keys(futureGrouped).length > 0 ? (
+                Object.entries(futureGrouped).map(
+                  ([date, appointments]: [string, AppointmentData[]]) => (
+                    <Card key={date}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 pb-2 border-b">
+                            <h3 className="text-lg font-medium text-gray-800">
+                              {formatDate(date)}
+                            </h3>
+                            <span className="text-sm text-gray-500">
+                              {new Date(date).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </span>
+                            <Badge variant="outline" className="ml-2">
+                              {appointments.length} appointment
+                              {appointments.length !== 1 ? "s" : ""}
+                            </Badge>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {appointments && appointments.length > 0 ? (
+                          appointments.map((appointment: AppointmentData) => {
+                            // Add individual appointment validation
+                            if (!appointment || !appointment._id) {
+                              console.warn(
+                                "Invalid appointment data:",
+                                appointment
+                              );
+                              return null;
+                            }
+
+                            return (
+                              <AppointmentCard
+                                status="pending"
+                                key={appointment._id}
+                                appointment={appointment}
+                                showDate={true}
+                              />
+                            );
+                          })
+                        ) : (
+                          <div className="text-gray-500 text-center py-4">
+                            No appointments found for this date
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )
+                )
+              ) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No upcoming appointments
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      You don't have any appointments scheduled for the next 7
+                      days.
+                    </p>
+                    {/* <Button onClick={handleBookNewAppointment}>
+                  Book New Appointment
+                </Button> */}
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           </TabsContent>
 
@@ -1387,22 +1446,45 @@ export default function AppointmentsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {appointmentsData.previous.length > 0 ? (
-                  <div className="space-y-4">
-                    {appointmentsData.previous.map((appointment) => (
-                      <AppointmentCard
-                        key={appointment.id}
-                        appointment={appointment}
-                        showDate={true}
-                        isPrevious={true}
-                      />
-                    ))}
-                  </div>
+                {Object.keys(pastGrouped).length > 0 ? (
+                  Object.entries(pastGrouped).map(
+                    ([date, appointments]: [string, AppointmentData[]]) =>
+                      appointments.map((appointment: AppointmentData) => {
+                        // Add individual appointment validation
+                        if (!appointment || !appointment._id) {
+                          console.warn(
+                            "Invalid appointment data:",
+                            appointment
+                          );
+                          return null;
+                        }
+
+                        return (
+                          <AppointmentCard
+                            status="completed"
+                            key={appointment._id}
+                            appointment={appointment}
+                            showDate={true}
+                            isPrevious={true}
+                          />
+                        );
+                      })
+                  )
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No previous appointments found</p>
-                  </div>
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No previous appointments
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        You don't have any previous appointments.
+                      </p>
+                      {/* <Button onClick={handleBookNewAppointment}>
+                  Book New Appointment
+                </Button> */}
+                    </CardContent>
+                  </Card>
                 )}
               </CardContent>
             </Card>
