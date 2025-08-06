@@ -62,7 +62,6 @@ interface AppointmentData {
   createdAt: Date;
 }
 export interface DoctorDetails {
-  _id: string;
   userId: string;
   name: string;
   email: string;
@@ -119,7 +118,6 @@ const mockAppointmentData: AppointmentData = {
 
 // Mock DoctorDetails with empty strings
 const mockDoctorDetails: DoctorDetails = {
-  _id: "",
   userId: "",
   name: "",
   email: "",
@@ -915,9 +913,9 @@ export default function DashboardPage() {
         )}
 
         {/* Appointments Page */}
-        {/* {currentPage === "appointments" && (
+        {currentPage === "appointments" && (
           <Appointments onNavigate={setCurrentPage} />
-        )} */}
+        )}
         {currentPage === "patients" && <Patients onNavigate={setCurrentPage} />}
 
         {/* Other Pages Placeholder */}

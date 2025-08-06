@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +24,99 @@ import {
   FileEdit,
 } from "lucide-react";
 import Prescription from "./prescription";
+import { useAppSelector } from "@/redux/hooks";
+
+interface AppointmentData {
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorEmail: string;
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  createdAt: Date;
+}
+export interface DoctorDetails {
+  userId: string;
+  name: string;
+  email: string;
+  contact: string;
+  gender: string;
+  registrationNo: string;
+  specialist: string;
+  specializations: string[];
+  hospital: string;
+  fees: number;
+  rating?: number;
+  experience: string;
+  education: string;
+  degree: string;
+  language: string[];
+  about: string;
+  availableSlots: string[];
+  appointments: AppointmentData[];
+  consultationModes: string[];
+  createdAt: Date;
+}
+
+const mockAppointmentData: AppointmentData = {
+  doctorName: "",
+  doctorSpecialist: "",
+  doctorEmail: "",
+  patientId: "",
+  patientName: "",
+  patientEmail: "",
+  patientPhone: "",
+  patientGender: "",
+  appointmentDate: "",
+  appointmentTime: "",
+  consultationType: "",
+  consultedType: "",
+  reasonForVisit: "",
+  symptoms: "",
+  previousVisit: "",
+  emergencyContact: "",
+  emergencyPhone: "",
+  paymentMethod: "",
+  specialRequests: "",
+  createdAt: new Date(),
+};
+
+// Mock DoctorDetails with empty strings
+const mockDoctorDetails: DoctorDetails = {
+  userId: "",
+  name: "",
+  email: "",
+  contact: "",
+  gender: "",
+  registrationNo: "",
+  specialist: "",
+  specializations: [],
+  hospital: "",
+  fees: 0,
+  rating: 0,
+  experience: "",
+  education: "",
+  degree: "",
+  language: [],
+  about: "",
+  availableSlots: [],
+  appointments: [],
+  consultationModes: [],
+  createdAt: new Date(),
+};
 
 // Mock data for appointments
 const appointmentsData = {
@@ -455,8 +548,13 @@ export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
   const [requests, setRequests] = useState(appointmentRequests);
+  const [appointmentData, setAppointmentData] = useState<DoctorDetails | null>(
+    null
+  );
   const [showPrescription, setShowPrescription] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const doctor = useAppSelector((state) => state.auth.user);
+  console.log("🧞‍♂️doctor --->", doctor);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -491,6 +589,24 @@ export default function AppointmentsPage() {
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
+
+  useEffect(() => {
+    let id = doctor?._id;
+    console.log("🧞‍♂️id --->", id);
+    const fetchData = async () => {
+      const response = await fetch(`/api/doctor/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const responsedata = await response.json();
+      console.log("🧞‍♂️responsedata --->", responsedata);
+      setAppointmentData(responsedata.doctordetails);
+    };
+
+    fetchData();
+  }, [doctor]);
 
   const handleAcceptRequest = (
     requestId: number,
