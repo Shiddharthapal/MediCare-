@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +23,55 @@ import {
   ImageIcon,
   Clock,
 } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
+
+interface AppointmentData {
+  _id: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorEmail: string;
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  createdAt: Date;
+}
+
+const mockAppointmentData: AppointmentData = {
+  _id: "",
+  doctorName: "",
+  doctorSpecialist: "",
+  doctorEmail: "",
+  patientId: "",
+  patientName: "",
+  patientEmail: "",
+  patientPhone: "",
+  patientGender: "",
+  appointmentDate: "",
+  appointmentTime: "",
+  consultationType: "",
+  consultedType: "",
+  reasonForVisit: "",
+  symptoms: "",
+  previousVisit: "",
+  emergencyContact: "",
+  emergencyPhone: "",
+  paymentMethod: "",
+  specialRequests: "",
+  createdAt: new Date(),
+};
 
 // Mock data for patients
 const patients = [
@@ -331,7 +380,13 @@ interface PatientsPageProps {
 export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [selectedPatient, setSelectedPatient] = useState(patients[0]);
   const [showPatientList, setShowPatientList] = useState(true);
+  const [patientData, setPatientData] =
+    useState<AppointmentData>(mockAppointmentData);
   const [activeTab, setActiveTab] = useState("overview");
+
+  let doctor = useAppSelector((state) => state.auth.user);
+
+  useEffect(() => {}, [doctor]);
 
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {

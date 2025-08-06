@@ -676,8 +676,11 @@ const groupAppointmentsByDate = (
     return grouped;
   }, {});
 };
+interface PatientsPageProps {
+  onNavigate: (page: string) => void;
+}
 
-export default function AppointmentsPage() {
+export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
   const [requests, setRequests] = useState(appointmentRequests);
@@ -961,17 +964,10 @@ export default function AppointmentsPage() {
   );
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden min-h-screen bg-gray-50">
+    <div className="flex-1 flex flex-col items-center mx-28 overflow-hidden min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <button className="hover:text-gray-700">Dashboard</button>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-gray-900">Appointments</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
+      <header className="flex items-center  justify-between p-6 border-b border-gray-100 bg-white">
+        <div className="flex flex-row  justify-between gap-24 md:gap-52">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
@@ -982,18 +978,16 @@ export default function AppointmentsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            New Appointment
-          </Button>
+          <div className="flex gap-6">
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
+            </Button>
+            <Button size="sm" className="">
+              <Plus className="h-4 w-4 mr-2" />
+              New Appointment
+            </Button>
+          </div>
         </div>
       </header>
 

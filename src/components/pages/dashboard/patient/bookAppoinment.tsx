@@ -62,12 +62,6 @@ interface User {
   contactNumber: String;
 }
 
-interface BookAppointmentProps {
-  isOpen: boolean;
-  onClose: () => void;
-  doctor: Doctor | null;
-}
-
 interface AppointmentData {
   appointmentDate: string;
   appointmentTime: string;
@@ -185,7 +179,11 @@ const paymentMethods = [
   "Credit Card",
   "Debit Card",
 ];
-
+interface BookAppointmentProps {
+  isOpen: boolean;
+  onClose: () => void;
+  doctor: Doctor | null;
+}
 export default function BookAppointment({
   isOpen,
   onClose,

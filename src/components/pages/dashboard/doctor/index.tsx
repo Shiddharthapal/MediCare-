@@ -525,7 +525,7 @@ export default function DashboardPage() {
       >
         {/* Main Content */}
         {currentPage === "dashboard" && (
-          <div className="flex-1 flex flex-col ">
+          <div className="flex-1 flex items-center mx-28 flex-col ">
             <main className="flex-1 overflow-y-auto p-6">
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
                 {/* Stats Cards */}
