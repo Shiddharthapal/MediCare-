@@ -17,39 +17,132 @@ interface PrescriptionProps {
   };
   onClose: () => void;
 }
+interface VitalSign {
+  bloodPressure?: string;
+  heartRate?: string;
+  temperature?: string;
+  weight?: string;
+  height?: string;
+  respiratoryRate?: string;
+  oxygenSaturation?: string;
+  bmi?: number;
+}
+
+interface Medication {
+  id: number;
+  medecineName: string;
+  medecineDosage: string;
+  frequency: string;
+  duration: string;
+  instructions?: string;
+  quantity: string;
+  // route?: "Oral" | "Injection" | "Topical" | "Inhaled" | "Other"; // Route of administration
+  route?: string[]; // Route of administration
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export interface Pescriptiondata {
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  paymentMethod: string;
+  specialRequests: string;
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+}
+
+const mockVitalsign: VitalSign = {
+  bloodPressure: " ",
+  heartRate: "",
+  temperature: "",
+  weight: "",
+  height: "",
+  respiratoryRate: "",
+  oxygenSaturation: "",
+  bmi: 0,
+};
+
+const mockMedication: Medication = {
+  id: 11,
+  medecineName: "",
+  medecineDosage: "",
+  frequency: "",
+  duration: "",
+  instructions: "",
+  quantity: "",
+  route: [], // Route of administration
+  startDate: new Date(),
+  endDate: new Date(),
+};
+
+const mockPescriptiondata: Pescriptiondata = {
+  patientId: "",
+  patientName: "",
+  patientEmail: "",
+  patientPhone: "",
+  patientGender: "",
+  consultationType: "",
+  consultedType: "",
+  reasonForVisit: "",
+  symptoms: "",
+  previousVisit: "",
+  paymentMethod: "",
+  specialRequests: "",
+  vitalSign: mockVitalsign,
+  primaryDiagnosis: "",
+  testandReport: "",
+  medication: [mockMedication],
+  restrictions: "",
+  followUpDate: "",
+  additionalNote: "",
+};
 
 export default function Prescription({
   patientData,
   onClose,
 }: PrescriptionProps) {
-  const [prescriptionForm, setPrescriptionForm] = useState({
-    medications: [
-      {
-        id: 1,
-        name: "",
-        dosage: "",
-        frequency: "",
-        duration: "",
-        instructions: "",
-        quantity: "",
-      },
-    ],
-    diagnosis: "",
-    symptoms: "",
-    testsAndReports: "", // Add this new field
-    vitalSigns: {
-      bloodPressure: "",
-      heartRate: "",
-      temperature: "",
-      weight: "",
-      height: "",
-    },
-    allergies: "",
-    notes: "",
-    followUpDate: "",
-    labTests: [],
-    restrictions: "",
-  });
+  const [prescriptionForm, setPrescriptionForm] =
+    useState<Pescriptiondata>(mockPescriptiondata);
+
+  // medications: [
+  //   {
+  //     id: 1,
+  //     name: "",
+  //     dosage: "",
+  //     frequency: "",
+  //     duration: "",
+  //     instructions: "",
+  //     quantity: "",
+  //   },
+  // ],
+  // diagnosis: "",
+  // symptoms: "",
+  // testsAndReports: "", // Add this new field
+  // vitalSigns: {
+  //   bloodPressure: "",
+  //   heartRate: "",
+  //   temperature: "",
+  //   weight: "",
+  //   height: "",
+  // },
+  // allergies: "",
+  // notes: "",
+  // followUpDate: "",
+  // labTests: [],
+  // restrictions: "",
 
   const handleSavePrescription = () => {
     alert(`Prescription saved successfully for ${patientData.name}!`);
@@ -121,12 +214,12 @@ export default function Prescription({
                     type="text"
                     placeholder="120/80"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.bloodPressure}
+                    value={prescriptionForm?.vitalSign?.bloodPressure}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           bloodPressure: e.target.value,
                         },
                       }))
@@ -141,12 +234,12 @@ export default function Prescription({
                     type="text"
                     placeholder="72 bpm"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.heartRate}
+                    value={prescriptionForm.vitalSign.heartRate}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           heartRate: e.target.value,
                         },
                       }))
@@ -161,12 +254,12 @@ export default function Prescription({
                     type="text"
                     placeholder="98.6°F"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.temperature}
+                    value={prescriptionForm.vitalSign.temperature}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           temperature: e.target.value,
                         },
                       }))
@@ -181,12 +274,12 @@ export default function Prescription({
                     type="text"
                     placeholder="70 kg"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.weight}
+                    value={prescriptionForm.vitalSign.weight}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           weight: e.target.value,
                         },
                       }))
@@ -201,12 +294,12 @@ export default function Prescription({
                     type="text"
                     placeholder="175 cm"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.height}
+                    value={prescriptionForm.vitalSign.height}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           height: e.target.value,
                         },
                       }))
@@ -227,11 +320,11 @@ export default function Prescription({
                 <textarea
                   placeholder="Enter primary diagnosis..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
-                  value={prescriptionForm.diagnosis}
+                  value={prescriptionForm.primaryDiagnosis}
                   onChange={(e) =>
                     setPrescriptionForm((prev) => ({
                       ...prev,
-                      diagnosis: e.target.value,
+                      primaryDiagnosis: e.target.value,
                     }))
                   }
                 />
@@ -266,11 +359,11 @@ export default function Prescription({
               <textarea
                 placeholder="Enter recommended tests, lab work, or reports (leave empty if no tests required)..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 resize-none"
-                value={prescriptionForm.testsAndReports}
+                value={prescriptionForm.testandReport}
                 onChange={(e) =>
                   setPrescriptionForm((prev) => ({
                     ...prev,
-                    testsAndReports: e.target.value,
+                    testandReport: e.target.value,
                   }))
                 }
               />
@@ -291,12 +384,12 @@ export default function Prescription({
                   onClick={() => {
                     setPrescriptionForm((prev) => ({
                       ...prev,
-                      medications: [
-                        ...prev.medications,
+                      medication: [
+                        ...prev.medication,
                         {
-                          id: prev.medications.length + 1,
-                          name: "",
-                          dosage: "",
+                          id: prev.medication.length + 1,
+                          medecineName: "",
+                          medecineDosage: "",
                           frequency: "",
                           duration: "",
                           instructions: "",
@@ -313,21 +406,21 @@ export default function Prescription({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {prescriptionForm.medications.map((medication, index) => (
+                {prescriptionForm.medication.map((medication, index) => (
                   <div
                     key={medication.id}
                     className="border rounded-lg p-4 bg-gray-50"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-medium">Medication {index + 1}</h4>
-                      {prescriptionForm.medications.length > 1 && (
+                      {prescriptionForm.medication.length > 1 && (
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.filter(
+                              medication: prev.medication.filter(
                                 (med) => med.id !== medication.id
                               ),
                             }));
@@ -346,13 +439,13 @@ export default function Prescription({
                           type="text"
                           placeholder="e.g., Lisinopril"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={medication.name}
+                          value={medication.medecineName}
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
-                                  ? { ...med, name: e.target.value }
+                                  ? { ...med, medecineName: e.target.value }
                                   : med
                               ),
                             }));
@@ -367,13 +460,13 @@ export default function Prescription({
                           type="text"
                           placeholder="e.g., 10mg"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={medication.dosage}
+                          value={medication.medecineDosage}
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medications: prev.medication.map((med) =>
                                 med.id === medication.id
-                                  ? { ...med, dosage: e.target.value }
+                                  ? { ...med, medecineDosage: e.target.value }
                                   : med
                               ),
                             }));
@@ -390,7 +483,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medications: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, frequency: e.target.value }
                                   : med
@@ -424,7 +517,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medications: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, duration: e.target.value }
                                   : med
@@ -445,7 +538,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medications: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, quantity: e.target.value }
                                   : med
@@ -466,7 +559,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medications: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, instructions: e.target.value }
                                   : med
@@ -491,22 +584,6 @@ export default function Prescription({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Known Allergies
-                  </label>
-                  <textarea
-                    placeholder="List any known allergies..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
-                    value={prescriptionForm.allergies}
-                    onChange={(e) =>
-                      setPrescriptionForm((prev) => ({
-                        ...prev,
-                        allergies: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Activity Restrictions
@@ -553,11 +630,11 @@ export default function Prescription({
                   <textarea
                     placeholder="Any additional notes or instructions..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
-                    value={prescriptionForm.notes}
+                    value={prescriptionForm.additionalNote}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        notes: e.target.value,
+                        additionalNote: e.target.value,
                       }))
                     }
                   />
