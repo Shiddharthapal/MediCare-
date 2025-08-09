@@ -18,11 +18,20 @@ export const POST: APIRoute = async ({ request }) => {
       contactNumber,
       age,
       bloodGroup,
+      birthofday,
       weight,
       height,
       gender,
     } = formData;
-    if (!name || !address || !bloodGroup || !age || !weight || !contactNumber) {
+    if (
+      !name ||
+      !address ||
+      !bloodGroup ||
+      !age ||
+      !weight ||
+      !contactNumber ||
+      !birthofday
+    ) {
       return new Response(
         JSON.stringify({
           message: "Missing field required",
@@ -33,6 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
             gender: !gender ? "Gender is required" : null,
             weight: !weight ? "Weight is required" : null,
             bloodGroup: !bloodGroup ? "Bloodgroup is required" : null,
+            birthofday: !birthofday ? "Birthday is required" : null,
             contactNumber: !contactNumber ? "Contact number is required" : null,
           },
         }),
@@ -57,6 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
         age,
         gender,
         bloodGroup,
+        birthofday,
         weight,
         height,
       });
@@ -71,6 +82,7 @@ export const POST: APIRoute = async ({ request }) => {
       userdetails.age = age || userdetails.age;
       userdetails.gender = gender || userdetails.gender;
       userdetails.bloodGroup = bloodGroup || userdetails.bloodGroup;
+      userdetails.birthofday = birthofday || userdetails.birthofday;
       userdetails.weight = weight || userdetails.weight;
       userdetails.height = height || userdetails.height;
 

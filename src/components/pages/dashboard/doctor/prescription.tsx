@@ -179,7 +179,9 @@ export default function Prescription({
           {/* Patient Information Summary */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Patient Information</CardTitle>
+              <CardTitle className="text-lg">
+                Patient Information • {patientData.name}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-4 text-sm">

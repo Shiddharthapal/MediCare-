@@ -104,6 +104,9 @@ const userDetailsSchema = new mongoose.Schema({
   bloodGroup: {
     type: String,
   },
+  birthofday: {
+    type: Date,
+  },
   weight: {
     type: Number,
   },

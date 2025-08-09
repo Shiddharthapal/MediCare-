@@ -31,6 +31,15 @@ const appointmentDataSchema = new mongoose.Schema(
     patientAge: {
       type: Number,
     },
+    patientAddress: {
+      type: String,
+    },
+    patientBloodgroup: {
+      type: String,
+    },
+    patientBithofday: {
+      type: Date,
+    },
     appointmentDate: {
       type: String,
       required: true, // Fixed: was 'require'

@@ -35,6 +35,7 @@ interface AppointmentData {
   patientEmail: string;
   patientPhone: string;
   patientGender: string;
+  patientAddress: string;
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
@@ -49,6 +50,30 @@ interface AppointmentData {
   createdAt: Date;
 }
 
+interface DoctorDetails {
+  _id: string;
+  userId: string;
+  name: string;
+  email: string;
+  contact: string;
+  gender: string;
+  registrationNo: string;
+  specialist: string;
+  specializations: string[];
+  hospital: string;
+  fees: number;
+  rating?: number;
+  experience: string;
+  education: string;
+  degree: string;
+  language: string[];
+  about: string;
+  availableSlots: string[];
+  appointments: AppointmentData[];
+  consultationModes: string[];
+  createdAt: Date;
+}
+
 const mockAppointmentData: AppointmentData = {
   _id: "",
   doctorName: "",
@@ -59,6 +84,7 @@ const mockAppointmentData: AppointmentData = {
   patientEmail: "",
   patientPhone: "",
   patientGender: "",
+  patientAddress: "",
   appointmentDate: "",
   appointmentTime: "",
   consultationType: "",
@@ -373,6 +399,24 @@ const patients = [
   },
 ];
 
+interface GroupedPatientData {
+  [patientId: string]: {
+    patientInfo: {
+      patientId: string;
+      patientName: string;
+      patientEmail: string;
+      patientPhone: string;
+      patientGender: string;
+      patientAddress: string;
+      emergencyContact: string;
+    };
+    appointments: AppointmentData[];
+    totalAppointments: number;
+    latestAppointment: AppointmentData;
+    upcomingAppointments: AppointmentData[];
+  };
+}
+
 interface PatientsPageProps {
   onNavigate: (page: string) => void;
 }
@@ -380,13 +424,89 @@ interface PatientsPageProps {
 export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [selectedPatient, setSelectedPatient] = useState(patients[0]);
   const [showPatientList, setShowPatientList] = useState(true);
-  const [patientData, setPatientData] =
-    useState<AppointmentData>(mockAppointmentData);
+  const [patientData, setPatientData] = useState<GroupedPatientData>({});
   const [activeTab, setActiveTab] = useState("overview");
 
   let doctor = useAppSelector((state) => state.auth.user);
+  console.log("🧞‍♂️doctor --->", doctor);
 
-  useEffect(() => {}, [doctor]);
+  const groupAppointmentsByPatientId = (responseData: DoctorDetails) => {
+    if (!responseData.appointments || responseData.appointments.length === 0)
+      return;
+
+    const groupedData: GroupedPatientData = {};
+
+    responseData.appointments.forEach((appointment: AppointmentData) => {
+      const { patientId } = appointment;
+
+      if (!groupedData[patientId]) {
+        // Create new patient entry with first appointment
+        groupedData[patientId] = {
+          patientInfo: {
+            patientId: appointment.patientId,
+            patientName: appointment.patientName,
+            patientEmail: appointment.patientEmail,
+            patientPhone: appointment.patientPhone,
+            patientGender: appointment.patientGender,
+            patientAddress: appointment.patientAddress,
+            emergencyContact: appointment.emergencyContact,
+          },
+          appointments: [appointment],
+          totalAppointments: 1,
+          latestAppointment: appointment,
+          upcomingAppointments: [],
+        };
+      } else {
+        // Add appointment to existing patient
+        groupedData[patientId].appointments.push(appointment);
+        groupedData[patientId].totalAppointments += 1;
+
+        // Update latest appointment based on createdAt date
+        if (
+          new Date(appointment.createdAt) >
+          new Date(groupedData[patientId].latestAppointment.createdAt)
+        ) {
+          groupedData[patientId].latestAppointment = appointment;
+        }
+      }
+    });
+
+    Object.keys(groupedData).forEach((patientId) => {
+      // Sort appointments by appointment date
+      groupedData[patientId].appointments.sort(
+        (a, b) =>
+          new Date(a.appointmentDate).getTime() -
+          new Date(b.appointmentDate).getTime()
+      );
+
+      // Filter upcoming appointments
+      const today = new Date();
+      groupedData[patientId].upcomingAppointments = groupedData[
+        patientId
+      ].appointments.filter(
+        (appointment) => new Date(appointment.appointmentDate) >= today
+      );
+    });
+
+    console.log("=>", groupedData);
+    // Update the state with grouped data
+    setPatientData(groupedData);
+  };
+  useEffect(() => {
+    let id = doctor?._id;
+    const fetchData = async () => {
+      const response = await fetch(`/api/doctor/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      let responseData = await response.json();
+      groupAppointmentsByPatientId(responseData);
+    };
+    fetchData();
+  }, [doctor]);
 
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {
@@ -414,6 +534,27 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     }
   };
 
+  const getPatientInitials = (patientName: string) => {
+    if (!patientName) return "AB";
+
+    const cleanName = patientName.trim();
+
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Left Sidebar - Fixed */}
@@ -422,17 +563,19 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         {showPatientList && (
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium text-gray-900">Patient Lists (817)</h3>
+              <h3 className="font-medium text-gray-900">
+                Patient Lists ({Object.entries(patientData).length})
+              </h3>
               <Button variant="ghost" size="icon">
                 <Search className="h-4 w-4" />
               </Button>
             </div>
             <div className="space-y-2">
-              {patients.map((patient) => (
+              {Object.entries(patientData).map(([patientId, patient]) => (
                 <div
-                  key={patient.id}
+                  key={patientId}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                    selectedPatient.id === patient.id
+                    (selectedPatient?.id).toString() === patientId
                       ? "bg-blue-50 border border-blue-200"
                       : "hover:bg-gray-50"
                   }`}
@@ -441,15 +584,15 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={`/placeholder.svg?height=32&width=32`} />
                     <AvatarFallback className="text-xs">
-                      {patient.avatar}
+                      {getPatientInitials(patient.patientInfo.patientName)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-gray-900 truncate">
-                      {patient.name}
+                      {patient.patientInfo.patientName}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                      {patient.address}
+                      {patient.patientInfo.patientAddress}
                     </p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -467,7 +610,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           <div className="flex items-center gap-4">
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback>{selectedPatient.avatar}</AvatarFallback>
+              <AvatarFallback>
+                {getPatientInitials(selectedPatient.name)}
+              </AvatarFallback>
             </Avatar>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">

@@ -30,6 +30,7 @@ export interface UserDetails {
   age: number;
   gender: string;
   bloodGroup: string;
+  birthofday: Date;
   weight: number;
   height?: number;
   appoinments: AppointmentData[];

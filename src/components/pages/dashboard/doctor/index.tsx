@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -260,6 +260,89 @@ const findNewPatient = (appoinments: AppointmentData[]) => {
   });
   return count;
 };
+interface CategorizedAppointments {
+  today: AppointmentData[];
+  future: AppointmentData[];
+  past: AppointmentData[];
+}
+
+// Interface for grouped appointments by date
+interface GroupedAppointments {
+  [date: string]: AppointmentData[];
+}
+
+// Helper function to get today's date in YYYY-MM-DD format
+const getTodayDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+// Helper function to compare dates
+const compareDates = (
+  appointmentDate: string,
+  todayDate: string
+): "past" | "today" | "future" => {
+  if (appointmentDate < todayDate) return "past";
+  if (appointmentDate === todayDate) return "today";
+  return "future";
+};
+
+// Function to categorize appointments
+const categorizeAppointments = (
+  appointments: AppointmentData[]
+): CategorizedAppointments => {
+  const todayDate = getTodayDate();
+
+  const categorized: CategorizedAppointments = {
+    today: [],
+    future: [],
+    past: [],
+  };
+
+  appointments.forEach((appointment) => {
+    const category = compareDates(appointment.appointmentDate, todayDate);
+    categorized[category].push(appointment);
+  });
+
+  // Sort appointments within each category
+  categorized.today.sort((a, b) =>
+    a.appointmentTime.localeCompare(b.appointmentTime)
+  );
+  categorized.future.sort((a, b) => {
+    if (a.appointmentDate === b.appointmentDate) {
+      return a.appointmentTime.localeCompare(b.appointmentTime);
+    }
+    return a.appointmentDate.localeCompare(b.appointmentDate);
+  });
+  categorized.past.sort((a, b) => {
+    if (b.appointmentDate === a.appointmentDate) {
+      return b.appointmentTime.localeCompare(a.appointmentTime);
+    }
+    return b.appointmentDate.localeCompare(a.appointmentDate);
+  });
+
+  return categorized;
+};
+
+// Function to group appointments by date
+const groupAppointmentsByDate = (
+  appointments: AppointmentData[]
+): GroupedAppointments => {
+  return appointments.reduce((grouped: GroupedAppointments, appointment) => {
+    const date = appointment.appointmentDate;
+    if (!grouped[date]) {
+      grouped[date] = [];
+    }
+    grouped[date].push(appointment);
+
+    // Sort appointments within the same date by time
+    grouped[date].sort((a, b) =>
+      a.appointmentTime.localeCompare(b.appointmentTime)
+    );
+
+    return grouped;
+  }, {});
+};
 
 export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
@@ -271,7 +354,7 @@ export default function DashboardPage() {
     useState<DoctorDetails>(mockDoctorDetails);
 
   let doctor = useAppSelector((state) => state.auth.user);
-  console.log("🧞‍♂️doctor --->", doctor);
+  // console.log("🧞‍♂️doctor --->", doctor);
   const datagender = [
     { name: "Male", value: genderOfPatient?.Male || 10, color: "#3b82f6" },
     { name: "Female", value: genderOfPatient?.Female || 7, color: "#ec4899" },
@@ -362,7 +445,8 @@ export default function DashboardPage() {
         body: JSON.stringify({ token }),
       });
       let userid = await response.json();
-      console.log("🧞‍♂️userid --->", userid);
+
+      // console.log("🧞‍♂️userid --->", userid);
       if (!userid) {
         throw new Error("Invalid token or no user ID");
       }
@@ -373,12 +457,21 @@ export default function DashboardPage() {
       return null;
     }
   };
+  const categorizedAppointments = useMemo(() => {
+    return categorizeAppointments(
+      doctorData.appointments
+        ? Array.isArray(doctorData.appointments)
+          ? doctorData.appointments
+          : []
+        : []
+    );
+  }, [doctorData.appointments]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         let id = await getUserId();
-        console.log("🧞‍♂️id --->", id);
+        // console.log("🧞‍♂️id --->", id);
         let response = await fetch(`/api/doctor/${id}`, {
           method: "GET",
           headers: {
@@ -386,7 +479,7 @@ export default function DashboardPage() {
           },
         });
         let responsedata = await response.json();
-        console.log("🧞‍♂️responsedata --->", responsedata?.doctordetails);
+        // console.log("🧞‍♂️responsedata --->", responsedata?.doctordetails);
         setDoctorData(responsedata?.doctordetails);
       } catch (err) {
         console.log("Index error:", err);
@@ -395,6 +488,52 @@ export default function DashboardPage() {
     fetchData();
     handleGenderCountofPatient(doctorData.appointments);
   }, [doctor]);
+
+  const todayGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.today);
+  }, [categorizedAppointments.today]);
+  console.log("🧞‍♂️todayGrouped --->", todayGrouped);
+
+  const checktimelimit = ([date, time]: [string, string]) => {
+    const currentDate = new Date();
+    const currentDateString = currentDate.toISOString().split("T")[0]; // Format: "2025-08-08"
+
+    // Check if date matches
+    if (date !== currentDateString) {
+      return "bg-gray-400 hover:bg-gray-500";
+    }
+
+    // Parse time range
+    const timeRange = time.split(" - "); // ["5:00 PM", "5:30 PM"]
+    const startTime = timeRange[0].trim();
+    const endTime = timeRange[1].trim();
+
+    // Convert times to Date objects for today
+    const parseTimeToDate = (timeStr: any) => {
+      const today = new Date();
+      const [time, period] = timeStr.split(" ");
+      const [hours, minutes] = time.split(":").map(Number);
+
+      let hour24 = hours;
+      if (period === "PM" && hours !== 12) hour24 += 12;
+      if (period === "AM" && hours === 12) hour24 = 0;
+
+      today.setHours(hour24, minutes, 0, 0);
+      return today;
+    };
+
+    const startDateTime = parseTimeToDate(startTime);
+    const endDateTime = parseTimeToDate(endTime);
+
+    // Check if current time is within the slot
+    const isWithinTimeSlot =
+      currentDate >= startDateTime && currentDate <= endDateTime;
+
+    return isWithinTimeSlot
+      ? "bg-green-700 hover:bg-green-800"
+      : "bg-gray-400 hover:bg-gray-500";
+  };
+
   const getDoctorInitials = (doctorName: string) => {
     if (!doctorName) return "DR";
 
@@ -755,80 +894,104 @@ export default function DashboardPage() {
                       <CardTitle>{"Today's Appointments"}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                PATIENT
-                              </th>
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                SERVICE
-                              </th>
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                DATE
-                              </th>
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                TIME
-                              </th>
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                ACTION
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {todaysAppointments.map((appointment) => (
-                              <tr key={appointment.id} className="border-b">
-                                <td className="py-3 px-4">
-                                  <div className="flex items-center space-x-3">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarImage
-                                        src={
-                                          appointment.avatar ||
-                                          "/placeholder.svg"
-                                        }
-                                      />
-                                      <AvatarFallback>
-                                        {appointment.patient
-                                          .split(" ")
-                                          .map((n) => n[0])
-                                          .join("")}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="font-medium">
-                                      {appointment.patient}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4">
-                                  {appointment.service}
-                                </td>
-                                <td className="py-3 px-4">
-                                  {appointment.date}
-                                </td>
-                                <td className="py-3 px-4">
-                                  {appointment.time}
-                                </td>
-                                <td className="py-3 px-4">
-                                  <Button
-                                    size="sm"
-                                    className={
-                                      appointment.status === "active"
-                                        ? "bg-green-500 hover:bg-green-600"
-                                        : "bg-gray-400 hover:bg-gray-500"
-                                    }
-                                  >
-                                    Start
-                                  </Button>
-                                </td>
+                      {Object.keys(todayGrouped).length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  PATIENT
+                                </th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  SERVICE
+                                </th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  DATE
+                                </th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  TIME
+                                </th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  ACTION
+                                </th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                            </thead>
+                            <tbody>
+                              {Object.entries(todayGrouped).map(
+                                ([date, appointments]: [
+                                  string,
+                                  AppointmentData[],
+                                ]) =>
+                                  appointments.map(
+                                    (appointment: AppointmentData) => {
+                                      if (!appointment || !appointment._id) {
+                                        console.warn(
+                                          "Invalid appointment data:",
+                                          appointment
+                                        );
+                                        return null;
+                                      }
+                                      return (
+                                        <tr
+                                          key={appointment._id}
+                                          className="border-b"
+                                        >
+                                          <td className="py-3 px-4">
+                                            <div className="flex items-center space-x-3">
+                                              <Avatar className="h-8 w-8">
+                                                <AvatarFallback>
+                                                  {appointment.patientName
+                                                    .split(" ")
+                                                    .map((n) => n[0])
+                                                    .join("")}
+                                                </AvatarFallback>
+                                              </Avatar>
+                                              <span className="font-medium">
+                                                {appointment.patientName}
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="py-3 px-4">
+                                            Consultation
+                                          </td>
+                                          <td className="py-3 px-4">
+                                            {appointment.appointmentDate}
+                                          </td>
+                                          <td className="py-3 px-4">
+                                            {appointment.appointmentTime}
+                                          </td>
+                                          <td className="py-3 px-4">
+                                            <Button
+                                              size="sm"
+                                              className={checktimelimit([
+                                                appointment.appointmentDate,
+                                                appointment.appointmentTime,
+                                              ])}
+                                            >
+                                              Start
+                                            </Button>
+                                          </td>
+                                        </tr>
+                                      );
+                                    }
+                                  )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            No appointments
+                          </h3>
+                          <p className="text-gray-600 mb-4">
+                            You don't have any appointments scheduled for today.
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
-                  <div className=" pt-6">
+                  {/* <div className=" pt-6">
                     <Card>
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
@@ -905,7 +1068,7 @@ export default function DashboardPage() {
                         ))}
                       </CardContent>
                     </Card>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </main>
