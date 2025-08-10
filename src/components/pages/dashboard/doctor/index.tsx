@@ -82,6 +82,36 @@ export interface DoctorDetails {
   createdAt: Date;
 }
 
+interface AppointmentCount {
+  Jan: number;
+  Feb: number;
+  Mar: number;
+  Apr: number;
+  May: number;
+  Jun: number;
+  Jul: number;
+  Aug: number;
+  Sep: number;
+  Oct: number;
+  Nov: number;
+  Dec: number;
+}
+
+const mockAppointmentCount: AppointmentCount = {
+  Jan: 0,
+  Feb: 0,
+  Mar: 0,
+  Apr: 0,
+  May: 0,
+  Jun: 0,
+  Jul: 0,
+  Aug: 0,
+  Sep: 0,
+  Oct: 0,
+  Nov: 0,
+  Dec: 0,
+};
+
 export interface GenderCount {
   Male: number;
   Female: number;
@@ -149,13 +179,18 @@ const menuItems = [
 const COLORS = ["#3b82f6", "#ec4899", "#047857"];
 
 const data = [
-  { name: "Mon", appointments: 12 },
-  { name: "Tue", appointments: 19 },
-  { name: "Wed", appointments: 15 },
-  { name: "Thu", appointments: 25 },
-  { name: "Fri", appointments: 22 },
-  { name: "Sat", appointments: 18 },
-  { name: "Sun", appointments: 8 },
+  { name: "Jan", appointments: 12 },
+  { name: "Feb", appointments: 19 },
+  { name: "Mar", appointments: 15 },
+  { name: "Apr", appointments: 25 },
+  { name: "May", appointments: 22 },
+  { name: "Jun", appointments: 18 },
+  { name: "Jul", appointments: 10 },
+  { name: "Aug", appointments: 8 },
+  { name: "Sep", appointments: 22 },
+  { name: "Oct", appointments: 2 },
+  { name: "Nov", appointments: 18 },
+  { name: "Dec", appointments: 10 },
 ];
 const stats = [
   {
@@ -348,6 +383,8 @@ export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [genderOfPatient, setGenderOfPatient] =
     useState<GenderCount>(mockGenderCount);
+  const [appointmentNumberinMonth, setAppointmentNumberinMonth] =
+    useState<AppointmentCount>(mockAppointmentCount);
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [doctorData, setDoctorData] =
@@ -359,6 +396,21 @@ export default function DashboardPage() {
     { name: "Male", value: genderOfPatient?.Male || 10, color: "#3b82f6" },
     { name: "Female", value: genderOfPatient?.Female || 7, color: "#ec4899" },
     { name: "Other", value: genderOfPatient?.Other || 1, color: "#047857" },
+  ];
+
+  const dataAppointmentCount = [
+    { name: "Jan", appointments: appointmentNumberinMonth?.Jan || 22 },
+    { name: "Feb", appointments: appointmentNumberinMonth?.Feb || 2 },
+    { name: "Mar", appointments: appointmentNumberinMonth?.Mar || 13 },
+    { name: "Apr", appointments: appointmentNumberinMonth?.Apr || 5 },
+    { name: "May", appointments: appointmentNumberinMonth?.May || 7 },
+    { name: "Jun", appointments: appointmentNumberinMonth?.Jun || 2 },
+    { name: "Jul", appointments: appointmentNumberinMonth?.Jul || 19 },
+    { name: "Aug", appointments: appointmentNumberinMonth?.Aug || 4 },
+    { name: "Sep", appointments: appointmentNumberinMonth?.Sep || 15 },
+    { name: "Oct", appointments: appointmentNumberinMonth?.Oct || 23 },
+    { name: "Nov", appointments: appointmentNumberinMonth?.Nov || 2 },
+    { name: "Dec", appointments: appointmentNumberinMonth?.Dec || 14 },
   ];
 
   const stats = [
@@ -391,6 +443,48 @@ export default function DashboardPage() {
       icon: User,
     },
   ];
+  let countAppointmentInMonth = (
+    appointments: AppointmentData[]
+  ): AppointmentCount => {
+    let countappointment: AppointmentCount = {
+      Jan: 0,
+      Feb: 0,
+      Mar: 0,
+      Apr: 0,
+      May: 0,
+      Jun: 0,
+      Jul: 0,
+      Aug: 0,
+      Sep: 0,
+      Oct: 0,
+      Nov: 0,
+      Dec: 0,
+    };
+
+    const monthNames: (keyof AppointmentCount)[] = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    appointments.forEach((appointment: AppointmentData) => {
+      let date = appointment.appointmentDate;
+      const monthIndex = new Date(date).getMonth();
+      const monthname = monthNames[monthIndex];
+      countappointment[monthname]++;
+    });
+
+    return countappointment;
+  };
 
   let genderCountofPatients = (
     appointments: AppointmentData[]
@@ -415,9 +509,18 @@ export default function DashboardPage() {
     return countgender;
   };
 
+  const handleAppointmentCount = (appointments: AppointmentData[]) => {
+    if (!appointments) {
+      throw new Error("No appointments are available now");
+    }
+    let appointment_total = countAppointmentInMonth(appointments);
+    setAppointmentNumberinMonth(appointment_total);
+    return true;
+  };
+
   const handleGenderCountofPatient = (appointments: AppointmentData[]) => {
     if (!appointments) {
-      throw new Error("No appointments are availavle now");
+      throw new Error("No appointments are available now");
     }
 
     let result = genderCountofPatients(appointments);
@@ -487,6 +590,7 @@ export default function DashboardPage() {
     };
     fetchData();
     handleGenderCountofPatient(doctorData.appointments);
+    handleAppointmentCount(doctorData.appointments);
   }, [doctor]);
 
   const todayGrouped = useMemo(() => {
@@ -745,14 +849,14 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <Card>
                       <CardHeader>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-36">
                           <CardTitle>Appointments</CardTitle>
                           <Tabs defaultValue="week" className="w-auto">
-                            <TabsList className="grid w-full grid-cols-4">
-                              <TabsTrigger value="day">Day</TabsTrigger>
-                              <TabsTrigger value="week">Week</TabsTrigger>
+                            <TabsList className="grid w-full grid-cols-1">
+                              {/* <TabsTrigger value="day">Day</TabsTrigger>
+                              <TabsTrigger value="week">Week</TabsTrigger> */}
                               <TabsTrigger value="month">Month</TabsTrigger>
-                              <TabsTrigger value="year">Year</TabsTrigger>
+                              {/* <TabsTrigger value="year">Year</TabsTrigger> */}
                             </TabsList>
                           </Tabs>
                         </div>
@@ -761,7 +865,7 @@ export default function DashboardPage() {
                         <div className="h-[300px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
-                              data={data}
+                              data={dataAppointmentCount}
                               margin={{
                                 top: 10,
                                 right: 30,
