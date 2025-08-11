@@ -19,10 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, CalendarIcon } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
 interface PatientData {
   email?: string;
@@ -31,6 +39,7 @@ interface PatientData {
   address: string;
   contactNumber: string;
   age: string;
+  dateOfBirth: Date;
   bloodGroup: string;
   weight: string;
   height: string;
@@ -49,6 +58,14 @@ interface PatientDataErrors {
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
+//Helper function without timezone issues
+const formatDateForInput = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 export default function PatientProfileForm() {
   const [formData, setFormData] = useState<PatientData>({
     name: "",
@@ -56,6 +73,7 @@ export default function PatientProfileForm() {
     address: "",
     contactNumber: "",
     age: "",
+    dateOfBirth: new Date("2016-03-24"),
     gender: " ",
     weight: "",
     height: "",
@@ -79,6 +97,7 @@ export default function PatientProfileForm() {
     address: "",
     contactNumber: "",
     age: "",
+    dateOfBirth: new Date("2016-03-24"),
     gender: "",
     bloodGroup: "",
     weight: "",
@@ -426,6 +445,220 @@ export default function PatientProfileForm() {
                   </p>
                 )}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dateOfBirth">
+                Date of Birth <span className="text-red-500">*</span>
+              </Label>
+              {isEditing ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={`w-full justify-start text-left font-normal ${
+                        !formData?.dateOfBirth ? "text-muted-foreground" : ""
+                      } ${errors.dateOfBirth ? "border-red-500" : "bg-white"}`}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData?.dateOfBirth ? (
+                        format(new Date(formData.dateOfBirth), "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <div className="p-3 border-b">
+                      <div className="flex gap-2">
+                        <Select
+                          value={
+                            formData?.dateOfBirth
+                              ? new Date(formData.dateOfBirth)
+                                  .getMonth()
+                                  .toString()
+                              : ""
+                          }
+                          onValueChange={(month) => {
+                            const currentDate = formData?.dateOfBirth
+                              ? new Date(formData.dateOfBirth)
+                              : new Date();
+                            const newDate = new Date(
+                              currentDate.getFullYear(),
+                              Number.parseInt(month),
+                              currentDate.getDate()
+                            );
+                            handleInputChange(
+                              "dateOfBirth",
+                              formatDateForInput(newDate)
+                            );
+                          }}
+                        >
+                          <SelectTrigger className="w-[120px]">
+                            <SelectValue placeholder="Month" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[200px]">
+                            {Array.from({ length: 12 }, (_, i) => (
+                              <SelectItem key={i} value={i.toString()}>
+                                {format(new Date(2000, i, 1), "MMMM")}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <Select
+                          value={
+                            formData?.dateOfBirth
+                              ? new Date(formData.dateOfBirth)
+                                  .getFullYear()
+                                  .toString()
+                              : ""
+                          }
+                          onValueChange={(year) => {
+                            const currentDate = formData?.dateOfBirth
+                              ? new Date(formData.dateOfBirth)
+                              : new Date();
+                            const newDate = new Date(
+                              Number.parseInt(year),
+                              currentDate.getMonth(),
+                              currentDate.getDate()
+                            );
+                            handleInputChange(
+                              "dateOfBirth",
+                              formatDateForInput(newDate)
+                            );
+
+                            // Auto-calculate age from date of birth
+                            const today = new Date();
+                            const birthDate = new Date(newDate);
+                            let age =
+                              today.getFullYear() - birthDate.getFullYear();
+                            const monthDiff =
+                              today.getMonth() - birthDate.getMonth();
+                            if (
+                              monthDiff < 0 ||
+                              (monthDiff === 0 &&
+                                today.getDate() < birthDate.getDate())
+                            ) {
+                              age--;
+                            }
+                            handleInputChange("age", age.toString());
+                          }}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue placeholder="Year" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[200px]">
+                            {Array.from({ length: 124 }, (_, i) => {
+                              const year = new Date().getFullYear() - i;
+                              return (
+                                <SelectItem key={year} value={year.toString()}>
+                                  {year}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <Calendar
+                      mode="single"
+                      selected={
+                        formData?.dateOfBirth
+                          ? new Date(formData.dateOfBirth)
+                          : undefined
+                      }
+                      onSelect={(date) => {
+                        if (date) {
+                          handleInputChange(
+                            "dateOfBirth",
+                            formatDateForInput(date)
+                          );
+                          // Auto-calculate age from date of birth
+                          const today = new Date();
+                          const birthDate = new Date(date);
+                          let age =
+                            today.getFullYear() - birthDate.getFullYear();
+                          const monthDiff =
+                            today.getMonth() - birthDate.getMonth();
+                          if (
+                            monthDiff < 0 ||
+                            (monthDiff === 0 &&
+                              today.getDate() < birthDate.getDate())
+                          ) {
+                            age--;
+                          }
+                          handleInputChange("age", age.toString());
+                        }
+                      }}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      month={
+                        formData?.dateOfBirth
+                          ? new Date(formData.dateOfBirth)
+                          : undefined
+                      }
+                      className="p-3 rounded-md border-0"
+                      classNames={{
+                        months:
+                          "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4",
+                        caption:
+                          "flex justify-center pt-1 relative items-center mb-4",
+                        caption_label: "text-sm font-medium",
+                        nav: "space-x-1 flex items-center",
+                        nav_button:
+                          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                        nav_button_previous: "absolute left-1",
+                        nav_button_next: "absolute right-1",
+                        table: "w-full border-collapse",
+                        head_row: "flex mb-2",
+                        head_cell:
+                          "text-muted-foreground rounded-md w-10 font-normal text-[0.8rem] flex items-center justify-center p-2",
+                        row: "flex w-full mt-1 gap-1",
+                        cell: "text-center text-sm p-1 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors duration-200",
+                        day_selected:
+                          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_today:
+                          "bg-accent text-accent-foreground font-semibold",
+                        day_outside: "text-muted-foreground opacity-50",
+                        day_disabled: "text-muted-foreground opacity-50",
+                        day_range_middle:
+                          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                        day_hidden: "invisible",
+                      }}
+                      onMonthChange={(month) => {
+                        if (month) {
+                          const currentDate = formData?.dateOfBirth
+                            ? new Date(formData.dateOfBirth)
+                            : new Date();
+                          const newDate = new Date(
+                            month.getFullYear(),
+                            month.getMonth(),
+                            currentDate.getDate()
+                          );
+                          handleInputChange(
+                            "dateOfBirth",
+                            formatDateForInput(newDate)
+                          );
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                  {formData?.dateOfBirth
+                    ? format(new Date(formData.dateOfBirth), "PPP")
+                    : "Not provided"}
+                </p>
+              )}
+              {errors.dateOfBirth && (
+                <p className="text-sm text-red-500">{errors.dateOfBirth}</p>
+              )}
             </div>
 
             <div className="space-y-2">

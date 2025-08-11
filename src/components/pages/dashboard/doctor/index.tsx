@@ -679,7 +679,7 @@ export default function DashboardPage() {
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         } ${collapsed ? "md:w-16" : "md:w-64"} w-64`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col pt-16 h-full">
           {/* Navigation */}
           <nav className="flex-1 p-4 overflow-y-auto">
             <ul className="space-y-2">
@@ -783,18 +783,6 @@ export default function DashboardPage() {
                                 {stat.title}
                               </p>
                               <p className="text-2xl font-bold">{stat.value}</p>
-                              <div className="flex items-center mt-1">
-                                {stat.trend === "up" ? (
-                                  <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                                ) : (
-                                  <TrendingDown className="h-3 w-3 text-red-500 mr-1" />
-                                )}
-                                <span
-                                  className={`text-xs ${stat.trend === "up" ? "text-green-500" : "text-red-500"}`}
-                                >
-                                  {stat.change}
-                                </span>
-                              </div>
                             </div>
                             <stat.icon className="h-8 w-8 text-gray-400" />
                           </div>

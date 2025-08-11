@@ -528,7 +528,7 @@ export default function Dashboard() {
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         } ${collapsed ? "md:w-16" : "md:w-64"} w-64`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col  pt-16 h-full">
           {/* Logo/Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center pl-6">
