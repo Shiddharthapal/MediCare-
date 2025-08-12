@@ -625,6 +625,7 @@ const categorizeAppointments = (
   appointments: AppointmentData[]
 ): CategorizedAppointments => {
   const todayDate = getTodayDate();
+  console.log("appointments=>", appointments);
 
   const categorized: CategorizedAppointments = {
     today: [],
@@ -685,7 +686,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [requests, setRequests] = useState(appointmentRequests);
   const [appointmentData, setAppointmentData] =
-    useState<AppointmentData>(mockAppointmentData);
+    useState<DoctorDetails>(mockDoctorDetails);
   const [showPrescription, setShowPrescription] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const doctor = useAppSelector((state) => state.auth.user);
@@ -726,10 +727,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   };
 
   const categorizedAppointments = useMemo(() => {
+    let appointmentdata = appointmentData.appointments;
     return categorizeAppointments(
-      appointmentData
-        ? Array.isArray(appointmentData)
-          ? appointmentData
+      appointmentdata
+        ? Array.isArray(appointmentdata)
+          ? appointmentdata
           : []
         : []
     );

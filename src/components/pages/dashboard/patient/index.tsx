@@ -37,23 +37,6 @@ const menuItems = [
   { icon: Heart, label: "Health Records", active: false },
   { icon: Settings, label: "Settings", active: false },
 ];
-interface UserDetails {
-  _id: string;
-  userId: string;
-  email: string;
-  name: string;
-  fatherName?: string;
-  address: string;
-  contactNumber: string;
-  age: number;
-  gender: string;
-  bloodGroup: string;
-  weight: number;
-  height?: number;
-  appoinments: appointmentdata[];
-  lastTreatmentDate?: Date;
-  createdAt: Date;
-}
 
 interface appointmentdata {
   _id: string;
@@ -76,6 +59,24 @@ interface appointmentdata {
   paymentMethod: string;
   specialRequests: string;
   status: string;
+}
+
+interface UserDetails {
+  _id: string;
+  userId: string;
+  email: string;
+  name: string;
+  fatherName?: string;
+  address: string;
+  contactNumber: string;
+  age: number;
+  gender: string;
+  bloodGroup: string;
+  weight: number;
+  height?: number;
+  appoinments: appointmentdata[];
+  lastTreatmentDate?: Date;
+  createdAt: Date;
 }
 
 interface GroupedAppointments {
@@ -529,18 +530,6 @@ export default function Dashboard() {
         } ${collapsed ? "md:w-16" : "md:w-64"} w-64`}
       >
         <div className="flex flex-col  pt-16 h-full">
-          {/* Logo/Header */}
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center pl-6">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">M</span>
-              </div>
-              {!collapsed && (
-                <span className="ml-3 font-bold text-lg">MedDash</span>
-              )}
-            </div>
-          </div>
-
           {/* Navigation */}
           <nav className="flex-1 p-4 overflow-y-auto">
             <ul className="space-y-2">
@@ -643,7 +632,7 @@ export default function Dashboard() {
                   Welcome {patientData.name},
                 </h1>
                 <p className="text-gray-600">
-                  {patientData.appointments.length > 0 ? (
+                  {patientData.appoinments?.length > 0 ? (
                     " "
                   ) : (
                     <p>You have got no appointments for today</p>
