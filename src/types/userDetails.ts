@@ -1,24 +1,3 @@
-interface AppointmentData {
-  doctorUserId: string;
-  doctorName: string;
-  doctorSpecialist: string;
-  doctorGender: string;
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
-  appointmentDate: string;
-  appointmentTime: string;
-  consultationType: string;
-  consultedType: string;
-  reasonForVisit: string;
-  symptoms: string;
-  previousVisit: string;
-  emergencyContact: string;
-  emergencyPhone: string;
-  paymentMethod: string;
-  specialRequests: string;
-  createdAt: Date;
-}
 interface VitalSign {
   bloodPressure?: string;
   heartRate?: string;
@@ -80,6 +59,29 @@ interface Prescription {
   specialist: string;
   createdAt: Date;
 }
+interface AppointmentData {
+  doctorUserId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorGender: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  prescription: Prescription[];
+  createdAt: Date;
+}
+
 export interface UserDetails {
   _id: string;
   userId: string;
@@ -95,7 +97,6 @@ export interface UserDetails {
   weight: number;
   height?: number;
   appoinments: AppointmentData[];
-  prescription: Prescription[];
   lastTreatmentDate?: Date;
   createdAt: Date;
 }

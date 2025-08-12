@@ -1,5 +1,175 @@
 import mongoose from "mongoose";
 
+const VitalSignSchema = new mongoose.Schema({
+  bloodPressure: {
+    type: String,
+  },
+  heartRate: {
+    type: String,
+  },
+  temperature: {
+    type: String,
+  },
+  weight: {
+    type: String,
+  },
+  height: {
+    type: String,
+  },
+  respiratoryRate: {
+    type: String,
+  },
+  oxygenSaturation: {
+    type: String,
+  },
+  bmi: {
+    type: Number,
+  },
+});
+const MedicationSchema = new mongoose.Schema({
+  id: {
+    type: String,
+  },
+  medecineName: {
+    type: String,
+  },
+  medecineDosage: {
+    type: String,
+  },
+  frequency: {
+    type: String,
+  },
+  duration: {
+    type: String,
+  },
+  instructions: {
+    type: String,
+  },
+  quantity: {
+    type: String,
+  },
+  startDate: {
+    type: Date,
+  },
+  endDate: {
+    type: Date,
+  },
+});
+const PrescriptionSchema = new mongoose.Schema({
+  doctorId: {
+    type: String,
+  },
+  doctorName: {
+    type: String,
+  },
+  doctorSpecialist: {
+    type: String,
+  },
+  doctorEmail: {
+    type: String,
+  },
+  doctorGender: {
+    type: String,
+  },
+  doctorContact: {
+    type: String,
+  },
+  patientId: {
+    type: String,
+  },
+  patientName: {
+    type: String,
+  },
+  patientEmail: {
+    type: String,
+  },
+  patientPhone: {
+    type: String,
+  },
+  patientGender: {
+    type: String,
+  },
+  patientAge: {
+    type: String,
+  },
+  patientAddress: {
+    type: String,
+  },
+  hospital: {
+    type: String,
+  },
+  patientBloodgroup: {
+    type: String,
+  },
+  patientBithofday: {
+    type: Date,
+  },
+  appointmentDate: {
+    type: String,
+  },
+  appointmentTime: {
+    type: String,
+  },
+  consultationType: {
+    type: String,
+  },
+  consultedType: {
+    type: String,
+  },
+  reasonForVisit: {
+    type: String,
+  },
+  symptoms: {
+    type: String,
+  },
+  previousVisit: {
+    type: String,
+  },
+  emergencyContact: {
+    type: String,
+  },
+  emergencyPhone: {
+    type: String,
+  },
+  paymentMethod: {
+    type: String,
+  },
+  specialRequests: {
+    type: String,
+  },
+  patientdateOfBirth: {
+    type: String,
+  },
+  vitalSign: {
+    type: VitalSignSchema,
+  },
+  primaryDiagnosis: {
+    type: String,
+  },
+  testandReport: {
+    type: String,
+  },
+  medication: {
+    type: [MedicationSchema],
+    default: [],
+  },
+  restrictions: {
+    type: String,
+  },
+  followUpDate: {
+    type: String,
+  },
+  additionalNote: {
+    type: String,
+  },
+  specialist: {
+    type: String,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+});
 const appointmentDataSchema = new mongoose.Schema(
   {
     doctorName: {
@@ -79,6 +249,10 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     specialRequests: {
       type: String,
+    },
+    prescription: {
+      type: [PrescriptionSchema],
+      default: [],
     },
     createdAt: {
       type: Date,
