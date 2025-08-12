@@ -8,12 +8,34 @@ import { ArrowLeft, CheckCircle, XCircle, Plus } from "lucide-react";
 
 interface PrescriptionProps {
   patientData: {
-    name: string;
-    avatar: string;
-    phone: string;
-    email: string;
-    age: number;
-    gender: string;
+    doctorId: string;
+    doctorName: string;
+    doctorSpecialist: string;
+    doctorEmail: string;
+    doctorGender: string;
+    patientId: string;
+    patientName: string;
+    patientEmail: string;
+    patientPhone: string;
+    patientGender: string;
+    patientAge: number;
+    patientAddress: string;
+    hospital: string;
+    patientBloodgroup: string;
+    patientBithofday: Date;
+    appointmentDate: string;
+    appointmentTime: string;
+    consultationType: string;
+    consultedType: string;
+    reasonForVisit: string;
+    symptoms: string;
+    previousVisit: string;
+    emergencyContact: string;
+    emergencyPhone: string;
+    doctorContact: string;
+    paymentMethod: string;
+    specialRequests: string;
+    createdAt: Date;
   };
   onClose: () => void;
 }
@@ -48,6 +70,7 @@ export interface Pescriptiondata {
   patientEmail: string;
   patientPhone: string;
   patientGender: string;
+  patientdateOfBirth: string;
   consultationType: string;
   consultedType: string;
   reasonForVisit: string;
@@ -62,6 +85,12 @@ export interface Pescriptiondata {
   restrictions: string;
   followUpDate: string;
   additionalNote: string;
+  doctorName: string;
+  doctorContact: string;
+  hospital: string;
+  specialist: string;
+  date: string;
+  licenseNumber: string;
 }
 
 const mockVitalsign: VitalSign = {
@@ -94,6 +123,7 @@ const mockPescriptiondata: Pescriptiondata = {
   patientEmail: "",
   patientPhone: "",
   patientGender: "",
+  patientdateOfBirth: "",
   consultationType: "",
   consultedType: "",
   reasonForVisit: "",
@@ -108,6 +138,12 @@ const mockPescriptiondata: Pescriptiondata = {
   restrictions: "",
   followUpDate: "",
   additionalNote: "",
+  doctorName: "",
+  doctorContact: "",
+  hospital: "",
+  specialist: "",
+  date: "",
+  licenseNumber: "",
 };
 
 export default function Prescription({
@@ -144,9 +180,37 @@ export default function Prescription({
   // labTests: [],
   // restrictions: "",
 
-  const handleSavePrescription = () => {
-    alert(`Prescription saved successfully for ${patientData.name}!`);
+  const handleSavePrescription = async () => {
+    const response = await fetch("/api/doctor/createPrescription/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ patientData, prescriptionForm }),
+    });
     onClose();
+  };
+
+  console.log("=>", patientData);
+  const getPatientInitials = (patientName: string) => {
+    if (!patientName) return "AB";
+
+    const cleanName = patientName.trim();
+
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
   };
 
   return (
@@ -160,13 +224,15 @@ export default function Prescription({
           <div className="flex items-center gap-4">
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback>{patientData.avatar}</AvatarFallback>
+              <AvatarFallback>
+                {getPatientInitials(patientData.patientName)}
+              </AvatarFallback>
             </Avatar>
             <div>
               <h1 className="text-xl font-semibold">Create Prescription</h1>
               <p className="text-gray-600">
-                {patientData.name} • Age: {patientData.age} •{" "}
-                {patientData.gender}
+                {patientData.patientName} • Age: {patientData.patientAge} •{" "}
+                {patientData.patientGender}
               </p>
             </div>
           </div>
@@ -178,24 +244,69 @@ export default function Prescription({
         <div className="space-y-6">
           {/* Patient Information Summary */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                Patient Information • {patientData.name}
-              </CardTitle>
-            </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-3  text-sm">
                 <div>
-                  <p className="text-gray-500">Phone</p>
-                  <p className="font-medium">{patientData.phone}</p>
+                  <div>
+                    <p className="text-2xl font-semibold pb-2">
+                      Patient Information
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Name</p>
+                    <p className="font-medium">
+                      {patientData.patientName} • {patientData.patientAge} years
+                      • {patientData.patientGender}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Address</p>
+                    <p className="font-medium">{patientData.patientAddress}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Phone</p>
+                    <p className="font-medium">{patientData.patientPhone}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Email</p>
+                    <p className="font-medium">{patientData.patientEmail}</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center pl-4">
+                    <div className="w-8 h-8 bg-green-600 pb-2 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-3xl">+</span>
+                    </div>
+                    <span className="ml-2 text-xl font-bold text-gray-900">
+                      MediCare+
+                    </span>
+                  </div>
                 </div>
                 <div>
-                  <p className="text-gray-500">Email</p>
-                  <p className="font-medium">{patientData.email}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Patient ID</p>
-                  <p className="font-medium">#78146284/201</p>
+                  <div>
+                    <p className="text-2xl font-semibold pb-2">
+                      Doctor Information
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Name</p>
+                    <p className="font-medium">
+                      {patientData.doctorName} • ({patientData.doctorSpecialist}
+                      ) • {patientData.doctorGender}{" "}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Address</p>
+                    <p className="font-medium">{patientData.hospital}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Phone</p>
+                    <p className="font-medium">{patientData.doctorContact}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Email</p>
+                    <p className="font-medium">{patientData.doctorEmail}</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -466,7 +577,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medication.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, medecineDosage: e.target.value }
                                   : med
@@ -479,33 +590,22 @@ export default function Prescription({
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Frequency
                         </label>
-                        <select
+                        <input
+                          type="text"
+                          placeholder="Twice daily before meal"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={medication.frequency}
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medication.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, frequency: e.target.value }
                                   : med
                               ),
                             }));
                           }}
-                        >
-                          <option value="">Select frequency</option>
-                          <option value="Once daily">Once daily</option>
-                          <option value="Twice daily">Twice daily</option>
-                          <option value="Three times daily">
-                            Three times daily
-                          </option>
-                          <option value="Four times daily">
-                            Four times daily
-                          </option>
-                          <option value="As needed">As needed</option>
-                          <option value="Before meals">Before meals</option>
-                          <option value="After meals">After meals</option>
-                        </select>
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -519,7 +619,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medication.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, duration: e.target.value }
                                   : med
@@ -540,7 +640,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medication.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, quantity: e.target.value }
                                   : med
@@ -561,7 +661,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medication.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, instructions: e.target.value }
                                   : med
@@ -592,7 +692,7 @@ export default function Prescription({
                   </label>
                   <textarea
                     placeholder="Any activity restrictions..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-44 resize-none"
                     value={prescriptionForm.restrictions}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
@@ -644,7 +744,23 @@ export default function Prescription({
               </CardContent>
             </Card>
           </div>
-
+          <Card>
+            <CardContent>
+              <div className="-4  border-gray-200">
+                <div className="flex items-center justify-between italic text-sm text-gray-600">
+                  <span>
+                    Digital Signature:{" "}
+                    <span className="text-blue-700">
+                      {patientData.doctorName} • {patientData.doctorSpecialist}
+                    </span>
+                  </span>
+                  <span className="text-blue-700">
+                    {patientData.appointmentDate}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-4 pt-6 border-t bg-white p-6 rounded-lg">
             <Button variant="outline" onClick={onClose}>

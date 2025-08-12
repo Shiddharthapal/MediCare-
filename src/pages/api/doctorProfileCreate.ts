@@ -85,11 +85,11 @@ export const POST: APIRoute = async ({ request }) => {
     await connect();
 
     const doctordata = await Doctor.findOne({ _id: tokenDetails?.userId });
-    const doctordetails = await DoctorDetails.findOne({
+    let doctordetails = await DoctorDetails.findOne({
       userId: tokenDetails?.userId,
     });
     if (!doctordetails) {
-      const doctordetails = new DoctorDetails({
+      doctordetails = new DoctorDetails({
         userId: tokenDetails?.userId,
         name,
         email: doctordata?.email,

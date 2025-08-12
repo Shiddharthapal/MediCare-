@@ -844,9 +844,17 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
   // If prescription is shown, render only the prescription component
   if (showPrescription && selectedPatient) {
+    let id = doctor?._id;
     return (
       <Prescription
-        patientData={selectedPatient}
+        patientData={{
+          ...selectedPatient,
+          hospital: appointmentData.hospital,
+          doctorContact: appointmentData.contact,
+          doctorEmail: appointmentData.email,
+          doctorGender: appointmentData.gender,
+          doctorid: id,
+        }}
         onClose={handleClosePrescription}
       />
     );
@@ -951,9 +959,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   <Button
                     size="sm"
                     className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
-                    onClick={() =>
-                      handleCreatePrescription(appointment.patient)
-                    }
+                    onClick={() => handleCreatePrescription(appointment)}
                   >
                     <FileEdit className="h-3 w-3 mr-1" />
                     Create
