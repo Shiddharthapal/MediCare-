@@ -864,8 +864,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     isPrevious?: boolean;
   }) => (
     <Card className="mb-4 hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
+      <CardContent className="p-1">
+        <div className="flex items-center justify-between">
           <div className="flex items-start gap-4 flex-1">
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
@@ -881,14 +881,23 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                 <Badge className={getStatusColor(status)}>{status}</Badge>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {showDate && <span>{appointment?.appointmentDate} - </span>}
-                  <span>{appointment.appointmentTime} 30 Minutes</span>
+                <div className="flex flex-col  gap-1">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {showDate && <span>{appointment?.appointmentDate} </span>}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    <span>{appointment.appointmentTime} • 30 Minutes</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span>{appointment.location}</span>
+                  <span>
+                    {appointment.consultationType === "video" || "phone"
+                      ? "In home (online)"
+                      : appointmentData.hospital}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Phone className="h-4 w-4" />
@@ -907,7 +916,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   <strong>Doctor:</strong> {appointment?.doctorName}
                 </p>
                 <p className="text-sm">
-                  <strong>Notes:</strong> {appointment.notes}
+                  <strong>Reason: </strong> {appointment.reasonForVisit}
                 </p>
                 {isPrevious && appointment.outcome && (
                   <p className="text-sm">
@@ -922,7 +931,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             </div>
           </div>
           <div className="flex flex-col gap-2 ml-4">
-            {status === "pending||confirmed" && (
+            {(status === "pending" || "confirmed") && (
               <div className="flex flex-col gap-1">
                 <Button
                   size="sm"
