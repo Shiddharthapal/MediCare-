@@ -43,7 +43,6 @@ export const POST: APIRoute = async ({ request }) => {
     } = body;
 
     await connect();
-    let u;
 
     return new Response(JSON.stringify({}), {
       status: 200,

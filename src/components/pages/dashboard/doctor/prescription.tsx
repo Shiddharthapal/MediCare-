@@ -58,8 +58,7 @@ interface Medication {
   duration: string;
   instructions?: string;
   quantity: string;
-  // route?: "Oral" | "Injection" | "Topical" | "Inhaled" | "Other"; // Route of administration
-  route?: string[]; // Route of administration
+  route?: string[];
   startDate?: Date;
   endDate?: Date;
 }
