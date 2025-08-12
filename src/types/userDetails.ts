@@ -30,7 +30,7 @@ interface VitalSign {
   bmi?: number;
 }
 interface Medication {
-  id: number;
+  id: string;
   medecineName: string;
   medecineDosage: string;
   frequency: string;
