@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ request }) => {
       contactNumber,
       age,
       bloodGroup,
-      birthofday,
+      dateOfBirth,
       weight,
       height,
       gender,
@@ -30,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
       !age ||
       !weight ||
       !contactNumber ||
-      !birthofday
+      !dateOfBirth
     ) {
       return new Response(
         JSON.stringify({
@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
             gender: !gender ? "Gender is required" : null,
             weight: !weight ? "Weight is required" : null,
             bloodGroup: !bloodGroup ? "Bloodgroup is required" : null,
-            birthofday: !birthofday ? "Birthday is required" : null,
+            dateOfBirth: !dateOfBirth ? "Birthday is required" : null,
             contactNumber: !contactNumber ? "Contact number is required" : null,
           },
         }),
@@ -53,42 +53,43 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
     await connect();
-    const userdetails = await UserDetails.findOne({ userId: id });
+    let userdetails = await UserDetails.findOne({ userId: id });
     let userdata = await User.findOne({ _id: id });
     //console.log("userId=>", id);
     if (!userdetails) {
-      const userDetails = new UserDetails({
+      userdetails = new UserDetails({
         userId: id,
         email: userdata?.email,
         name,
         fatherName,
         address,
+        dateOfBirth,
         contactNumber,
         age,
         gender,
         bloodGroup,
-        birthofday,
         weight,
         height,
       });
-      //console.log("user=>", userDetails);
-      userDetails.save();
+
+      await userdetails.save();
     } else {
       userdetails.name = name || userdetails.name;
-      userdetails.email = userdata?.email || userdetails.name;
+      userdetails.email = userdata?.email || userdetails.email;
       userdetails.fatherName = fatherName || userdetails.fatherName;
       userdetails.address = address || userdetails.address;
+      userdetails.dateOfBirth = dateOfBirth || userdetails.dateOfBirth;
       userdetails.contactNumber = contactNumber || userdetails.contactNumber;
       userdetails.age = age || userdetails.age;
       userdetails.gender = gender || userdetails.gender;
       userdetails.bloodGroup = bloodGroup || userdetails.bloodGroup;
-      userdetails.birthofday = birthofday || userdetails.birthofday;
       userdetails.weight = weight || userdetails.weight;
       userdetails.height = height || userdetails.height;
 
       await userdetails.save();
     }
 
+    //console.log("=>", userdetails);
     return new Response(JSON.stringify({ userdetails }), {
       status: 200,
       headers: {

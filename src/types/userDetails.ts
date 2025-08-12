@@ -26,11 +26,11 @@ export interface UserDetails {
   name: string;
   fatherName?: string;
   address: string;
+  dateOfBirth: Date;
   contactNumber: string;
   age: number;
   gender: string;
   bloodGroup: string;
-  birthofday: Date;
   weight: number;
   height?: number;
   appoinments: AppointmentData[];
