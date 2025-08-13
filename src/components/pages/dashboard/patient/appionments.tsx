@@ -707,7 +707,7 @@ export default function Appointments({
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+      <div className="flex grid grid-cols-3 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
         <Button
           variant={activeTab === "upcoming" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
