@@ -887,7 +887,16 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   {appointment?.patientName}
                 </h3>
                 <Badge className={getStatusColor(status)}>{status}</Badge>
+                <div>
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-50 text-blue-700 border-blue-200"
+                  >
+                    {appointment.patientGender}
+                  </Badge>
+                </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                 <div className="flex flex-col  gap-1">
                   <div className="flex items-center gap-1">
