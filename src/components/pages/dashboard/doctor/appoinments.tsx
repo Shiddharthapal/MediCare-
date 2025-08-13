@@ -690,7 +690,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [showPrescription, setShowPrescription] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const doctor = useAppSelector((state) => state.auth.user);
-  console.log("🧞‍♂️doctor --->", doctor);
+  // console.log("🧞‍♂️doctor --->", doctor);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -748,7 +748,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
         },
       });
       const responsedata = await response.json();
-      console.log("🧞‍♂️responsedata --->", responsedata);
+      // console.log("🧞‍♂️responsedata --->", responsedata);
       setAppointmentData(responsedata.doctordetails);
     };
 
@@ -853,7 +853,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           doctorContact: appointmentData.contact,
           doctorEmail: appointmentData.email,
           doctorGender: appointmentData.gender,
-          doctorid: id,
+          doctorId: id,
         }}
         onClose={handleClosePrescription}
       />

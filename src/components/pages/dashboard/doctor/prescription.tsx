@@ -410,7 +410,7 @@ export default function Prescription({
     </div>
   );
 
-  console.log("=>", patientData);
+  //console.log("=>", patientData);
   const getPatientInitials = (patientName: string) => {
     if (!patientName) return "AB";
 

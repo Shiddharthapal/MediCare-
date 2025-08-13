@@ -10,10 +10,10 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     let body = await request.json();
-    console.log("🧞‍♂️body --->", body);
+    console.log("🧞‍♂️  body --->", body);
 
     let { patientData, prescriptionForm } = body;
-    let { patientId, doctorid } = patientData;
+    let { patientId, doctorId } = patientData;
     let {
       vitalSign,
       primaryDiagnosis,
@@ -23,9 +23,11 @@ export const POST: APIRoute = async ({ request }) => {
       followUpDate,
       additionalNote,
     } = prescriptionForm;
+    //console.log("🧞‍♂️prescriptionForm --->", prescriptionForm);
     await connect();
 
-    let userdetails = await userDetails.findById({ userId: patientId });
+    let userdetails = await userDetails.findById({ _id: patientId });
+    //console.log("🧞‍♂️userdetails --->", userdetails);
     if (!userdetails) {
       return new Response(
         JSON.stringify({
@@ -48,6 +50,7 @@ export const POST: APIRoute = async ({ request }) => {
       additionalNote,
       createdAt: new Date(),
     };
+    console.log("🧞‍♂️newPrescriptionPatient --->", newPrescriptionPatient);
     const createUserPrescription = await userDetails.findByIdAndUpdate(
       userdetails._id,
       {
@@ -59,7 +62,9 @@ export const POST: APIRoute = async ({ request }) => {
       }
     );
 
-    let doctordetails = await doctorDetails.findById({ userId: doctorid });
+    let doctordetails = await doctorDetails.findOne({ userId: doctorId });
+    console.log("🧞‍♂️  doctordetails --->", doctordetails);
+
     if (!doctordetails) {
       return new Response(
         JSON.stringify({
@@ -81,6 +86,7 @@ export const POST: APIRoute = async ({ request }) => {
       additionalNote,
       createdAt: new Date(),
     };
+    console.log("🧞‍♂️newPrescriptionDoctor --->", newPrescriptionDoctor);
 
     const createDoctorPrescription = await doctorDetails.findByIdAndUpdate(
       doctordetails._id,
