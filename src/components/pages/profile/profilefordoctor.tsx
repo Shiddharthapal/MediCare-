@@ -320,7 +320,7 @@ export default function DoctorProfilePage() {
               <div className="flex-1">
                 {isEditing ? (
                   <Input
-                    value={editedDoctor.name}
+                    value={editedDoctor?.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="text-2xl font-bold bg-white/10 border-white/20 text-white placeholder:text-white/70"
                     placeholder="Enter your full name"
@@ -332,7 +332,7 @@ export default function DoctorProfilePage() {
                 )}
                 {isEditing ? (
                   <Input
-                    value={editedDoctor.specialist}
+                    value={editedDoctor?.specialist}
                     onChange={(e) =>
                       handleInputChange("specialist", e.target.value)
                     }
@@ -425,7 +425,7 @@ export default function DoctorProfilePage() {
                   </Label>
                   {isEditing ? (
                     <Input
-                      value={editedDoctor.hospital}
+                      value={editedDoctor?.hospital}
                       onChange={(e) =>
                         handleInputChange("hospital", e.target.value)
                       }
@@ -445,7 +445,7 @@ export default function DoctorProfilePage() {
                   </Label>
                   {isEditing ? (
                     <Input
-                      value={editedDoctor.education}
+                      value={editedDoctor?.education}
                       onChange={(e) =>
                         handleInputChange("education", e.target.value)
                       }
@@ -465,7 +465,7 @@ export default function DoctorProfilePage() {
                   </Label>
                   {isEditing ? (
                     <Input
-                      value={editedDoctor.degree}
+                      value={editedDoctor?.degree}
                       onChange={(e) =>
                         handleInputChange("degree", e.target.value)
                       }
@@ -485,7 +485,7 @@ export default function DoctorProfilePage() {
                   </Label>
                   {isEditing ? (
                     <Input
-                      value={editedDoctor.experience}
+                      value={editedDoctor?.experience}
                       onChange={(e) =>
                         handleInputChange("experience", e.target.value)
                       }
@@ -505,7 +505,7 @@ export default function DoctorProfilePage() {
                   {isEditing ? (
                     <Input
                       type="tel"
-                      value={editedDoctor.contact}
+                      value={editedDoctor?.contact}
                       onChange={(e) =>
                         handleInputChange("contact", e.target.value)
                       }
@@ -542,12 +542,12 @@ export default function DoctorProfilePage() {
                             <Badge
                               key={mode}
                               variant={
-                                editedDoctor.consultationModes.includes(mode)
+                                editedDoctor?.consultationModes?.includes(mode)
                                   ? "default"
                                   : "outline"
                               }
                               className={`cursor-pointer px-4 py-2 text-base ${
-                                editedDoctor.consultationModes.includes(mode)
+                                editedDoctor?.consultationModes?.includes(mode)
                                   ? "bg-blue-500 text-white hover:bg-blue-600"
                                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                               }`}
@@ -589,7 +589,7 @@ export default function DoctorProfilePage() {
                   {isEditing ? (
                     <Input
                       type="number"
-                      value={editedDoctor.fees || ""}
+                      value={editedDoctor?.fees || ""}
                       onChange={(e) =>
                         handleInputChange(
                           "fees",
@@ -601,7 +601,7 @@ export default function DoctorProfilePage() {
                   ) : (
                     <p className="text-3xl font-bold text-green-600">
                       {currentDoctor?.fees
-                        ? `$${currentDoctor.fees}`
+                        ? `$${currentDoctor?.fees}`
                         : "Fees not set"}
                     </p>
                   )}
@@ -739,7 +739,7 @@ export default function DoctorProfilePage() {
               </Label>
               {isEditing ? (
                 <Textarea
-                  value={editedDoctor.about}
+                  value={editedDoctor?.about}
                   onChange={(e) => handleInputChange("about", e.target.value)}
                   placeholder="Tell patients about yourself, your approach to medicine, and your expertise..."
                   rows={4}

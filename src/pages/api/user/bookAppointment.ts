@@ -85,6 +85,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     const doctordetails = await doctorDetails.findOne({ userId: userId });
+    console.log("🧞‍♂️  doctordetails --->", doctordetails);
     console.log("🧞‍♂️userdetails --->", userdetails);
 
     if (userdetails) {
@@ -93,6 +94,7 @@ export const POST: APIRoute = async ({ request }) => {
         doctorName: name,
         doctorSpecialist: specialist,
         doctorGender: gender,
+        doctorEmail: doctordetails?.email,
         hospital: doctordetails?.hospital,
         patientName: userdetails?.name,
         patientEmail: userdetails?.email || "",
@@ -123,8 +125,6 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
 
-      console.log("🧞‍♂️updatedDoctor --->", updatedUser);
-      console.log("🧞‍♂️updatedDoctor --->", doctordetails);
       if (!doctordetails) {
         return new Response(
           JSON.stringify({

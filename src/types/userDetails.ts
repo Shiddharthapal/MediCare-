@@ -35,6 +35,7 @@ interface AppointmentData {
   doctorName: string;
   doctorSpecialist: string;
   doctorGender: string;
+  doctorEmail: string;
   hospital: string;
   patientName: string;
   patientEmail: string;
