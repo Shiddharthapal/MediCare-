@@ -31,6 +31,7 @@ interface Prescription {
   createdAt: Date;
 }
 interface AppointmentData {
+  doctorpatinetId: string;
   doctorName: string;
   doctorSpecialist: string;
   doctorEmail: string;
@@ -54,7 +55,7 @@ interface AppointmentData {
   emergencyPhone: string;
   paymentMethod: string;
   specialRequests: string;
-  prescription: Prescription[];
+  prescription: Prescription;
   createdAt: Date;
 }
 export interface DoctorDetails {

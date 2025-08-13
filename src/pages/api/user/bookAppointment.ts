@@ -78,6 +78,7 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
+    const uniqueId = crypto.randomUUID();
 
     await connect();
     const userdetails = await userDetails.findOne({
@@ -90,6 +91,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (userdetails) {
       const newbookAppoinmentsDetails = {
+        doctorpatinetId: uniqueId,
         doctorUserId: doctor.userId,
         doctorName: name,
         doctorSpecialist: specialist,
@@ -124,6 +126,7 @@ export const POST: APIRoute = async ({ request }) => {
           runValidators: true,
         }
       );
+      console.log("🧞‍♂️  updatedUser --->", updatedUser);
 
       if (!doctordetails) {
         return new Response(
@@ -137,6 +140,7 @@ export const POST: APIRoute = async ({ request }) => {
         );
       }
       const newbookAppoinmentsDataforDoctor = {
+        doctorpatinetId: uniqueId,
         doctorName: name,
         doctorSpecialist: specialist,
         doctorEmail: "",
