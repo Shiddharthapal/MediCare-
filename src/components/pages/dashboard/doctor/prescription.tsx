@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, CheckCircle, XCircle, Plus } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  Plus,
+  Edit,
+  Printer,
+} from "lucide-react";
 
 interface PrescriptionProps {
   patientData: {
@@ -38,6 +45,9 @@ interface PrescriptionProps {
     createdAt: Date;
   };
   onClose: () => void;
+  savedPrescription?: any;
+  isEditMode?: boolean;
+  onSave?: (prescriptionData: any) => void;
 }
 interface VitalSign {
   bloodPressure?: string;
@@ -104,7 +114,7 @@ const mockVitalsign: VitalSign = {
 };
 
 const mockMedication: Medication = {
-  id: 11,
+  id: "1",
   medecineName: "",
   medecineDosage: "",
   frequency: "",
@@ -148,9 +158,20 @@ const mockPescriptiondata: Pescriptiondata = {
 export default function Prescription({
   patientData,
   onClose,
+  savedPrescription,
+  isEditMode = false,
+  onSave,
 }: PrescriptionProps) {
   const [prescriptionForm, setPrescriptionForm] =
     useState<Pescriptiondata>(mockPescriptiondata);
+  const [isSaved, setIsSaved] = useState(!!savedPrescription);
+  const [viewMode, setViewMode] = useState(!!savedPrescription && !isEditMode);
+
+  useEffect(() => {
+    if (savedPrescription) {
+      setPrescriptionForm(savedPrescription);
+    }
+  }, [savedPrescription]);
 
   // medications: [
   //   {
@@ -178,17 +199,216 @@ export default function Prescription({
   // followUpDate: "",
   // labTests: [],
   // restrictions: "",
-
   const handleSavePrescription = async () => {
-    const response = await fetch("/api/doctor/createPrescription/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ patientData, prescriptionForm }),
-    });
-    onClose();
+    try {
+      const prescriptionData = {
+        ...prescriptionForm,
+        patientInfo: patientData,
+        prescriptionId: `RX-${Date.now()}`,
+        dateIssued: new Date().toLocaleDateString(),
+        timeIssued: new Date().toLocaleTimeString(),
+      };
+
+      const response = await fetch("/api/doctor/createPrescription/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ patientData, prescriptionForm }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to save prescription: ${response.statusText}`);
+      }
+
+      if (onSave) {
+        onSave(prescriptionData);
+      }
+
+      setIsSaved(true);
+      setViewMode(true);
+      onClose();
+    } catch (error) {
+      console.error("Error saving prescription", error);
+    }
   };
+
+  const handleEditPrescription = () => {
+    setViewMode(false);
+  };
+
+  const PrescriptionView = () => (
+    <div className="max-w-4xl mx-auto p-6 bg-white">
+      {/* Header */}
+      <div className="border-b-2 border-blue-600 pb-4 mb-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-blue-600">PRESCRIPTION</h1>
+            <p className="text-sm text-gray-600">
+              Prescription ID: RX-{Date.now()}
+            </p>
+            <p className="text-sm text-gray-600">
+              Date: {new Date().toLocaleDateString()}
+            </p>
+          </div>
+          <div className="text-right">
+            <h2 className="font-bold text-lg">{patientData.doctorName}</h2>
+            <p className="text-sm">{patientData.doctorSpecialist}</p>
+            <p className="text-sm">{patientData.hospital}</p>
+            <p className="text-sm">{patientData.doctorContact}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Patient Information */}
+      <div className="mb-6">
+        <h3 className="font-semibold text-lg mb-3 text-blue-600">
+          Patient Information
+        </h3>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <strong>Name:</strong> {patientData.patientName}
+          </div>
+          <div>
+            <strong>Age:</strong> {patientData.patientAge}
+          </div>
+          <div>
+            <strong>Gender:</strong> {patientData.patientGender}
+          </div>
+          <div>
+            <strong>Blood Group:</strong> {patientData.patientBloodgroup}
+          </div>
+          <div>
+            <strong>Phone:</strong> {patientData.patientPhone}
+          </div>
+          <div>
+            <strong>Patient ID:</strong> {patientData.patientId}
+          </div>
+        </div>
+      </div>
+
+      {/* Vital Signs */}
+      {(prescriptionForm.vitalSign.bloodPressure ||
+        prescriptionForm.vitalSign.heartRate ||
+        prescriptionForm.vitalSign.temperature ||
+        prescriptionForm.vitalSign.weight ||
+        prescriptionForm.vitalSign.height) && (
+        <div className="mb-6">
+          <h3 className="font-semibold text-lg mb-3 text-blue-600">
+            Vital Signs
+          </h3>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            {prescriptionForm.vitalSign.bloodPressure && (
+              <div>
+                <strong>Blood Pressure:</strong>{" "}
+                {prescriptionForm.vitalSign.bloodPressure}
+              </div>
+            )}
+            {prescriptionForm.vitalSign.heartRate && (
+              <div>
+                <strong>Heart Rate:</strong>{" "}
+                {prescriptionForm.vitalSign.heartRate}
+              </div>
+            )}
+            {prescriptionForm.vitalSign.temperature && (
+              <div>
+                <strong>Temperature:</strong>{" "}
+                {prescriptionForm.vitalSign.temperature}
+              </div>
+            )}
+            {prescriptionForm.vitalSign.weight && (
+              <div>
+                <strong>Weight:</strong> {prescriptionForm.vitalSign.weight}
+              </div>
+            )}
+            {prescriptionForm.vitalSign.height && (
+              <div>
+                <strong>Height:</strong> {prescriptionForm.vitalSign.height}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Diagnosis */}
+      {prescriptionForm.primaryDiagnosis && (
+        <div className="mb-6">
+          <h3 className="font-semibold text-lg mb-3 text-blue-600">
+            Diagnosis
+          </h3>
+          <p className="text-sm">{prescriptionForm.primaryDiagnosis}</p>
+        </div>
+      )}
+
+      {/* Medications */}
+      {prescriptionForm.medication.length > 0 && (
+        <div className="mb-6">
+          <h3 className="font-semibold text-lg mb-3 text-blue-600">
+            Medications
+          </h3>
+          <div className="space-y-3">
+            {prescriptionForm.medication.map((medication, index) => (
+              <div key={medication.id} className="border rounded p-3 text-sm">
+                <div className="font-medium">
+                  {medication.medecineName} - {medication.medecineDosage}
+                </div>
+                <div className="text-gray-600">
+                  {medication.frequency} | {medication.duration} |{" "}
+                  {medication.instructions}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Additional sections */}
+      {prescriptionForm.restrictions && (
+        <div className="mb-6">
+          <h3 className="font-semibold text-lg mb-3 text-blue-600">
+            Restrictions
+          </h3>
+          <p className="text-sm">{prescriptionForm.restrictions}</p>
+        </div>
+      )}
+
+      {/* Digital Signature */}
+      <div className="mt-8 pt-4 border-t">
+        <div className="flex justify-between items-end">
+          <div>
+            <p className="text-sm text-gray-600">Doctor's Signature</p>
+            <div className="mt-2 font-signature text-2xl">
+              {patientData.doctorName}
+            </div>
+            <p className="text-xs text-gray-500">
+              Digitally signed on {new Date().toLocaleDateString()}
+            </p>
+          </div>
+          <div className="text-right text-xs text-gray-500">
+            <p>This is a computer-generated prescription</p>
+            <p>Valid for 30 days from date of issue</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-between mt-8 pt-4 border-t">
+        <Button variant="outline" onClick={onClose}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Dashboard
+        </Button>
+        <div className="space-x-2">
+          <Button variant="outline" onClick={handleEditPrescription}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Prescription
+          </Button>
+          <Button onClick={() => window.print()}>
+            <Printer className="h-4 w-4 mr-2" />
+            Print
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 
   console.log("=>", patientData);
   const getPatientInitials = (patientName: string) => {
@@ -211,6 +431,10 @@ export default function Prescription({
       return "AB";
     }
   };
+
+  if (viewMode && isSaved) {
+    return <PrescriptionView />;
+  }
 
   return (
     <div className="min-h-screen overflow-auto bg-gray-50">
@@ -499,7 +723,7 @@ export default function Prescription({
                       medication: [
                         ...prev.medication,
                         {
-                          id: prev.medication.length + 1,
+                          id: (prev.medication.length + 1).toString(),
                           medecineName: "",
                           medecineDosage: "",
                           frequency: "",

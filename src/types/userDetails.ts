@@ -21,34 +21,6 @@ interface Medication {
   endDate?: Date;
 }
 interface Prescription {
-  doctorId: string;
-  doctorName: string;
-  doctorSpecialist: string;
-  doctorEmail: string;
-  doctorGender: string;
-  doctorContact: string;
-  patientId: string;
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
-  patientGender: string;
-  patientAge: number;
-  patientAddress: string;
-  hospital: string;
-  patientBloodgroup: string;
-  patientBithofday: Date;
-  appointmentDate: string;
-  appointmentTime: string;
-  consultationType: string;
-  consultedType: string;
-  reasonForVisit: string;
-  symptoms: string;
-  previousVisit: string;
-  emergencyContact: string;
-  emergencyPhone: string;
-  paymentMethod: string;
-  specialRequests: string;
-  patientdateOfBirth: string;
   vitalSign: VitalSign;
   primaryDiagnosis: string;
   testandReport: string;
@@ -56,7 +28,6 @@ interface Prescription {
   restrictions: string;
   followUpDate: string;
   additionalNote: string;
-  specialist: string;
   createdAt: Date;
 }
 interface AppointmentData {
@@ -64,6 +35,7 @@ interface AppointmentData {
   doctorName: string;
   doctorSpecialist: string;
   doctorGender: string;
+  hospital: string;
   patientName: string;
   patientEmail: string;
   patientPhone: string;

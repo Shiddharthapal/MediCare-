@@ -59,90 +59,6 @@ const MedicationSchema = new mongoose.Schema(
 );
 const PrescriptionSchema = new mongoose.Schema(
   {
-    doctorId: {
-      type: String,
-    },
-    doctorName: {
-      type: String,
-    },
-    doctorSpecialist: {
-      type: String,
-    },
-    doctorEmail: {
-      type: String,
-    },
-    doctorGender: {
-      type: String,
-    },
-    doctorContact: {
-      type: String,
-    },
-    patientId: {
-      type: String,
-    },
-    patientName: {
-      type: String,
-    },
-    patientEmail: {
-      type: String,
-    },
-    patientPhone: {
-      type: String,
-    },
-    patientGender: {
-      type: String,
-    },
-    patientAge: {
-      type: String,
-    },
-    patientAddress: {
-      type: String,
-    },
-    hospital: {
-      type: String,
-    },
-    patientBloodgroup: {
-      type: String,
-    },
-    patientBithofday: {
-      type: Date,
-    },
-    appointmentDate: {
-      type: String,
-    },
-    appointmentTime: {
-      type: String,
-    },
-    consultationType: {
-      type: String,
-    },
-    consultedType: {
-      type: String,
-    },
-    reasonForVisit: {
-      type: String,
-    },
-    symptoms: {
-      type: String,
-    },
-    previousVisit: {
-      type: String,
-    },
-    emergencyContact: {
-      type: String,
-    },
-    emergencyPhone: {
-      type: String,
-    },
-    paymentMethod: {
-      type: String,
-    },
-    specialRequests: {
-      type: String,
-    },
-    patientdateOfBirth: {
-      type: String,
-    },
     vitalSign: {
       type: VitalSignSchema,
     },
@@ -165,9 +81,6 @@ const PrescriptionSchema = new mongoose.Schema(
     additionalNote: {
       type: String,
     },
-    specialist: {
-      type: String,
-    },
     createdAt: {
       type: Date,
       default: Date.now(),
@@ -188,6 +101,9 @@ const appointmentDataSchema = new mongoose.Schema(
       type: String,
     },
     doctorGender: {
+      type: String,
+    },
+    hospital: {
       type: String,
     },
     patientName: {
