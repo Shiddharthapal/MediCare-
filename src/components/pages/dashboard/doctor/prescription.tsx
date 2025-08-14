@@ -285,12 +285,19 @@ export default function Prescription({
   };
 
   const PrescriptionView = () => (
-    <div className="max-w-4xl mx-auto p-6 bg-white">
+    <div className="w-full md:mx-16 lg:mx-24 p-2 bg-white">
       {/* Header */}
       <div className="border-b-2 border-blue-600 pb-4 mb-6">
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start md:gap-32 lg:gap-28">
           <div>
-            <h1 className="text-2xl font-bold text-blue-600">PRESCRIPTION</h1>
+            <div className="flex-shrink-0 flex items-center ">
+              <div className="w-8 h-8 bg-green-600 pb-2 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-3xl">+</span>
+              </div>
+              <span className="ml-2 text-xl font-bold text-gray-900">
+                MediCare+
+              </span>
+            </div>
             <p className="text-sm text-gray-600">
               Prescription ID: RX-{Date.now()}
             </p>

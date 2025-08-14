@@ -10,7 +10,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     let body = await request.json();
-    console.log("🧞‍♂️  body --->", body);
+    //console.log("🧞‍♂️  body --->", body);
 
     let { patientData, prescriptionForm } = body;
     let { doctorpatinetId, patientId, doctorId } = patientData;
@@ -40,7 +40,6 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    let commonIdUser = userdetails?.appointments?.prescription?._id;
     const newPrescriptionPatient = {
       vitalSign,
       primaryDiagnosis,
@@ -51,7 +50,7 @@ export const POST: APIRoute = async ({ request }) => {
       additionalNote,
       createdAt: new Date(),
     };
-    console.log("🧞‍♂️newPrescriptionPatient --->", newPrescriptionPatient);
+    //console.log("🧞‍♂️newPrescriptionPatient --->", newPrescriptionPatient);
     const createUserPrescription = await userDetails.findOneAndUpdate(
       {
         _id: userdetails._id,
@@ -69,7 +68,7 @@ export const POST: APIRoute = async ({ request }) => {
     );
 
     let doctordetails = await doctorDetails.findOne({ userId: doctorId });
-    console.log("🧞‍♂️  doctordetails --->", doctordetails);
+    //console.log("🧞‍♂️  doctordetails --->", doctordetails);
 
     if (!doctordetails) {
       return new Response(
@@ -92,7 +91,7 @@ export const POST: APIRoute = async ({ request }) => {
       additionalNote,
       createdAt: new Date(),
     };
-    console.log("🧞‍♂️newPrescriptionDoctor --->", newPrescriptionDoctor);
+    //console.log("🧞‍♂️newPrescriptionDoctor --->", newPrescriptionDoctor);
 
     const createDoctorPrescription = await doctorDetails.findOneAndUpdate(
       {
@@ -109,7 +108,7 @@ export const POST: APIRoute = async ({ request }) => {
         runValidators: true,
       }
     );
-    console.log("🧞‍♂️  createDoctorPrescription --->", createDoctorPrescription);
+    // console.log("🧞‍♂️  createDoctorPrescription --->", createDoctorPrescription);
 
     return new Response(JSON.stringify({ createDoctorPrescription }), {
       status: 200,
