@@ -212,9 +212,12 @@ export default function Prescription({
           return null; // Return null for non-matching
         })
         .filter(Boolean); // Remove null values
+      //console.log("🧞‍♂️  data --->", data);
+
       setPrescriptiondata(data);
       setIsSaved(true);
       setViewMode(true);
+      console.log("prescription data=>", prescriptiondata);
       <PrescriptionView />;
     };
     fetchPrescription();
@@ -287,7 +290,7 @@ export default function Prescription({
   const PrescriptionView = () => (
     <div className="w-full md:mx-16 lg:mx-24 p-2 bg-white">
       {/* Header */}
-      <div className="border-b-2 border-blue-600 pb-4 mb-6">
+      <div className="border-b-2 border-blue-600 pb-4 ">
         <div className="flex justify-between items-start md:gap-32 lg:gap-28">
           <div>
             <div className="flex-shrink-0 flex items-center ">
@@ -315,11 +318,11 @@ export default function Prescription({
       </div>
 
       {/* Patient Information */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-lg mb-3 text-blue-600">
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg  text-blue-600">
           Patient Information
         </h3>
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-2 gap-x-4 text-sm ">
           <div>
             <strong>Name:</strong> {patientData.patientName}
           </div>
@@ -336,77 +339,66 @@ export default function Prescription({
             <strong>Phone:</strong> {patientData.patientPhone}
           </div>
           <div>
-            <strong>Patient ID:</strong> {patientData.patientId}
+            <strong>Address:</strong> {patientData.patientAddress}
           </div>
         </div>
       </div>
 
       {/* Vital Signs */}
-      {(prescriptionForm.vitalSign.bloodPressure ||
-        prescriptionForm.vitalSign.heartRate ||
-        prescriptionForm.vitalSign.temperature ||
-        prescriptionForm.vitalSign.weight ||
-        prescriptionForm.vitalSign.height) && (
-        <div className="mb-6">
-          <h3 className="font-semibold text-lg mb-3 text-blue-600">
-            Vital Signs
-          </h3>
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            {prescriptionForm.vitalSign.bloodPressure && (
-              <div>
-                <strong>Blood Pressure:</strong>{" "}
-                {prescriptionForm.vitalSign.bloodPressure}
-              </div>
-            )}
-            {prescriptionForm.vitalSign.heartRate && (
-              <div>
-                <strong>Heart Rate:</strong>{" "}
-                {prescriptionForm.vitalSign.heartRate}
-              </div>
-            )}
-            {prescriptionForm.vitalSign.temperature && (
-              <div>
-                <strong>Temperature:</strong>{" "}
-                {prescriptionForm.vitalSign.temperature}
-              </div>
-            )}
-            {prescriptionForm.vitalSign.weight && (
-              <div>
-                <strong>Weight:</strong> {prescriptionForm.vitalSign.weight}
-              </div>
-            )}
-            {prescriptionForm.vitalSign.height && (
-              <div>
-                <strong>Height:</strong> {prescriptionForm.vitalSign.height}
-              </div>
-            )}
-          </div>
+
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg  text-blue-600">Vital Signs</h3>
+        <div className="grid grid-cols-3 gap-x-4 text-sm">
+          {prescriptiondata[0]?.vitalSign?.bloodPressure && (
+            <div>
+              <strong>Blood Pressure:</strong>{" "}
+              {prescriptiondata[0]?.vitalSign?.bloodPressure}
+            </div>
+          )}
+          {prescriptiondata[0]?.vitalSign?.heartRate && (
+            <div>
+              <strong>Heart Rate:</strong>{" "}
+              {prescriptiondata[0]?.vitalSign?.heartRate}
+            </div>
+          )}
+          {prescriptiondata[0]?.vitalSign?.temperature && (
+            <div>
+              <strong>Temperature:</strong>{" "}
+              {prescriptiondata[0]?.vitalSign?.temperature}
+            </div>
+          )}
+          {prescriptiondata[0]?.vitalSign?.weight && (
+            <div>
+              <strong>Weight:</strong> {prescriptiondata[0]?.vitalSign?.weight}
+            </div>
+          )}
+          {prescriptiondata[0]?.vitalSign?.height && (
+            <div>
+              <strong>Height:</strong> {prescriptiondata[0]?.vitalSign?.height}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Diagnosis */}
-      {prescriptionForm.primaryDiagnosis && (
-        <div className="mb-6">
-          <h3 className="font-semibold text-lg mb-3 text-blue-600">
-            Diagnosis
-          </h3>
-          <p className="text-sm">{prescriptionForm.primaryDiagnosis}</p>
+      {prescriptiondata[0]?.primaryDiagnosis && (
+        <div className="mb-3">
+          <h3 className="font-semibold text-lg text-blue-600">Diagnosis</h3>
+          <p className="text-sm">{prescriptiondata[0]?.primaryDiagnosis}</p>
         </div>
       )}
 
       {/* Medications */}
-      {prescriptionForm.medication.length > 0 && (
-        <div className="mb-6">
-          <h3 className="font-semibold text-lg mb-3 text-blue-600">
-            Medications
-          </h3>
+      {prescriptiondata[0]?.medication.length > 0 && (
+        <div className="mb-3">
+          <h3 className="font-semibold text-lg  text-blue-600">Medications</h3>
           <div className="space-y-3">
-            {prescriptionForm.medication.map((medication, index) => (
+            {prescriptiondata[0]?.medication.map((medication, index) => (
               <div key={medication.id} className="border rounded p-3 text-sm">
                 <div className="font-medium">
-                  {medication.medecineName} - {medication.medecineDosage}
+                  • {medication.medecineName} - {medication.medecineDosage}
                 </div>
-                <div className="text-gray-600">
+                <div className="text-gray-600 space-y-3">
                   {medication.frequency} | {medication.duration} |{" "}
                   {medication.instructions}
                 </div>
@@ -416,18 +408,36 @@ export default function Prescription({
         </div>
       )}
 
-      {/* Additional sections */}
-      {prescriptionForm.restrictions && (
-        <div className="mb-6">
-          <h3 className="font-semibold text-lg mb-3 text-blue-600">
-            Restrictions
+      {/* Restriction */}
+      {prescriptiondata[0]?.restrictions && (
+        <div className="mb-3">
+          <h3 className="font-semibold text-lg text-blue-600">Restrictions</h3>
+          <p className="text-sm">{prescriptiondata[0]?.restrictions}</p>
+        </div>
+      )}
+
+      {/* Test and report*/}
+      {prescriptiondata[0]?.testandReport && (
+        <div className="mb-3">
+          <h3 className="font-semibold text-lg text-blue-600">Test & Report</h3>
+          <p className="text-sm font-medium">
+            {prescriptiondata[0]?.testandReport}
+          </p>
+        </div>
+      )}
+
+      {/* Additional Note */}
+      {prescriptiondata[0]?.additionalNote && (
+        <div className="mb-3">
+          <h3 className="font-semibold text-lg text-blue-600">
+            Additional Note
           </h3>
-          <p className="text-sm">{prescriptionForm.restrictions}</p>
+          <p className="text-sm">{prescriptiondata[0]?.additionalNote}</p>
         </div>
       )}
 
       {/* Digital Signature */}
-      <div className="mt-8 pt-4 border-t">
+      <div className="mt-8 pt-2 border-t">
         <div className="flex justify-between items-end">
           <div>
             <p className="text-sm text-gray-600">Doctor's Signature</p>
@@ -439,8 +449,14 @@ export default function Prescription({
             </p>
           </div>
           <div className="text-right text-xs text-gray-500">
-            <p>This is a computer-generated prescription</p>
-            <p>Valid for 30 days from date of issue</p>
+            {prescriptiondata[0]?.followUpDate && (
+              <div className="mb-3">
+                <h3 className="font-semibold text-lg text-blue-600">
+                  Follow up date
+                </h3>
+                <p className="text-sm">{prescriptiondata[0]?.followUpDate}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
