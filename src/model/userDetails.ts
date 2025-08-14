@@ -163,7 +163,7 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     prescription: {
       type: PrescriptionSchema,
-      default: [],
+      default: {},
     },
     createdAt: {
       type: Date,

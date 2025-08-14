@@ -319,6 +319,30 @@ export default function Doctors({
     }
   };
 
+  const getDoctorInitials = (doctorName: string) => {
+    if (!doctorName) return "DR";
+
+    // Remove DR/Dr prefix and clean the name
+    const cleanName = doctorName
+      .replace(/^(DR\.?|Dr\.?)\s*/i, "") // Remove DR/Dr at the beginning
+      .trim();
+
+    if (!cleanName) return "DR";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "DR";
+    }
+  };
+
   const handleBookNewAppointment = () => {
     if (onNavigate) {
       onNavigate("doctors");
@@ -332,12 +356,12 @@ export default function Doctors({
           <Avatar className="h-16 w-16">
             <AvatarImage src={doctor.image || "/placeholder.svg"} />
             <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold text-lg">
-              {doctor.avatar}
+              {getDoctorInitials(doctor.name)}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex-1">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1">
               <h3 className="text-xl font-semibold text-gray-900">
                 {doctor.name}
               </h3>
@@ -349,9 +373,16 @@ export default function Doctors({
                 </span>
               </div>
             </div>
-            <div>{doctor.gender || " "}</div>
+            <div>
+              <Badge
+                variant="outline"
+                className="bg-blue-50 text-blue-700 border-blue-200"
+              >
+                {doctor?.gender}
+              </Badge>
+            </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 mt-2">
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-blue-600" />
                 <span className="text-gray-700 font-medium">

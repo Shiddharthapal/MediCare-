@@ -56,9 +56,6 @@ const MedicationSchema = new mongoose.Schema({
   },
 });
 const PrescriptionSchema = new mongoose.Schema({
-  doctorpatinetId: {
-    type: String,
-  },
   vitalSign: {
     type: VitalSignSchema,
   },
@@ -88,6 +85,9 @@ const PrescriptionSchema = new mongoose.Schema({
 });
 const appointmentDataSchema = new mongoose.Schema(
   {
+    doctorpatinetId: {
+      type: String,
+    },
     doctorName: {
       type: String,
     },
@@ -168,7 +168,7 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     prescription: {
       type: PrescriptionSchema,
-      default: [],
+      default: {},
     },
     createdAt: {
       type: Date,

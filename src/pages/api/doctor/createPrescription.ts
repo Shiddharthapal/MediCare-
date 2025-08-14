@@ -13,7 +13,7 @@ export const POST: APIRoute = async ({ request }) => {
     console.log("🧞‍♂️  body --->", body);
 
     let { patientData, prescriptionForm } = body;
-    let { patientId, doctorId } = patientData;
+    let { doctorpatinetId, patientId, doctorId } = patientData;
     let {
       vitalSign,
       primaryDiagnosis,
@@ -40,6 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    let commonIdUser = userdetails?.appointments?.prescription?._id;
     const newPrescriptionPatient = {
       vitalSign,
       primaryDiagnosis,
@@ -51,10 +52,15 @@ export const POST: APIRoute = async ({ request }) => {
       createdAt: new Date(),
     };
     console.log("🧞‍♂️newPrescriptionPatient --->", newPrescriptionPatient);
-    const createUserPrescription = await userDetails.findByIdAndUpdate(
-      userdetails._id,
+    const createUserPrescription = await userDetails.findOneAndUpdate(
       {
-        $push: { "appointments.prescription": newPrescriptionPatient },
+        _id: userdetails._id,
+        "appointments.doctorpatinetId": doctorpatinetId,
+      },
+      {
+        $set: {
+          "appointments.$.prescription": newPrescriptionPatient,
+        },
       },
       {
         new: true,
@@ -88,16 +94,22 @@ export const POST: APIRoute = async ({ request }) => {
     };
     console.log("🧞‍♂️newPrescriptionDoctor --->", newPrescriptionDoctor);
 
-    const createDoctorPrescription = await doctorDetails.findByIdAndUpdate(
-      doctordetails._id,
+    const createDoctorPrescription = await doctorDetails.findOneAndUpdate(
       {
-        $push: { "appointments.prescription": newPrescriptionDoctor },
+        _id: doctordetails._id,
+        "appointments.doctorpatinetId": doctorpatinetId,
+      },
+      {
+        $set: {
+          "appointments.$.prescription": newPrescriptionDoctor,
+        },
       },
       {
         new: true,
         runValidators: true,
       }
     );
+    console.log("🧞‍♂️  createDoctorPrescription --->", createDoctorPrescription);
 
     return new Response(JSON.stringify({ createDoctorPrescription }), {
       status: 200,
@@ -106,7 +118,7 @@ export const POST: APIRoute = async ({ request }) => {
   } catch (error) {
     return new Response(
       JSON.stringify({
-        message: "Prescription not created.",
+        message: `Prescription not created. Error: ${error}`,
       }),
       {
         status: 400,

@@ -112,6 +112,7 @@ export const POST: APIRoute = async ({ request }) => {
         emergencyPhone,
         paymentMethod,
         specialRequests,
+        prescription: {},
         createdAt: new Date(),
       };
       console.log("newbookAppoinmentsDetails --->", newbookAppoinmentsDetails);
@@ -152,7 +153,7 @@ export const POST: APIRoute = async ({ request }) => {
         patientAge: userdetails?.age,
         patientAddress: userdetails?.address,
         patientBloodgroup: userdetails?.bloodGroup,
-        patientBithofday: userdetails?.birthofday,
+        patientBithofday: userdetails?.dateOfBirth,
         appointmentDate,
         appointmentTime,
         consultationType,
@@ -164,6 +165,7 @@ export const POST: APIRoute = async ({ request }) => {
         emergencyPhone,
         paymentMethod,
         specialRequests,
+        prescription: {},
         createdAt: new Date(),
       };
       console.log(

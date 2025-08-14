@@ -204,12 +204,12 @@ const groupTodayToFutureAppointments = (
   const todayDate = getTodayDate();
 
   // Filter appointments from today onwards
-  const todayToFutureAppointments = appointments.filter(
+  const todayToFutureAppointments = appointments?.filter(
     (appointment) => appointment.appointmentDate >= todayDate
   );
 
   const grouped: GroupedAppointments = {};
-  todayToFutureAppointments.forEach((appointment) => {
+  todayToFutureAppointments?.forEach((appointment) => {
     const date = appointment.appointmentDate;
     const status = getAppointmentStatus(date);
     const dayLabel = formatDate(date);
@@ -629,10 +629,10 @@ export default function Dashboard() {
               {/* Header */}
               <div className="space-y-1">
                 <h1 className="text-2xl font-semibold text-gray-900">
-                  Welcome {patientData.name},
+                  Welcome {patientData?.name},
                 </h1>
                 <p className="text-gray-600">
-                  {patientData.appoinments?.length > 0 ? (
+                  {patientData?.appoinments?.length > 0 ? (
                     " "
                   ) : (
                     <p>You have got no appointments for today</p>
