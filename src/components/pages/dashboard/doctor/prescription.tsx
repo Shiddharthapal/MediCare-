@@ -79,6 +79,7 @@ interface Prescription {
   primaryDiagnosis: string;
   testandReport: string;
   medication: Medication[];
+  symptoms: string;
   restrictions: string;
   followUpDate: string;
   additionalNote: string;
@@ -184,6 +185,7 @@ export default function Prescription({
     testandReport: "",
     medication: [mockMedication],
     restrictions: "",
+    symptoms: "",
     followUpDate: "",
     additionalNote: "",
     createdAt: new Date(),
@@ -213,7 +215,34 @@ export default function Prescription({
         })
         .filter(Boolean); // Remove null values
       //console.log("🧞‍♂️  data --->", data);
+      if (data && data.length > 0) {
+        const fetchedData = data[0]; // Assuming you want the first prescription
 
+        setPrescriptionForm((prevForm) => ({
+          ...prevForm, // Keep existing form data
+          // Only update fields that exist in fetchedData and match the interface
+          ...(fetchedData.vitalSign && {
+            vitalSign: { ...prevForm.vitalSign, ...fetchedData.vitalSign },
+          }),
+          ...(fetchedData.primaryDiagnosis && {
+            primaryDiagnosis: fetchedData.primaryDiagnosis,
+          }),
+          ...(fetchedData.testandReport && {
+            testandReport: fetchedData.testandReport,
+          }),
+          ...(fetchedData.medication && { medication: fetchedData.medication }),
+          ...(fetchedData.restrictions && {
+            restrictions: fetchedData.restrictions,
+          }),
+          ...(fetchedData.followUpDate && {
+            followUpDate: fetchedData.followUpDate,
+          }),
+          ...(fetchedData.additionalNote && {
+            additionalNote: fetchedData.additionalNote,
+          }),
+          ...(fetchedData.symptoms && { symptoms: fetchedData.symptoms }),
+        }));
+      }
       setPrescriptiondata(data);
       setIsSaved(true);
       setViewMode(true);
@@ -402,6 +431,15 @@ export default function Prescription({
         )}
       </div>
 
+      {/*Symptoms*/}
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Symptoms</h3>
+        {prescriptiondata[0]?.symptoms ? (
+          <p className="text-sm ">{prescriptiondata[0]?.symptoms}</p>
+        ) : (
+          <p className="text-sm text-gray-500 italic">No symptoms</p>
+        )}
+      </div>
       {/* Diagnosis */}
       <div className="mb-3">
         <h3 className="font-semibold text-lg text-blue-600">Diagnosis</h3>

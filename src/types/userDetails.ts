@@ -23,6 +23,7 @@ interface Medication {
 interface Prescription {
   vitalSign: VitalSign;
   primaryDiagnosis: string;
+  symptoms: string;
   testandReport: string;
   medication: Medication[];
   restrictions: string;

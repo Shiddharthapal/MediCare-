@@ -62,6 +62,9 @@ const PrescriptionSchema = new mongoose.Schema({
   primaryDiagnosis: {
     type: String,
   },
+  symptoms: {
+    type: String,
+  },
   testandReport: {
     type: String,
   },
