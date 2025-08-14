@@ -81,6 +81,9 @@ const PrescriptionSchema = new mongoose.Schema({
   additionalNote: {
     type: String,
   },
+  prescriptionId: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),

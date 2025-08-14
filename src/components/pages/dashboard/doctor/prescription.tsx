@@ -83,6 +83,7 @@ interface Prescription {
   restrictions: string;
   followUpDate: string;
   additionalNote: string;
+  prescriptionId: string;
   createdAt: Date;
 }
 
@@ -188,6 +189,7 @@ export default function Prescription({
     symptoms: "",
     followUpDate: "",
     additionalNote: "",
+    prescriptionId: "",
     createdAt: new Date(),
   });
   useEffect(() => {
@@ -293,7 +295,7 @@ export default function Prescription({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ patientData, prescriptionForm }),
+        body: JSON.stringify({ patientData, prescriptionData }),
       });
       if (!response.ok) {
         throw new Error(`Failed to save prescription: ${response.statusText}`);
@@ -331,7 +333,10 @@ export default function Prescription({
               </span>
             </div>
             <p className="text-sm text-gray-600">
-              Prescription ID: RX-{Date.now()}
+              Prescription ID:{" "}
+              {prescriptiondata[0]?.prescriptionId
+                ? prescriptiondata[0]?.prescriptionId
+                : "RX-" + Date.now()}
             </p>
             <p className="text-sm text-gray-600">
               Date: {new Date().toLocaleDateString()}
@@ -342,6 +347,7 @@ export default function Prescription({
             <p className="text-sm">{patientData.doctorSpecialist}</p>
             <p className="text-sm">{patientData.hospital}</p>
             <p className="text-sm">{patientData.doctorContact}</p>
+            <p className="text-sm">{patientData.doctorEmail}</p>
           </div>
         </div>
       </div>
@@ -370,6 +376,9 @@ export default function Prescription({
             </div>
             <div>
               <strong>Address:</strong> {patientData.patientAddress}
+            </div>
+            <div>
+              <strong>Email:</strong> {patientData.patientEmail}
             </div>
           </div>
         ) : (

@@ -10,9 +10,9 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     let body = await request.json();
-    //console.log("🧞‍♂️  body --->", body);
+    console.log("🧞‍♂️  body --->", body);
 
-    let { patientData, prescriptionForm } = body;
+    let { patientData, prescriptionData } = body;
     let { doctorpatinetId, patientId, doctorId } = patientData;
     let {
       vitalSign,
@@ -23,7 +23,8 @@ export const POST: APIRoute = async ({ request }) => {
       restrictions,
       followUpDate,
       additionalNote,
-    } = prescriptionForm;
+      prescriptionId,
+    } = prescriptionData;
     //console.log("🧞‍♂️prescriptionForm --->", prescriptionForm);
     await connect();
 
@@ -50,6 +51,7 @@ export const POST: APIRoute = async ({ request }) => {
       restrictions,
       followUpDate,
       additionalNote,
+      prescriptionId,
       createdAt: new Date(),
     };
     //console.log("🧞‍♂️newPrescriptionPatient --->", newPrescriptionPatient);
@@ -92,6 +94,7 @@ export const POST: APIRoute = async ({ request }) => {
       restrictions,
       followUpDate,
       additionalNote,
+      prescriptionId,
       createdAt: new Date(),
     };
     //console.log("🧞‍♂️newPrescriptionDoctor --->", newPrescriptionDoctor);

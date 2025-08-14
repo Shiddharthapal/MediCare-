@@ -29,6 +29,7 @@ interface Prescription {
   restrictions: string;
   followUpDate: string;
   additionalNote: string;
+  prescriptionId: string;
   createdAt: Date;
 }
 interface AppointmentData {
