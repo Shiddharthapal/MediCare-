@@ -322,119 +322,160 @@ export default function Prescription({
         <h3 className="font-semibold text-lg  text-blue-600">
           Patient Information
         </h3>
-        <div className="grid grid-cols-2 gap-x-4 text-sm ">
-          <div>
-            <strong>Name:</strong> {patientData.patientName}
+        {patientData ? (
+          <div className="grid grid-cols-2 gap-x-4 text-sm ">
+            <div>
+              <strong>Name:</strong> {patientData.patientName}
+            </div>
+            <div>
+              <strong>Age:</strong> {patientData.patientAge}
+            </div>
+            <div>
+              <strong>Gender:</strong> {patientData.patientGender}
+            </div>
+            <div>
+              <strong>Blood Group:</strong> {patientData.patientBloodgroup}
+            </div>
+            <div>
+              <strong>Phone:</strong> {patientData.patientPhone}
+            </div>
+            <div>
+              <strong>Address:</strong> {patientData.patientAddress}
+            </div>
           </div>
-          <div>
-            <strong>Age:</strong> {patientData.patientAge}
-          </div>
-          <div>
-            <strong>Gender:</strong> {patientData.patientGender}
-          </div>
-          <div>
-            <strong>Blood Group:</strong> {patientData.patientBloodgroup}
-          </div>
-          <div>
-            <strong>Phone:</strong> {patientData.patientPhone}
-          </div>
-          <div>
-            <strong>Address:</strong> {patientData.patientAddress}
-          </div>
-        </div>
+        ) : (
+          <p className="text-sm text-gray-500 italic">
+            No Patient Data Available
+          </p>
+        )}
       </div>
 
       {/* Vital Signs */}
 
       <div className="mb-3">
         <h3 className="font-semibold text-lg  text-blue-600">Vital Signs</h3>
-        <div className="grid grid-cols-3 gap-x-4 text-sm">
-          {prescriptiondata[0]?.vitalSign?.bloodPressure && (
+        {prescriptiondata[0]?.vitalSign ? (
+          <div className="grid grid-cols-3 gap-x-4 text-sm">
+            {prescriptiondata[0]?.vitalSign?.bloodPressure ? (
+              <div>
+                <strong>Blood Pressure:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.bloodPressure}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Blood Presure</p>
+            )}
+            {prescriptiondata[0]?.vitalSign?.heartRate ? (
+              <div>
+                <strong>Heart Rate:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.heartRate}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Heart Rate</p>
+            )}
+            {prescriptiondata[0]?.vitalSign?.temperature ? (
+              <div>
+                <strong>Temperature:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.temperature}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Temperature</p>
+            )}
+            {prescriptiondata[0]?.vitalSign?.weight ? (
+              <div>
+                <strong>Weight:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.weight}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Weight</p>
+            )}
+            {prescriptiondata[0]?.vitalSign?.height ? (
+              <div>
+                <strong>Height:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.height}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Height</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 italic">Vital Signs</p>
+        )}
+      </div>
+
+      {/* Diagnosis */}
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Diagnosis</h3>
+        {prescriptiondata[0]?.primaryDiagnosis ? (
+          <p className="text-sm ">{prescriptiondata[0]?.primaryDiagnosis}</p>
+        ) : (
+          <p className="text-sm text-gray-500 italic">No Diagnosis available</p>
+        )}
+      </div>
+
+      {/* Medications */}
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg  text-blue-600">Medications</h3>
+        <div className="space-y-3">
+          {prescriptiondata[0]?.medication ? (
             <div>
-              <strong>Blood Pressure:</strong>{" "}
-              {prescriptiondata[0]?.vitalSign?.bloodPressure}
+              {prescriptiondata[0]?.medication.map((medication, index) => (
+                <div key={medication.id} className="border rounded p-3 text-sm">
+                  <div className="font-medium">
+                    • {medication.medecineName} - {medication.medecineDosage}
+                  </div>
+                  <div className="text-gray-600 space-y-3">
+                    {medication.frequency} | {medication.duration} |{" "}
+                    {medication.instructions}
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-          {prescriptiondata[0]?.vitalSign?.heartRate && (
-            <div>
-              <strong>Heart Rate:</strong>{" "}
-              {prescriptiondata[0]?.vitalSign?.heartRate}
-            </div>
-          )}
-          {prescriptiondata[0]?.vitalSign?.temperature && (
-            <div>
-              <strong>Temperature:</strong>{" "}
-              {prescriptiondata[0]?.vitalSign?.temperature}
-            </div>
-          )}
-          {prescriptiondata[0]?.vitalSign?.weight && (
-            <div>
-              <strong>Weight:</strong> {prescriptiondata[0]?.vitalSign?.weight}
-            </div>
-          )}
-          {prescriptiondata[0]?.vitalSign?.height && (
-            <div>
-              <strong>Height:</strong> {prescriptiondata[0]?.vitalSign?.height}
-            </div>
+          ) : (
+            <p className="text-sm text-gray-500 italic">
+              No Medications available
+            </p>
           )}
         </div>
       </div>
 
-      {/* Diagnosis */}
-      {prescriptiondata[0]?.primaryDiagnosis && (
-        <div className="mb-3">
-          <h3 className="font-semibold text-lg text-blue-600">Diagnosis</h3>
-          <p className="text-sm">{prescriptiondata[0]?.primaryDiagnosis}</p>
-        </div>
-      )}
-
-      {/* Medications */}
-      {prescriptiondata[0]?.medication.length > 0 && (
-        <div className="mb-3">
-          <h3 className="font-semibold text-lg  text-blue-600">Medications</h3>
-          <div className="space-y-3">
-            {prescriptiondata[0]?.medication.map((medication, index) => (
-              <div key={medication.id} className="border rounded p-3 text-sm">
-                <div className="font-medium">
-                  • {medication.medecineName} - {medication.medecineDosage}
-                </div>
-                <div className="text-gray-600 space-y-3">
-                  {medication.frequency} | {medication.duration} |{" "}
-                  {medication.instructions}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Restriction */}
-      {prescriptiondata[0]?.restrictions && (
-        <div className="mb-3">
-          <h3 className="font-semibold text-lg text-blue-600">Restrictions</h3>
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Restrictions</h3>
+        {prescriptiondata[0]?.restrictions ? (
           <p className="text-sm">{prescriptiondata[0]?.restrictions}</p>
-        </div>
-      )}
+        ) : (
+          <p className="text-sm text-gray-500 italic">
+            No Restrictions available
+          </p>
+        )}
+      </div>
 
       {/* Test and report*/}
-      {prescriptiondata[0]?.testandReport && (
-        <div className="mb-3">
-          <h3 className="font-semibold text-lg text-blue-600">Test & Report</h3>
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Test & Report</h3>
+        {prescriptiondata[0]?.testandReport ? (
           <p className="text-sm font-medium">
             {prescriptiondata[0]?.testandReport}
           </p>
-        </div>
-      )}
+        ) : (
+          <p className="text-sm text-gray-500 italic">
+            No test or report data available
+          </p>
+        )}
+      </div>
 
       {/* Additional Note */}
-      {prescriptiondata[0]?.additionalNote && (
-        <div className="mb-3">
-          <h3 className="font-semibold text-lg text-blue-600">
-            Additional Note
-          </h3>
+
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Additional Note</h3>
+        {prescriptiondata[0]?.additionalNote ? (
           <p className="text-sm">{prescriptiondata[0]?.additionalNote}</p>
-        </div>
-      )}
+        ) : (
+          <p className="text-sm text-gray-500 italic">
+            No Additional Note available
+          </p>
+        )}
+      </div>
 
       {/* Digital Signature */}
       <div className="mt-8 pt-2 border-t">
@@ -506,6 +547,12 @@ export default function Prescription({
   if (viewMode && isSaved) {
     return <PrescriptionView />;
   }
+
+  const handleShowPrescription = () => {
+    setViewMode(true);
+    setIsSaved(true);
+    <PrescriptionView />;
+  };
 
   return (
     <div className="min-h-screen overflow-auto bg-gray-50">
