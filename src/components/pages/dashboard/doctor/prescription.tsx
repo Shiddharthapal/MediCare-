@@ -15,6 +15,7 @@ import {
 
 interface PrescriptionProps {
   patientData: {
+    doctorpatinetId: string;
     doctorId: string;
     doctorName: string;
     doctorSpecialist: string;
@@ -42,6 +43,7 @@ interface PrescriptionProps {
     doctorContact: string;
     paymentMethod: string;
     specialRequests: string;
+    prescription: string;
     createdAt: Date;
   };
   onClose: () => void;
@@ -71,6 +73,16 @@ interface Medication {
   route?: string[];
   startDate?: Date;
   endDate?: Date;
+}
+interface Prescription {
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  createdAt: Date;
 }
 
 export interface Pescriptiondata {
@@ -166,11 +178,46 @@ export default function Prescription({
     useState<Pescriptiondata>(mockPescriptiondata);
   const [isSaved, setIsSaved] = useState(!!savedPrescription);
   const [viewMode, setViewMode] = useState(!!savedPrescription && !isEditMode);
-
+  const [prescriptiondata, setPrescriptiondata] = useState<Prescription>({
+    vitalSign: mockVitalsign,
+    primaryDiagnosis: "",
+    testandReport: "",
+    medication: [mockMedication],
+    restrictions: "",
+    followUpDate: "",
+    additionalNote: "",
+    createdAt: new Date(),
+  });
   useEffect(() => {
     if (savedPrescription) {
       setPrescriptionForm(savedPrescription);
     }
+    const fetchPrescription = async () => {
+      let response = await fetch(`/api/doctor/${patientData.doctorId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("User not found");
+      }
+      let responsedata = await response.json();
+      // console.log("🧞‍♂️  responsedata --->", responsedata);
+      let data = responsedata.doctordetails.appointments
+        .map((appointment: any) => {
+          if (appointment.doctorpatinetId === patientData.doctorpatinetId) {
+            return appointment.prescription; // Return only the prescription
+          }
+          return null; // Return null for non-matching
+        })
+        .filter(Boolean); // Remove null values
+      setPrescriptiondata(data);
+      setIsSaved(true);
+      setViewMode(true);
+      <PrescriptionView />;
+    };
+    fetchPrescription();
   }, [savedPrescription]);
 
   // medications: [
@@ -226,6 +273,7 @@ export default function Prescription({
 
       setIsSaved(true);
       setViewMode(true);
+      <PrescriptionView />;
       onClose();
     } catch (error) {
       console.error("Error saving prescription", error);
