@@ -550,7 +550,7 @@ export default function Prescription({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-between mt-8 pt-4 border-t">
+      <div className="flex justify-between mt-8 pt-4 print:hidden border-t">
         <Button variant="outline" onClick={onClose}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Dashboard
