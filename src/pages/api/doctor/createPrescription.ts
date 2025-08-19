@@ -41,7 +41,8 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
-
+    userdetails.appointments.status = "completed";
+    userdetails.save();
     const newPrescriptionPatient = {
       vitalSign,
       primaryDiagnosis,
@@ -85,6 +86,9 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
+    doctordetails.appointments.status = "completed";
+    doctordetails.save();
+
     const newPrescriptionDoctor = {
       vitalSign,
       primaryDiagnosis,
