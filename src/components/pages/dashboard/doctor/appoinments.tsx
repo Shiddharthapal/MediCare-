@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Plus,
   Filter,
+  Eye,
   Download,
   Video,
   FileEdit,
@@ -867,7 +868,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             </div>
           </div>
           <div className="flex flex-col gap-2 ml-4">
-            {(status === "pending" || "confirmed") && (
+            {status !== "completed" ? (
               <div className="flex flex-col gap-1">
                 <Button
                   size="sm"
@@ -893,14 +894,29 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                     Create
                   </Button>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-xs bg-transparent"
-                  onClick={() => handleCancelAppointment(appointment)}
-                >
-                  Cancel
-                </Button>
+                {status === "pending" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs bg-transparent"
+                    onClick={() => handleCancelAppointment(appointment)}
+                  >
+                    Cancel
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <div className="">
+                  <Button
+                    size="sm"
+                    className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
+                    onClick={() => handleCreatePrescription(appointment)}
+                  >
+                    <Eye className="h-3 w-3 mr-1" />
+                    See Prescription
+                  </Button>
+                </div>
               </div>
             )}
           </div>
