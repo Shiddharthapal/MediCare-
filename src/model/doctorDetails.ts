@@ -140,6 +140,9 @@ const appointmentDataSchema = new mongoose.Schema(
       type: String,
       required: true, // Fixed: was 'require'
     },
+    status: {
+      type: String,
+    },
     consultationType: {
       type: String,
       required: true, // Fixed: was 'require'

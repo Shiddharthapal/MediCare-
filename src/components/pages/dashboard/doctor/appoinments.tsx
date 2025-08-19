@@ -38,6 +38,7 @@ interface AppointmentData {
   patientGender: string;
   appointmentDate: string;
   appointmentTime: string;
+  status: string;
   consultationType: string;
   consultedType: string;
   reasonForVisit: string;
@@ -84,6 +85,7 @@ const mockAppointmentData: AppointmentData = {
   patientGender: "",
   appointmentDate: "",
   appointmentTime: "",
+  status: "",
   consultationType: "",
   consultedType: "",
   reasonForVisit: "",
@@ -438,113 +440,6 @@ const appointmentsData = {
   ],
 };
 
-const appointmentRequests = [
-  {
-    id: 1,
-    patient: {
-      name: "Sarah Wilson",
-      avatar: "SW",
-      phone: "(555) 234-5678",
-      email: "sarah.wilson@email.com",
-      age: 31,
-      gender: "Female",
-    },
-    requestedDate: "December 12, 2024",
-    requestedTime: "10:30 AM",
-    alternativeTime: "2:00 PM",
-    duration: "30 min",
-    type: "General Consultation",
-    reason: "Persistent headaches and fatigue for the past 2 weeks",
-    urgency: "Medium",
-    requestDate: "December 8, 2024",
-    status: "pending",
-    notes: "Patient reports difficulty sleeping and increased stress levels",
-  },
-  {
-    id: 2,
-    patient: {
-      name: "Michael Brown",
-      avatar: "MB",
-      phone: "(555) 345-6789",
-      email: "michael.brown@email.com",
-      age: 45,
-      gender: "Male",
-    },
-    requestedDate: "December 13, 2024",
-    requestedTime: "9:15 AM",
-    alternativeTime: "11:00 AM",
-    duration: "45 min",
-    type: "Follow-up Consultation",
-    reason: "Blood pressure medication review and adjustment",
-    urgency: "High",
-    requestDate: "December 7, 2024",
-    status: "pending",
-    notes: "Patient experiencing side effects from current medication",
-  },
-  {
-    id: 3,
-    patient: {
-      name: "Emily Davis",
-      avatar: "ED",
-      phone: "(555) 456-7890",
-      email: "emily.davis@email.com",
-      age: 28,
-      gender: "Female",
-    },
-    requestedDate: "December 14, 2024",
-    requestedTime: "3:30 PM",
-    alternativeTime: "4:15 PM",
-    duration: "30 min",
-    type: "Routine Checkup",
-    reason: "Annual physical examination and health screening",
-    urgency: "Low",
-    requestDate: "December 6, 2024",
-    status: "pending",
-    notes: "Patient is due for annual wellness visit",
-  },
-  {
-    id: 4,
-    patient: {
-      name: "Robert Johnson",
-      avatar: "RJ",
-      phone: "(555) 567-8901",
-      email: "robert.johnson@email.com",
-      age: 52,
-      gender: "Male",
-    },
-    requestedDate: "December 15, 2024",
-    requestedTime: "1:45 PM",
-    alternativeTime: "3:00 PM",
-    duration: "30 min",
-    type: "Diabetes Management",
-    reason: "Quarterly diabetes check and blood sugar monitoring",
-    urgency: "Medium",
-    requestDate: "December 5, 2024",
-    status: "pending",
-    notes: "Patient reports fluctuating blood sugar levels",
-  },
-  {
-    id: 5,
-    patient: {
-      name: "Lisa Anderson",
-      avatar: "LA",
-      phone: "(555) 678-9012",
-      email: "lisa.anderson@email.com",
-      age: 38,
-      gender: "Female",
-    },
-    requestedDate: "December 16, 2024",
-    requestedTime: "11:30 AM",
-    alternativeTime: "2:30 PM",
-    duration: "45 min",
-    type: "Specialist Consultation",
-    reason: "Chronic back pain evaluation and treatment options",
-    urgency: "High",
-    requestDate: "December 4, 2024",
-    status: "pending",
-    notes: "Patient unable to perform daily activities due to pain",
-  },
-];
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const today = new Date();
@@ -684,7 +579,6 @@ interface PatientsPageProps {
 export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
-  const [requests, setRequests] = useState(appointmentRequests);
   const [appointmentData, setAppointmentData] =
     useState<DoctorDetails>(mockDoctorDetails);
   const [showPrescription, setShowPrescription] = useState(false);
@@ -790,15 +684,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     alert(`Appointment request accepted and confirmation sent to patient!`);
   };
 
-  const handleRejectRequest = (requestId: number) => {
-    setRequests((prevRequests) =>
-      prevRequests.map((request) =>
-        request.id === requestId ? { ...request, status: "rejected" } : request
-      )
-    );
-    alert(`Appointment request rejected and notification sent to patient.`);
-  };
-
   const getUrgencyColor = (urgency: string) => {
     switch (urgency.toLowerCase()) {
       case "high":
@@ -820,6 +705,40 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const handleClosePrescription = () => {
     setShowPrescription(false);
     setSelectedPatient(null);
+  };
+
+  const handleCancelAppointment = async (appointment: any) => {
+    let id = doctor?._id;
+    try {
+      const response = await fetch("/api/doctor/cancelAppointment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId: appointment._id,
+          doctorId: id,
+          patientId: appointment.patientId,
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the appointment data
+        const fetchData = async () => {
+          const response = await fetch(`/api/doctor/${id}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const responsedata = await response.json();
+          setAppointmentData(responsedata.doctordetails);
+        };
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+    }
   };
   const getPatientInitials = (patientName: string) => {
     if (!patientName) return "AB";
@@ -978,6 +897,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   size="sm"
                   variant="outline"
                   className="text-xs bg-transparent"
+                  onClick={() => handleCancelAppointment(appointment)}
                 >
                   Cancel
                 </Button>
@@ -1116,14 +1036,16 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                           return null;
                         }
 
-                        return (
-                          <AppointmentCard
-                            status="confirmed"
-                            key={appointment._id}
-                            appointment={appointment}
-                            showDate={true}
-                          />
-                        );
+                        if (appointment.status !== "cancelled") {
+                          return (
+                            <AppointmentCard
+                              status="confirmed"
+                              key={appointment._id}
+                              appointment={appointment}
+                              showDate={true}
+                            />
+                          );
+                        }
                       })
                   )
                 ) : (
@@ -1417,15 +1339,16 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                               );
                               return null;
                             }
-
-                            return (
-                              <AppointmentCard
-                                status="pending"
-                                key={appointment._id}
-                                appointment={appointment}
-                                showDate={true}
-                              />
-                            );
+                            if (appointment.status !== "cancelled") {
+                              return (
+                                <AppointmentCard
+                                  status="pending"
+                                  key={appointment._id}
+                                  appointment={appointment}
+                                  showDate={true}
+                                />
+                              );
+                            }
                           })
                         ) : (
                           <div className="text-gray-500 text-center py-4">
@@ -1479,15 +1402,17 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                           return null;
                         }
 
-                        return (
-                          <AppointmentCard
-                            status="completed"
-                            key={appointment._id}
-                            appointment={appointment}
-                            showDate={true}
-                            isPrevious={true}
-                          />
-                        );
+                        if (appointment.status !== "cancelled") {
+                          return (
+                            <AppointmentCard
+                              status="completed"
+                              key={appointment._id}
+                              appointment={appointment}
+                              showDate={true}
+                              isPrevious={true}
+                            />
+                          );
+                        }
                       })
                   )
                 ) : (

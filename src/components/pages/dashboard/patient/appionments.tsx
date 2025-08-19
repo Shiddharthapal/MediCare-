@@ -633,6 +633,47 @@ export default function Appointments({
     </Card>
   );
 
+  const CancelledAppointmentCard = ({ appointment }: { appointment: any }) => (
+    <Card className="mb-4 border-l-4 border-red-500">
+      <CardContent className="p-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src="/placeholder.svg?height=48&width=48" />
+              <AvatarFallback className="bg-red-100 text-red-600 font-semibold">
+                {getDoctorInitials(appointment.doctorName)}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-gray-900">
+                  {appointment.reasonForVisit}
+                </h3>
+                <Badge className={getStatusColor("cancelled")}>Cancelled by Doctor</Badge>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-1">
+                {appointment.doctorName} • {appointment.doctorSpecialist}
+              </p>
+
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {appointment.appointmentTime}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {appointment.appointmentDate}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -768,14 +809,23 @@ export default function Appointments({
                         return null;
                       }
 
-                      return (
-                        <AppointmentCard
-                          status="pending"
-                          key={appointment._id}
-                          appointment={appointment}
-                          showActions={true}
-                        />
-                      );
+                      if (appointment.status === 'cancelled') {
+                        return (
+                          <CancelledAppointmentCard
+                            key={appointment._id}
+                            appointment={appointment}
+                          />
+                        );
+                      } else {
+                        return (
+                          <AppointmentCard
+                            status="pending"
+                            key={appointment._id}
+                            appointment={appointment}
+                            showActions={true}
+                          />
+                        );
+                      }
                     })
                   ) : (
                     <div className="text-gray-500 text-center py-4">
@@ -827,14 +877,23 @@ export default function Appointments({
                       return null;
                     }
 
-                    return (
-                      <AppointmentCard
-                        status="confirmed"
-                        key={appointment._id}
-                        appointment={appointment}
-                        showActions={true}
-                      />
-                    );
+                    if (appointment.status === 'cancelled') {
+                      return (
+                        <CancelledAppointmentCard
+                          key={appointment._id}
+                          appointment={appointment}
+                        />
+                      );
+                    } else {
+                      return (
+                        <AppointmentCard
+                          status="confirmed"
+                          key={appointment._id}
+                          appointment={appointment}
+                          showActions={true}
+                        />
+                      );
+                    }
                   })
               )
             ) : (
@@ -881,14 +940,25 @@ export default function Appointments({
                     </Badge>
                   </div>
 
-                  {appointments.map((appointment: any) => (
-                    <AppointmentCard
-                      status="completed"
-                      key={appointment.id}
-                      appointment={appointment}
-                      showActions={false}
-                    />
-                  ))}
+                  {appointments.map((appointment: any) => {
+                    if (appointment.status === "cancelled") {
+                      return (
+                        <CancelledAppointmentCard
+                          key={appointment.id}
+                          appointment={appointment}
+                        />
+                      );
+                    } else {
+                      return (
+                        <AppointmentCard
+                          status="completed"
+                          key={appointment.id}
+                          appointment={appointment}
+                          showActions={false}
+                        />
+                      );
+                    }
+                  })}
                 </div>
               ))
           ) : (

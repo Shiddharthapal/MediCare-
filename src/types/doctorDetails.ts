@@ -48,6 +48,7 @@ interface AppointmentData {
   patientBithofday: Date;
   appointmentDate: string;
   appointmentTime: string;
+  status: string;
   consultationType: string;
   consultedType: string;
   reasonForVisit: string;

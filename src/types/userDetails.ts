@@ -45,6 +45,7 @@ interface AppointmentData {
   patientPhone: string;
   appointmentDate: string;
   appointmentTime: string;
+  status: string;
   consultationType: string;
   consultedType: string;
   reasonForVisit: string;
