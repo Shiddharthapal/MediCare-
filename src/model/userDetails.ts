@@ -137,6 +137,7 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     status: {
       type: String,
+      default: "pending",
     },
     consultationType: {
       type: String,

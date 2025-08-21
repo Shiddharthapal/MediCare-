@@ -22,6 +22,15 @@ import {
   ClipboardList,
   ImageIcon,
   Clock,
+  Heart,
+  Airplay,
+  Brain,
+  User,
+  AlertCircle,
+  RefreshCw,
+  HelpCircle,
+  Activity,
+  Shield,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -426,9 +435,14 @@ const patients = [
     ],
   },
 ];
+interface ReasonForVisit {
+  reason: string;
+  createdAt: Date;
+}
 
 interface GroupedPatientData {
   [patientId: string]: {
+    id: string;
     patientInfo: {
       patientId: string;
       patientName: string;
@@ -439,14 +453,58 @@ interface GroupedPatientData {
       patientBithofday: Date;
       patientAge: string;
       patientBloodgroup: string;
+      symptoms: string;
       emergencyContact: string;
     };
     appointments: AppointmentData[];
+    reasonForVisit: ReasonForVisit[];
     totalAppointments: number;
     latestAppointment: AppointmentData;
     upcomingAppointments: AppointmentData[];
   };
 }
+interface PatientData {
+  id: string;
+  patientInfo: {
+    patientId: string;
+    patientName: string;
+    patientEmail: string;
+    patientPhone: string;
+    patientGender: string;
+    patientAddress: string;
+    patientBithofday: Date;
+    patientAge: string;
+    patientBloodgroup: string;
+    symptoms: string;
+    emergencyContact: string;
+  };
+  appointments: AppointmentData[];
+  reasonForVisit: ReasonForVisit[];
+  totalAppointments: number;
+  latestAppointment: AppointmentData;
+  upcomingAppointments: AppointmentData[];
+}
+const mockPatientData: PatientData = {
+  id: "",
+  patientInfo: {
+    patientId: "",
+    patientName: "",
+    patientEmail: "",
+    patientPhone: "",
+    patientGender: "",
+    patientAddress: "",
+    patientBithofday: new Date("08-08-1900"),
+    patientAge: "",
+    patientBloodgroup: "",
+    symptoms: "",
+    emergencyContact: "",
+  },
+  appointments: [],
+  reasonForVisit: [],
+  totalAppointments: 0,
+  latestAppointment: mockAppointmentData,
+  upcomingAppointments: [],
+};
 
 interface CategorizedAppointments {
   today: AppointmentData[];
@@ -538,7 +596,8 @@ interface PatientsPageProps {
 }
 
 export default function PatientsPage({ onNavigate }: PatientsPageProps) {
-  const [selectedPatient, setSelectedPatient] = useState(patients[0]);
+  const [selectedPatient, setSelectedPatient] =
+    useState<PatientData>(mockPatientData);
   const [showPatientList, setShowPatientList] = useState(true);
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
   const [appointmentData, setAppointmentData] =
@@ -548,6 +607,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   let doctor = useAppSelector((state) => state.auth.user);
 
   const groupAppointmentsByPatientId = (responseData: DoctorDetails) => {
+    console.log("🧞‍♂️  responseData2 --->", responseData);
     if (!responseData.appointments || responseData.appointments.length === 0)
       return;
 
@@ -555,10 +615,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
     responseData.appointments.forEach((appointment: AppointmentData) => {
       const { patientId } = appointment;
+      //console.log("🧞‍♂️  appointment-group  --->", appointment);
 
       if (!groupedData[patientId]) {
         // Create new patient entry with first appointment
         groupedData[patientId] = {
+          id: patientId,
           patientInfo: {
             patientId: appointment.patientId,
             patientName: appointment.patientName,
@@ -572,8 +634,15 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               new Date().getFullYear() -
               new Date(appointment.patientBithofday).getFullYear()
             ).toString(),
+            symptoms: appointment.symptoms,
             emergencyContact: appointment.emergencyContact,
           },
+          reasonForVisit: [
+            {
+              reason: appointment.reasonForVisit,
+              createdAt: appointment.createdAt,
+            },
+          ],
           appointments: [appointment],
           totalAppointments: 1,
           latestAppointment: appointment,
@@ -638,8 +707,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       });
 
       let responseData = await response.json();
-      console.log("🧞‍♂️  responseData --->", responseData);
-      groupAppointmentsByPatientId(responseData);
+      console.log("🧞‍♂️  responseData --->", responseData.doctordetails);
+      groupAppointmentsByPatientId(responseData.doctordetails);
     };
     fetchData();
   }, [doctor]);
@@ -656,12 +725,117 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity.toLowerCase()) {
+  const handleCancelAppointment = async (appointment: any) => {
+    let id = doctor?._id;
+    try {
+      const response = await fetch("/api/doctor/cancelAppointment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId: appointment._id,
+          doctorId: id,
+          patientId: appointment.patientId,
+        }),
+      });
+
+      if (response.ok) {
+        //update the selected state
+        setSelectedPatient((prev) => ({
+          ...prev,
+          upcomingAppointments: prev.upcomingAppointments.filter(
+            (apt) => apt._id !== appointment._id
+          ),
+        }));
+      }
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+    }
+  };
+
+  const getSeverityLevel = (reason: string): string => {
+    switch (reason.toLowerCase()) {
+      // CRITICAL/HIGH SEVERITY
+      case "chest pain evaluation":
+      case "heart palpitations":
+      case "shortness of breath":
+      case "breathing difficulties":
+      case "severe abdominal pain":
+      case "severe headache/migraine":
+      case "severe allergic reactions":
+        return "high";
+
+      // MEDIUM-HIGH SEVERITY
+      case "high blood pressure management":
+      case "asthma management":
+      case "diabetes management":
+      case "anxiety symptoms":
+      case "depression screening":
+      case "back pain":
+      case "joint pain":
+      case "muscle strain":
+      case "sports injury":
+        return "medium-high";
+
+      // MEDIUM SEVERITY
+      case "cough and cold symptoms":
+      case "stomach pain/abdominal pain":
+      case "nausea and vomiting":
+      case "diarrhea":
+      case "constipation":
+      case "fever":
+      case "fatigue/weakness":
+      case "skin rash":
+      case "headache/migraine":
+      case "sinus infection":
+      case "allergic reactions":
+      case "menstrual irregularities":
+        return "medium";
+
+      // LOW-MEDIUM SEVERITY
+      case "routine heart checkup":
+      case "medication review":
+      case "treatment follow-up":
+      case "post-surgery follow-up":
+      case "lab result discussion":
+      case "arthritis management":
+      case "acid reflux/heartburn":
+      case "weight loss/gain":
+      case "stress management":
+      case "mental health consultation":
+      case "pregnancy consultation":
+        return "low-medium";
+
+      // LOW SEVERITY
+      case "annual physical examination":
+      case "routine checkup":
+      case "health screening":
+      case "vaccination/immunization":
+      case "well-child visit":
+      case "sports physical":
+      case "annual gynecological exam":
+      case "pap smear":
+      case "birth control consultation":
+        return "low";
+
+      default:
+        return "medium";
+    }
+  };
+
+  const getSeverityColor = (reason: string) => {
+    const severity = getSeverityLevel(reason);
+
+    switch (severity) {
       case "high":
         return "bg-red-100 text-red-800 border-red-200";
+      case "medium-high":
+        return "bg-orange-100 text-orange-800 border-orange-200";
       case "medium":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "low-medium":
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "low":
         return "bg-green-100 text-green-800 border-green-200";
       default:
@@ -669,20 +843,86 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
-      case "treated":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case "completed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+  const getStatusIcon = (reason: string) => {
+    switch (reason.toLowerCase()) {
+      // Preventive Care
+      case "annual physical examination":
+      case "routine checkup":
+      case "health screening":
+      case "vaccination/immunization":
+      case "well-child visit":
+      case "sports physical":
+        return <Shield className="h-4 w-4 text-blue-500" />;
+
+      // Cardiovascular
+      case "routine heart checkup":
+      case "chest pain evaluation":
+      case "high blood pressure management":
+      case "heart palpitations":
+      case "shortness of breath":
+        return <Heart className="h-4 w-4 text-red-500" />;
+
+      // Respiratory
+      case "cough and cold symptoms":
+      case "breathing difficulties":
+      case "asthma management":
+      case "allergic reactions":
+      case "sinus infection":
+        return <Airplay className="h-4 w-4 text-cyan-500" />;
+
+      // Digestive
+      case "stomach pain/abdominal pain":
+      case "nausea and vomiting":
+      case "diarrhea":
+      case "constipation":
+      case "acid reflux/heartburn":
+        return <Activity className="h-4 w-4 text-orange-500" />;
+
+      // Musculoskeletal
+      case "back pain":
+      case "joint pain":
+      case "muscle strain":
+      case "arthritis management":
+      case "sports injury":
+        return <Users className="h-4 w-4 text-purple-500" />;
+
+      // Mental Health
+      case "anxiety symptoms":
+      case "depression screening":
+      case "stress management":
+      case "mental health consultation":
+        return <Brain className="h-4 w-4 text-indigo-500" />;
+
+      // Women's Health
+      case "annual gynecological exam":
+      case "pap smear":
+      case "menstrual irregularities":
+      case "pregnancy consultation":
+      case "birth control consultation":
+        return <User className="h-4 w-4 text-pink-500" />;
+
+      // General Symptoms
+      case "headache/migraine":
+      case "fever":
+      case "fatigue/weakness":
+      case "skin rash":
+      case "weight loss/gain":
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+
+      // Follow-up
+      case "post-surgery follow-up":
+      case "medication review":
+      case "lab result discussion":
+      case "treatment follow-up":
+        return <RefreshCw className="h-4 w-4 text-green-500" />;
+
       default:
-        return <XCircle className="h-4 w-4 text-gray-500" />;
+        return <HelpCircle className="h-4 w-4 text-gray-500" />;
     }
   };
 
   const getPatientInitials = (patientName: string) => {
+    console.log("🧞‍♂️  patientName --->", patientName);
     if (!patientName) return "AB";
 
     const cleanName = patientName.trim();
@@ -719,11 +959,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               </Button>
             </div>
             <div className="space-y-2">
-              {Object.entries(patientData).map(([patientId, patient]) => (
+              {Object.entries(patientData).map(([id, patient]) => (
                 <div
-                  key={patientId}
+                  key={id}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                    (selectedPatient?.id).toString() === patientId
+                    selectedPatient?.id === id
                       ? "bg-blue-50 border border-blue-200"
                       : "hover:bg-gray-50"
                   }`}
@@ -732,15 +972,15 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={`/placeholder.svg?height=32&width=32`} />
                     <AvatarFallback className="text-xs">
-                      {getPatientInitials(patient.patientInfo.patientName)}
+                      {getPatientInitials(patient?.patientInfo?.patientName)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-gray-900 truncate">
-                      {patient.patientInfo.patientName}
+                      {patient?.patientInfo?.patientName}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                      {patient.patientInfo.patientAddress}
+                      {patient?.patientInfo?.patientAddress}
                     </p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -754,19 +994,25 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
+        <header className="flex items-center justify-between pt-6 pl-6 pr-6 pb-3 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-4">
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>
-                {getPatientInitials(selectedPatient.name)}
+                {getPatientInitials(selectedPatient?.patientInfo?.patientName)}
               </AvatarFallback>
             </Avatar>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                {selectedPatient.name}
+                {selectedPatient?.patientInfo?.patientName}
               </h2>
-              <p className="text-sm text-gray-500">ID: #78146284/201</p>
+              <p className="text-sm text-gray-500">
+                ID:{" "}
+                {selectedPatient.id.slice(
+                  selectedPatient.id.length - 10,
+                  selectedPatient.id.length
+                )}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -780,7 +1026,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         </header>
 
         {/* Tabs */}
-        <div className="grid grid-cols-4 md:gap-10 px-6 py-4 border-b border-gray-100 bg-white">
+        <div className="grid grid-cols-4 md:gap-10 px-6 py-3 border-b border-gray-100 bg-white">
           <button
             className={`pb-2 border-b-2 transition-colors ${
               activeTab === "overview"
@@ -843,19 +1089,24 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                           <div>
                             <p className="text-sm text-gray-500">Full Name</p>
                             <p className="font-medium">
-                              {selectedPatient.name}
+                              {selectedPatient?.patientInfo?.patientName}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Patient ID</p>
-                            <p className="font-medium">#78146284/201</p>
+                            <p className="font-medium">
+                              {selectedPatient.id.slice(
+                                selectedPatient.id.length - 10,
+                                selectedPatient.id.length
+                              )}
+                            </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">
                               Phone Number
                             </p>
                             <p className="font-medium">
-                              {selectedPatient.phone}
+                              {selectedPatient?.patientInfo?.patientPhone}
                             </p>
                           </div>
                         </div>
@@ -863,13 +1114,13 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                           <div>
                             <p className="text-sm text-gray-500">Gender</p>
                             <p className="font-medium">
-                              {selectedPatient.gender}
+                              {selectedPatient?.patientInfo?.patientGender}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Age</p>
                             <p className="font-medium">
-                              {selectedPatient.age} years
+                              {selectedPatient?.patientInfo?.patientAge} years
                             </p>
                           </div>
                           <div>
@@ -877,7 +1128,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               Email Address
                             </p>
                             <p className="font-medium text-blue-600">
-                              {selectedPatient.email}
+                              {selectedPatient?.patientInfo?.patientEmail}
                             </p>
                           </div>
                         </div>
@@ -886,7 +1137,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             <p className="text-sm text-gray-500">
                               Date of Birth
                             </p>
-                            <p className="font-medium">March 15, 1970</p>
+                            <p className="font-medium">
+                              {new Date(
+                                selectedPatient?.patientInfo?.patientBithofday
+                              ).toLocaleDateString()}
+                            </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Blood Type</p>
@@ -897,7 +1152,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               Home Address
                             </p>
                             <p className="font-medium">
-                              {selectedPatient.fullAddress}
+                              {selectedPatient?.patientInfo?.patientAddress}
                             </p>
                           </div>
                         </div>
@@ -910,36 +1165,39 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">
-                          Current Active Conditions
+                          Previous Conditions
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          {selectedPatient.diseases
-                            ?.filter((d) => d.status === "Active")
-                            .map((disease, index) => (
+                          {selectedPatient?.reasonForVisit.map(
+                            (values, index) => (
                               <div
                                 key={index}
-                                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                                className="flex items-center justify-between p-4 bg-gray-100 rounded-lg"
                               >
                                 <div className="flex items-center gap-3">
-                                  {getStatusIcon(disease.status)}
+                                  {getStatusIcon(values?.reason)}
                                   <div>
                                     <p className="font-medium">
-                                      {disease.name}
+                                      {values?.reason}
                                     </p>
                                     <p className="text-sm text-gray-500">
-                                      Since: {disease.diagnosedDate}
+                                      Since:{" "}
+                                      {new Date(
+                                        values?.createdAt
+                                      ).toLocaleDateString()}
                                     </p>
                                   </div>
                                 </div>
                                 <Badge
-                                  className={getSeverityColor(disease.severity)}
+                                  className={getSeverityColor(values?.reason)}
                                 >
-                                  {disease.severity}
+                                  {values?.reason}
                                 </Badge>
                               </div>
-                            ))}
+                            )
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -956,51 +1214,62 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                     <CardContent>
                       <div className="space-y-4">
                         {/* Check if patient has upcoming appointments */}
-                        {futureGrouped ? (
-                          <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-300">
-                            <div className="p-2 bg-yellow-100 rounded-lg">
-                              <Calendar className="h-5 w-5 text-yellow-600" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-1">
-                                <h3 className="font-semibold">
-                                  Follow-up Consultation
-                                </h3>
-                                <Badge className="bg-yellow-100 text-yellow-800">
-                                  Confirmed
-                                </Badge>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  <span>December 15, 2024 - 2:30 PM</span>
+                        {Object.keys(selectedPatient?.upcomingAppointments)
+                          .length > 0 ? (
+                          selectedPatient?.upcomingAppointments.map(
+                            (value, index) => (
+                              <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-300">
+                                <div className="p-2 bg-yellow-100 rounded-lg">
+                                  <Calendar className="h-5 w-5 text-yellow-600" />
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-4 w-4" />
-                                  <span>Dr. Edward Bailey</span>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <h3 className="font-semibold">
+                                      {value?.consultedType}
+                                    </h3>
+                                    <Badge className="bg-yellow-100 text-yellow-800">
+                                      Confirmed
+                                    </Badge>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4" />
+                                      <span>
+                                        {value?.appointmentDate}{" "}
+                                        {value?.appointmentTime}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Users className="h-4 w-4" />
+                                      <span>{value?.doctorName}</span>
+                                    </div>
+                                  </div>
+                                  <p className="text-sm text-gray-500 mt-2">
+                                    {value?.reasonForVisit}
+                                  </p>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-yellow-300 hover:bg-yellow-500"
+                                  >
+                                    Reschedule
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-transparent text-red-600 hover:text-red-700"
+                                    onClick={() =>
+                                      handleCancelAppointment(value)
+                                    }
+                                  >
+                                    Cancel
+                                  </Button>
                                 </div>
                               </div>
-                              <p className="text-sm text-gray-500 mt-2">
-                                Hypertension and diabetes management review
-                              </p>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs bg-yellow-300 hover:bg-yellow-500"
-                              >
-                                Reschedule
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs bg-transparent text-red-600 hover:text-red-700"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
+                            )
+                          )
                         ) : (
                           <div className="text-center py-8 text-gray-500">
                             <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -1011,10 +1280,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               This patient has no scheduled appointments at this
                               time.
                             </p>
-                            <Button className="mt-4" size="sm">
-                              <Plus className="h-4 w-4 mr-2" />
-                              Schedule Appointment
-                            </Button>
                           </div>
                         )}
                       </div>

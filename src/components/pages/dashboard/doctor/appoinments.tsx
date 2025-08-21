@@ -650,9 +650,21 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     fetchData();
   }, [doctor]);
 
-  const todayGrouped = useMemo(() => {
+  let todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
   }, [categorizedAppointments.today]);
+
+  if (todayGrouped) {
+    Object.keys(todayGrouped).forEach(
+      (date) =>
+        (todayGrouped[date] = todayGrouped[date].map(
+          (appointment: AppointmentData) => ({
+            ...appointment,
+            status: "confirmed",
+          })
+        ))
+    );
+  }
   console.log("today appointment=>", todayGrouped);
 
   const futureGrouped = useMemo(() => {
@@ -663,6 +675,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const pastGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
+  console.log("🧞‍♂️  pastGrouped --->", pastGrouped);
 
   const handleAcceptRequest = (
     requestId: number,
