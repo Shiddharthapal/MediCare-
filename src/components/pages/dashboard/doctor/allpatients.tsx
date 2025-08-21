@@ -758,9 +758,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       console.log("🧞‍♂️  today --->", today);
       groupedData[patientId].upcomingAppointments = groupedData[
         patientId
-      ].appointments.filter(
-        (appointment) => new Date(appointment.appointmentDate) >= today
-      );
+      ].appointments.filter((appointment) => {
+        const appointmentDate = new Date(appointment.appointmentDate);
+        return appointmentDate >= today;
+      });
 
       //Filter previous appointments
       groupedData[patientId].previousAppointments = groupedData[
