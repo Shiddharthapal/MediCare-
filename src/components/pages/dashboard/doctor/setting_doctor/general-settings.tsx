@@ -86,8 +86,7 @@ export function GeneralSettings() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="en">English</SelectItem>
-                <SelectItem value="es">Spanish</SelectItem>
-                <SelectItem value="fr">French</SelectItem>
+                <SelectItem value="es">Bangla</SelectItem>
               </SelectContent>
             </Select>
           </div>
