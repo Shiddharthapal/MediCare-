@@ -18,7 +18,83 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { X, Edit3, Save } from "lucide-react";
+import { useState } from "react";
+
+interface ProfileInformation {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  bio: string;
+}
+
+interface SystemPreferences {
+  darkMode: boolean;
+  language: string;
+  timezone: string;
+}
+
+interface GeneralSettingsData {
+  profile: ProfileInformation;
+  preferences: SystemPreferences;
+}
+
 export function GeneralSettings() {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
+  const [formData, setFormData] = useState<GeneralSettingsData>({
+    profile: {
+      firstName: "Sanjoy",
+      lastName: "Morol",
+      email: "sanjoy2017@gmail.com",
+      phone: "",
+      bio: "",
+    },
+    preferences: {
+      darkMode: false,
+      language: "en",
+      timezone: "est",
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      // API call will go here
+      console.log("Form data to be sent:", formData);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setFormData({ ...formData });
+    setIsEditing(false);
+    setIsLoading(false);
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+  const updateProfile = (field: keyof ProfileInformation, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      profile: { ...prev.profile, [field]: value },
+    }));
+  };
+
+  const updatePreferences = (field: keyof SystemPreferences, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      preferences: { ...prev.preferences, [field]: value },
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -32,31 +108,34 @@ export function GeneralSettings() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" defaultValue="Sanjoy" />
+              <p className="text-gray-700 leading-relaxed text-lg">
+                {formData?.profile?.firstName || "Not Provided"}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" defaultValue="Morol" />
+              <p className="text-gray-700 leading-relaxed text-lg">
+                {formData?.profile?.lastName}
+              </p>
             </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              defaultValue="sanjoy2017@gmail.com"
-            />
+            <p className="text-gray-700 leading-relaxed text-lg">
+              {formData?.profile?.email || "Not Provided"}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" />
+            <p className="text-gray-700 leading-relaxed text-lg">
+              {formData?.profile?.phone || "Not Provided"}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="bio">Professional Bio</Label>
-            <Textarea
-              id="bio"
-              placeholder="Brief description of your medical practice and specialties"
-            />
+            <p className="text-gray-700 leading-relaxed text-lg">
+              {formData.profile.bio || "Not Provided"}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -76,23 +155,34 @@ export function GeneralSettings() {
                 Enable dark theme for the application
               </p>
             </div>
-            <Switch />
+            <Switch
+              checked={formData.preferences.darkMode}
+              onCheckedChange={(checked) =>
+                updatePreferences("darkMode", checked)
+              }
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="language">Language</Label>
-            <Select defaultValue="en">
+            <Select
+              value={formData.preferences.language}
+              onValueChange={(value) => updatePreferences("language", value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="es">Bangla</SelectItem>
+                <SelectItem value="English">English</SelectItem>
+                <SelectItem value="Bangla">Bangla</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="timezone">Timezone</Label>
-            <Select defaultValue="est">
+            <Select
+              value={formData.preferences.timezone}
+              onValueChange={(value) => updatePreferences("timezone", value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -107,7 +197,43 @@ export function GeneralSettings() {
       </Card>
 
       <div className="flex justify-end">
-        <Button>Save Changes</Button>
+        {isEditing ? (
+          <>
+            <Button onClick={handleSubmit} className="flex items-center gap-2">
+              <Save className="h-4 w-4" />
+              Save Profile
+            </Button>
+            <Button
+              onClick={handleCancel}
+              variant="outline"
+              className="flex items-center gap-2 bg-transparent"
+            >
+              <X className="h-4 w-4" />
+              Cancel
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              onClick={handleEdit}
+              variant="outline"
+              className="flex items-center gap-2 bg-transparent"
+            >
+              <Edit3 className="h-4 w-4" />
+              {hasProfile ? "Edit Profile" : "Create Profile"}
+            </Button>
+            {isEditing && (
+              <Button
+                onClick={handleCancel}
+                variant="outline"
+                className="flex items-center gap-2 bg-transparent"
+              >
+                <X className="h-4 w-4" />
+                Cancel
+              </Button>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
