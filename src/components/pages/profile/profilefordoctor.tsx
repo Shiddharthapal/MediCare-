@@ -497,7 +497,38 @@ export default function DoctorProfilePage() {
                     </p>
                   )}
                 </div>
+                <div>
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <Phone className="h-5 w-5 mr-2" />
+                    Contact Number
+                  </Label>
+                  {isEditing ? (
+                    <Input
+                      type="tel"
+                      value={editedDoctor?.contact}
+                      onChange={(e) =>
+                        handleInputChange("contact", e.target.value)
+                      }
+                      placeholder="Enter your contact number"
+                    />
+                  ) : (
+                    <p className="text-gray-700 text-lg">
+                      {displayValue(currentDoctor?.contact)}
+                    </p>
+                  )}
+                </div>
+                {/* New Email Field */}
+                <div>
+                  <Label className="text-lg font-semibold flex items-center mb-3">
+                    <Mail className="h-5 w-5 mr-2" />
+                    Email
+                  </Label>
 
+                  <p className="text-gray-700 text-lg">
+                    {displayValue(currentDoctor?.email) ||
+                      "Not need to provide"}
+                  </p>
+                </div>
                 <div className="">
                   <div>
                     <Label className="text-lg font-semibold flex items-center mb-3">
@@ -575,39 +606,99 @@ export default function DoctorProfilePage() {
                     </p>
                   )}
                 </div>
-                <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Phone className="h-5 w-5 mr-2" />
-                    Contact Number
-                  </Label>
-                  {isEditing ? (
-                    <Input
-                      type="tel"
-                      value={editedDoctor?.contact}
-                      onChange={(e) =>
-                        handleInputChange("contact", e.target.value)
-                      }
-                      placeholder="Enter your contact number"
-                    />
-                  ) : (
-                    <p className="text-gray-700 text-lg">
-                      {displayValue(currentDoctor?.contact)}
-                    </p>
-                  )}
-                </div>
-                {/* New Email Field */}
-                <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Mail className="h-5 w-5 mr-2" />
-                    Email
-                  </Label>
 
-                  <p className="text-gray-700 text-lg">
-                    {displayValue(currentDoctor?.email) ||
-                      "Not need to provide"}
-                  </p>
+                <div>
+                  <Label className="text-lg font-semibold flex items-center mb-1">
+                    <Clock className="h-5 w-5 mr-2" />
+                    Available Time Slots
+                  </Label>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      {currentDoctor?.availableSlots?.length > 0
+                        ? currentDoctor?.availableSlots.map((slot, index) => (
+                            <div key={index} className="flex items-center">
+                              <Badge variant="outline" className="text-sm">
+                                {slot}
+                              </Badge>
+                              {isEditing && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleRemoveSlot(index)}
+                                  className="ml-1 h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          ))
+                        : !isEditing && (
+                            <p className="text-gray-500 text-sm">
+                              No time slots available
+                            </p>
+                          )}
+                    </div>
+                    {isEditing && (
+                      <div className="flex gap-2 mt-3">
+                        <Input
+                          value={newSlot}
+                          onChange={(e) => setNewSlot(e.target.value)}
+                          placeholder="Add time slot (e.g., 09:00 AM - 10:00 AM)"
+                          className="flex-1"
+                        />
+                        <Button onClick={handleAddSlot} size="sm">
+                          Add
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
+                <div>
+                  <Label className="text-lg font-semibold flex items-center mb-1 ">
+                    <Languages className="h-5 w-5 mr-2" />
+                    Language
+                  </Label>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      {currentDoctor?.language?.length > 0
+                        ? currentDoctor?.language.map((slot, index) => (
+                            <div key={index} className="flex items-center">
+                              <Badge variant="outline" className="text-sm">
+                                {slot}
+                              </Badge>
+                              {isEditing && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleRemoveLanguage(index)}
+                                  className="ml-1 h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          ))
+                        : !isEditing && (
+                            <p className="text-gray-500 text-sm">
+                              Not Provided
+                            </p>
+                          )}
+                    </div>
+                    {isEditing && (
+                      <div className="flex gap-2 mt-3">
+                        <Input
+                          value={language}
+                          onChange={(e) => setLanguage(e.target.value)}
+                          placeholder="Add language (English, other)"
+                          className="flex-1"
+                        />
+                        <Button onClick={handleAddLanguage} size="sm">
+                          Add
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <Label className="text-lg font-semibold flex items-center mb-3">
                     <Transgender className="h-5 w-5 mr-2" />
