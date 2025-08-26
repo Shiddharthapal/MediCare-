@@ -11,11 +11,6 @@ import {
   Users,
   User,
   CreditCard,
-  TrendingDown,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  XCircle,
   LayoutDashboard,
   FileText,
   Settings,
@@ -37,6 +32,7 @@ import {
 } from "recharts";
 import Appointments from "./appoinments";
 import Patients from "./allpatients";
+import Setting from "./setting_doctor/index";
 import { useAppSelector } from "@/redux/hooks";
 
 interface AppointmentData {
@@ -173,7 +169,7 @@ const menuItems = [
   { icon: Calendar, label: "Appointments", active: false },
   { icon: Users, label: "Patients", active: false },
   { icon: FileText, label: "Reports", active: false },
-  { icon: Settings, label: "Settings", active: false },
+  { icon: Settings, label: "Setting", active: false },
 ];
 
 const COLORS = ["#3b82f6", "#ec4899", "#047857"];
@@ -1172,10 +1168,12 @@ export default function DashboardPage() {
           <Appointments onNavigate={setCurrentPage} />
         )}
         {currentPage === "patients" && <Patients onNavigate={setCurrentPage} />}
+        {currentPage === "setting" && <Setting onNavigate={setCurrentPage} />}
 
         {/* Other Pages Placeholder */}
         {currentPage !== "dashboard" &&
           currentPage !== "appointments" &&
+          currentPage !=="setting" &&
           currentPage !== "patients" && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
