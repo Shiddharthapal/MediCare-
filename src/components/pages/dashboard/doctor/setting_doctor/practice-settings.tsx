@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -18,9 +21,154 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface PracticeData {
+  practiceName: string;
+  specialty: string;
+  address: string;
+  phone: string;
+  fax: string;
+  appointmentDuration: string;
+  bufferTime: string;
+  allowOnlineBooking: boolean;
+  sendReminders: boolean;
+  workingHours: {
+    [key: string]: {
+      enabled: boolean;
+      startTime: string;
+      endTime: string;
+    };
+  };
+}
+
 export function PracticeSettings() {
+  const [formData, setFormData] = useState<PracticeData>({
+    practiceName: "MediCare+ Family Practice",
+    specialty: "family",
+    address: "",
+    phone: "",
+    fax: "",
+    appointmentDuration: "30",
+    bufferTime: "5",
+    allowOnlineBooking: true,
+    sendReminders: true,
+    workingHours: {
+      Monday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Tuesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Wednesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Thursday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Friday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Saturday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Sunday: { enabled: false, startTime: "09:00", endTime: "17:00" },
+    },
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [savedData, setSavedData] = useState<PracticeData | null>(null);
+
+  useEffect(() => {
+    loadPracticeData();
+  }, []);
+
+  const loadPracticeData = async () => {
+    try {
+      const response = await fetch("/api/practice-settings");
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(data);
+        setSavedData(data);
+      }
+    } catch (error) {
+      console.error("Failed to load practice data:", error);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/practice-settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const savedData = await response.json();
+        setSavedData(savedData);
+        alert("Practice settings saved successfully!");
+      } else {
+        alert("Failed to save practice settings");
+      }
+    } catch (error) {
+      console.error("Error saving practice settings:", error);
+      alert("Error saving practice settings");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof PracticeData, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleWorkingHourChange = (day: string, field: string, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      workingHours: {
+        ...prev.workingHours,
+        [day]: {
+          ...prev.workingHours[day],
+          [field]: value,
+        },
+      },
+    }));
+  };
+
   return (
     <div className="space-y-6">
+      {savedData && (
+        <Card className="bg-green-50 border-green-200">
+          <CardHeader>
+            <CardTitle className="text-green-800">
+              Saved Practice Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <strong>Practice Name:</strong> {savedData.practiceName}
+              </div>
+              <div>
+                <strong>Specialty:</strong> {savedData.specialty}
+              </div>
+              <div>
+                <strong>Phone:</strong> {savedData.phone}
+              </div>
+              <div>
+                <strong>Fax:</strong> {savedData.fax}
+              </div>
+            </div>
+            <div className="mt-4">
+              <strong>Working Hours:</strong>
+              <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                {Object.entries(savedData.workingHours).map(([day, hours]) => (
+                  <div key={day}>
+                    {day}:{" "}
+                    {hours.enabled
+                      ? `${hours.startTime} - ${hours.endTime}`
+                      : "Closed"}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Practice Information</CardTitle>
@@ -31,11 +179,20 @@ export function PracticeSettings() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="practiceName">Practice Name</Label>
-            <Input id="practiceName" defaultValue="MediCare+ Family Practice" />
+            <Input
+              id="practiceName"
+              value={formData.practiceName}
+              onChange={(e) =>
+                handleInputChange("practiceName", e.target.value)
+              }
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="specialty">Medical Specialty</Label>
-            <Select defaultValue="family">
+            <Select
+              value={formData.specialty}
+              onValueChange={(value) => handleInputChange("specialty", value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -53,16 +210,30 @@ export function PracticeSettings() {
             <Textarea
               id="address"
               placeholder="Enter complete practice address"
+              value={formData.address}
+              onChange={(e) => handleInputChange("address", e.target.value)}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="phone">Practice Phone</Label>
-              <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" />
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                value={formData.phone}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="fax">Fax Number</Label>
-              <Input id="fax" type="tel" placeholder="+1 (555) 123-4568" />
+              <Input
+                id="fax"
+                type="tel"
+                placeholder="+1 (555) 123-4568"
+                value={formData.fax}
+                onChange={(e) => handleInputChange("fax", e.target.value)}
+              />
             </div>
           </div>
         </CardContent>
@@ -81,7 +252,12 @@ export function PracticeSettings() {
               <Label htmlFor="appointmentDuration">
                 Default Appointment Duration
               </Label>
-              <Select defaultValue="30">
+              <Select
+                value={formData.appointmentDuration}
+                onValueChange={(value) =>
+                  handleInputChange("appointmentDuration", value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -97,7 +273,12 @@ export function PracticeSettings() {
               <Label htmlFor="bufferTime">
                 Buffer Time Between Appointments
               </Label>
-              <Select defaultValue="5">
+              <Select
+                value={formData.bufferTime}
+                onValueChange={(value) =>
+                  handleInputChange("bufferTime", value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -117,7 +298,12 @@ export function PracticeSettings() {
                 Enable patients to book appointments online
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={formData.allowOnlineBooking}
+              onCheckedChange={(checked) =>
+                handleInputChange("allowOnlineBooking", checked)
+              }
+            />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -126,7 +312,12 @@ export function PracticeSettings() {
                 Automatically send reminders to patients
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={formData.sendReminders}
+              onCheckedChange={(checked) =>
+                handleInputChange("sendReminders", checked)
+              }
+            />
           </div>
         </CardContent>
       </Card>
@@ -148,13 +339,32 @@ export function PracticeSettings() {
           ].map((day) => (
             <div key={day} className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <Switch defaultChecked={day !== "Sunday"} />
+                <Switch
+                  checked={formData.workingHours[day].enabled}
+                  onCheckedChange={(checked) =>
+                    handleWorkingHourChange(day, "enabled", checked)
+                  }
+                />
                 <Label className="w-20">{day}</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Input type="time" defaultValue="09:00" className="w-32" />
+                <Input
+                  type="time"
+                  value={formData.workingHours[day].startTime}
+                  onChange={(e) =>
+                    handleWorkingHourChange(day, "startTime", e.target.value)
+                  }
+                  className="w-32"
+                />
                 <span>to</span>
-                <Input type="time" defaultValue="17:00" className="w-32" />
+                <Input
+                  type="time"
+                  value={formData.workingHours[day].endTime}
+                  onChange={(e) =>
+                    handleWorkingHourChange(day, "endTime", e.target.value)
+                  }
+                  className="w-32"
+                />
               </div>
             </div>
           ))}
@@ -162,7 +372,9 @@ export function PracticeSettings() {
       </Card>
 
       <div className="flex justify-end">
-        <Button>Save Changes</Button>
+        <Button onClick={handleSaveChanges} disabled={isLoading}>
+          {isLoading ? "Saving..." : "Save Changes"}
+        </Button>
       </div>
     </div>
   );
