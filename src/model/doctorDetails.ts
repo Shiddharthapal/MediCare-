@@ -89,6 +89,50 @@ const PrescriptionSchema = new mongoose.Schema({
     default: Date.now(),
   },
 });
+
+const practiceSetUp = new mongoose.Schema({
+  practiceName: {
+    type: String,
+  },
+  specialty: {
+    type: String,
+  },
+  address: {
+    type: String,
+  },
+  phone: {
+    type: String,
+  },
+  fax: {
+    type: String,
+  },
+  appointmentDuration: {
+    type: String,
+  },
+  bufferTime: {
+    type: String,
+  },
+  allowOnlineBooking: {
+    type: Boolean,
+  },
+  sendReminders: {
+    type: Boolean,
+  },
+  workingHours: {
+    type: Map,
+    of: {
+      enabled: {
+        type: Boolean,
+      },
+      startTime: {
+        type: String,
+      },
+      endTime: {
+        type: String,
+      },
+    },
+  },
+});
 const appointmentDataSchema = new mongoose.Schema(
   {
     doctorpatinetId: {
@@ -185,7 +229,9 @@ const appointmentDataSchema = new mongoose.Schema(
     },
   },
   { _id: true }
-); // This will auto-generate _id for each appointment
+);
+
+// This will auto-generate _id for each appointment
 const doctorDetailsSchema = new mongoose.Schema({
   userId: {
     type: String,

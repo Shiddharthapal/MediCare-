@@ -32,6 +32,24 @@ interface Prescription {
   prescriptionId: string;
   createdAt: Date;
 }
+interface PracticeData {
+  practiceName: string;
+  specialty: string;
+  address: string;
+  phone: string;
+  fax: string;
+  appointmentDuration: string;
+  bufferTime: string;
+  allowOnlineBooking: boolean;
+  sendReminders: boolean;
+  workingHours: {
+    [key: string]: {
+      enabled: boolean;
+      startTime: string;
+      endTime: string;
+    };
+  };
+}
 interface AppointmentData {
   doctorpatinetId: string;
   doctorName: string;
@@ -81,6 +99,7 @@ export interface DoctorDetails {
   about: string;
   availableSlots: string[];
   appointments: AppointmentData[];
+  practiceSetUp: PracticeData[];
   consultationModes: string[];
   createdAt: Date;
 }
