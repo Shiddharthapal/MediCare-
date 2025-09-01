@@ -6,9 +6,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -17,9 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { X, Edit3, Save } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileInformation {
   firstName: string;
@@ -41,51 +37,71 @@ interface GeneralSettingsData {
 }
 
 export function GeneralSettings() {
-  const [isEditing, setIsEditing] = useState(false);
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
   const [formData, setFormData] = useState<GeneralSettingsData>({
     profile: {
-      firstName: "Sanjoy",
-      lastName: "Morol",
-      email: "sanjoy2017@gmail.com",
+      firstName: "",
+      lastName: "",
+      email: "",
       phone: "",
       bio: "",
     },
     preferences: {
-      darkMode: false,
-      language: "en",
-      timezone: "est",
+      darkMode: localStorage.getItem("darkMode") === "true",
+      language: localStorage.getItem("language") || "en",
+      timezone: localStorage.getItem("timezone") || "Asia/Dhaka",
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
+
+  useEffect(() => {
+    // Apply dark mode
+    document.documentElement.classList.toggle(
+      "dark",
+      formData.preferences.darkMode
+    );
+    localStorage.setItem("darkMode", formData.preferences.darkMode.toString());
+  }, [formData.preferences.darkMode]);
+
+  useEffect(() => {
+    // Save language and timezone preferences
+    localStorage.setItem("language", formData.preferences.language);
+    localStorage.setItem("timezone", formData.preferences.timezone);
+  }, [formData.preferences.language, formData.preferences.timezone]);
+
+  const fetchProfileData = async () => {
     try {
-      // API call will go here
-      console.log("Form data to be sent:", formData);
+      setIsLoading(true);
+      const response = await fetch("/api/doctor/doctorDetails");
+      const data = await response.json();
+
+      if (data) {
+        setFormData((prev) => ({
+          ...prev,
+          profile: {
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+            email: data.email || "",
+            phone: data.phone || "",
+            bio: data.bio || "",
+          },
+        }));
+        setHasProfile(true);
+      }
     } catch (error) {
-      console.error("Error submitting form:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch profile data",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCancel = () => {
-    setFormData({ ...formData });
-    setIsEditing(false);
-    setIsLoading(false);
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-  const updateProfile = (field: keyof ProfileInformation, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      profile: { ...prev.profile, [field]: value },
-    }));
   };
 
   const updatePreferences = (field: keyof SystemPreferences, value: any) => {
@@ -172,8 +188,9 @@ export function GeneralSettings() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="English">English</SelectItem>
-                <SelectItem value="Bangla">Bangla</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="bn">বাংলা (Bangla)</SelectItem>
+                <SelectItem value="hi">हिंदी (Hindi)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -187,54 +204,22 @@ export function GeneralSettings() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="est">Eastern Time (EST)</SelectItem>
-                <SelectItem value="cst">Central Time (CST)</SelectItem>
-                <SelectItem value="pst">Pacific Time (PST)</SelectItem>
+                <SelectItem value="Asia/Dhaka">Asia/Dhaka (GMT+6)</SelectItem>
+                <SelectItem value="Asia/Kolkata">
+                  Asia/Kolkata (GMT+5:30)
+                </SelectItem>
+                <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+4)</SelectItem>
+                <SelectItem value="Europe/London">
+                  Europe/London (GMT+0)
+                </SelectItem>
+                <SelectItem value="America/New_York">
+                  America/New_York (GMT-5)
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
-
-      <div className="flex justify-end">
-        {isEditing ? (
-          <>
-            <Button onClick={handleSubmit} className="flex items-center gap-2">
-              <Save className="h-4 w-4" />
-              Save Profile
-            </Button>
-            <Button
-              onClick={handleCancel}
-              variant="outline"
-              className="flex items-center gap-2 bg-transparent"
-            >
-              <X className="h-4 w-4" />
-              Cancel
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              onClick={handleEdit}
-              variant="outline"
-              className="flex items-center gap-2 bg-transparent"
-            >
-              <Edit3 className="h-4 w-4" />
-              {hasProfile ? "Edit Profile" : "Create Profile"}
-            </Button>
-            {isEditing && (
-              <Button
-                onClick={handleCancel}
-                variant="outline"
-                className="flex items-center gap-2 bg-transparent"
-              >
-                <X className="h-4 w-4" />
-                Cancel
-              </Button>
-            )}
-          </>
-        )}
-      </div>
     </div>
   );
 }
