@@ -10,7 +10,7 @@ export const POST: APIRoute = async ({ request }) => {
   };
   try {
     const body = await request.json();
-    console.log("🧞‍♂️body --->", body);
+
     const { email, password, registrationNo } = body;
     // Connect to database
     await connect();
@@ -36,11 +36,10 @@ export const POST: APIRoute = async ({ request }) => {
 
       // Create new user
       const users = new User({
-        email: email, // Only add the active identifier
+        email: email,
         password,
       });
 
-      console.log("=>", users);
       await users.save();
 
       // Generate JWT token
@@ -51,7 +50,6 @@ export const POST: APIRoute = async ({ request }) => {
           "your-secret-key",
         { expiresIn: "24h" }
       );
-      console.log("=>>", token);
     } else {
       const existingDoctor = await Doctor.findOne({
         email: email,
