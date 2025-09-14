@@ -32,7 +32,7 @@ interface Prescription {
   prescriptionId: string;
   createdAt: Date;
 }
-interface PracticeData {
+interface PracticeSettingData {
   practiceName: string;
   specialty: string;
   address: string;
@@ -99,7 +99,7 @@ export interface DoctorDetails {
   about: string;
   availableSlots: string[];
   appointments: AppointmentData[];
-  practiceSetUp: PracticeData[];
+  practiceSettingData: PracticeSettingData[];
   consultationModes: string[];
   createdAt: Date;
 }

@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { User } from "@/types/userDetails";
+import type { UserDetails } from "@/types/userDetails";
 
 interface ProfileState {
   isEditing: boolean;
@@ -24,7 +24,10 @@ export const profileSlice = createSlice({
       state.isSaving = true;
       state.error = null;
     },
-    updateProfileSuccess: (state, action: PayloadAction<Partial<User>>) => {
+    updateProfileSuccess: (
+      state,
+      action: PayloadAction<Partial<UserDetails>>
+    ) => {
       state.isSaving = false;
       state.error = null;
       state.lastUpdated = new Date();

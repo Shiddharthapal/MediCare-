@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAppSelector } from "@/redux/hooks";
 
 interface PracticeData {
   practiceName: string;
@@ -64,18 +65,26 @@ export function PracticeSettings() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [savedData, setSavedData] = useState<PracticeData | null>(null);
+  const doctor = useAppSelector((state) => state.auth.user);
 
   useEffect(() => {
     loadPracticeData();
-  }, []);
+  }, [doctor]);
 
   const loadPracticeData = async () => {
+    let id = doctor?._id;
     try {
-      const response = await fetch("/api/practice-settings");
+      const response = await fetch(`/api/doctor/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       if (response.ok) {
         const data = await response.json();
-        setFormData(data);
-        setSavedData(data);
+        console.log("🧞‍♂️  data --->", data);
+        setFormData(data?.doctordetails?.practiceSettingData);
+        setSavedData(data?.doctordetails?.practiceSettingData);
       }
     } catch (error) {
       console.error("Failed to load practice data:", error);
@@ -83,14 +92,15 @@ export function PracticeSettings() {
   };
 
   const handleSaveChanges = async () => {
+    let id = doctor?._id;
     setIsLoading(true);
     try {
-      const response = await fetch("/api/practice-settings", {
+      const response = await fetch("/api/doctor/practice-settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ formData, id }),
       });
 
       if (response.ok) {
@@ -128,6 +138,35 @@ export function PracticeSettings() {
     }));
   };
 
+  const formatTo12Hour = (time24) => {
+    if (!time24) return "";
+
+    const [hours, minutes] = time24.split(":");
+    const hour = parseInt(hours, 10);
+    const minute = minutes || "00";
+
+    if (hour === 0) {
+      return `12:${minute} AM`;
+    } else if (hour < 12) {
+      return `${hour}:${minute} AM`;
+    } else if (hour === 12) {
+      return `12:${minute} PM`;
+    } else {
+      return `${hour - 12}:${minute} PM`;
+    }
+  };
+
+  const formatWorkingHours = (hours) => {
+    if (!hours?.enabled) {
+      return "Closed";
+    }
+
+    const startTime = formatTo12Hour(hours.startTime);
+    const endTime = formatTo12Hour(hours.endTime);
+
+    return `${startTime} - ${endTime}`;
+  };
+
   return (
     <div className="space-y-6">
       {savedData && (
@@ -143,10 +182,13 @@ export function PracticeSettings() {
                 <strong>Practice Name:</strong> {savedData.practiceName}
               </div>
               <div>
-                <strong>Specialty:</strong> {savedData.specialty}
+                <strong>Medical Specialty:</strong> {savedData.specialty}
               </div>
               <div>
-                <strong>Phone:</strong> {savedData.phone}
+                <strong>Practice Address:</strong> {savedData.address}
+              </div>
+              <div>
+                <strong>Practice Institute Phone:</strong> {savedData.phone}
               </div>
               <div>
                 <strong>Fax:</strong> {savedData.fax}
@@ -155,14 +197,19 @@ export function PracticeSettings() {
             <div className="mt-4">
               <strong>Working Hours:</strong>
               <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-                {Object.entries(savedData.workingHours).map(([day, hours]) => (
-                  <div key={day}>
-                    {day}:{" "}
-                    {hours.enabled
-                      ? `${hours.startTime} - ${hours.endTime}`
-                      : "Closed"}
-                  </div>
-                ))}
+                {savedData.workingHours &&
+                  Object.entries(savedData.workingHours).map(([day, hours]) => (
+                    <div key={day} className="flex items-center py-1">
+                      <span className="capitalize font-medium text-gray-700 w-20">
+                        {day}:
+                      </span>
+                      <span
+                        className={`${hours?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
+                      >
+                        {formatWorkingHours(hours)}
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
           </CardContent>
@@ -216,11 +263,11 @@ export function PracticeSettings() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Practice Phone</Label>
+              <Label htmlFor="phone">Practice Institute Phone</Label>
               <Input
                 id="phone"
                 type="tel"
-                placeholder="+1 (555) 123-4567"
+                placeholder="01*********"
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
               />
@@ -298,12 +345,7 @@ export function PracticeSettings() {
                 Enable patients to book appointments online
               </p>
             </div>
-            <Switch
-              checked={formData.allowOnlineBooking}
-              onCheckedChange={(checked) =>
-                handleInputChange("allowOnlineBooking", checked)
-              }
-            />
+            <Switch checked={formData.allowOnlineBooking} />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">

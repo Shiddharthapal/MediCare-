@@ -2,17 +2,16 @@ import connect from "@/lib/connection";
 import DoctorDetails from "@/model/doctorDetails";
 import type { APIRoute } from "astro";
 
-export const GET: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async ({ params, request }: any) => {
   const headers = {
     "Content-Type": "application/json",
   };
   try {
     let { id } = params;
-    console.log("🧞‍♂️id --->", id);
     await connect();
 
     let doctordetails = await DoctorDetails.findOne({ userId: id });
-    //console.log("🧞‍♂️doctordetails --->", doctordetails);
+    // console.log("🧞‍♂️doctordetails --->", doctordetails);
 
     return new Response(
       JSON.stringify({

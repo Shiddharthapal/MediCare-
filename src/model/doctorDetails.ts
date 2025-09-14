@@ -90,7 +90,7 @@ const PrescriptionSchema = new mongoose.Schema({
   },
 });
 
-const practiceSetUp = new mongoose.Schema({
+const practiceSettingData = new mongoose.Schema({
   practiceName: {
     type: String,
   },
@@ -327,6 +327,11 @@ const doctorDetailsSchema = new mongoose.Schema({
       },
       message: "consultation Modes slot must contain at least one Modes",
     },
+  },
+
+  practiceSettingData: {
+    type: practiceSettingData,
+    default: () => ({}),
   },
 
   createdAt: {

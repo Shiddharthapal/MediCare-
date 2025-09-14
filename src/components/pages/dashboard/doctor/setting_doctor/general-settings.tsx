@@ -16,13 +16,13 @@ import {
 } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAppSelector } from "@/redux/hooks";
 
 interface ProfileInformation {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
-  phone: string;
-  bio: string;
+  contact: string;
+  about: string;
 }
 
 interface SystemPreferences {
@@ -42,11 +42,10 @@ export function GeneralSettings() {
   const [hasProfile, setHasProfile] = useState(false);
   const [formData, setFormData] = useState<GeneralSettingsData>({
     profile: {
-      firstName: "",
-      lastName: "",
+      name: "",
       email: "",
-      phone: "",
-      bio: "",
+      contact: "",
+      about: "",
     },
     preferences: {
       darkMode: localStorage.getItem("darkMode") === "true",
@@ -54,6 +53,9 @@ export function GeneralSettings() {
       timezone: localStorage.getItem("timezone") || "Asia/Dhaka",
     },
   });
+
+  const user = useAppSelector((state) => state.auth.user);
+  const id = user?._id;
 
   useEffect(() => {
     fetchProfileData();
@@ -77,18 +79,18 @@ export function GeneralSettings() {
   const fetchProfileData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/doctor/doctorDetails");
+      const response = await fetch(`/api/doctor/${id}`);
       const data = await response.json();
+      console.log("🧞‍♂️  data --->", data);
 
       if (data) {
         setFormData((prev) => ({
           ...prev,
           profile: {
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
-            email: data.email || "",
-            phone: data.phone || "",
-            bio: data.bio || "",
+            name: data?.doctordetails?.name || "",
+            email: data?.doctordetails?.email || "",
+            contact: data?.doctordetails?.contact || "",
+            about: data?.doctordetails?.about || "",
           },
         }));
         setHasProfile(true);
@@ -125,13 +127,7 @@ export function GeneralSettings() {
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
               <p className="text-gray-700 leading-relaxed text-lg">
-                {formData?.profile?.firstName || "Not Provided"}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <p className="text-gray-700 leading-relaxed text-lg">
-                {formData?.profile?.lastName}
+                {formData?.profile?.name || "Not Provided"}
               </p>
             </div>
           </div>
@@ -144,13 +140,13 @@ export function GeneralSettings() {
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
             <p className="text-gray-700 leading-relaxed text-lg">
-              {formData?.profile?.phone || "Not Provided"}
+              {formData?.profile?.contact || "Not Provided"}
             </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="bio">Professional Bio</Label>
             <p className="text-gray-700 leading-relaxed text-lg">
-              {formData.profile.bio || "Not Provided"}
+              {formData.profile.about || "Not Provided"}
             </p>
           </div>
         </CardContent>
