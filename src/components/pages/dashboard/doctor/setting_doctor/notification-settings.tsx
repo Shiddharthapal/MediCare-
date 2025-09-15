@@ -43,10 +43,10 @@ export function NotificationSettings() {
       newAppointments: true,
       cancellations: true,
       patientMessages: true,
-      labResults: true,
+      labResults: false,
     },
     sms: {
-      emergencyAlerts: true,
+      emergencyAlerts: false,
       dailySummary: false,
     },
     patient: {
