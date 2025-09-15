@@ -8,6 +8,20 @@ interface VitalSign {
   oxygenSaturation?: string;
   bmi?: number;
 }
+
+interface PaymentMethods {
+  acceptCreditCards: boolean;
+  acceptDebitCards: boolean;
+  acceptBkash: boolean;
+  acceptNagad: boolean;
+  acceptRocket: boolean;
+  creditCardNumber?: string;
+  debitAccountNumber?: string;
+  bkashNumber?: string;
+  nagadNumber?: string;
+  rocketNumber?: string;
+}
+
 interface Medication {
   id: string;
   medecineName: string;
@@ -97,6 +111,7 @@ export interface DoctorDetails {
   degree: string;
   language: string[];
   about: string;
+  payment: PaymentMethods[];
   availableSlots: string[];
   appointments: AppointmentData[];
   practiceSettingData: PracticeSettingData[];

@@ -26,6 +26,47 @@ const VitalSignSchema = new mongoose.Schema({
     type: Number,
   },
 });
+
+const PaymentMethods = new mongoose.Schema({
+  acceptCreditCards: {
+    type: Boolean,
+    default: false,
+  },
+  acceptDebitCards: {
+    type: Boolean,
+    default: false,
+  },
+  acceptBkash: {
+    type: Boolean,
+    default: false,
+  },
+  acceptNagad: {
+    type: Boolean,
+    default: false,
+  },
+  acceptRocket: {
+    type: Boolean,
+    default: false,
+  },
+
+  // Payment account details (conditional validation)
+  creditCardNumber: {
+    type: String,
+  },
+  debitAccountNumber: {
+    type: String,
+  },
+  bkashNumber: {
+    type: String,
+  },
+  nagadNumber: {
+    type: String,
+  },
+  rocketNumber: {
+    type: String,
+  },
+});
+
 const MedicationSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -304,6 +345,12 @@ const doctorDetailsSchema = new mongoose.Schema({
   about: {
     type: String,
   },
+
+  payment: {
+    type: PaymentMethods,
+    default: [],
+  },
+
   availableSlots: {
     type: [String],
     require: true,

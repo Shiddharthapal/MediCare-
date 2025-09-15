@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -15,8 +18,102 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
+
+interface NotificationState {
+  email: {
+    newAppointments: boolean;
+    cancellations: boolean;
+    patientMessages: boolean;
+    labResults: boolean;
+  };
+  sms: {
+    emergencyAlerts: boolean;
+    dailySummary: boolean;
+  };
+  patient: {
+    reminderTiming: string;
+    followUpMessages: boolean;
+  };
+}
 
 export function NotificationSettings() {
+  const [settings, setSettings] = useState<NotificationState>({
+    email: {
+      newAppointments: true,
+      cancellations: true,
+      patientMessages: true,
+      labResults: true,
+    },
+    sms: {
+      emergencyAlerts: true,
+      dailySummary: false,
+    },
+    patient: {
+      reminderTiming: "24",
+      followUpMessages: true,
+    },
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleEmailToggle = (key: keyof typeof settings.email) => {
+    setSettings((prev) => ({
+      ...prev,
+      email: {
+        ...prev.email,
+        [key]: !prev.email[key],
+      },
+    }));
+  };
+
+  const handleSmsToggle = (key: keyof typeof settings.sms) => {
+    setSettings((prev) => ({
+      ...prev,
+      sms: {
+        ...prev.sms,
+        [key]: !prev.sms[key],
+      },
+    }));
+  };
+
+  const handlePatientToggle = (key: keyof typeof settings.patient) => {
+    if (typeof settings.patient[key] === "boolean") {
+      setSettings((prev) => ({
+        ...prev,
+        patient: {
+          ...prev.patient,
+          [key]: !prev.patient[key as keyof typeof prev.patient],
+        },
+      }));
+    }
+  };
+
+  const handleReminderTimingChange = (value: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      patient: {
+        ...prev.patient,
+        reminderTiming: value,
+      },
+    }));
+  };
+
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    toast({
+      title: "Settings saved",
+      description:
+        "Your notification preferences have been updated successfully.",
+    });
+
+    setIsSaving(false);
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -34,7 +131,10 @@ export function NotificationSettings() {
                 Get notified when patients book new appointments
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={settings.email.newAppointments}
+              onCheckedChange={() => handleEmailToggle("newAppointments")}
+            />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -43,7 +143,10 @@ export function NotificationSettings() {
                 Get notified when appointments are cancelled
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={settings.email.cancellations}
+              onCheckedChange={() => handleEmailToggle("cancellations")}
+            />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -52,7 +155,10 @@ export function NotificationSettings() {
                 Get notified when patients send messages
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={settings.email.patientMessages}
+              onCheckedChange={() => handleEmailToggle("patientMessages")}
+            />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -61,7 +167,10 @@ export function NotificationSettings() {
                 Get notified when lab results are available
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={settings.email.labResults}
+              onCheckedChange={() => handleEmailToggle("labResults")}
+            />
           </div>
         </CardContent>
       </Card>
@@ -81,7 +190,10 @@ export function NotificationSettings() {
                 Receive urgent notifications via SMS
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={settings.sms.emergencyAlerts}
+              onCheckedChange={() => handleSmsToggle("emergencyAlerts")}
+            />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -90,7 +202,10 @@ export function NotificationSettings() {
                 Daily summary of appointments and tasks
               </p>
             </div>
-            <Switch />
+            <Switch
+              checked={settings.sms.dailySummary}
+              onCheckedChange={() => handleSmsToggle("dailySummary")}
+            />
           </div>
         </CardContent>
       </Card>
@@ -105,7 +220,10 @@ export function NotificationSettings() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="reminderTiming">Appointment Reminder Timing</Label>
-            <Select defaultValue="24">
+            <Select
+              value={settings.patient.reminderTiming}
+              onValueChange={handleReminderTimingChange}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -124,13 +242,18 @@ export function NotificationSettings() {
                 Automatically send follow-up messages after appointments
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={settings.patient.followUpMessages}
+              onCheckedChange={() => handlePatientToggle("followUpMessages")}
+            />
           </div>
         </CardContent>
       </Card>
 
       <div className="flex justify-end">
-        <Button>Save Changes</Button>
+        <Button onClick={handleSaveChanges} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
       </div>
     </div>
   );
