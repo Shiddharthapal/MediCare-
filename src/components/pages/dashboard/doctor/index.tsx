@@ -33,6 +33,7 @@ import {
 import Appointments from "./appoinments";
 import Patients from "./allpatients";
 import Setting from "./setting_doctor/index";
+import Reports from "./reports/index";
 import { useAppSelector } from "@/redux/hooks";
 
 interface AppointmentData {
@@ -760,7 +761,7 @@ export default function DashboardPage() {
       )}
 
       <div
-        className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
+        className={`container transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
         {/* Main Content */}
         {currentPage === "dashboard" && (
@@ -1169,11 +1170,13 @@ export default function DashboardPage() {
         )}
         {currentPage === "patients" && <Patients onNavigate={setCurrentPage} />}
         {currentPage === "setting" && <Setting onNavigate={setCurrentPage} />}
+        {currentPage === "reports" && <Reports onNavigate={setCurrentPage} />}
 
         {/* Other Pages Placeholder */}
         {currentPage !== "dashboard" &&
           currentPage !== "appointments" &&
-          currentPage !=="setting" &&
+          currentPage !== "reports" &&
+          currentPage !== "setting" &&
           currentPage !== "patients" && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">

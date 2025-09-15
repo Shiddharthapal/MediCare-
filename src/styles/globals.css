@@ -127,3 +127,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+.container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.containerReport {
+  @apply max-w-7xl mx-auto px-4;
+  margin-left: calc((100vw - 90rem) / 2); /* Double the auto margin */
+  margin-right: 0;
+}
