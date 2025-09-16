@@ -106,11 +106,11 @@ export function MedicalCharts() {
             config={{
               accuracy: {
                 label: "Accuracy (%)",
-                color: "hsl(var(--chart-1))",
+                color: "hsl(217, 91%, 60%)",
               },
               totalCases: {
                 label: "Total Cases",
-                color: "hsl(var(--chart-2))",
+                color: "hsl(330, 81%, 60%)",
               },
             }}
             className="h-[300px]"
@@ -126,8 +126,8 @@ export function MedicalCharts() {
                   yAxisId="left"
                   type="monotone"
                   dataKey="accuracy"
-                  stroke="var(--color-chart-1)"
-                  fill="var(--color-chart-1)"
+                  stroke="hsl(217, 91%, 60%)"
+                  fill="hsl(217, 91%, 60%)"
                   fillOpacity={0.3}
                   name="Accuracy (%)"
                 />
@@ -135,7 +135,8 @@ export function MedicalCharts() {
                   yAxisId="right"
                   type="monotone"
                   dataKey="totalCases"
-                  stroke="var(--color-chart-2)"
+                  stroke="hsl(330, 81%, 60%)"
+                  fill="hsl(330, 81%, 60%)"
                   strokeWidth={2}
                   name="Total Cases"
                 />
@@ -257,15 +258,15 @@ export function MedicalCharts() {
             config={{
               success: {
                 label: "Success",
-                color: "hsl(var(--chart-1))",
+                color: "hsl(163, 94%, 24%)",
               },
               partial: {
                 label: "Partial Success",
-                color: "hsl(var(--chart-2))",
+                color: "hsl(217, 91%, 60%)",
               },
               failed: {
                 label: "Failed",
-                color: "hsl(var(--chart-3))",
+                color: "hsl(330, 81%, 60%)",
               },
             }}
             className="h-[300px]"
@@ -279,19 +280,19 @@ export function MedicalCharts() {
                 <Bar
                   dataKey="success"
                   stackId="a"
-                  fill="var(--color-chart-1)"
+                  fill="hsl(163, 94%, 24%)"
                   name="Success"
                 />
                 <Bar
                   dataKey="partial"
                   stackId="a"
-                  fill="var(--color-chart-2)"
+                  fill="hsl(217, 91%, 60%)"
                   name="Partial Success"
                 />
                 <Bar
                   dataKey="failed"
                   stackId="a"
-                  fill="var(--color-chart-3)"
+                  fill="hsl(330, 81%, 60%)"
                   name="Failed"
                 />
               </BarChart>
@@ -311,16 +312,16 @@ export function MedicalCharts() {
             Appointment frequency and average duration by hour
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="">
           <ChartContainer
             config={{
               appointments: {
                 label: "Appointments",
-                color: "hsl(var(--chart-1))",
+                color: "hsl(217, 91%, 60%)",
               },
               avgDuration: {
                 label: "Avg Duration (min)",
-                color: "hsl(var(--chart-2))",
+                color: "hsl(217, 91%, 60%)",
               },
             }}
             className="h-[300px]"
@@ -335,7 +336,7 @@ export function MedicalCharts() {
                 <Bar
                   yAxisId="left"
                   dataKey="appointments"
-                  fill="var(--color-chart-1)"
+                  fill="hsl(217, 91%, 60%)"
                   name="Appointments"
                   opacity={0.7}
                 />
@@ -343,7 +344,7 @@ export function MedicalCharts() {
                   yAxisId="right"
                   type="monotone"
                   dataKey="avgDuration"
-                  stroke="var(--color-chart-2)"
+                  stroke="hsl(330, 81%, 60%)"
                   strokeWidth={3}
                   name="Avg Duration (min)"
                 />

@@ -56,30 +56,46 @@ export function PatientAnalytics() {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {/* Age Group Distribution */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Patient Age Distribution</CardTitle>
-          <CardDescription>Breakdown of patients by age groups</CardDescription>
+      <Card className="w-full">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg sm:text-xl md:text-2xl">
+            Patient Age Distribution
+          </CardTitle>
+          <CardDescription className="text-sm sm:text-base">
+            Breakdown of patients by age groups
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <ChartContainer
             config={{
               count: {
                 label: "Patient Count",
-                color: "hsl(var(--chart-1))",
+                color: "hsl(217, 91%, 60%)",
               },
             }}
-            className="h-[300px]"
+            className="h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageGroupData}>
+              <BarChart
+                data={ageGroupData}
+                margin={{
+                  top: 10,
+                  right: 10,
+                  left: 10,
+                  bottom: 10,
+                }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="ageGroup" />
-                <YAxis />
+                <XAxis
+                  dataKey="ageGroup"
+                  fontSize={12}
+                  className="text-xs sm:text-sm"
+                />
+                <YAxis fontSize={12} className="text-xs sm:text-sm" />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   dataKey="count"
-                  fill="var(--color-chart-1)"
+                  fill="var(--color-count)"
                   name="Patient Count"
                   radius={[4, 4, 0, 0]}
                 />
@@ -88,46 +104,80 @@ export function PatientAnalytics() {
           </ChartContainer>
         </CardContent>
       </Card>
-
       {/* New vs Returning Patients */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Patient Visit Patterns</CardTitle>
-          <CardDescription>New vs returning patients over time</CardDescription>
+      <Card className="w-full shadow-sm hover:shadow-md transition-shadow duration-200">
+        <CardHeader className="pb-3 sm:pb-4 md:pb-6">
+          <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold">
+            Patient Visit Patterns
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm md:text-base text-muted-foreground">
+            New vs returning patients over time
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 sm:p-4 md:p-6">
           <ChartContainer
             config={{
               newPatients: {
                 label: "New Patients",
-                color: "hsl(var(--chart-1))",
+                color: "hsl(217, 91%, 60%)",
               },
               returningPatients: {
                 label: "Returning Patients",
-                color: "hsl(var(--chart-2))",
+                color: "hsl(330, 81%, 60%)",
               },
             }}
-            className="h-[300px]"
+            className="h-[200px] xs:h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] xl:h-[450px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={visitFrequencyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
+              <LineChart
+                data={visitFrequencyData}
+                margin={{
+                  top: 5,
+                  right: window?.innerWidth < 640 ? 5 : 20,
+                  left: window?.innerWidth < 640 ? 5 : 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <XAxis
+                  dataKey="month"
+                  fontSize={
+                    window?.innerWidth < 640
+                      ? 10
+                      : window?.innerWidth < 768
+                        ? 12
+                        : 14
+                  }
+                  tick={{ fontSize: window?.innerWidth < 640 ? 10 : 12 }}
+                />
+                <YAxis
+                  fontSize={
+                    window?.innerWidth < 640
+                      ? 10
+                      : window?.innerWidth < 768
+                        ? 12
+                        : 14
+                  }
+                  tick={{ fontSize: window?.innerWidth < 640 ? 10 : 12 }}
+                />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line
                   type="monotone"
                   dataKey="newPatients"
-                  stroke="var(--color-chart-1)"
-                  strokeWidth={2}
+                  stroke="hsl(217, 91%, 60%)"
+                  strokeWidth={window?.innerWidth < 640 ? 1.5 : 2}
                   name="New Patients"
+                  dot={{ r: window?.innerWidth < 640 ? 3 : 4 }}
+                  activeDot={{ r: window?.innerWidth < 640 ? 4 : 6 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="returningPatients"
-                  stroke="var(--color-chart-2)"
-                  strokeWidth={2}
+                  stroke="hsl(330, 81%, 60%)"
+                  strokeWidth={window?.innerWidth < 640 ? 1.5 : 2}
                   name="Returning Patients"
+                  dot={{ r: window?.innerWidth < 640 ? 3 : 4 }}
+                  activeDot={{ r: window?.innerWidth < 640 ? 4 : 6 }}
                 />
               </LineChart>
             </ResponsiveContainer>
