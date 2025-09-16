@@ -1,13 +1,51 @@
+interface VitalSign {
+  bloodPressure?: string;
+  heartRate?: string;
+  temperature?: string;
+  weight?: string;
+  height?: string;
+  respiratoryRate?: string;
+  oxygenSaturation?: string;
+  bmi?: number;
+}
+interface Medication {
+  id: string;
+  medecineName: string;
+  medecineDosage: string;
+  frequency: string;
+  duration: string;
+  instructions?: string;
+  quantity: string;
+  route?: string[];
+  startDate?: Date;
+  endDate?: Date;
+}
+interface Prescription {
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  symptoms: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
 interface AppointmentData {
+  doctorpatinetId: string;
   doctorUserId: string;
   doctorName: string;
   doctorSpecialist: string;
   doctorGender: string;
+  doctorEmail: string;
+  hospital: string;
   patientName: string;
   patientEmail: string;
   patientPhone: string;
   appointmentDate: string;
   appointmentTime: string;
+  status: string;
   consultationType: string;
   consultedType: string;
   reasonForVisit: string;
@@ -17,8 +55,10 @@ interface AppointmentData {
   emergencyPhone: string;
   paymentMethod: string;
   specialRequests: string;
+  prescription: Prescription;
   createdAt: Date;
 }
+
 export interface UserDetails {
   _id: string;
   userId: string;
@@ -26,6 +66,7 @@ export interface UserDetails {
   name: string;
   fatherName?: string;
   address: string;
+  dateOfBirth: Date;
   contactNumber: string;
   age: number;
   gender: string;

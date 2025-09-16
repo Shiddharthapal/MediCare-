@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,11 +19,109 @@ import {
   AlertTriangle,
   Plus,
   Filter,
+  Eye,
   Download,
   Video,
   FileEdit,
 } from "lucide-react";
 import Prescription from "./prescription";
+import { useAppSelector } from "@/redux/hooks";
+
+interface AppointmentData {
+  _id: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorEmail: string;
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  createdAt: Date;
+}
+export interface DoctorDetails {
+  userId: string;
+  name: string;
+  email: string;
+  contact: string;
+  gender: string;
+  registrationNo: string;
+  specialist: string;
+  specializations: string[];
+  hospital: string;
+  fees: number;
+  rating?: number;
+  experience: string;
+  education: string;
+  degree: string;
+  language: string[];
+  about: string;
+  availableSlots: string[];
+  appointments: AppointmentData[];
+  consultationModes: string[];
+  createdAt: Date;
+}
+
+const mockAppointmentData: AppointmentData = {
+  _id: "",
+  doctorName: "",
+  doctorSpecialist: "",
+  doctorEmail: "",
+  patientId: "",
+  patientName: "",
+  patientEmail: "",
+  patientPhone: "",
+  patientGender: "",
+  appointmentDate: "",
+  appointmentTime: "",
+  status: "",
+  consultationType: "",
+  consultedType: "",
+  reasonForVisit: "",
+  symptoms: "",
+  previousVisit: "",
+  emergencyContact: "",
+  emergencyPhone: "",
+  paymentMethod: "",
+  specialRequests: "",
+  createdAt: new Date(),
+};
+
+// Mock DoctorDetails with empty strings
+const mockDoctorDetails: DoctorDetails = {
+  userId: "",
+  name: "",
+  email: "",
+  contact: "",
+  gender: "",
+  registrationNo: "",
+  specialist: "",
+  specializations: [],
+  hospital: "",
+  fees: 0,
+  rating: 0,
+  experience: "",
+  education: "",
+  degree: "",
+  language: [],
+  about: "",
+  availableSlots: [],
+  appointments: [],
+  consultationModes: [],
+  createdAt: new Date(),
+};
 
 // Mock data for appointments
 const appointmentsData = {
@@ -343,120 +441,151 @@ const appointmentsData = {
   ],
 };
 
-const appointmentRequests = [
-  {
-    id: 1,
-    patient: {
-      name: "Sarah Wilson",
-      avatar: "SW",
-      phone: "(555) 234-5678",
-      email: "sarah.wilson@email.com",
-      age: 31,
-      gender: "Female",
-    },
-    requestedDate: "December 12, 2024",
-    requestedTime: "10:30 AM",
-    alternativeTime: "2:00 PM",
-    duration: "30 min",
-    type: "General Consultation",
-    reason: "Persistent headaches and fatigue for the past 2 weeks",
-    urgency: "Medium",
-    requestDate: "December 8, 2024",
-    status: "pending",
-    notes: "Patient reports difficulty sleeping and increased stress levels",
-  },
-  {
-    id: 2,
-    patient: {
-      name: "Michael Brown",
-      avatar: "MB",
-      phone: "(555) 345-6789",
-      email: "michael.brown@email.com",
-      age: 45,
-      gender: "Male",
-    },
-    requestedDate: "December 13, 2024",
-    requestedTime: "9:15 AM",
-    alternativeTime: "11:00 AM",
-    duration: "45 min",
-    type: "Follow-up Consultation",
-    reason: "Blood pressure medication review and adjustment",
-    urgency: "High",
-    requestDate: "December 7, 2024",
-    status: "pending",
-    notes: "Patient experiencing side effects from current medication",
-  },
-  {
-    id: 3,
-    patient: {
-      name: "Emily Davis",
-      avatar: "ED",
-      phone: "(555) 456-7890",
-      email: "emily.davis@email.com",
-      age: 28,
-      gender: "Female",
-    },
-    requestedDate: "December 14, 2024",
-    requestedTime: "3:30 PM",
-    alternativeTime: "4:15 PM",
-    duration: "30 min",
-    type: "Routine Checkup",
-    reason: "Annual physical examination and health screening",
-    urgency: "Low",
-    requestDate: "December 6, 2024",
-    status: "pending",
-    notes: "Patient is due for annual wellness visit",
-  },
-  {
-    id: 4,
-    patient: {
-      name: "Robert Johnson",
-      avatar: "RJ",
-      phone: "(555) 567-8901",
-      email: "robert.johnson@email.com",
-      age: 52,
-      gender: "Male",
-    },
-    requestedDate: "December 15, 2024",
-    requestedTime: "1:45 PM",
-    alternativeTime: "3:00 PM",
-    duration: "30 min",
-    type: "Diabetes Management",
-    reason: "Quarterly diabetes check and blood sugar monitoring",
-    urgency: "Medium",
-    requestDate: "December 5, 2024",
-    status: "pending",
-    notes: "Patient reports fluctuating blood sugar levels",
-  },
-  {
-    id: 5,
-    patient: {
-      name: "Lisa Anderson",
-      avatar: "LA",
-      phone: "(555) 678-9012",
-      email: "lisa.anderson@email.com",
-      age: 38,
-      gender: "Female",
-    },
-    requestedDate: "December 16, 2024",
-    requestedTime: "11:30 AM",
-    alternativeTime: "2:30 PM",
-    duration: "45 min",
-    type: "Specialist Consultation",
-    reason: "Chronic back pain evaluation and treatment options",
-    urgency: "High",
-    requestDate: "December 4, 2024",
-    status: "pending",
-    notes: "Patient unable to perform daily activities due to pain",
-  },
-];
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
-export default function AppointmentsPage() {
+  if (date.toDateString() === today.toDateString()) {
+    return "Today";
+  } else if (date.toDateString() === tomorrow.toDateString()) {
+    return "Tomorrow";
+  } else {
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
+  }
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "confirmed":
+      return "bg-green-100 text-green-800";
+    case "pending":
+      return "bg-yellow-100 text-yellow-800";
+    case "completed":
+      return "bg-blue-100 text-blue-800";
+    case "cancelled":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+
+const getModeIcon = (mode: string) => {
+  switch (mode) {
+    case "video":
+      return <Video className="h-4 w-4" />;
+    case "phone":
+      return <Phone className="h-4 w-4" />;
+    case "in-person":
+      return <MapPin className="h-4 w-4" />;
+    default:
+      return <Calendar className="h-4 w-4" />;
+  }
+};
+
+// Interface for categorized appointments
+interface CategorizedAppointments {
+  today: AppointmentData[];
+  future: AppointmentData[];
+  past: AppointmentData[];
+}
+
+// Interface for grouped appointments by date
+interface GroupedAppointments {
+  [date: string]: AppointmentData[];
+}
+
+// Helper function to get today's date in YYYY-MM-DD format
+const getTodayDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+// Helper function to compare dates
+const compareDates = (
+  appointmentDate: string,
+  todayDate: string
+): "past" | "today" | "future" => {
+  if (appointmentDate < todayDate) return "past";
+  if (appointmentDate === todayDate) return "today";
+  return "future";
+};
+
+// Function to categorize appointments
+const categorizeAppointments = (
+  appointments: AppointmentData[]
+): CategorizedAppointments => {
+  const todayDate = getTodayDate();
+  console.log("appointments=>", appointments);
+
+  const categorized: CategorizedAppointments = {
+    today: [],
+    future: [],
+    past: [],
+  };
+
+  appointments.forEach((appointment) => {
+    const category = compareDates(appointment.appointmentDate, todayDate);
+    categorized[category].push(appointment);
+  });
+
+  // Sort appointments within each category
+  categorized.today.sort((a, b) =>
+    a.appointmentTime.localeCompare(b.appointmentTime)
+  );
+  categorized.future.sort((a, b) => {
+    if (a.appointmentDate === b.appointmentDate) {
+      return a.appointmentTime.localeCompare(b.appointmentTime);
+    }
+    return a.appointmentDate.localeCompare(b.appointmentDate);
+  });
+  categorized.past.sort((a, b) => {
+    if (b.appointmentDate === a.appointmentDate) {
+      return b.appointmentTime.localeCompare(a.appointmentTime);
+    }
+    return b.appointmentDate.localeCompare(a.appointmentDate);
+  });
+
+  return categorized;
+};
+
+// Function to group appointments by date
+const groupAppointmentsByDate = (
+  appointments: AppointmentData[]
+): GroupedAppointments => {
+  return appointments.reduce((grouped: GroupedAppointments, appointment) => {
+    const date = appointment.appointmentDate;
+    if (!grouped[date]) {
+      grouped[date] = [];
+    }
+    grouped[date].push(appointment);
+
+    // Sort appointments within the same date by time
+    grouped[date].sort((a, b) =>
+      a.appointmentTime.localeCompare(b.appointmentTime)
+    );
+
+    return grouped;
+  }, {});
+};
+interface PatientsPageProps {
+  onNavigate: (page: string) => void;
+}
+
+export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
-  const [requests, setRequests] = useState(appointmentRequests);
+  const [appointmentData, setAppointmentData] =
+    useState<DoctorDetails>(mockDoctorDetails);
   const [showPrescription, setShowPrescription] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const doctor = useAppSelector((state) => state.auth.user);
+  // console.log("🧞‍♂️doctor --->", doctor);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -492,6 +621,62 @@ export default function AppointmentsPage() {
     }
   };
 
+  const categorizedAppointments = useMemo(() => {
+    let appointmentdata = appointmentData.appointments;
+    return categorizeAppointments(
+      appointmentdata
+        ? Array.isArray(appointmentdata)
+          ? appointmentdata
+          : []
+        : []
+    );
+  }, [appointmentData]);
+
+  useEffect(() => {
+    let id = doctor?._id;
+    console.log("🧞‍♂️id --->", id);
+    const fetchData = async () => {
+      const response = await fetch(`/api/doctor/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const responsedata = await response.json();
+      // console.log("🧞‍♂️responsedata --->", responsedata);
+      setAppointmentData(responsedata.doctordetails);
+    };
+
+    fetchData();
+  }, [doctor]);
+
+  let todayGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.today);
+  }, [categorizedAppointments.today]);
+
+  if (todayGrouped) {
+    Object.keys(todayGrouped).forEach(
+      (date) =>
+        (todayGrouped[date] = todayGrouped[date].map(
+          (appointment: AppointmentData) => ({
+            ...appointment,
+            status: "confirmed",
+          })
+        ))
+    );
+  }
+  console.log("today appointment=>", todayGrouped);
+
+  const futureGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.future);
+  }, [categorizedAppointments.future]);
+  console.log("future appointment=>", futureGrouped);
+
+  const pastGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.past);
+  }, [categorizedAppointments.past]);
+  console.log("🧞‍♂️  pastGrouped --->", pastGrouped);
+
   const handleAcceptRequest = (
     requestId: number,
     timeSlot: "primary" | "alternative"
@@ -511,15 +696,6 @@ export default function AppointmentsPage() {
       )
     );
     alert(`Appointment request accepted and confirmation sent to patient!`);
-  };
-
-  const handleRejectRequest = (requestId: number) => {
-    setRequests((prevRequests) =>
-      prevRequests.map((request) =>
-        request.id === requestId ? { ...request, status: "rejected" } : request
-      )
-    );
-    alert(`Appointment request rejected and notification sent to patient.`);
   };
 
   const getUrgencyColor = (urgency: string) => {
@@ -545,69 +721,152 @@ export default function AppointmentsPage() {
     setSelectedPatient(null);
   };
 
+  const handleCancelAppointment = async (appointment: any) => {
+    let id = doctor?._id;
+    try {
+      const response = await fetch("/api/doctor/cancelAppointment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId: appointment._id,
+          doctorId: id,
+          patientId: appointment.patientId,
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the appointment data
+        const fetchData = async () => {
+          const response = await fetch(`/api/doctor/${id}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const responsedata = await response.json();
+          setAppointmentData(responsedata.doctordetails);
+        };
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+    }
+  };
+  const getPatientInitials = (patientName: string) => {
+    if (!patientName) return "AB";
+
+    const cleanName = patientName.trim();
+
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
+  };
+
   // If prescription is shown, render only the prescription component
   if (showPrescription && selectedPatient) {
+    let id = doctor?._id;
     return (
       <Prescription
-        patientData={selectedPatient}
+        patientData={{
+          ...selectedPatient,
+          hospital: appointmentData.hospital,
+          doctorContact: appointmentData.contact,
+          doctorEmail: appointmentData.email,
+          doctorGender: appointmentData.gender,
+          doctorId: id,
+        }}
         onClose={handleClosePrescription}
       />
     );
   }
 
   const AppointmentCard = ({
+    status,
     appointment,
-    showDate = false,
+    showDate,
     isPrevious = false,
-  }: any) => (
+  }: {
+    status: string;
+    appointment: any;
+    showDate: boolean;
+    isPrevious?: boolean;
+  }) => (
     <Card className="mb-4 hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
+      <CardContent className="p-1">
+        <div className="flex items-center justify-between">
           <div className="flex items-start gap-4 flex-1">
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback>{appointment.patient.avatar}</AvatarFallback>
+              <AvatarFallback>
+                {getPatientInitials(appointment?.patientName)}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-lg">
-                  {appointment.patient.name}
+                  {appointment?.patientName}
                 </h3>
-                <Badge className={getStatusColor(appointment.status)}>
-                  {appointment.status.charAt(0).toUpperCase() +
-                    appointment.status.slice(1)}
-                </Badge>
+                <Badge className={getStatusColor(status)}>{status}</Badge>
+                <div>
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-50 text-blue-700 border-blue-200"
+                  >
+                    {appointment.patientGender}
+                  </Badge>
+                </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {showDate && <span>{appointment.date} - </span>}
-                  <span>
-                    {appointment.time} ({appointment.duration})
-                  </span>
+                <div className="flex flex-col  gap-1">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {showDate && <span>{appointment?.appointmentDate} </span>}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    <span>{appointment.appointmentTime} • 30 Minutes</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span>{appointment.location}</span>
+                  <span>
+                    {appointment.consultationType === "video" || "phone"
+                      ? "In home (online)"
+                      : appointmentData.hospital}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Phone className="h-4 w-4" />
-                  <span>{appointment.patient.phone}</span>
+                  <span>{appointment.patientPhone}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Mail className="h-4 w-4" />
-                  <span>{appointment.patient.email}</span>
+                  <span>{appointment.patientEmail}</span>
                 </div>
               </div>
               <div className="mb-3">
                 <p className="text-sm">
-                  <strong>Type:</strong> {appointment.type}
+                  <strong>Type:</strong> {appointment?.consultationType}
                 </p>
                 <p className="text-sm">
-                  <strong>Doctor:</strong> {appointment.doctor}
+                  <strong>Doctor:</strong> {appointment?.doctorName}
                 </p>
                 <p className="text-sm">
-                  <strong>Notes:</strong> {appointment.notes}
+                  <strong>Reason: </strong> {appointment.reasonForVisit}
                 </p>
                 {isPrevious && appointment.outcome && (
                   <p className="text-sm">
@@ -616,14 +875,13 @@ export default function AppointmentsPage() {
                 )}
               </div>
               <div className="text-xs text-gray-500">
-                Patient: {appointment.patient.age} years old,{" "}
-                {appointment.patient.gender}
+                Patient: {appointment?.patientAge} years old,{" "}
+                {appointment?.patientGender}
               </div>
             </div>
           </div>
           <div className="flex flex-col gap-2 ml-4">
-            {getStatusIcon(appointment.status)}
-            {!isPrevious && (
+            {status !== "completed" ? (
               <div className="flex flex-col gap-1">
                 <Button
                   size="sm"
@@ -643,21 +901,35 @@ export default function AppointmentsPage() {
                   <Button
                     size="sm"
                     className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
-                    onClick={() =>
-                      handleCreatePrescription(appointment.patient)
-                    }
+                    onClick={() => handleCreatePrescription(appointment)}
                   >
                     <FileEdit className="h-3 w-3 mr-1" />
                     Create
                   </Button>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-xs bg-transparent"
-                >
-                  Cancel
-                </Button>
+                {status === "pending" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs bg-transparent"
+                    onClick={() => handleCancelAppointment(appointment)}
+                  >
+                    Cancel
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <div className="">
+                  <Button
+                    size="sm"
+                    className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
+                    onClick={() => handleCreatePrescription(appointment)}
+                  >
+                    <Eye className="h-3 w-3 mr-1" />
+                    See Prescription
+                  </Button>
+                </div>
               </div>
             )}
           </div>
@@ -667,17 +939,10 @@ export default function AppointmentsPage() {
   );
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden min-h-screen bg-gray-50">
+    <div className="flex-1 flex flex-col items-center mx-28 overflow-hidden min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <button className="hover:text-gray-700">Dashboard</button>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-gray-900">Appointments</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
+      <header className="flex items-center  justify-between p-6 border-b border-gray-100 bg-white">
+        <div className="flex flex-row  justify-between gap-24 md:gap-52">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
@@ -688,25 +953,23 @@ export default function AppointmentsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            New Appointment
-          </Button>
+          <div className="flex gap-6">
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
+            </Button>
+            <Button size="sm" className="">
+              <Plus className="h-4 w-4 mr-2" />
+              New Appointment
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Main Content - Scrollable */}
       <main className="flex-1 overflow-y-auto p-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -715,14 +978,14 @@ export default function AppointmentsPage() {
                     {"Today's Appointments"}
                   </p>
                   <p className="text-2xl font-bold">
-                    {appointmentsData.today.length}
+                    {Object.entries(todayGrouped).length}
                   </p>
                 </div>
                 <Calendar className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          {/* <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -734,17 +997,14 @@ export default function AppointmentsPage() {
                 <AlertTriangle className="h-8 w-8 text-orange-500" />
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Upcoming (7 days)</p>
                   <p className="text-2xl font-bold">
-                    {appointmentsData.upcoming.reduce(
-                      (total, day) => total + day.appointments.length,
-                      0
-                    )}
+                    {Object.entries(futureGrouped).length}
                   </p>
                 </div>
                 <Clock className="h-8 w-8 text-green-500" />
@@ -757,7 +1017,7 @@ export default function AppointmentsPage() {
                 <div>
                   <p className="text-sm text-gray-600">Completed</p>
                   <p className="text-2xl font-bold">
-                    {appointmentsData.previous.length}
+                    {Object.entries(pastGrouped).length}
                   </p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-gray-500" />
@@ -768,16 +1028,16 @@ export default function AppointmentsPage() {
 
         {/* Appointments Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="today">Today</TabsTrigger>
-            <TabsTrigger value="requests">
+            {/* <TabsTrigger value="requests">
               Requests
               {requests.filter((r) => r.status === "pending").length > 0 && (
                 <Badge className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5">
                   {requests.filter((r) => r.status === "pending").length}
                 </Badge>
               )}
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="upcoming">Upcoming (7 days)</TabsTrigger>
             <TabsTrigger value="previous">Previous</TabsTrigger>
           </TabsList>
@@ -788,31 +1048,57 @@ export default function AppointmentsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  {"Today's Appointments - December 9, 2024"}
+                  {`Today's Appointments - ${new Date()}`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {appointmentsData.today.length > 0 ? (
-                  <div className="space-y-4">
-                    {appointmentsData.today.map((appointment) => (
-                      <AppointmentCard
-                        key={appointment.id}
-                        appointment={appointment}
-                      />
-                    ))}
-                  </div>
+                {Object.keys(todayGrouped).length > 0 ? (
+                  Object.entries(todayGrouped).map(
+                    ([date, appointments]: [string, AppointmentData[]]) =>
+                      appointments.map((appointment: AppointmentData) => {
+                        // Add individual appointment validation
+                        if (!appointment || !appointment._id) {
+                          console.warn(
+                            "Invalid appointment data:",
+                            appointment
+                          );
+                          return null;
+                        }
+
+                        if (appointment.status !== "cancelled") {
+                          return (
+                            <AppointmentCard
+                              status="confirmed"
+                              key={appointment._id}
+                              appointment={appointment}
+                              showDate={true}
+                            />
+                          );
+                        }
+                      })
+                  )
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No appointments scheduled for today</p>
-                  </div>
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No appointments
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        You don't have any appointments scheduled for today.
+                      </p>
+                      {/* <Button onClick={handleBookNewAppointment}>
+                  Book New Appointment
+                </Button> */}
+                    </CardContent>
+                  </Card>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Request Appointments */}
-          <TabsContent value="requests" className="mt-6">
+          {/* <TabsContent value="requests" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -967,9 +1253,9 @@ export default function AppointmentsPage() {
                 )}
               </CardContent>
             </Card>
-
-            {/* Processed Requests Section */}
-            {requests.filter((r) => r.status !== "pending").length > 0 && (
+*/}
+          {/* Processed Requests Section */}
+          {/* {requests.filter((r) => r.status !== "pending").length > 0 && (
               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1033,38 +1319,92 @@ export default function AppointmentsPage() {
                   </div>
                 </CardContent>
               </Card>
-            )}
-          </TabsContent>
+            )} */}
+          {/* </TabsContent> */}
 
           {/* Upcoming Appointments */}
           <TabsContent value="upcoming" className="mt-6">
-            <div className="space-y-6">
-              {appointmentsData.upcoming.map((dayData) => (
-                <Card key={dayData.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      {dayData.date} - {dayData.fullDate}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {dayData.appointments.length > 0 ? (
-                      <div className="space-y-4">
-                        {dayData.appointments.map((appointment) => (
-                          <AppointmentCard
-                            key={appointment.id}
-                            appointment={appointment}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 text-gray-500">
-                        <p>No appointments scheduled for this day</p>
-                      </div>
-                    )}
+            <div className="space-y-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5" />
+                    Previous Appointments
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+              {Object.keys(futureGrouped).length > 0 ? (
+                Object.entries(futureGrouped).map(
+                  ([date, appointments]: [string, AppointmentData[]]) => (
+                    <Card key={date}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 pb-2 border-b">
+                            <h3 className="text-lg font-medium text-gray-800">
+                              {formatDate(date)}
+                            </h3>
+                            <span className="text-sm text-gray-500">
+                              {new Date(date).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </span>
+                            <Badge variant="outline" className="ml-2">
+                              {appointments.length} appointment
+                              {appointments.length !== 1 ? "s" : ""}
+                            </Badge>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {appointments && appointments.length > 0 ? (
+                          appointments.map((appointment: AppointmentData) => {
+                            // Add individual appointment validation
+                            if (!appointment || !appointment._id) {
+                              console.warn(
+                                "Invalid appointment data:",
+                                appointment
+                              );
+                              return null;
+                            }
+                            if (appointment.status !== "cancelled") {
+                              return (
+                                <AppointmentCard
+                                  status="pending"
+                                  key={appointment._id}
+                                  appointment={appointment}
+                                  showDate={true}
+                                />
+                              );
+                            }
+                          })
+                        ) : (
+                          <div className="text-gray-500 text-center py-4">
+                            No appointments found for this date
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )
+                )
+              ) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No upcoming appointments
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      You don't have any appointments scheduled for the next 7
+                      days.
+                    </p>
+                    {/* <Button onClick={handleBookNewAppointment}>
+                  Book New Appointment
+                </Button> */}
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           </TabsContent>
 
@@ -1078,22 +1418,47 @@ export default function AppointmentsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {appointmentsData.previous.length > 0 ? (
-                  <div className="space-y-4">
-                    {appointmentsData.previous.map((appointment) => (
-                      <AppointmentCard
-                        key={appointment.id}
-                        appointment={appointment}
-                        showDate={true}
-                        isPrevious={true}
-                      />
-                    ))}
-                  </div>
+                {Object.keys(pastGrouped).length > 0 ? (
+                  Object.entries(pastGrouped).map(
+                    ([date, appointments]: [string, AppointmentData[]]) =>
+                      appointments.map((appointment: AppointmentData) => {
+                        // Add individual appointment validation
+                        if (!appointment || !appointment._id) {
+                          console.warn(
+                            "Invalid appointment data:",
+                            appointment
+                          );
+                          return null;
+                        }
+
+                        if (appointment.status !== "cancelled") {
+                          return (
+                            <AppointmentCard
+                              status="completed"
+                              key={appointment._id}
+                              appointment={appointment}
+                              showDate={true}
+                              isPrevious={true}
+                            />
+                          );
+                        }
+                      })
+                  )
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No previous appointments found</p>
-                  </div>
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No previous appointments
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        You don't have any previous appointments.
+                      </p>
+                      {/* <Button onClick={handleBookNewAppointment}>
+                  Book New Appointment
+                </Button> */}
+                    </CardContent>
+                  </Card>
                 )}
               </CardContent>
             </Card>

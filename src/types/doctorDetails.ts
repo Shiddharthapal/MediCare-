@@ -1,4 +1,71 @@
+interface VitalSign {
+  bloodPressure?: string;
+  heartRate?: string;
+  temperature?: string;
+  weight?: string;
+  height?: string;
+  respiratoryRate?: string;
+  oxygenSaturation?: string;
+  bmi?: number;
+}
+
+interface PaymentMethods {
+  acceptCreditCards: boolean;
+  acceptDebitCards: boolean;
+  acceptBkash: boolean;
+  acceptNagad: boolean;
+  acceptRocket: boolean;
+  creditCardNumber?: string;
+  debitAccountNumber?: string;
+  bkashNumber?: string;
+  nagadNumber?: string;
+  rocketNumber?: string;
+}
+
+interface Medication {
+  id: string;
+  medecineName: string;
+  medecineDosage: string;
+  frequency: string;
+  duration: string;
+  instructions?: string;
+  quantity: string;
+  route?: string[];
+  startDate?: Date;
+  endDate?: Date;
+}
+interface Prescription {
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  symptoms: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+interface PracticeSettingData {
+  practiceName: string;
+  specialty: string;
+  address: string;
+  phone: string;
+  fax: string;
+  appointmentDuration: string;
+  bufferTime: string;
+  allowOnlineBooking: boolean;
+  sendReminders: boolean;
+  workingHours: {
+    [key: string]: {
+      enabled: boolean;
+      startTime: string;
+      endTime: string;
+    };
+  };
+}
 interface AppointmentData {
+  doctorpatinetId: string;
   doctorName: string;
   doctorSpecialist: string;
   doctorEmail: string;
@@ -6,9 +73,14 @@ interface AppointmentData {
   patientName: string;
   patientEmail: string;
   patientPhone: string;
-  patinetGender: string;
+  patientGender: string;
+  patientAge: number;
+  patientAddress: string;
+  patientBloodgroup: string;
+  patientBithofday: Date;
   appointmentDate: string;
   appointmentTime: string;
+  status: string;
   consultationType: string;
   consultedType: string;
   reasonForVisit: string;
@@ -18,6 +90,7 @@ interface AppointmentData {
   emergencyPhone: string;
   paymentMethod: string;
   specialRequests: string;
+  prescription: Prescription;
   createdAt: Date;
 }
 export interface DoctorDetails {
@@ -38,8 +111,10 @@ export interface DoctorDetails {
   degree: string;
   language: string[];
   about: string;
+  payment: PaymentMethods[];
   availableSlots: string[];
   appointments: AppointmentData[];
+  practiceSettingData: PracticeSettingData[];
   consultationModes: string[];
   createdAt: Date;
 }

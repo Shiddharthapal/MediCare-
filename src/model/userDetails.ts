@@ -1,9 +1,105 @@
-import { date } from "astro:schema";
 import mongoose from "mongoose";
-
+const VitalSignSchema = new mongoose.Schema({
+  bloodPressure: {
+    type: String,
+  },
+  heartRate: {
+    type: String,
+  },
+  temperature: {
+    type: String,
+  },
+  weight: {
+    type: String,
+  },
+  height: {
+    type: String,
+  },
+  respiratoryRate: {
+    type: String,
+  },
+  oxygenSaturation: {
+    type: String,
+  },
+  bmi: {
+    type: Number,
+  },
+});
+const MedicationSchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+    },
+    medecineName: {
+      type: String,
+    },
+    medecineDosage: {
+      type: String,
+    },
+    frequency: {
+      type: String,
+    },
+    duration: {
+      type: String,
+    },
+    instructions: {
+      type: String,
+    },
+    quantity: {
+      type: String,
+    },
+    startDate: {
+      type: Date,
+    },
+    endDate: {
+      type: Date,
+    },
+  },
+  { _id: true }
+);
+const PrescriptionSchema = new mongoose.Schema(
+  {
+    vitalSign: {
+      type: VitalSignSchema,
+    },
+    primaryDiagnosis: {
+      type: String,
+    },
+    symptoms: {
+      type: String,
+    },
+    testandReport: {
+      type: String,
+    },
+    medication: {
+      type: [MedicationSchema],
+      default: [],
+    },
+    restrictions: {
+      type: String,
+    },
+    followUpDate: {
+      type: String,
+    },
+    additionalNote: {
+      type: String,
+    },
+    prescriptionId: {
+      type: String,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now(),
+    },
+  },
+  { _id: true }
+);
 // Define the appointment data schema as a subdocument
 const appointmentDataSchema = new mongoose.Schema(
   {
+    doctorpatinetId: {
+      type: String,
+    },
     doctorUserId: {
       type: String,
     },
@@ -14,6 +110,12 @@ const appointmentDataSchema = new mongoose.Schema(
       type: String,
     },
     doctorGender: {
+      type: String,
+    },
+    doctorEmail: {
+      type: String,
+    },
+    hospital: {
       type: String,
     },
     patientName: {
@@ -32,6 +134,10 @@ const appointmentDataSchema = new mongoose.Schema(
     appointmentTime: {
       type: String,
       required: true, // Fixed: was 'require'
+    },
+    status: {
+      type: String,
+      default: "pending",
     },
     consultationType: {
       type: String,
@@ -65,6 +171,10 @@ const appointmentDataSchema = new mongoose.Schema(
     specialRequests: {
       type: String,
     },
+    prescription: {
+      type: PrescriptionSchema,
+      default: {},
+    },
     createdAt: {
       type: Date,
     },
@@ -89,6 +199,9 @@ const userDetailsSchema = new mongoose.Schema({
   address: {
     type: String,
     required: true,
+  },
+  dateOfBirth: {
+    type: Date,
   },
   contactNumber: {
     type: String,

@@ -13,7 +13,6 @@ import Profile from "./pages/profile";
 import DashboardofDoctor from "./pages/dashboard/doctor";
 import DashboardofPatient from "./pages/dashboard/patient";
 import ProfileofDoctor from "./pages/profile/profilefordoctor";
-// import DoctorAppoinments from "./pages/dashboard/doctor/appoinments";
 import ProtectedRoute from "./ProctedRoute";
 export default function App() {
   return (

@@ -10,7 +10,7 @@ export const POST: APIRoute = async ({ request }) => {
   };
   try {
     const body = await request.json();
-    console.log("🧞‍♂️body --->", body);
+    // console.log("🧞‍♂️body --->", body);
     const { editedDoctor, token } = body;
     const {
       name,
@@ -78,18 +78,18 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    console.log("🧞‍♂️tokenDetails --->", editedDoctor);
+    // console.log("🧞‍♂️tokenDetails --->", editedDoctor);
     const tokenDetails = await verifyToken(token);
-    console.log("🧞‍♂️tokenDetails --->", tokenDetails);
+    // console.log("🧞‍♂️tokenDetails --->", tokenDetails);
 
     await connect();
 
     const doctordata = await Doctor.findOne({ _id: tokenDetails?.userId });
-    const doctordetails = await DoctorDetails.findOne({
+    let doctordetails = await DoctorDetails.findOne({
       userId: tokenDetails?.userId,
     });
     if (!doctordetails) {
-      const doctordetails = new DoctorDetails({
+      doctordetails = new DoctorDetails({
         userId: tokenDetails?.userId,
         name,
         email: doctordata?.email,

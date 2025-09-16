@@ -78,20 +78,26 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
+    const uniqueId = crypto.randomUUID();
 
     await connect();
     const userdetails = await userDetails.findOne({
       userId: id,
     });
 
+    const doctordetails = await doctorDetails.findOne({ userId: userId });
+    console.log("🧞‍♂️  doctordetails --->", doctordetails);
     console.log("🧞‍♂️userdetails --->", userdetails);
 
     if (userdetails) {
       const newbookAppoinmentsDetails = {
+        doctorpatinetId: uniqueId,
         doctorUserId: doctor.userId,
         doctorName: name,
         doctorSpecialist: specialist,
         doctorGender: gender,
+        doctorEmail: doctordetails?.email,
+        hospital: doctordetails?.hospital,
         patientName: userdetails?.name,
         patientEmail: userdetails?.email || "",
         patientPhone: userdetails?.contactNumber,
@@ -106,6 +112,7 @@ export const POST: APIRoute = async ({ request }) => {
         emergencyPhone,
         paymentMethod,
         specialRequests,
+        prescription: {},
         createdAt: new Date(),
       };
       console.log("newbookAppoinmentsDetails --->", newbookAppoinmentsDetails);
@@ -120,10 +127,8 @@ export const POST: APIRoute = async ({ request }) => {
           runValidators: true,
         }
       );
+      console.log("🧞‍♂️  updatedUser --->", updatedUser);
 
-      console.log("🧞‍♂️updatedDoctor --->", updatedUser);
-      const doctordetails = await doctorDetails.findOne({ userId: userId });
-      console.log("🧞‍♂️updatedDoctor --->", doctordetails);
       if (!doctordetails) {
         return new Response(
           JSON.stringify({
@@ -136,6 +141,7 @@ export const POST: APIRoute = async ({ request }) => {
         );
       }
       const newbookAppoinmentsDataforDoctor = {
+        doctorpatinetId: uniqueId,
         doctorName: name,
         doctorSpecialist: specialist,
         doctorEmail: "",
@@ -144,6 +150,10 @@ export const POST: APIRoute = async ({ request }) => {
         patientEmail: userdetails.email || "",
         patientPhone: userdetails.contactNumber,
         patientGender: userdetails?.gender,
+        patientAge: userdetails?.age,
+        patientAddress: userdetails?.address,
+        patientBloodgroup: userdetails?.bloodGroup,
+        patientBithofday: userdetails?.dateOfBirth,
         appointmentDate,
         appointmentTime,
         consultationType,
@@ -155,6 +165,7 @@ export const POST: APIRoute = async ({ request }) => {
         emergencyPhone,
         paymentMethod,
         specialRequests,
+        prescription: {},
         createdAt: new Date(),
       };
       console.log(

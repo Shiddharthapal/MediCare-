@@ -1,59 +1,604 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, CheckCircle, XCircle, Plus } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  Plus,
+  Edit,
+  Printer,
+} from "lucide-react";
 
 interface PrescriptionProps {
   patientData: {
-    name: string;
-    avatar: string;
-    phone: string;
-    email: string;
-    age: number;
-    gender: string;
+    doctorpatinetId: string;
+    doctorId: string;
+    doctorName: string;
+    doctorSpecialist: string;
+    doctorEmail: string;
+    doctorGender: string;
+    patientId: string;
+    patientName: string;
+    patientEmail: string;
+    patientPhone: string;
+    patientGender: string;
+    patientAge: number;
+    patientAddress: string;
+    hospital: string;
+    patientBloodgroup: string;
+    patientBithofday: Date;
+    appointmentDate: string;
+    appointmentTime: string;
+    consultationType: string;
+    consultedType: string;
+    reasonForVisit: string;
+    symptoms: string;
+    previousVisit: string;
+    emergencyContact: string;
+    emergencyPhone: string;
+    doctorContact: string;
+    paymentMethod: string;
+    specialRequests: string;
+    prescription: string;
+    createdAt: Date;
   };
   onClose: () => void;
+  savedPrescription?: any;
+  isEditMode?: boolean;
+  onSave?: (prescriptionData: any) => void;
 }
+interface VitalSign {
+  bloodPressure?: string;
+  heartRate?: string;
+  temperature?: string;
+  weight?: string;
+  height?: string;
+  respiratoryRate?: string;
+  oxygenSaturation?: string;
+  bmi?: number;
+}
+
+interface Medication {
+  id: string;
+  medecineName: string;
+  medecineDosage: string;
+  frequency: string;
+  duration: string;
+  instructions?: string;
+  quantity: string;
+  route?: string[];
+  startDate?: Date;
+  endDate?: Date;
+}
+interface Prescription {
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  testandReport: string;
+  medication: Medication[];
+  symptoms: string;
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+
+export interface Pescriptiondata {
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  patientdateOfBirth: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  paymentMethod: string;
+  specialRequests: string;
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  doctorName: string;
+  doctorContact: string;
+  hospital: string;
+  specialist: string;
+  date: string;
+  licenseNumber: string;
+}
+
+const mockVitalsign: VitalSign = {
+  bloodPressure: " ",
+  heartRate: "",
+  temperature: "",
+  weight: "",
+  height: "",
+  respiratoryRate: "",
+  oxygenSaturation: "",
+  bmi: 0,
+};
+
+const mockMedication: Medication = {
+  id: "1",
+  medecineName: "",
+  medecineDosage: "",
+  frequency: "",
+  duration: "",
+  instructions: "",
+  quantity: "",
+  route: [], // Route of administration
+  startDate: new Date(),
+  endDate: new Date(),
+};
+
+const mockPescriptiondata: Pescriptiondata = {
+  patientId: "",
+  patientName: "",
+  patientEmail: "",
+  patientPhone: "",
+  patientGender: "",
+  patientdateOfBirth: "",
+  consultationType: "",
+  consultedType: "",
+  reasonForVisit: "",
+  symptoms: "",
+  previousVisit: "",
+  paymentMethod: "",
+  specialRequests: "",
+  vitalSign: mockVitalsign,
+  primaryDiagnosis: "",
+  testandReport: "",
+  medication: [mockMedication],
+  restrictions: "",
+  followUpDate: "",
+  additionalNote: "",
+  doctorName: "",
+  doctorContact: "",
+  hospital: "",
+  specialist: "",
+  date: "",
+  licenseNumber: "",
+};
 
 export default function Prescription({
   patientData,
   onClose,
+  savedPrescription,
+  isEditMode = false,
+  onSave,
 }: PrescriptionProps) {
-  const [prescriptionForm, setPrescriptionForm] = useState({
-    medications: [
-      {
-        id: 1,
-        name: "",
-        dosage: "",
-        frequency: "",
-        duration: "",
-        instructions: "",
-        quantity: "",
-      },
-    ],
-    diagnosis: "",
-    symptoms: "",
-    testsAndReports: "", // Add this new field
-    vitalSigns: {
-      bloodPressure: "",
-      heartRate: "",
-      temperature: "",
-      weight: "",
-      height: "",
-    },
-    allergies: "",
-    notes: "",
-    followUpDate: "",
-    labTests: [],
+  const [prescriptionForm, setPrescriptionForm] =
+    useState<Pescriptiondata>(mockPescriptiondata);
+  const [isSaved, setIsSaved] = useState(!!savedPrescription);
+  const [viewMode, setViewMode] = useState(!!savedPrescription && !isEditMode);
+  const [prescriptiondata, setPrescriptiondata] = useState<Prescription>({
+    vitalSign: mockVitalsign,
+    primaryDiagnosis: "",
+    testandReport: "",
+    medication: [mockMedication],
     restrictions: "",
+    symptoms: "",
+    followUpDate: "",
+    additionalNote: "",
+    prescriptionId: "",
+    createdAt: new Date(),
   });
+  useEffect(() => {
+    if (savedPrescription) {
+      setPrescriptionForm(savedPrescription);
+    }
+    const fetchPrescription = async () => {
+      let response = await fetch(`/api/doctor/${patientData.doctorId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("User not found");
+      }
+      let responsedata = await response.json();
+      // console.log("🧞‍♂️  responsedata --->", responsedata);
+      let data = responsedata.doctordetails.appointments
+        .map((appointment: any) => {
+          if (appointment.doctorpatinetId === patientData.doctorpatinetId) {
+            return appointment.prescription; // Return only the prescription
+          }
+          return null; // Return null for non-matching
+        })
+        .filter(Boolean); // Remove null values
+      //console.log("🧞‍♂️  data --->", data);
+      if (data && data.length > 0) {
+        const fetchedData = data[0]; // Assuming you want the first prescription
 
-  const handleSavePrescription = () => {
-    alert(`Prescription saved successfully for ${patientData.name}!`);
-    onClose();
+        setPrescriptionForm((prevForm) => ({
+          ...prevForm, // Keep existing form data
+          // Only update fields that exist in fetchedData and match the interface
+          ...(fetchedData.vitalSign && {
+            vitalSign: { ...prevForm.vitalSign, ...fetchedData.vitalSign },
+          }),
+          ...(fetchedData.primaryDiagnosis && {
+            primaryDiagnosis: fetchedData.primaryDiagnosis,
+          }),
+          ...(fetchedData.testandReport && {
+            testandReport: fetchedData.testandReport,
+          }),
+          ...(fetchedData.medication && { medication: fetchedData.medication }),
+          ...(fetchedData.restrictions && {
+            restrictions: fetchedData.restrictions,
+          }),
+          ...(fetchedData.followUpDate && {
+            followUpDate: fetchedData.followUpDate,
+          }),
+          ...(fetchedData.additionalNote && {
+            additionalNote: fetchedData.additionalNote,
+          }),
+          ...(fetchedData.symptoms && { symptoms: fetchedData.symptoms }),
+        }));
+      }
+      setPrescriptiondata(data);
+      setIsSaved(true);
+      setViewMode(true);
+      console.log("prescription data=>", prescriptiondata);
+      <PrescriptionView />;
+    };
+    fetchPrescription();
+  }, [savedPrescription]);
+
+  // medications: [
+  //   {
+  //     id: 1,
+  //     name: "",
+  //     dosage: "",
+  //     frequency: "",
+  //     duration: "",
+  //     instructions: "",
+  //     quantity: "",
+  //   },
+  // ],
+  // diagnosis: "",
+  // symptoms: "",
+  // testsAndReports: "", // Add this new field
+  // vitalSigns: {
+  //   bloodPressure: "",
+  //   heartRate: "",
+  //   temperature: "",
+  //   weight: "",
+  //   height: "",
+  // },
+  // allergies: "",
+  // notes: "",
+  // followUpDate: "",
+  // labTests: [],
+  // restrictions: "",
+  const handleSavePrescription = async () => {
+    try {
+      const prescriptionData = {
+        ...prescriptionForm,
+        patientInfo: patientData,
+        prescriptionId: `RX-${Date.now()}`,
+        dateIssued: new Date().toLocaleDateString(),
+        timeIssued: new Date().toLocaleTimeString(),
+      };
+
+      const response = await fetch("/api/doctor/createPrescription/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ patientData, prescriptionData }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to save prescription: ${response.statusText}`);
+      }
+
+      if (onSave) {
+        onSave(prescriptionData);
+      }
+
+      setIsSaved(true);
+      setViewMode(true);
+      <PrescriptionView />;
+      onClose();
+    } catch (error) {
+      console.error("Error saving prescription", error);
+    }
+  };
+
+  const handleEditPrescription = () => {
+    setViewMode(false);
+  };
+
+  const PrescriptionView = () => (
+    <div className="w-full md:mx-16 lg:mx-24 p-2 bg-white">
+      {/* Header */}
+      <div className="border-b-2 border-blue-600 pb-4 ">
+        <div className="flex justify-between items-start md:gap-32 lg:gap-28">
+          <div>
+            <div className="flex-shrink-0 flex items-center ">
+              <div className="w-8 h-8 bg-green-600 pb-2 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-3xl">+</span>
+              </div>
+              <span className="ml-2 text-xl font-bold text-gray-900">
+                MediCare+
+              </span>
+            </div>
+            <p className="text-sm text-gray-600">
+              Prescription ID:{" "}
+              {prescriptiondata[0]?.prescriptionId
+                ? prescriptiondata[0]?.prescriptionId
+                : "RX-" + Date.now()}
+            </p>
+            <p className="text-sm text-gray-600">
+              Date: {new Date().toLocaleDateString()}
+            </p>
+          </div>
+          <div className="text-right">
+            <h2 className="font-bold text-lg">{patientData.doctorName}</h2>
+            <p className="text-sm">{patientData.doctorSpecialist}</p>
+            <p className="text-sm">{patientData.hospital}</p>
+            <p className="text-sm">{patientData.doctorContact}</p>
+            <p className="text-sm">{patientData.doctorEmail}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Patient Information */}
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg  text-blue-600">
+          Patient Information
+        </h3>
+        {patientData ? (
+          <div className="grid grid-cols-2 gap-x-4 text-sm ">
+            <div>
+              <strong>Name:</strong> {patientData.patientName}
+            </div>
+            <div>
+              <strong>Age:</strong> {patientData.patientAge}
+            </div>
+            <div>
+              <strong>Gender:</strong> {patientData.patientGender}
+            </div>
+            <div>
+              <strong>Blood Group:</strong> {patientData.patientBloodgroup}
+            </div>
+            <div>
+              <strong>Phone:</strong> {patientData.patientPhone}
+            </div>
+            <div>
+              <strong>Address:</strong> {patientData.patientAddress}
+            </div>
+            <div>
+              <strong>Email:</strong> {patientData.patientEmail}
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 italic">
+            No Patient Data Available
+          </p>
+        )}
+      </div>
+
+      {/* Vital Signs */}
+
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg  text-blue-600">Vital Signs</h3>
+        {prescriptiondata[0]?.vitalSign ? (
+          <div className="grid grid-cols-3 gap-x-4 text-sm">
+            {prescriptiondata[0]?.vitalSign?.bloodPressure ? (
+              <div>
+                <strong>Blood Pressure:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.bloodPressure}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Blood Presure</p>
+            )}
+            {prescriptiondata[0]?.vitalSign?.heartRate ? (
+              <div>
+                <strong>Heart Rate:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.heartRate}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Heart Rate</p>
+            )}
+            {prescriptiondata[0]?.vitalSign?.temperature ? (
+              <div>
+                <strong>Temperature:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.temperature}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Temperature</p>
+            )}
+            {prescriptiondata[0]?.vitalSign?.weight ? (
+              <div>
+                <strong>Weight:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.weight}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Weight</p>
+            )}
+            {prescriptiondata[0]?.vitalSign?.height ? (
+              <div>
+                <strong>Height:</strong>{" "}
+                {prescriptiondata[0]?.vitalSign?.height}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No Height</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 italic">Vital Signs</p>
+        )}
+      </div>
+
+      {/*Symptoms*/}
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Symptoms</h3>
+        {prescriptiondata[0]?.symptoms ? (
+          <p className="text-sm ">{prescriptiondata[0]?.symptoms}</p>
+        ) : (
+          <p className="text-sm text-gray-500 italic">No symptoms</p>
+        )}
+      </div>
+      {/* Diagnosis */}
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Diagnosis</h3>
+        {prescriptiondata[0]?.primaryDiagnosis ? (
+          <p className="text-sm ">{prescriptiondata[0]?.primaryDiagnosis}</p>
+        ) : (
+          <p className="text-sm text-gray-500 italic">No Diagnosis available</p>
+        )}
+      </div>
+
+      {/* Medications */}
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg  text-blue-600">Medications</h3>
+        <div className="space-y-3">
+          {prescriptiondata[0]?.medication ? (
+            <div>
+              {prescriptiondata[0]?.medication.map((medication, index) => (
+                <div key={medication.id} className="border rounded p-3 text-sm">
+                  <div className="font-medium">
+                    • {medication.medecineName} - {medication.medecineDosage}
+                  </div>
+                  <div className="text-gray-600 space-y-3">
+                    {medication.frequency} | {medication.duration} |{" "}
+                    {medication.instructions}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 italic">
+              No Medications available
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Restriction */}
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Restrictions</h3>
+        {prescriptiondata[0]?.restrictions ? (
+          <p className="text-sm">{prescriptiondata[0]?.restrictions}</p>
+        ) : (
+          <p className="text-sm text-gray-500 italic">
+            No Restrictions available
+          </p>
+        )}
+      </div>
+
+      {/* Test and report*/}
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Test & Report</h3>
+        {prescriptiondata[0]?.testandReport ? (
+          <p className="text-sm font-medium">
+            {prescriptiondata[0]?.testandReport}
+          </p>
+        ) : (
+          <p className="text-sm text-gray-500 italic">
+            No test or report data available
+          </p>
+        )}
+      </div>
+
+      {/* Additional Note */}
+
+      <div className="mb-3">
+        <h3 className="font-semibold text-lg text-blue-600">Additional Note</h3>
+        {prescriptiondata[0]?.additionalNote ? (
+          <p className="text-sm">{prescriptiondata[0]?.additionalNote}</p>
+        ) : (
+          <p className="text-sm text-gray-500 italic">
+            No Additional Note available
+          </p>
+        )}
+      </div>
+
+      {/* Digital Signature */}
+      <div className="mt-8 pt-2 border-t">
+        <div className="flex justify-between items-end">
+          <div>
+            <p className="text-sm text-gray-600">Doctor's Signature</p>
+            <div className="mt-2 font-signature text-2xl">
+              {patientData.doctorName}
+            </div>
+            <p className="text-xs text-gray-500">
+              Digitally signed on {new Date().toLocaleDateString()}
+            </p>
+          </div>
+          <div className="text-right text-xs text-gray-500">
+            {prescriptiondata[0]?.followUpDate && (
+              <div className="mb-3">
+                <h3 className="font-semibold text-lg text-blue-600">
+                  Follow up date
+                </h3>
+                <p className="text-sm">{prescriptiondata[0]?.followUpDate}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-between mt-8 pt-4 print:hidden border-t">
+        <Button variant="outline" onClick={onClose}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Dashboard
+        </Button>
+        <div className="space-x-2">
+          <Button variant="outline" onClick={handleEditPrescription}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Prescription
+          </Button>
+          <Button onClick={() => window.print()}>
+            <Printer className="h-4 w-4 mr-2" />
+            Print
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  //console.log("=>", patientData);
+  const getPatientInitials = (patientName: string) => {
+    if (!patientName) return "AB";
+
+    const cleanName = patientName.trim();
+
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
+  };
+
+  if (viewMode && isSaved) {
+    return <PrescriptionView />;
+  }
+
+  const handleShowPrescription = () => {
+    setViewMode(true);
+    setIsSaved(true);
+    <PrescriptionView />;
   };
 
   return (
@@ -67,13 +612,15 @@ export default function Prescription({
           <div className="flex items-center gap-4">
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback>{patientData.avatar}</AvatarFallback>
+              <AvatarFallback>
+                {getPatientInitials(patientData.patientName)}
+              </AvatarFallback>
             </Avatar>
             <div>
               <h1 className="text-xl font-semibold">Create Prescription</h1>
               <p className="text-gray-600">
-                {patientData.name} • Age: {patientData.age} •{" "}
-                {patientData.gender}
+                {patientData.patientName} • Age: {patientData.patientAge} •{" "}
+                {patientData.patientGender}
               </p>
             </div>
           </div>
@@ -85,22 +632,69 @@ export default function Prescription({
         <div className="space-y-6">
           {/* Patient Information Summary */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Patient Information</CardTitle>
-            </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-3  text-sm">
                 <div>
-                  <p className="text-gray-500">Phone</p>
-                  <p className="font-medium">{patientData.phone}</p>
+                  <div>
+                    <p className="text-2xl font-semibold pb-2">
+                      Patient Information
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Name</p>
+                    <p className="font-medium">
+                      {patientData.patientName} • {patientData.patientAge} years
+                      • {patientData.patientGender}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Address</p>
+                    <p className="font-medium">{patientData.patientAddress}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Phone</p>
+                    <p className="font-medium">{patientData.patientPhone}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Email</p>
+                    <p className="font-medium">{patientData.patientEmail}</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center pl-4">
+                    <div className="w-8 h-8 bg-green-600 pb-2 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-3xl">+</span>
+                    </div>
+                    <span className="ml-2 text-xl font-bold text-gray-900">
+                      MediCare+
+                    </span>
+                  </div>
                 </div>
                 <div>
-                  <p className="text-gray-500">Email</p>
-                  <p className="font-medium">{patientData.email}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Patient ID</p>
-                  <p className="font-medium">#78146284/201</p>
+                  <div>
+                    <p className="text-2xl font-semibold pb-2">
+                      Doctor Information
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Name</p>
+                    <p className="font-medium">
+                      {patientData.doctorName} • ({patientData.doctorSpecialist}
+                      ) • {patientData.doctorGender}{" "}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Address</p>
+                    <p className="font-medium">{patientData.hospital}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Phone</p>
+                    <p className="font-medium">{patientData.doctorContact}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Email</p>
+                    <p className="font-medium">{patientData.doctorEmail}</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -121,12 +715,12 @@ export default function Prescription({
                     type="text"
                     placeholder="120/80"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.bloodPressure}
+                    value={prescriptionForm?.vitalSign?.bloodPressure}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           bloodPressure: e.target.value,
                         },
                       }))
@@ -141,12 +735,12 @@ export default function Prescription({
                     type="text"
                     placeholder="72 bpm"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.heartRate}
+                    value={prescriptionForm.vitalSign.heartRate}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           heartRate: e.target.value,
                         },
                       }))
@@ -161,12 +755,12 @@ export default function Prescription({
                     type="text"
                     placeholder="98.6°F"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.temperature}
+                    value={prescriptionForm.vitalSign.temperature}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           temperature: e.target.value,
                         },
                       }))
@@ -181,12 +775,12 @@ export default function Prescription({
                     type="text"
                     placeholder="70 kg"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.weight}
+                    value={prescriptionForm.vitalSign.weight}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           weight: e.target.value,
                         },
                       }))
@@ -201,12 +795,12 @@ export default function Prescription({
                     type="text"
                     placeholder="175 cm"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={prescriptionForm.vitalSigns.height}
+                    value={prescriptionForm.vitalSign.height}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        vitalSigns: {
-                          ...prev.vitalSigns,
+                        vitalSign: {
+                          ...prev.vitalSign,
                           height: e.target.value,
                         },
                       }))
@@ -227,11 +821,11 @@ export default function Prescription({
                 <textarea
                   placeholder="Enter primary diagnosis..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
-                  value={prescriptionForm.diagnosis}
+                  value={prescriptionForm.primaryDiagnosis}
                   onChange={(e) =>
                     setPrescriptionForm((prev) => ({
                       ...prev,
-                      diagnosis: e.target.value,
+                      primaryDiagnosis: e.target.value,
                     }))
                   }
                 />
@@ -266,11 +860,11 @@ export default function Prescription({
               <textarea
                 placeholder="Enter recommended tests, lab work, or reports (leave empty if no tests required)..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 resize-none"
-                value={prescriptionForm.testsAndReports}
+                value={prescriptionForm.testandReport}
                 onChange={(e) =>
                   setPrescriptionForm((prev) => ({
                     ...prev,
-                    testsAndReports: e.target.value,
+                    testandReport: e.target.value,
                   }))
                 }
               />
@@ -291,12 +885,12 @@ export default function Prescription({
                   onClick={() => {
                     setPrescriptionForm((prev) => ({
                       ...prev,
-                      medications: [
-                        ...prev.medications,
+                      medication: [
+                        ...prev.medication,
                         {
-                          id: prev.medications.length + 1,
-                          name: "",
-                          dosage: "",
+                          id: (prev.medication.length + 1).toString(),
+                          medecineName: "",
+                          medecineDosage: "",
                           frequency: "",
                           duration: "",
                           instructions: "",
@@ -313,21 +907,21 @@ export default function Prescription({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {prescriptionForm.medications.map((medication, index) => (
+                {prescriptionForm.medication.map((medication, index) => (
                   <div
                     key={medication.id}
                     className="border rounded-lg p-4 bg-gray-50"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-medium">Medication {index + 1}</h4>
-                      {prescriptionForm.medications.length > 1 && (
+                      {prescriptionForm.medication.length > 1 && (
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.filter(
+                              medication: prev.medication.filter(
                                 (med) => med.id !== medication.id
                               ),
                             }));
@@ -346,13 +940,13 @@ export default function Prescription({
                           type="text"
                           placeholder="e.g., Lisinopril"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={medication.name}
+                          value={medication.medecineName}
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
-                                  ? { ...med, name: e.target.value }
+                                  ? { ...med, medecineName: e.target.value }
                                   : med
                               ),
                             }));
@@ -367,13 +961,13 @@ export default function Prescription({
                           type="text"
                           placeholder="e.g., 10mg"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={medication.dosage}
+                          value={medication.medecineDosage}
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
-                                  ? { ...med, dosage: e.target.value }
+                                  ? { ...med, medecineDosage: e.target.value }
                                   : med
                               ),
                             }));
@@ -384,33 +978,22 @@ export default function Prescription({
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Frequency
                         </label>
-                        <select
+                        <input
+                          type="text"
+                          placeholder="Twice daily before meal"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={medication.frequency}
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, frequency: e.target.value }
                                   : med
                               ),
                             }));
                           }}
-                        >
-                          <option value="">Select frequency</option>
-                          <option value="Once daily">Once daily</option>
-                          <option value="Twice daily">Twice daily</option>
-                          <option value="Three times daily">
-                            Three times daily
-                          </option>
-                          <option value="Four times daily">
-                            Four times daily
-                          </option>
-                          <option value="As needed">As needed</option>
-                          <option value="Before meals">Before meals</option>
-                          <option value="After meals">After meals</option>
-                        </select>
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -424,7 +1007,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, duration: e.target.value }
                                   : med
@@ -445,7 +1028,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, quantity: e.target.value }
                                   : med
@@ -466,7 +1049,7 @@ export default function Prescription({
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
                               ...prev,
-                              medications: prev.medications.map((med) =>
+                              medication: prev.medication.map((med) =>
                                 med.id === medication.id
                                   ? { ...med, instructions: e.target.value }
                                   : med
@@ -493,27 +1076,11 @@ export default function Prescription({
               <CardContent className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Known Allergies
-                  </label>
-                  <textarea
-                    placeholder="List any known allergies..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
-                    value={prescriptionForm.allergies}
-                    onChange={(e) =>
-                      setPrescriptionForm((prev) => ({
-                        ...prev,
-                        allergies: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Activity Restrictions
                   </label>
                   <textarea
                     placeholder="Any activity restrictions..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-44 resize-none"
                     value={prescriptionForm.restrictions}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
@@ -553,11 +1120,11 @@ export default function Prescription({
                   <textarea
                     placeholder="Any additional notes or instructions..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
-                    value={prescriptionForm.notes}
+                    value={prescriptionForm.additionalNote}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
                         ...prev,
-                        notes: e.target.value,
+                        additionalNote: e.target.value,
                       }))
                     }
                   />
@@ -565,7 +1132,23 @@ export default function Prescription({
               </CardContent>
             </Card>
           </div>
-
+          <Card>
+            <CardContent>
+              <div className="-4  border-gray-200">
+                <div className="flex items-center justify-between italic text-sm text-gray-600">
+                  <span>
+                    Digital Signature:{" "}
+                    <span className="text-blue-700">
+                      {patientData.doctorName} • {patientData.doctorSpecialist}
+                    </span>
+                  </span>
+                  <span className="text-blue-700">
+                    {patientData.appointmentDate}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-4 pt-6 border-t bg-white p-6 rounded-lg">
             <Button variant="outline" onClick={onClose}>

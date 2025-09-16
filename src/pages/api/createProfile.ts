@@ -18,11 +18,20 @@ export const POST: APIRoute = async ({ request }) => {
       contactNumber,
       age,
       bloodGroup,
+      dateOfBirth,
       weight,
       height,
       gender,
     } = formData;
-    if (!name || !address || !bloodGroup || !age || !weight || !contactNumber) {
+    if (
+      !name ||
+      !address ||
+      !bloodGroup ||
+      !age ||
+      !weight ||
+      !contactNumber ||
+      !dateOfBirth
+    ) {
       return new Response(
         JSON.stringify({
           message: "Missing field required",
@@ -33,6 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
             gender: !gender ? "Gender is required" : null,
             weight: !weight ? "Weight is required" : null,
             bloodGroup: !bloodGroup ? "Bloodgroup is required" : null,
+            dateOfBirth: !dateOfBirth ? "Birthday is required" : null,
             contactNumber: !contactNumber ? "Contact number is required" : null,
           },
         }),
@@ -43,16 +53,17 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
     await connect();
-    const userdetails = await UserDetails.findOne({ userId: id });
+    let userdetails = await UserDetails.findOne({ userId: id });
     let userdata = await User.findOne({ _id: id });
     //console.log("userId=>", id);
     if (!userdetails) {
-      const userDetails = new UserDetails({
+      userdetails = new UserDetails({
         userId: id,
         email: userdata?.email,
         name,
         fatherName,
         address,
+        dateOfBirth,
         contactNumber,
         age,
         gender,
@@ -60,13 +71,14 @@ export const POST: APIRoute = async ({ request }) => {
         weight,
         height,
       });
-      //console.log("user=>", userDetails);
-      userDetails.save();
+
+      await userdetails.save();
     } else {
       userdetails.name = name || userdetails.name;
-      userdetails.email = userdata?.email || userdetails.name;
+      userdetails.email = userdata?.email || userdetails.email;
       userdetails.fatherName = fatherName || userdetails.fatherName;
       userdetails.address = address || userdetails.address;
+      userdetails.dateOfBirth = dateOfBirth || userdetails.dateOfBirth;
       userdetails.contactNumber = contactNumber || userdetails.contactNumber;
       userdetails.age = age || userdetails.age;
       userdetails.gender = gender || userdetails.gender;
@@ -77,6 +89,7 @@ export const POST: APIRoute = async ({ request }) => {
       await userdetails.save();
     }
 
+    //console.log("=>", userdetails);
     return new Response(JSON.stringify({ userdetails }), {
       status: 200,
       headers: {

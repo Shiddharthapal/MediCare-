@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +11,6 @@ import {
   Users,
   User,
   CreditCard,
-  TrendingDown,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  XCircle,
   LayoutDashboard,
   FileText,
   Settings,
@@ -37,6 +32,8 @@ import {
 } from "recharts";
 import Appointments from "./appoinments";
 import Patients from "./allpatients";
+import Setting from "./setting_doctor/index";
+import Reports from "./reports/index";
 import { useAppSelector } from "@/redux/hooks";
 
 interface AppointmentData {
@@ -62,7 +59,6 @@ interface AppointmentData {
   createdAt: Date;
 }
 export interface DoctorDetails {
-  _id: string;
   userId: string;
   name: string;
   email: string;
@@ -82,6 +78,36 @@ export interface DoctorDetails {
   consultationModes: string[];
   createdAt: Date;
 }
+
+interface AppointmentCount {
+  Jan: number;
+  Feb: number;
+  Mar: number;
+  Apr: number;
+  May: number;
+  Jun: number;
+  Jul: number;
+  Aug: number;
+  Sep: number;
+  Oct: number;
+  Nov: number;
+  Dec: number;
+}
+
+const mockAppointmentCount: AppointmentCount = {
+  Jan: 0,
+  Feb: 0,
+  Mar: 0,
+  Apr: 0,
+  May: 0,
+  Jun: 0,
+  Jul: 0,
+  Aug: 0,
+  Sep: 0,
+  Oct: 0,
+  Nov: 0,
+  Dec: 0,
+};
 
 export interface GenderCount {
   Male: number;
@@ -119,7 +145,6 @@ const mockAppointmentData: AppointmentData = {
 
 // Mock DoctorDetails with empty strings
 const mockDoctorDetails: DoctorDetails = {
-  _id: "",
   userId: "",
   name: "",
   email: "",
@@ -145,19 +170,24 @@ const menuItems = [
   { icon: Calendar, label: "Appointments", active: false },
   { icon: Users, label: "Patients", active: false },
   { icon: FileText, label: "Reports", active: false },
-  { icon: Settings, label: "Settings", active: false },
+  { icon: Settings, label: "Setting", active: false },
 ];
 
 const COLORS = ["#3b82f6", "#ec4899", "#047857"];
 
 const data = [
-  { name: "Mon", appointments: 12 },
-  { name: "Tue", appointments: 19 },
-  { name: "Wed", appointments: 15 },
-  { name: "Thu", appointments: 25 },
-  { name: "Fri", appointments: 22 },
-  { name: "Sat", appointments: 18 },
-  { name: "Sun", appointments: 8 },
+  { name: "Jan", appointments: 12 },
+  { name: "Feb", appointments: 19 },
+  { name: "Mar", appointments: 15 },
+  { name: "Apr", appointments: 25 },
+  { name: "May", appointments: 22 },
+  { name: "Jun", appointments: 18 },
+  { name: "Jul", appointments: 10 },
+  { name: "Aug", appointments: 8 },
+  { name: "Sep", appointments: 22 },
+  { name: "Oct", appointments: 2 },
+  { name: "Nov", appointments: 18 },
+  { name: "Dec", appointments: 10 },
 ];
 const stats = [
   {
@@ -262,22 +292,122 @@ const findNewPatient = (appoinments: AppointmentData[]) => {
   });
   return count;
 };
+interface CategorizedAppointments {
+  today: AppointmentData[];
+  future: AppointmentData[];
+  past: AppointmentData[];
+}
+
+// Interface for grouped appointments by date
+interface GroupedAppointments {
+  [date: string]: AppointmentData[];
+}
+
+// Helper function to get today's date in YYYY-MM-DD format
+const getTodayDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+// Helper function to compare dates
+const compareDates = (
+  appointmentDate: string,
+  todayDate: string
+): "past" | "today" | "future" => {
+  if (appointmentDate < todayDate) return "past";
+  if (appointmentDate === todayDate) return "today";
+  return "future";
+};
+
+// Function to categorize appointments
+const categorizeAppointments = (
+  appointments: AppointmentData[]
+): CategorizedAppointments => {
+  const todayDate = getTodayDate();
+
+  const categorized: CategorizedAppointments = {
+    today: [],
+    future: [],
+    past: [],
+  };
+
+  appointments.forEach((appointment) => {
+    const category = compareDates(appointment.appointmentDate, todayDate);
+    categorized[category].push(appointment);
+  });
+
+  // Sort appointments within each category
+  categorized.today.sort((a, b) =>
+    a.appointmentTime.localeCompare(b.appointmentTime)
+  );
+  categorized.future.sort((a, b) => {
+    if (a.appointmentDate === b.appointmentDate) {
+      return a.appointmentTime.localeCompare(b.appointmentTime);
+    }
+    return a.appointmentDate.localeCompare(b.appointmentDate);
+  });
+  categorized.past.sort((a, b) => {
+    if (b.appointmentDate === a.appointmentDate) {
+      return b.appointmentTime.localeCompare(a.appointmentTime);
+    }
+    return b.appointmentDate.localeCompare(a.appointmentDate);
+  });
+
+  return categorized;
+};
+
+// Function to group appointments by date
+const groupAppointmentsByDate = (
+  appointments: AppointmentData[]
+): GroupedAppointments => {
+  return appointments.reduce((grouped: GroupedAppointments, appointment) => {
+    const date = appointment.appointmentDate;
+    if (!grouped[date]) {
+      grouped[date] = [];
+    }
+    grouped[date].push(appointment);
+
+    // Sort appointments within the same date by time
+    grouped[date].sort((a, b) =>
+      a.appointmentTime.localeCompare(b.appointmentTime)
+    );
+
+    return grouped;
+  }, {});
+};
 
 export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [genderOfPatient, setGenderOfPatient] =
     useState<GenderCount>(mockGenderCount);
+  const [appointmentNumberinMonth, setAppointmentNumberinMonth] =
+    useState<AppointmentCount>(mockAppointmentCount);
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [doctorData, setDoctorData] =
     useState<DoctorDetails>(mockDoctorDetails);
 
   let doctor = useAppSelector((state) => state.auth.user);
-  console.log("🧞‍♂️doctor --->", doctor);
+  // console.log("🧞‍♂️doctor --->", doctor);
   const datagender = [
     { name: "Male", value: genderOfPatient?.Male || 10, color: "#3b82f6" },
     { name: "Female", value: genderOfPatient?.Female || 7, color: "#ec4899" },
     { name: "Other", value: genderOfPatient?.Other || 1, color: "#047857" },
+  ];
+
+  const dataAppointmentCount = [
+    { name: "Jan", appointments: appointmentNumberinMonth?.Jan || 22 },
+    { name: "Feb", appointments: appointmentNumberinMonth?.Feb || 2 },
+    { name: "Mar", appointments: appointmentNumberinMonth?.Mar || 13 },
+    { name: "Apr", appointments: appointmentNumberinMonth?.Apr || 5 },
+    { name: "May", appointments: appointmentNumberinMonth?.May || 7 },
+    { name: "Jun", appointments: appointmentNumberinMonth?.Jun || 2 },
+    { name: "Jul", appointments: appointmentNumberinMonth?.Jul || 19 },
+    { name: "Aug", appointments: appointmentNumberinMonth?.Aug || 4 },
+    { name: "Sep", appointments: appointmentNumberinMonth?.Sep || 15 },
+    { name: "Oct", appointments: appointmentNumberinMonth?.Oct || 23 },
+    { name: "Nov", appointments: appointmentNumberinMonth?.Nov || 2 },
+    { name: "Dec", appointments: appointmentNumberinMonth?.Dec || 14 },
   ];
 
   const stats = [
@@ -310,6 +440,48 @@ export default function DashboardPage() {
       icon: User,
     },
   ];
+  let countAppointmentInMonth = (
+    appointments: AppointmentData[]
+  ): AppointmentCount => {
+    let countappointment: AppointmentCount = {
+      Jan: 0,
+      Feb: 0,
+      Mar: 0,
+      Apr: 0,
+      May: 0,
+      Jun: 0,
+      Jul: 0,
+      Aug: 0,
+      Sep: 0,
+      Oct: 0,
+      Nov: 0,
+      Dec: 0,
+    };
+
+    const monthNames: (keyof AppointmentCount)[] = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    appointments.forEach((appointment: AppointmentData) => {
+      let date = appointment.appointmentDate;
+      const monthIndex = new Date(date).getMonth();
+      const monthname = monthNames[monthIndex];
+      countappointment[monthname]++;
+    });
+
+    return countappointment;
+  };
 
   let genderCountofPatients = (
     appointments: AppointmentData[]
@@ -334,9 +506,18 @@ export default function DashboardPage() {
     return countgender;
   };
 
+  const handleAppointmentCount = (appointments: AppointmentData[]) => {
+    if (!appointments) {
+      throw new Error("No appointments are available now");
+    }
+    let appointment_total = countAppointmentInMonth(appointments);
+    setAppointmentNumberinMonth(appointment_total);
+    return true;
+  };
+
   const handleGenderCountofPatient = (appointments: AppointmentData[]) => {
     if (!appointments) {
-      throw new Error("No appointments are availavle now");
+      throw new Error("No appointments are available now");
     }
 
     let result = genderCountofPatients(appointments);
@@ -364,7 +545,8 @@ export default function DashboardPage() {
         body: JSON.stringify({ token }),
       });
       let userid = await response.json();
-      console.log("🧞‍♂️userid --->", userid);
+
+      // console.log("🧞‍♂️userid --->", userid);
       if (!userid) {
         throw new Error("Invalid token or no user ID");
       }
@@ -375,12 +557,21 @@ export default function DashboardPage() {
       return null;
     }
   };
+  const categorizedAppointments = useMemo(() => {
+    return categorizeAppointments(
+      doctorData.appointments
+        ? Array.isArray(doctorData.appointments)
+          ? doctorData.appointments
+          : []
+        : []
+    );
+  }, [doctorData.appointments]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         let id = await getUserId();
-        console.log("🧞‍♂️id --->", id);
+        // console.log("🧞‍♂️id --->", id);
         let response = await fetch(`/api/doctor/${id}`, {
           method: "GET",
           headers: {
@@ -388,7 +579,7 @@ export default function DashboardPage() {
           },
         });
         let responsedata = await response.json();
-        console.log("🧞‍♂️responsedata --->", responsedata?.doctordetails);
+        // console.log("🧞‍♂️responsedata --->", responsedata?.doctordetails);
         setDoctorData(responsedata?.doctordetails);
       } catch (err) {
         console.log("Index error:", err);
@@ -396,7 +587,54 @@ export default function DashboardPage() {
     };
     fetchData();
     handleGenderCountofPatient(doctorData.appointments);
+    handleAppointmentCount(doctorData.appointments);
   }, [doctor]);
+
+  const todayGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.today);
+  }, [categorizedAppointments.today]);
+  console.log("🧞‍♂️todayGrouped --->", todayGrouped);
+
+  const checktimelimit = ([date, time]: [string, string]) => {
+    const currentDate = new Date();
+    const currentDateString = currentDate.toISOString().split("T")[0]; // Format: "2025-08-08"
+
+    // Check if date matches
+    if (date !== currentDateString) {
+      return "bg-gray-400 hover:bg-gray-500";
+    }
+
+    // Parse time range
+    const timeRange = time.split(" - "); // ["5:00 PM", "5:30 PM"]
+    const startTime = timeRange[0].trim();
+    const endTime = timeRange[1].trim();
+
+    // Convert times to Date objects for today
+    const parseTimeToDate = (timeStr: any) => {
+      const today = new Date();
+      const [time, period] = timeStr.split(" ");
+      const [hours, minutes] = time.split(":").map(Number);
+
+      let hour24 = hours;
+      if (period === "PM" && hours !== 12) hour24 += 12;
+      if (period === "AM" && hours === 12) hour24 = 0;
+
+      today.setHours(hour24, minutes, 0, 0);
+      return today;
+    };
+
+    const startDateTime = parseTimeToDate(startTime);
+    const endDateTime = parseTimeToDate(endTime);
+
+    // Check if current time is within the slot
+    const isWithinTimeSlot =
+      currentDate >= startDateTime && currentDate <= endDateTime;
+
+    return isWithinTimeSlot
+      ? "bg-green-700 hover:bg-green-800"
+      : "bg-gray-400 hover:bg-gray-500";
+  };
+
   const getDoctorInitials = (doctorName: string) => {
     if (!doctorName) return "DR";
 
@@ -438,7 +676,7 @@ export default function DashboardPage() {
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         } ${collapsed ? "md:w-16" : "md:w-64"} w-64`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col pt-16 h-full">
           {/* Navigation */}
           <nav className="flex-1 p-4 overflow-y-auto">
             <ul className="space-y-2">
@@ -523,11 +761,11 @@ export default function DashboardPage() {
       )}
 
       <div
-        className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
+        className={`container transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
         {/* Main Content */}
         {currentPage === "dashboard" && (
-          <div className="flex-1 flex flex-col ">
+          <div className="flex-1 flex items-center mx-28 flex-col ">
             <main className="flex-1 overflow-y-auto p-6">
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
                 {/* Stats Cards */}
@@ -542,18 +780,6 @@ export default function DashboardPage() {
                                 {stat.title}
                               </p>
                               <p className="text-2xl font-bold">{stat.value}</p>
-                              <div className="flex items-center mt-1">
-                                {stat.trend === "up" ? (
-                                  <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                                ) : (
-                                  <TrendingDown className="h-3 w-3 text-red-500 mr-1" />
-                                )}
-                                <span
-                                  className={`text-xs ${stat.trend === "up" ? "text-green-500" : "text-red-500"}`}
-                                >
-                                  {stat.change}
-                                </span>
-                              </div>
                             </div>
                             <stat.icon className="h-8 w-8 text-gray-400" />
                           </div>
@@ -608,14 +834,14 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <Card>
                       <CardHeader>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-36">
                           <CardTitle>Appointments</CardTitle>
                           <Tabs defaultValue="week" className="w-auto">
-                            <TabsList className="grid w-full grid-cols-4">
-                              <TabsTrigger value="day">Day</TabsTrigger>
-                              <TabsTrigger value="week">Week</TabsTrigger>
+                            <TabsList className="grid w-full grid-cols-1">
+                              {/* <TabsTrigger value="day">Day</TabsTrigger>
+                              <TabsTrigger value="week">Week</TabsTrigger> */}
                               <TabsTrigger value="month">Month</TabsTrigger>
-                              <TabsTrigger value="year">Year</TabsTrigger>
+                              {/* <TabsTrigger value="year">Year</TabsTrigger> */}
                             </TabsList>
                           </Tabs>
                         </div>
@@ -624,7 +850,7 @@ export default function DashboardPage() {
                         <div className="h-[300px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
-                              data={data}
+                              data={dataAppointmentCount}
                               margin={{
                                 top: 10,
                                 right: 30,
@@ -757,80 +983,104 @@ export default function DashboardPage() {
                       <CardTitle>{"Today's Appointments"}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                PATIENT
-                              </th>
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                SERVICE
-                              </th>
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                DATE
-                              </th>
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                TIME
-                              </th>
-                              <th className="text-left py-3 px-4 font-medium text-gray-600">
-                                ACTION
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {todaysAppointments.map((appointment) => (
-                              <tr key={appointment.id} className="border-b">
-                                <td className="py-3 px-4">
-                                  <div className="flex items-center space-x-3">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarImage
-                                        src={
-                                          appointment.avatar ||
-                                          "/placeholder.svg"
-                                        }
-                                      />
-                                      <AvatarFallback>
-                                        {appointment.patient
-                                          .split(" ")
-                                          .map((n) => n[0])
-                                          .join("")}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="font-medium">
-                                      {appointment.patient}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4">
-                                  {appointment.service}
-                                </td>
-                                <td className="py-3 px-4">
-                                  {appointment.date}
-                                </td>
-                                <td className="py-3 px-4">
-                                  {appointment.time}
-                                </td>
-                                <td className="py-3 px-4">
-                                  <Button
-                                    size="sm"
-                                    className={
-                                      appointment.status === "active"
-                                        ? "bg-green-500 hover:bg-green-600"
-                                        : "bg-gray-400 hover:bg-gray-500"
-                                    }
-                                  >
-                                    Start
-                                  </Button>
-                                </td>
+                      {Object.keys(todayGrouped).length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  PATIENT
+                                </th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  SERVICE
+                                </th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  DATE
+                                </th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  TIME
+                                </th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                  ACTION
+                                </th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                            </thead>
+                            <tbody>
+                              {Object.entries(todayGrouped).map(
+                                ([date, appointments]: [
+                                  string,
+                                  AppointmentData[],
+                                ]) =>
+                                  appointments.map(
+                                    (appointment: AppointmentData) => {
+                                      if (!appointment || !appointment._id) {
+                                        console.warn(
+                                          "Invalid appointment data:",
+                                          appointment
+                                        );
+                                        return null;
+                                      }
+                                      return (
+                                        <tr
+                                          key={appointment._id}
+                                          className="border-b"
+                                        >
+                                          <td className="py-3 px-4">
+                                            <div className="flex items-center space-x-3">
+                                              <Avatar className="h-8 w-8">
+                                                <AvatarFallback>
+                                                  {appointment.patientName
+                                                    .split(" ")
+                                                    .map((n) => n[0])
+                                                    .join("")}
+                                                </AvatarFallback>
+                                              </Avatar>
+                                              <span className="font-medium">
+                                                {appointment.patientName}
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="py-3 px-4">
+                                            Consultation
+                                          </td>
+                                          <td className="py-3 px-4">
+                                            {appointment.appointmentDate}
+                                          </td>
+                                          <td className="py-3 px-4">
+                                            {appointment.appointmentTime}
+                                          </td>
+                                          <td className="py-3 px-4">
+                                            <Button
+                                              size="sm"
+                                              className={checktimelimit([
+                                                appointment.appointmentDate,
+                                                appointment.appointmentTime,
+                                              ])}
+                                            >
+                                              Start
+                                            </Button>
+                                          </td>
+                                        </tr>
+                                      );
+                                    }
+                                  )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            No appointments
+                          </h3>
+                          <p className="text-gray-600 mb-4">
+                            You don't have any appointments scheduled for today.
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
-                  <div className=" pt-6">
+                  {/* <div className=" pt-6">
                     <Card>
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
@@ -907,7 +1157,7 @@ export default function DashboardPage() {
                         ))}
                       </CardContent>
                     </Card>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </main>
@@ -915,14 +1165,18 @@ export default function DashboardPage() {
         )}
 
         {/* Appointments Page */}
-        {/* {currentPage === "appointments" && (
+        {currentPage === "appointments" && (
           <Appointments onNavigate={setCurrentPage} />
-        )} */}
+        )}
         {currentPage === "patients" && <Patients onNavigate={setCurrentPage} />}
+        {currentPage === "setting" && <Setting onNavigate={setCurrentPage} />}
+        {currentPage === "reports" && <Reports onNavigate={setCurrentPage} />}
 
         {/* Other Pages Placeholder */}
         {currentPage !== "dashboard" &&
           currentPage !== "appointments" &&
+          currentPage !== "reports" &&
+          currentPage !== "setting" &&
           currentPage !== "patients" && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">

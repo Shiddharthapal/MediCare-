@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatInTimeZone } from "date-fns-tz";
 import {
   Search,
   Bell,
   Calendar,
   Users,
+  UserRoundPlus,
   ChevronRight,
   AlertTriangle,
   CheckCircle,
@@ -22,7 +24,193 @@ import {
   ClipboardList,
   ImageIcon,
   Clock,
+  Heart,
+  Airplay,
+  Brain,
+  User,
+  AlertCircle,
+  RefreshCw,
+  HelpCircle,
+  Activity,
+  Shield,
 } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
+interface VitalSign {
+  bloodPressure?: string;
+  heartRate?: string;
+  temperature?: string;
+  weight?: string;
+  height?: string;
+  respiratoryRate?: string;
+  oxygenSaturation?: string;
+  bmi?: number;
+}
+
+interface Medication {
+  id: string;
+  medecineName: string;
+  medecineDosage: string;
+  frequency: string;
+  duration: string;
+  instructions?: string;
+  quantity: string;
+  route?: string[];
+  startDate?: Date;
+  endDate?: Date;
+}
+interface Prescription {
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  testandReport: string;
+  medication: Medication[];
+  symptoms: string;
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+
+interface AppointmentData {
+  _id: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorEmail: string;
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  patientAddress: string;
+  patientBithofday: Date;
+  patientBloodgroup: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  prescription: Prescription;
+  createdAt: Date;
+}
+
+interface DoctorDetails {
+  userId: string;
+  name: string;
+  email: string;
+  contact: string;
+  gender: string;
+  registrationNo: string;
+  specialist: string;
+  specializations: string[];
+  hospital: string;
+  fees: number;
+  rating?: number;
+  experience: string;
+  education: string;
+  degree: string;
+  language: string[];
+  about: string;
+  availableSlots: string[];
+  appointments: AppointmentData[];
+  consultationModes: string[];
+  createdAt: Date;
+}
+
+const mockVitalsign: VitalSign = {
+  bloodPressure: " ",
+  heartRate: "",
+  temperature: "",
+  weight: "",
+  height: "",
+  respiratoryRate: "",
+  oxygenSaturation: "",
+  bmi: 0,
+};
+
+const mockMedication: Medication = {
+  id: "1",
+  medecineName: "",
+  medecineDosage: "",
+  frequency: "",
+  duration: "",
+  instructions: "",
+  quantity: "",
+  route: [], // Route of administration
+  startDate: new Date(),
+  endDate: new Date(),
+};
+
+const mockPrescription: Prescription = {
+  vitalSign: mockVitalsign,
+  primaryDiagnosis: "",
+  testandReport: "",
+  medication: [mockMedication],
+  restrictions: "",
+  symptoms: "",
+  followUpDate: "",
+  additionalNote: "",
+  prescriptionId: "",
+  createdAt: new Date(),
+};
+
+const mockAppointmentData: AppointmentData = {
+  _id: "",
+  doctorName: "",
+  doctorSpecialist: "",
+  doctorEmail: "",
+  patientId: "",
+  patientName: "",
+  patientEmail: "",
+  patientPhone: "",
+  patientGender: "",
+  patientAddress: "",
+  patientBithofday: new Date(),
+  patientBloodgroup: "",
+  appointmentDate: "",
+  appointmentTime: "",
+  status: "",
+  consultationType: "",
+  consultedType: "",
+  reasonForVisit: "",
+  symptoms: "",
+  previousVisit: "",
+  emergencyContact: "",
+  emergencyPhone: "",
+  paymentMethod: "",
+  specialRequests: "",
+  prescription: mockPrescription,
+  createdAt: new Date(),
+};
+
+const mockDoctorDetails: DoctorDetails = {
+  userId: "",
+  name: "",
+  email: "",
+  contact: "",
+  gender: "",
+  registrationNo: "",
+  specialist: "",
+  specializations: [],
+  hospital: "",
+  fees: 0,
+  rating: 0,
+  experience: "",
+  education: "",
+  degree: "",
+  language: [],
+  about: "",
+  availableSlots: [],
+  appointments: [],
+  consultationModes: [],
+  createdAt: new Date(),
+};
 
 // Mock data for patients
 const patients = [
@@ -323,22 +511,426 @@ const patients = [
     ],
   },
 ];
+interface ReasonForVisit {
+  appointment: AppointmentData;
+  reason: string;
+  createdAt: Date;
+}
+
+interface GroupedPatientData {
+  [patientId: string]: {
+    id: string;
+    patientInfo: {
+      patientId: string;
+      patientName: string;
+      patientEmail: string;
+      patientPhone: string;
+      patientGender: string;
+      patientAddress: string;
+      patientBithofday: Date;
+      patientAge: string;
+      patientBloodgroup: string;
+      symptoms: string;
+      emergencyContact: string;
+    };
+    appointments: AppointmentData[];
+    reasonForVisit: ReasonForVisit[];
+    totalAppointments: number;
+    latestAppointment: AppointmentData;
+    upcomingAppointments: AppointmentData[];
+    previousAppointments: AppointmentData[];
+  };
+}
+interface PatientData {
+  id: string;
+  patientInfo: {
+    patientId: string;
+    patientName: string;
+    patientEmail: string;
+    patientPhone: string;
+    patientGender: string;
+    patientAddress: string;
+    patientBithofday: Date;
+    patientAge: string;
+    patientBloodgroup: string;
+    symptoms: string;
+    emergencyContact: string;
+  };
+  appointments: AppointmentData[];
+  reasonForVisit: ReasonForVisit[];
+  totalAppointments: number;
+  latestAppointment: AppointmentData;
+  upcomingAppointments: AppointmentData[];
+  previousAppointments: AppointmentData[];
+}
+const mockPatientData: PatientData = {
+  id: "",
+  patientInfo: {
+    patientId: "",
+    patientName: "",
+    patientEmail: "",
+    patientPhone: "",
+    patientGender: "",
+    patientAddress: "",
+    patientBithofday: new Date("08-08-1900"),
+    patientAge: "",
+    patientBloodgroup: "",
+    symptoms: "",
+    emergencyContact: "",
+  },
+  appointments: [],
+  reasonForVisit: [],
+  totalAppointments: 0,
+  latestAppointment: mockAppointmentData,
+  upcomingAppointments: [],
+  previousAppointments: [],
+};
+
+interface CategorizedAppointments {
+  today: AppointmentData[];
+  future: AppointmentData[];
+  past: AppointmentData[];
+}
+
+// Interface for grouped appointments by date
+interface GroupedAppointments {
+  [date: string]: AppointmentData[];
+}
+
+// Helper function to get today's date in YYYY-MM-DD format
+const getTodayDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+// Helper function to compare dates
+const compareDates = (
+  appointmentDate: string,
+  todayDate: string
+): "past" | "today" | "future" => {
+  if (appointmentDate < todayDate) return "past";
+  if (appointmentDate === todayDate) return "today";
+  return "future";
+};
+
+// Function to categorize appointments
+const categorizeAppointments = (
+  appointments: AppointmentData[]
+): CategorizedAppointments => {
+  const todayDate = getTodayDate();
+  console.log("appointments=>", appointments);
+
+  const categorized: CategorizedAppointments = {
+    today: [],
+    future: [],
+    past: [],
+  };
+
+  appointments.forEach((appointment) => {
+    const category = compareDates(appointment.appointmentDate, todayDate);
+    categorized[category].push(appointment);
+  });
+
+  // Sort appointments within each category
+  categorized.today.sort((a, b) =>
+    a.appointmentTime.localeCompare(b.appointmentTime)
+  );
+  categorized.future.sort((a, b) => {
+    if (a.appointmentDate === b.appointmentDate) {
+      return a.appointmentTime.localeCompare(b.appointmentTime);
+    }
+    return a.appointmentDate.localeCompare(b.appointmentDate);
+  });
+  categorized.past.sort((a, b) => {
+    if (b.appointmentDate === a.appointmentDate) {
+      return b.appointmentTime.localeCompare(a.appointmentTime);
+    }
+    return b.appointmentDate.localeCompare(a.appointmentDate);
+  });
+
+  return categorized;
+};
+
+// Function to group appointments by date
+const groupAppointmentsByDate = (
+  appointments: AppointmentData[]
+): GroupedAppointments => {
+  return appointments.reduce((grouped: GroupedAppointments, appointment) => {
+    const date = appointment.appointmentDate;
+    if (!grouped[date]) {
+      grouped[date] = [];
+    }
+    grouped[date].push(appointment);
+
+    // Sort appointments within the same date by time
+    grouped[date].sort((a, b) =>
+      a.appointmentTime.localeCompare(b.appointmentTime)
+    );
+
+    return grouped;
+  }, {});
+};
 
 interface PatientsPageProps {
   onNavigate: (page: string) => void;
 }
 
 export default function PatientsPage({ onNavigate }: PatientsPageProps) {
-  const [selectedPatient, setSelectedPatient] = useState(patients[0]);
+  const [selectedPatient, setSelectedPatient] =
+    useState<PatientData>(mockPatientData);
   const [showPatientList, setShowPatientList] = useState(true);
+  const [patientData, setPatientData] = useState<GroupedPatientData>({});
+  const [appointmentData, setAppointmentData] =
+    useState<DoctorDetails>(mockDoctorDetails);
   const [activeTab, setActiveTab] = useState("overview");
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity.toLowerCase()) {
+  let doctor = useAppSelector((state) => state.auth.user);
+
+  const groupAppointmentsByPatientId = (responseData: DoctorDetails) => {
+    console.log("🧞‍♂️  responseData2 --->", responseData);
+    if (!responseData.appointments || responseData.appointments.length === 0)
+      return;
+
+    const groupedData: GroupedPatientData = {};
+
+    responseData.appointments.forEach((appointment: AppointmentData) => {
+      const { patientId } = appointment;
+      //console.log("🧞‍♂️  appointment-group  --->", appointment);
+
+      if (!groupedData[patientId]) {
+        // Create new patient entry with first appointment
+        groupedData[patientId] = {
+          id: patientId,
+          patientInfo: {
+            patientId: appointment.patientId,
+            patientName: appointment.patientName,
+            patientEmail: appointment.patientEmail,
+            patientPhone: appointment.patientPhone,
+            patientGender: appointment.patientGender,
+            patientAddress: appointment.patientAddress,
+            patientBithofday: appointment.patientBithofday,
+            patientBloodgroup: appointment.patientBloodgroup,
+            patientAge: (
+              new Date().getFullYear() -
+              new Date(appointment.patientBithofday).getFullYear()
+            ).toString(),
+            symptoms: appointment.symptoms,
+            emergencyContact: appointment.emergencyContact,
+          },
+          reasonForVisit: [
+            {
+              appointment: appointment,
+              reason: appointment.reasonForVisit,
+              createdAt: appointment.createdAt,
+            },
+          ],
+          appointments: [appointment],
+          totalAppointments: 1,
+          latestAppointment: appointment,
+          upcomingAppointments: [],
+          previousAppointments: [],
+        };
+      } else {
+        // Add appointment to existing patient
+        groupedData[patientId].appointments.push(appointment);
+        groupedData[patientId].totalAppointments += 1;
+
+        // Update latest appointment based on createdAt date
+        if (
+          new Date(appointment.createdAt) >
+          new Date(groupedData[patientId].latestAppointment.createdAt)
+        ) {
+          groupedData[patientId].latestAppointment = appointment;
+        }
+      }
+    });
+
+    Object.keys(groupedData).forEach((patientId) => {
+      // Sort appointments by appointment date
+      groupedData[patientId].appointments.sort(
+        (a, b) =>
+          new Date(a.appointmentDate).getTime() -
+          new Date(b.appointmentDate).getTime()
+      );
+
+      // Filter upcoming appointments
+      const today = new Date();
+      console.log("🧞‍♂️  today --->", today);
+      groupedData[patientId].upcomingAppointments = groupedData[
+        patientId
+      ].appointments.filter((appointment) => {
+        const appointmentDate = new Date(appointment.appointmentDate);
+        return appointmentDate >= today;
+      });
+
+      //Filter previous appointments
+      groupedData[patientId].previousAppointments = groupedData[
+        patientId
+      ].appointments.filter((appointment) => {
+        const appointmentDate = new Date(appointment.appointmentDate);
+        // console.log(
+        //   `Appointment: ${appointment.appointmentDate}, Parsed: ${appointmentDate}, Is Previous: ${appointmentDate < today}`
+        // );
+        return appointmentDate < today;
+      });
+    });
+
+    console.log("=>", groupedData);
+    // Update the state with grouped data
+    setPatientData(groupedData);
+  };
+
+  const categorizedAppointments = useMemo(() => {
+    let appointmentdata = appointmentData.appointments;
+    return categorizeAppointments(
+      appointmentdata
+        ? Array.isArray(appointmentdata)
+          ? appointmentdata
+          : []
+        : []
+    );
+  }, [appointmentData]);
+
+  useEffect(() => {
+    let id = doctor?._id;
+    const fetchData = async () => {
+      const response = await fetch(`/api/doctor/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      let responseData = await response.json();
+      console.log("🧞‍♂️  responseData --->", responseData.doctordetails);
+      groupAppointmentsByPatientId(responseData.doctordetails);
+    };
+    fetchData();
+  }, [doctor]);
+
+  const futureGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.future);
+  }, [categorizedAppointments.future]);
+
+  const todayGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.today);
+  }, [categorizedAppointments.today]);
+
+  const pastGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.past);
+  }, [categorizedAppointments.past]);
+
+  const handleCancelAppointment = async (appointment: any) => {
+    let id = doctor?._id;
+    try {
+      const response = await fetch("/api/doctor/cancelAppointment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId: appointment._id,
+          doctorId: id,
+          patientId: appointment.patientId,
+        }),
+      });
+
+      if (response.ok) {
+        //update the selected state
+        setSelectedPatient((prev) => ({
+          ...prev,
+          upcomingAppointments: prev.upcomingAppointments.filter(
+            (apt) => apt._id !== appointment._id
+          ),
+        }));
+      }
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+    }
+  };
+
+  const getSeverityLevel = (reason: string): string => {
+    switch (reason.toLowerCase()) {
+      // CRITICAL/HIGH SEVERITY
+      case "chest pain evaluation":
+      case "heart palpitations":
+      case "shortness of breath":
+      case "breathing difficulties":
+      case "severe abdominal pain":
+      case "severe headache/migraine":
+      case "severe allergic reactions":
+        return "high";
+
+      // MEDIUM-HIGH SEVERITY
+      case "high blood pressure management":
+      case "asthma management":
+      case "diabetes management":
+      case "anxiety symptoms":
+      case "depression screening":
+      case "back pain":
+      case "joint pain":
+      case "muscle strain":
+      case "sports injury":
+        return "medium-high";
+
+      // MEDIUM SEVERITY
+      case "cough and cold symptoms":
+      case "stomach pain/abdominal pain":
+      case "nausea and vomiting":
+      case "diarrhea":
+      case "constipation":
+      case "fever":
+      case "fatigue/weakness":
+      case "skin rash":
+      case "headache/migraine":
+      case "sinus infection":
+      case "allergic reactions":
+      case "menstrual irregularities":
+        return "medium";
+
+      // LOW-MEDIUM SEVERITY
+      case "routine heart checkup":
+      case "medication review":
+      case "treatment follow-up":
+      case "post-surgery follow-up":
+      case "lab result discussion":
+      case "arthritis management":
+      case "acid reflux/heartburn":
+      case "weight loss/gain":
+      case "stress management":
+      case "mental health consultation":
+      case "pregnancy consultation":
+        return "low-medium";
+
+      // LOW SEVERITY
+      case "annual physical examination":
+      case "routine checkup":
+      case "health screening":
+      case "vaccination/immunization":
+      case "well-child visit":
+      case "sports physical":
+      case "annual gynecological exam":
+      case "pap smear":
+      case "birth control consultation":
+        return "low";
+
+      default:
+        return "medium";
+    }
+  };
+
+  const getSeverityColor = (reason: string) => {
+    const severity = getSeverityLevel(reason);
+
+    switch (severity) {
       case "high":
         return "bg-red-100 text-red-800 border-red-200";
+      case "medium-high":
+        return "bg-orange-100 text-orange-800 border-orange-200";
       case "medium":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "low-medium":
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "low":
         return "bg-green-100 text-green-800 border-green-200";
       default:
@@ -346,16 +938,103 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
-      case "treated":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case "completed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+  const getStatusIcon = (reason: string) => {
+    switch (reason.toLowerCase()) {
+      // Preventive Care
+      case "annual physical examination":
+      case "routine checkup":
+      case "health screening":
+      case "vaccination/immunization":
+      case "well-child visit":
+      case "sports physical":
+        return <Shield className="h-4 w-4 text-blue-500" />;
+
+      // Cardiovascular
+      case "routine heart checkup":
+      case "chest pain evaluation":
+      case "high blood pressure management":
+      case "heart palpitations":
+      case "shortness of breath":
+        return <Heart className="h-4 w-4 text-red-500" />;
+
+      // Respiratory
+      case "cough and cold symptoms":
+      case "breathing difficulties":
+      case "asthma management":
+      case "allergic reactions":
+      case "sinus infection":
+        return <Airplay className="h-4 w-4 text-cyan-500" />;
+
+      // Digestive
+      case "stomach pain/abdominal pain":
+      case "nausea and vomiting":
+      case "diarrhea":
+      case "constipation":
+      case "acid reflux/heartburn":
+        return <Activity className="h-4 w-4 text-orange-500" />;
+
+      // Musculoskeletal
+      case "back pain":
+      case "joint pain":
+      case "muscle strain":
+      case "arthritis management":
+      case "sports injury":
+        return <Users className="h-4 w-4 text-purple-500" />;
+
+      // Mental Health
+      case "anxiety symptoms":
+      case "depression screening":
+      case "stress management":
+      case "mental health consultation":
+        return <Brain className="h-4 w-4 text-indigo-500" />;
+
+      // Women's Health
+      case "annual gynecological exam":
+      case "pap smear":
+      case "menstrual irregularities":
+      case "pregnancy consultation":
+      case "birth control consultation":
+        return <User className="h-4 w-4 text-pink-500" />;
+
+      // General Symptoms
+      case "headache/migraine":
+      case "fever":
+      case "fatigue/weakness":
+      case "skin rash":
+      case "weight loss/gain":
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+
+      // Follow-up
+      case "post-surgery follow-up":
+      case "medication review":
+      case "lab result discussion":
+      case "treatment follow-up":
+        return <RefreshCw className="h-4 w-4 text-green-500" />;
+
       default:
-        return <XCircle className="h-4 w-4 text-gray-500" />;
+        return <HelpCircle className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getPatientInitials = (patientName: string) => {
+    console.log("🧞‍♂️  patientName --->", patientName);
+    if (!patientName) return "AB";
+
+    const cleanName = patientName.trim();
+
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
     }
   };
 
@@ -367,17 +1046,19 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         {showPatientList && (
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium text-gray-900">Patient Lists (817)</h3>
+              <h3 className="font-medium text-gray-900">
+                Patient Lists ({Object.entries(patientData).length})
+              </h3>
               <Button variant="ghost" size="icon">
                 <Search className="h-4 w-4" />
               </Button>
             </div>
             <div className="space-y-2">
-              {patients.map((patient) => (
+              {Object.entries(patientData).map(([id, patient]) => (
                 <div
-                  key={patient.id}
+                  key={id}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                    selectedPatient.id === patient.id
+                    selectedPatient?.id === id
                       ? "bg-blue-50 border border-blue-200"
                       : "hover:bg-gray-50"
                   }`}
@@ -386,15 +1067,15 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={`/placeholder.svg?height=32&width=32`} />
                     <AvatarFallback className="text-xs">
-                      {patient.avatar}
+                      {getPatientInitials(patient?.patientInfo?.patientName)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-gray-900 truncate">
-                      {patient.name}
+                      {patient?.patientInfo?.patientName}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                      {patient.address}
+                      {patient?.patientInfo?.patientAddress}
                     </p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -408,17 +1089,25 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
+        <header className="flex items-center justify-between pt-6 pl-6 pr-6 pb-3 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-4">
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback>{selectedPatient.avatar}</AvatarFallback>
+              <AvatarFallback>
+                {getPatientInitials(selectedPatient?.patientInfo?.patientName)}
+              </AvatarFallback>
             </Avatar>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                {selectedPatient.name}
+                {selectedPatient?.patientInfo?.patientName}
               </h2>
-              <p className="text-sm text-gray-500">ID: #78146284/201</p>
+              <p className="text-sm text-gray-500">
+                ID:{" "}
+                {selectedPatient.id.slice(
+                  selectedPatient.id.length - 10,
+                  selectedPatient.id.length
+                )}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -432,7 +1121,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         </header>
 
         {/* Tabs */}
-        <div className="grid grid-cols-4 md:gap-10 px-6 py-4 border-b border-gray-100 bg-white">
+        <div className="grid grid-cols-4 md:gap-10 px-6 py-3 border-b border-gray-100 bg-white">
           <button
             className={`pb-2 border-b-2 transition-colors ${
               activeTab === "overview"
@@ -495,19 +1184,24 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                           <div>
                             <p className="text-sm text-gray-500">Full Name</p>
                             <p className="font-medium">
-                              {selectedPatient.name}
+                              {selectedPatient?.patientInfo?.patientName}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Patient ID</p>
-                            <p className="font-medium">#78146284/201</p>
+                            <p className="font-medium">
+                              {selectedPatient.id.slice(
+                                selectedPatient.id.length - 10,
+                                selectedPatient.id.length
+                              )}
+                            </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">
                               Phone Number
                             </p>
                             <p className="font-medium">
-                              {selectedPatient.phone}
+                              {selectedPatient?.patientInfo?.patientPhone}
                             </p>
                           </div>
                         </div>
@@ -515,13 +1209,13 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                           <div>
                             <p className="text-sm text-gray-500">Gender</p>
                             <p className="font-medium">
-                              {selectedPatient.gender}
+                              {selectedPatient?.patientInfo?.patientGender}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Age</p>
                             <p className="font-medium">
-                              {selectedPatient.age} years
+                              {selectedPatient?.patientInfo?.patientAge} years
                             </p>
                           </div>
                           <div>
@@ -529,7 +1223,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               Email Address
                             </p>
                             <p className="font-medium text-blue-600">
-                              {selectedPatient.email}
+                              {selectedPatient?.patientInfo?.patientEmail}
                             </p>
                           </div>
                         </div>
@@ -538,7 +1232,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             <p className="text-sm text-gray-500">
                               Date of Birth
                             </p>
-                            <p className="font-medium">March 15, 1970</p>
+                            <p className="font-medium">
+                              {new Date(
+                                selectedPatient?.patientInfo?.patientBithofday
+                              ).toLocaleDateString()}
+                            </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Blood Type</p>
@@ -549,7 +1247,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               Home Address
                             </p>
                             <p className="font-medium">
-                              {selectedPatient.fullAddress}
+                              {selectedPatient?.patientInfo?.patientAddress}
                             </p>
                           </div>
                         </div>
@@ -558,99 +1256,43 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </div>
 
                   {/* Medical Summary and Active Conditions */}
-                  <div className="grid grid-cols-2 gap-6 mb-6">
+                  <div className="mb-6">
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">
-                          Medical Summary
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <p className="text-sm text-gray-500">
-                            Primary Care Physician
-                          </p>
-                          <p className="font-medium">Dr. Edward Bailey</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Allergies</p>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            <Badge
-                              variant="outline"
-                              className="bg-red-50 text-red-700"
-                            >
-                              Peanuts
-                            </Badge>
-                            <Badge
-                              variant="outline"
-                              className="bg-red-50 text-red-700"
-                            >
-                              Shellfish
-                            </Badge>
-                            <Badge
-                              variant="outline"
-                              className="bg-yellow-50 text-yellow-700"
-                            >
-                              Pollen
-                            </Badge>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">
-                            Current Medications
-                          </p>
-                          <div className="space-y-1 mt-1">
-                            <p className="text-sm font-medium">
-                              • Lisinopril 10mg (Daily)
-                            </p>
-                            <p className="text-sm font-medium">
-                              • Metformin 500mg (Twice daily)
-                            </p>
-                            <p className="text-sm font-medium">
-                              • Atorvastatin 20mg (Daily)
-                            </p>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Last Visit</p>
-                          <p className="font-medium">December 1, 2024</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">
-                          Current Active Conditions
+                          Previous Conditions
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          {selectedPatient.diseases
-                            ?.filter((d) => d.status === "Active")
-                            .map((disease, index) => (
+                          {selectedPatient?.reasonForVisit.map(
+                            (values, index) => (
                               <div
                                 key={index}
-                                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                                className="flex items-center justify-between p-4 bg-gray-100 rounded-lg"
                               >
                                 <div className="flex items-center gap-3">
-                                  {getStatusIcon(disease.status)}
+                                  {getStatusIcon(values?.reason)}
                                   <div>
                                     <p className="font-medium">
-                                      {disease.name}
+                                      {values?.reason}
                                     </p>
                                     <p className="text-sm text-gray-500">
-                                      Since: {disease.diagnosedDate}
+                                      Since:{" "}
+                                      {new Date(
+                                        values?.createdAt
+                                      ).toLocaleDateString()}
                                     </p>
                                   </div>
                                 </div>
                                 <Badge
-                                  className={getSeverityColor(disease.severity)}
+                                  className={getSeverityColor(values?.reason)}
                                 >
-                                  {disease.severity}
+                                  {values?.reason}
                                 </Badge>
                               </div>
-                            ))}
+                            )
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -667,232 +1309,61 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                     <CardContent>
                       <div className="space-y-4">
                         {/* Check if patient has upcoming appointments */}
-                        {selectedPatient.id === 1 ? (
-                          <>
-                            <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                              <div className="p-2 bg-blue-100 rounded-lg">
-                                <Calendar className="h-5 w-5 text-blue-600" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-1">
-                                  <h3 className="font-semibold">
-                                    Follow-up Consultation
-                                  </h3>
-                                  <Badge className="bg-blue-100 text-blue-800">
-                                    Confirmed
-                                  </Badge>
+                        {(selectedPatient?.upcomingAppointments).length > 0 ? (
+                          selectedPatient?.upcomingAppointments.map(
+                            (value, index) => (
+                              <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-300">
+                                <div className="p-2 bg-yellow-100 rounded-lg">
+                                  <Calendar className="h-5 w-5 text-yellow-600" />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <Clock className="h-4 w-4" />
-                                    <span>December 15, 2024 - 2:30 PM</span>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <h3 className="font-semibold">
+                                      {value?.consultedType}
+                                    </h3>
+                                    <Badge className="bg-yellow-100 text-yellow-800">
+                                      Confirmed
+                                    </Badge>
                                   </div>
-                                  <div className="flex items-center gap-1">
-                                    <Users className="h-4 w-4" />
-                                    <span>Dr. Edward Bailey</span>
+                                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4" />
+                                      <span>
+                                        {value?.appointmentDate}{" "}
+                                        {value?.appointmentTime}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Users className="h-4 w-4" />
+                                      <span>{value?.doctorName}</span>
+                                    </div>
                                   </div>
+                                  <p className="text-sm text-gray-500 mt-2">
+                                    {value?.reasonForVisit}
+                                  </p>
                                 </div>
-                                <p className="text-sm text-gray-500 mt-2">
-                                  Hypertension and diabetes management review
-                                </p>
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-transparent"
-                                >
-                                  Reschedule
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-transparent text-red-600 hover:text-red-700"
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                              <div className="p-2 bg-green-100 rounded-lg">
-                                <ClipboardList className="h-5 w-5 text-green-600" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-1">
-                                  <h3 className="font-semibold">
-                                    Lab Work - Blood Test
-                                  </h3>
-                                  <Badge className="bg-green-100 text-green-800">
-                                    Scheduled
-                                  </Badge>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <Clock className="h-4 w-4" />
-                                    <span>December 20, 2024 - 9:00 AM</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Users className="h-4 w-4" />
-                                    <span>Lab Department</span>
-                                  </div>
-                                </div>
-                                <p className="text-sm text-gray-500 mt-2">
-                                  Quarterly blood work for diabetes monitoring
-                                </p>
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-transparent"
-                                >
-                                  Reschedule
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-transparent text-red-600 hover:text-red-700"
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
-                              <div className="p-2 bg-yellow-100 rounded-lg">
-                                <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-1">
-                                  <h3 className="font-semibold">
-                                    Cardiology Consultation
-                                  </h3>
-                                  <Badge className="bg-yellow-100 text-yellow-800">
-                                    Pending Confirmation
-                                  </Badge>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <Clock className="h-4 w-4" />
-                                    <span>January 5, 2025 - 11:30 AM</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Users className="h-4 w-4" />
-                                    <span>Dr. Michael Chen</span>
-                                  </div>
-                                </div>
-                                <p className="text-sm text-gray-500 mt-2">
-                                  Annual cardiac evaluation and EKG
-                                </p>
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <Button
-                                  size="sm"
-                                  className="text-xs bg-green-600 hover:bg-green-700"
-                                >
-                                  Confirm
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-transparent text-red-600 hover:text-red-700"
-                                >
-                                  Decline
-                                </Button>
-                              </div>
-                            </div>
-                          </>
-                        ) : selectedPatient.id === 2 ? (
-                          <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                              <Calendar className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-1">
-                                <h3 className="font-semibold">Asthma Review</h3>
-                                <Badge className="bg-blue-100 text-blue-800">
-                                  Confirmed
-                                </Badge>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  <span>December 18, 2024 - 3:15 PM</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-4 w-4" />
-                                  <span>Dr. Robert Kim</span>
+                                <div className="flex flex-col gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-yellow-300 hover:bg-yellow-500"
+                                  >
+                                    Reschedule
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-transparent text-red-600 hover:text-red-700"
+                                    onClick={() =>
+                                      handleCancelAppointment(value)
+                                    }
+                                  >
+                                    Cancel
+                                  </Button>
                                 </div>
                               </div>
-                              <p className="text-sm text-gray-500 mt-2">
-                                Quarterly asthma control assessment and inhaler
-                                review
-                              </p>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs bg-transparent"
-                              >
-                                Reschedule
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs bg-transparent text-red-600 hover:text-red-700"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        ) : selectedPatient.id === 3 ? (
-                          <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                              <Calendar className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-1">
-                                <h3 className="font-semibold">
-                                  Physical Therapy Session
-                                </h3>
-                                <Badge className="bg-blue-100 text-blue-800">
-                                  Confirmed
-                                </Badge>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  <span>December 16, 2024 - 1:00 PM</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-4 w-4" />
-                                  <span>Dr. Amanda Lee</span>
-                                </div>
-                              </div>
-                              <p className="text-sm text-gray-500 mt-2">
-                                Continued lower back pain treatment and
-                                exercises
-                              </p>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs bg-transparent"
-                              >
-                                Reschedule
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs bg-transparent text-red-600 hover:text-red-700"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
+                            )
+                          )
                         ) : (
                           <div className="text-center py-8 text-gray-500">
                             <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -903,10 +1374,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               This patient has no scheduled appointments at this
                               time.
                             </p>
-                            <Button className="mt-4" size="sm">
-                              <Plus className="h-4 w-4 mr-2" />
-                              Schedule Appointment
-                            </Button>
                           </div>
                         )}
                       </div>
@@ -916,46 +1383,46 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   {/* Recent Activity */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">Recent Activity</CardTitle>
+                      <CardTitle className="text-lg">
+                        Last Appointment
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Calendar className="h-5 w-5 text-blue-600" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">Appointment Completed</p>
+                        {selectedPatient?.latestAppointment ? (
+                          <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
+                            <div className="p-2 bg-green-100 rounded-lg">
+                              <CheckCircle className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">
+                                {
+                                  selectedPatient?.latestAppointment
+                                    ?.reasonForVisit
+                                }
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                Blood work - All values within normal range
+                              </p>
+                            </div>
                             <p className="text-sm text-gray-500">
-                              Regular checkup with Dr. Edward Bailey
+                              {new Date(
+                                selectedPatient?.latestAppointment?.appointmentDate
+                              ).toLocaleDateString()}
                             </p>
                           </div>
-                          <p className="text-sm text-gray-500">Dec 1, 2024</p>
-                        </div>
-                        <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <CheckCircle className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
+                            <div className="p-2 bg-green-100 rounded-lg">
+                              <CheckCircle className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-500">
+                                No appointment available
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <p className="font-medium">Lab Results Received</p>
-                            <p className="text-sm text-gray-500">
-                              Blood work - All values within normal range
-                            </p>
-                          </div>
-                          <p className="text-sm text-gray-500">Nov 28, 2024</p>
-                        </div>
-                        <div className="flex items-center gap-4 p-3 bg-yellow-50 rounded-lg">
-                          <div className="p-2 bg-yellow-100 rounded-lg">
-                            <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">Medication Refill Due</p>
-                            <p className="text-sm text-gray-500">
-                              Metformin prescription expires in 5 days
-                            </p>
-                          </div>
-                          <p className="text-sm text-gray-500">Nov 25, 2024</p>
-                        </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -972,47 +1439,38 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {selectedPatient.diseases
-                          ?.sort((a, b) => {
-                            const severityOrder = {
-                              High: 3,
-                              Medium: 2,
-                              Low: 1,
-                            };
-                            return (
-                              severityOrder[
-                                b.severity as keyof typeof severityOrder
-                              ] -
-                              severityOrder[
-                                a.severity as keyof typeof severityOrder
-                              ]
-                            );
-                          })
-                          .map((disease, index) => (
+                        {selectedPatient?.reasonForVisit.map(
+                          (disease, index) => (
                             <div key={index} className="border rounded-lg p-4">
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-3">
-                                  {getStatusIcon(disease.status)}
+                                  {getStatusIcon(disease.reason)}
                                   <h3 className="font-semibold text-lg">
-                                    {disease.name}
+                                    {disease.reason}
                                   </h3>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge
-                                    className={getSeverityColor(
-                                      disease.severity
-                                    )}
+                                    className={getSeverityColor(disease.reason)}
                                   >
-                                    {disease.severity} Severity
+                                    {getSeverityLevel(disease.reason)} Severity
                                   </Badge>
                                   <Badge
                                     variant={
-                                      disease.status === "Active"
+                                      new Date(
+                                        disease.appointment.prescription.followUpDate
+                                      ).toLocaleDateString() >=
+                                      new Date().toLocaleDateString()
                                         ? "destructive"
                                         : "secondary"
                                     }
                                   >
-                                    {disease.status}
+                                    {new Date(
+                                      disease.appointment.prescription.followUpDate
+                                    ).toLocaleDateString() >=
+                                    new Date().toLocaleDateString()
+                                      ? "Active"
+                                      : "Completed"}
                                   </Badge>
                                 </div>
                               </div>
@@ -1022,20 +1480,31 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     Diagnosed Date
                                   </p>
                                   <p className="font-medium">
-                                    {disease.diagnosedDate}
+                                    {new Date(
+                                      disease.appointment.prescription.createdAt
+                                    ).toLocaleDateString()}
                                   </p>
                                 </div>
                                 <div className="pl-10">
                                   <p className="text-gray-500">
                                     Current Status
                                   </p>
-                                  <p className="font-medium">
-                                    {disease.status}
+                                  <p className="font-medium text-green-600">
+                                    {Math.ceil(
+                                      (new Date(
+                                        disease.appointment.prescription.followUpDate
+                                      ) -
+                                        new Date()) /
+                                        (24 * 60 * 60 * 1000)
+                                    ) > 0
+                                      ? "Active"
+                                      : "Completed"}
                                   </p>
                                 </div>
                               </div>
                             </div>
-                          ))}
+                          )
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -1050,52 +1519,68 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {selectedPatient.appointments?.map(
-                          (appointment, index) => (
-                            <div key={index} className="border rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-blue-100 rounded-lg">
-                                    <Calendar className="h-5 w-5 text-blue-600" />
+                        {(selectedPatient?.previousAppointments).length > 0 ? (
+                          selectedPatient?.previousAppointments?.map(
+                            (appointment, index) => (
+                              <div
+                                key={index}
+                                className="border rounded-lg p-4"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                      <Calendar className="h-5 w-5 text-blue-600" />
+                                    </div>
+                                    <div>
+                                      <h3 className="font-semibold">
+                                        {appointment?.consultedType}
+                                      </h3>
+                                      <p className="text-sm text-gray-500">
+                                        with {appointment?.doctorName}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-green-100 text-green-800"
+                                  >
+                                    {appointment?.status}
+                                  </Badge>
+                                </div>
+                                <div className="grid grid-cols-3 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-gray-500">Date</p>
+                                    <p className="font-medium">
+                                      {appointment?.appointmentDate}
+                                    </p>
                                   </div>
                                   <div>
-                                    <h3 className="font-semibold">
-                                      {appointment.type}
-                                    </h3>
-                                    <p className="text-sm text-gray-500">
-                                      with {appointment.doctor}
+                                    <p className="text-gray-500">Time</p>
+                                    <p className="font-medium">
+                                      {appointment?.appointmentTime}
+                                    </p>
+                                  </div>
+                                  <div className="pl-11">
+                                    <p className="text-gray-500">Status</p>
+                                    <p className="font-medium text-green-600">
+                                      {appointment.status}
                                     </p>
                                   </div>
                                 </div>
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-green-100 text-green-800"
-                                >
-                                  {appointment.status}
-                                </Badge>
                               </div>
-                              <div className="grid grid-cols-3 gap-4 text-sm">
-                                <div>
-                                  <p className="text-gray-500">Date</p>
-                                  <p className="font-medium">
-                                    {appointment.date}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-gray-500">Time</p>
-                                  <p className="font-medium">
-                                    {appointment.time}
-                                  </p>
-                                </div>
-                                <div className="pl-11">
-                                  <p className="text-gray-500">Status</p>
-                                  <p className="font-medium text-green-600">
-                                    {appointment.status}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
+                            )
                           )
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <p className="text-lg font-medium mb-2">
+                              No Previous Appointments
+                            </p>
+                            <p className="text-sm">
+                              This patient has no previous appointments at this
+                              time.
+                            </p>
+                          </div>
                         )}
                       </div>
                     </CardContent>
@@ -1112,11 +1597,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                           <FileText className="h-5 w-5" />
                           Patient Documents
                         </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Upload Document
-                          </Button>
+                        <div className="">
                           <Button variant="outline" size="sm">
                             <Download className="h-4 w-4 mr-2" />
                             Download All
@@ -1155,117 +1636,132 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                       {/* Documents List */}
                       <div className="space-y-4">
-                        {selectedPatient.documents?.map((document, index) => (
-                          <div
-                            key={index}
-                            className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-4 flex-1">
-                                {/* Document Icon */}
-                                <div className="p-3 rounded-lg bg-blue-50">
-                                  {document.type === "Prescription" && (
-                                    <Pill className="h-6 w-6 text-blue-600" />
-                                  )}
-                                  {document.type === "Lab Report" && (
-                                    <ClipboardList className="h-6 w-6 text-green-600" />
-                                  )}
-                                  {document.type === "Imaging Report" && (
-                                    <ImageIcon className="h-6 w-6 text-purple-600" />
-                                  )}
-                                  {document.type === "Consultation Report" && (
-                                    <FileText className="h-6 w-6 text-orange-600" />
-                                  )}
-                                  {document.type === "Study Report" && (
-                                    <ClipboardList className="h-6 w-6 text-indigo-600" />
-                                  )}
-                                  {document.type === "Treatment Plan" && (
-                                    <FileText className="h-6 w-6 text-teal-600" />
-                                  )}
-                                  {![
-                                    "Prescription",
-                                    "Lab Report",
-                                    "Imaging Report",
-                                    "Consultation Report",
-                                    "Study Report",
-                                    "Treatment Plan",
-                                  ].includes(document.type) && (
-                                    <FileText className="h-6 w-6 text-gray-600" />
-                                  )}
+                        {selectedPatient?.previousAppointments.map(
+                          (document, index) => (
+                            <div
+                              key={index}
+                              className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-4 flex-1">
+                                  {/* Document Icon */}
+                                  <div className="p-3 rounded-lg bg-blue-50">
+                                    {document.prescription && (
+                                      <Pill className="h-6 w-6 text-blue-600" />
+                                    )}
+                                    {/* {document.type === "Lab Report" && (
+                                      <ClipboardList className="h-6 w-6 text-green-600" />
+                                    )}
+                                    {document.type === "Imaging Report" && (
+                                      <ImageIcon className="h-6 w-6 text-purple-600" />
+                                    )}
+                                    {document.type ===
+                                      "Consultation Report" && (
+                                      <FileText className="h-6 w-6 text-orange-600" />
+                                    )}
+                                    {document.type === "Study Report" && (
+                                      <ClipboardList className="h-6 w-6 text-indigo-600" />
+                                    )}
+                                    {document.type === "Treatment Plan" && (
+                                      <FileText className="h-6 w-6 text-teal-600" />
+                                    )} */}
+                                    {/* {![
+                                      "Prescription",
+                                      "Lab Report",
+                                      "Imaging Report",
+                                      "Consultation Report",
+                                      "Study Report",
+                                      "Treatment Plan",
+                                    ].includes(document.type) && (
+                                      <FileText className="h-6 w-6 text-gray-600" />
+                                    )} */}
+                                  </div>
+
+                                  {/* Document Details */}
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <h3 className="font-semibold text-lg">
+                                        {document.reasonForVisit}
+                                      </h3>
+                                      <Badge
+                                        variant={
+                                          document?.prescription
+                                            ? "default"
+                                            : "secondary"
+                                        }
+                                        className={
+                                          document?.prescription
+                                            ? "bg-green-100 text-green-800"
+                                            : "bg-gray-100 text-gray-800"
+                                        }
+                                      >
+                                        {document?.prescription
+                                          ? "Active"
+                                          : "Reviewed"}
+                                      </Badge>
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
+                                      <div className="flex items-center gap-1">
+                                        <FileText className="h-4 w-4" />
+                                        <span>{document.type}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>
+                                          {new Date(
+                                            document.prescription.createdAt
+                                          ).toLocaleDateString()}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <Clock className="h-4 w-4" />
+                                        <span>
+                                          {formatInTimeZone(
+                                            document?.prescription?.createdAt,
+                                            "Etc/UTC",
+                                            "hh:mm a"
+                                          )}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <UserRoundPlus className="h-5 w-5" />
+                                        <span>{document?.doctorName}</span>
+                                      </div>
+                                    </div>
+                                    <p className="text-sm text-gray-700 mb-2">
+                                      <strong>Description:</strong>{" "}
+                                      {document?.prescription?.primaryDiagnosis}
+                                    </p>
+                                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                                      <span>Size: {document.size}</span>
+                                      <span>Format: {document.format}</span>
+                                    </div>
+                                  </div>
                                 </div>
 
-                                {/* Document Details */}
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <h3 className="font-semibold text-lg">
-                                      {document.name}
-                                    </h3>
-                                    <Badge
-                                      variant={
-                                        document.status === "Active"
-                                          ? "default"
-                                          : "secondary"
-                                      }
-                                      className={
-                                        document.status === "Active"
-                                          ? "bg-green-100 text-green-800"
-                                          : "bg-gray-100 text-gray-800"
-                                      }
-                                    >
-                                      {document.status}
-                                    </Badge>
-                                  </div>
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
-                                    <div className="flex items-center gap-1">
-                                      <FileText className="h-4 w-4" />
-                                      <span>{document.type}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Calendar className="h-4 w-4" />
-                                      <span>{document.date}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Clock className="h-4 w-4" />
-                                      <span>{document.time}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Users className="h-4 w-4" />
-                                      <span>{document.doctor}</span>
-                                    </div>
-                                  </div>
-                                  <p className="text-sm text-gray-700 mb-2">
-                                    <strong>Description:</strong>{" "}
-                                    {document.description}
-                                  </p>
-                                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                                    <span>Size: {document.size}</span>
-                                    <span>Format: {document.format}</span>
-                                  </div>
+                                {/* Action Buttons */}
+                                <div className="flex flex-col  gap-2 ml-4 mt-6">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-transparent"
+                                  >
+                                    <Eye className="h-3 w-3 mr-1" />
+                                    View
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-transparent"
+                                  >
+                                    <Download className="h-3 w-3 mr-1" />
+                                    Download
+                                  </Button>
                                 </div>
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="flex flex-col gap-2 ml-4">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-transparent"
-                                >
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  View
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-transparent"
-                                >
-                                  <Download className="h-3 w-3 mr-1" />
-                                  Download
-                                </Button>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
 
                       {/* Document Statistics */}
