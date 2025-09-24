@@ -27,15 +27,16 @@ import {
 import Appointments from "./appionments";
 import Doctors from "./doctors";
 import Reports from "./report";
+import SettingPatient from "./setting_patient/index";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", active: true },
-  { icon: Calendar, label: "Appointments", active: false },
-  { icon: Users, label: "Doctors", active: false },
-  { icon: FileText, label: "Reports", active: false },
-  { icon: TestTube, label: "Lab Results", active: false },
-  { icon: Heart, label: "Health Records", active: false },
-  { icon: Settings, label: "Settings", active: false },
+  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
+  { id: "appointments", icon: Calendar, label: "Appointments", active: false },
+  { id: "doctors", icon: Users, label: "Doctors", active: false },
+  { id: "reports", icon: FileText, label: "Reports", active: false },
+  { id: "lab-results", icon: TestTube, label: "Lab Results", active: false },
+  { id: "health-records", icon: Heart, label: "Health Records", active: false },
+  { id: "settings", icon: Settings, label: "Settings", active: false }, // Changed to "settings"
 ];
 
 interface appointmentdata {
@@ -1062,6 +1063,14 @@ export default function Dashboard() {
           <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Reports />
+            </div>
+          </div>
+        )}
+
+        {currentPage === "settings" && (
+          <div className="h-screen  p-6 lg:p-6 ">
+            <div className="max-w-6xl mx-auto">
+              <SettingPatient onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
