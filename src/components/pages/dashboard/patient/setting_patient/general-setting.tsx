@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -10,10 +8,120 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useAppSelector } from "@/redux/hooks";
+
+interface ProfileInformation {
+  email: string;
+  name: string;
+  fatherName?: string;
+  address: string;
+  dateOfBirth: Date;
+  contactNumber: string;
+  age: number;
+  gender: string;
+  bloodGroup: string;
+  weight: number;
+  height?: number;
+}
+
+interface SystemPreferences {
+  darkMode: boolean;
+  language: string;
+  timezone: string;
+}
+
+interface GeneralSettingsData {
+  profile: ProfileInformation;
+  preferences: SystemPreferences;
+}
 
 export default function GeneralSettings() {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
+  const [userData, setUserData] = useState<GeneralSettingsData>({
+    profile: {
+      email: "",
+      name: "",
+      fatherName: "",
+      address: "",
+      dateOfBirth: new Date(),
+      contactNumber: "01*********",
+      age: 99,
+      gender: "",
+      bloodGroup: "",
+      weight: 0,
+      height: 0,
+    },
+
+    preferences: {
+      darkMode: localStorage.getItem("darkMode") === "true",
+      language: localStorage.getItem("language") || "en",
+      timezone: localStorage.getItem("timezone") || "Asia/Dhaka",
+    },
+  });
+
+  const user = useAppSelector((state) => state.auth.user);
+  const id = user?._id;
+
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
+
+  const fetchProfileData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/user/${id}`);
+      const data = await response.json();
+      console.log("🧞‍♂️  data --->", data);
+
+      if (data) {
+        setUserData((prev) => ({
+          ...prev,
+          profile: {
+            email: data?.userdetails?.email || "",
+            name: data?.userdetails?.name || "",
+            fatherName: data?.userdetails?.fatherName || "",
+            address: data?.userdetails?.address || "",
+            dateOfBirth: data?.userdetails?.dateOfBirth || new Date(),
+            contactNumber: data?.userdetails?.contactNumber || "01*********",
+            age: data?.userdetails?.age || 99,
+            gender: data?.userdetails?.gender || "",
+            bloodGroup: data?.userdetails?.bloodGroup || "",
+            weight: data?.userdetails?.weight || 0,
+            height: data?.userdetails?.height || 0,
+          },
+        }));
+        setHasProfile(true);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch profile data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updatePreferences = (field: keyof SystemPreferences, value: any) => {
+    setUserData((prev) => ({
+      ...prev,
+      preferences: { ...prev.preferences, [field]: value },
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -24,58 +132,112 @@ export default function GeneralSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" defaultValue="Probin" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" defaultValue="Shutrodhor" />
-            </div>
-          </div>
+          <Card className="bg-green-50 border-green-200">
+            <CardHeader>
+              <CardTitle className="text-green-800">
+                Saved Practice Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <strong>Name:</strong> {userData?.profile?.name}
+                </div>
+                <div>
+                  <strong>Email Address:</strong> {userData?.profile?.email}
+                </div>
+                <div>
+                  <strong>Address:</strong> {userData?.profile?.address}
+                </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                defaultValue="probin2017@gmail.com"
-                className="pl-10"
-              />
+                <div>
+                  <strong>Date of Birth:</strong>{" "}
+                  {userData?.profile?.dateOfBirth.toString().split("T")[0]}
+                </div>
+                <div>
+                  <strong>Phone Number:</strong>{" "}
+                  {userData?.profile?.contactNumber}
+                </div>
+                <div>
+                  <strong>Blood Group:</strong> {userData?.profile?.bloodGroup}
+                </div>
+
+                <div>
+                  <strong>Gender:</strong> {userData?.profile?.gender}
+                </div>
+                <div>
+                  <strong>Height:</strong> {userData?.profile?.height}
+                </div>
+                <div>
+                  <strong>Weight:</strong> {userData?.profile?.weight}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>System Preferences</CardTitle>
+          <CardDescription>
+            Configure your application preferences
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Dark Mode</Label>
+              <p className="text-sm text-muted-foreground">
+                Enable dark theme for the application
+              </p>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="phone"
-                type="tel"
-                defaultValue="01860686666"
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="dateOfBirth">Date of Birth</Label>
-            <Input id="dateOfBirth" type="date" defaultValue="1990-01-15" />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Textarea
-              id="address"
-              placeholder="Enter your full address"
-              defaultValue="123 Medical Street, Health City, HC 12345"
+            <Switch
+              checked={userData?.preferences?.darkMode}
+              onCheckedChange={(checked) =>
+                updatePreferences("darkMode", checked)
+              }
             />
           </div>
-
-          <Button className="w-full md:w-auto">Save Changes</Button>
+          <div className="space-y-2">
+            <Label htmlFor="language">Language</Label>
+            <Select
+              value={userData?.preferences?.language}
+              onValueChange={(value) => updatePreferences("language", value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="bn">বাংলা (Bangla)</SelectItem>
+                <SelectItem value="hi">हिंदी (Hindi)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="timezone">Timezone</Label>
+            <Select
+              value={userData?.preferences?.timezone}
+              onValueChange={(value) => updatePreferences("timezone", value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Asia/Dhaka">Asia/Dhaka (GMT+6)</SelectItem>
+                <SelectItem value="Asia/Kolkata">
+                  Asia/Kolkata (GMT+5:30)
+                </SelectItem>
+                <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+4)</SelectItem>
+                <SelectItem value="Europe/London">
+                  Europe/London (GMT+0)
+                </SelectItem>
+                <SelectItem value="America/New_York">
+                  America/New_York (GMT-5)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
     </div>
