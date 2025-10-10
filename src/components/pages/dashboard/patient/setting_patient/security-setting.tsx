@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAppSelector } from "@/redux/hooks";
 import { EyeOff, Eye, Info } from "lucide-react";
 
-export function SecuritySettings() {
+export default function SecuritySettings() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
 import { useAppSelector } from "@/redux/hooks";
 
 interface PaymentMethods {
@@ -29,7 +28,7 @@ interface PaymentMethods {
   rocketNumber?: string;
 }
 
-export function BillingSettings() {
+export default function BillingSettings() {
   const [formData, setFormData] = useState<PaymentMethods>({
     acceptCreditCards: false,
     acceptDebitCards: false,

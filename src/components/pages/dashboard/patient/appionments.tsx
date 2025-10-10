@@ -579,7 +579,7 @@ export default function Appointments({
                       Join
                     </Button>
                   )}
-                {status === "confirmed" && (
+                {status === "pending" && (
                   <>
                     <Button
                       variant="outline"
