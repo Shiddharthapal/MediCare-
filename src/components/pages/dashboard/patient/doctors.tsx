@@ -365,7 +365,7 @@ export default function Doctors({
   };
 
   const DoctorCard = ({ doctor }: { doctor: any }) => (
-    <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
+    <Card className="border-2 transition-all hover:border-primary/50 hover:shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-start space-x-4 mb-4">
           <Avatar className="h-16 w-16">

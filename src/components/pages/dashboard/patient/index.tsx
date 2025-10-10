@@ -34,7 +34,6 @@ const menuItems = [
   { id: "appointments", icon: Calendar, label: "Appointments", active: false },
   { id: "doctors", icon: Users, label: "Doctors", active: false },
   { id: "reports", icon: FileText, label: "Reports", active: false },
-  { id: "lab-results", icon: TestTube, label: "Lab Results", active: false },
   { id: "health-records", icon: Heart, label: "Health Records", active: false },
   { id: "settings", icon: Settings, label: "Settings", active: false }, // Changed to "settings"
 ];
