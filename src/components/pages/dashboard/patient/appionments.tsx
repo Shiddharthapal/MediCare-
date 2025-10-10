@@ -650,7 +650,9 @@ export default function Appointments({
                 <h3 className="font-semibold text-gray-900">
                   {appointment.reasonForVisit}
                 </h3>
-                <Badge className={getStatusColor("cancelled")}>Cancelled by Doctor</Badge>
+                <Badge className={getStatusColor("cancelled")}>
+                  Cancelled by Doctor
+                </Badge>
               </div>
 
               <p className="text-sm text-gray-600 mb-1">
@@ -748,7 +750,7 @@ export default function Appointments({
       </div>
 
       {/* Tabs */}
-      <div className="flex grid grid-cols-3 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
+      <div className=" grid grid-cols-3 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
         <Button
           variant={activeTab === "upcoming" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
@@ -809,7 +811,7 @@ export default function Appointments({
                         return null;
                       }
 
-                      if (appointment.status === 'cancelled') {
+                      if (appointment.status === "cancelled") {
                         return (
                           <CancelledAppointmentCard
                             key={appointment._id}
@@ -877,7 +879,7 @@ export default function Appointments({
                       return null;
                     }
 
-                    if (appointment.status === 'cancelled') {
+                    if (appointment.status === "cancelled") {
                       return (
                         <CancelledAppointmentCard
                           key={appointment._id}

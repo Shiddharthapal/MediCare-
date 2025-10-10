@@ -54,9 +54,9 @@ const topConditions = [
 
 export function PatientAnalytics() {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className=" my-4">
       {/* Age Group Distribution */}
-      <Card className="w-full">
+      <Card className="w-full shadow-sm hover:shadow-md transition-shadow duration-200 mb-6">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg sm:text-xl md:text-2xl">
             Patient Age Distribution
@@ -105,7 +105,7 @@ export function PatientAnalytics() {
         </CardContent>
       </Card>
       {/* New vs Returning Patients */}
-      <Card className="w-full shadow-sm hover:shadow-md transition-shadow duration-200">
+      <Card className="w-full shadow-sm hover:shadow-md transition-shadow duration-200 mb-6">
         <CardHeader className="pb-3 sm:pb-4 md:pb-6">
           <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold">
             Patient Visit Patterns
@@ -186,7 +186,7 @@ export function PatientAnalytics() {
       </Card>
 
       {/* Top Conditions */}
-      <Card className="col-span-2">
+      <Card className="col-span-2 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardHeader>
           <CardTitle>Most Common Conditions</CardTitle>
           <CardDescription>
