@@ -320,6 +320,7 @@ export default function Appointments({
 
   //remove file when you trying to upload
   const handleRemoveFile = (appointmentId: string, fileIndex: number) => {
+    console.log("🧞‍♂️  appointmentId --->", appointmentId);
     setUploadedFiles((prev) => {
       const files = [...(prev[appointmentId] || [])];
       // Revoke preview URL if it exists
@@ -1194,7 +1195,7 @@ export default function Appointments({
                                   size="icon"
                                   onClick={() =>
                                     handleRemoveFile(
-                                      selectedAppointment.id,
+                                      selectedAppointment._id,
                                       index
                                     )
                                   }
