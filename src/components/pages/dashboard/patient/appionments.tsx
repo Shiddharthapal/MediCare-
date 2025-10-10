@@ -360,7 +360,7 @@ export default function Appointments({
       });
 
       // Call the upload API
-      const response = await fetch("/api/upload", {
+      const response = await fetch("/api/user/upload", {
         method: "POST",
         body: formData,
       });
