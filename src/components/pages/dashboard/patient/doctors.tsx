@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,10 +20,9 @@ import {
   Eye,
   Stethoscope,
   Activity,
+  Loader2,
 } from "lucide-react";
 import BookAppointment from "./bookAppoinment";
-
-// Mock doctors data
 
 interface DoctorDetails {
   _id: string;
@@ -44,188 +43,6 @@ interface DoctorDetails {
   consultationModes: string[];
   createdAt: Date;
 }
-// const doctorsData = [
-//   {
-//     id: 1,
-//     name: "Dr. Sarah Wilson",
-//     specialty: "Cardiologist",
-//     experience: "15 years",
-//     rating: 4.9,
-//     reviews: 234,
-//     location: "New York Medical Center",
-//     availability: "Available Today",
-//     consultationFee: 150,
-//     image: "/placeholder.svg",
-//     avatar: "SW",
-//     about:
-//       "Specialized in heart diseases and cardiovascular surgery with extensive experience in complex cardiac procedures.",
-//     languages: ["English", "Spanish"],
-//     education: "Harvard Medical School",
-//     consultationModes: ["video", "in-person"],
-//     nextAvailable: "Today 2:00 PM",
-//     specializations: [
-//       "Heart Surgery",
-//       "Cardiac Imaging",
-//       "Preventive Cardiology",
-//     ],
-//     icon: Heart,
-//   },
-//   {
-//     id: 2,
-//     name: "Dr. Michael Chen",
-//     specialty: "Dermatologist",
-//     experience: "12 years",
-//     rating: 4.8,
-//     reviews: 189,
-//     location: "Skin Care Clinic",
-//     availability: "Available Tomorrow",
-//     consultationFee: 120,
-//     image: "/placeholder.svg",
-//     avatar: "MC",
-//     about:
-//       "Expert in skin conditions, cosmetic dermatology, and advanced skin cancer treatments.",
-//     languages: ["English", "Mandarin"],
-//     education: "Johns Hopkins University",
-//     consultationModes: ["video", "in-person"],
-//     nextAvailable: "Tomorrow 10:00 AM",
-//     specializations: ["Skin Cancer", "Cosmetic Dermatology", "Acne Treatment"],
-//     icon: Activity,
-//   },
-//   {
-//     id: 3,
-//     name: "Dr. Tina Murphy",
-//     specialty: "Endocrinologist",
-//     experience: "18 years",
-//     rating: 4.9,
-//     reviews: 312,
-//     location: "Hormone Health Institute",
-//     availability: "Available Today",
-//     consultationFee: 180,
-//     image: "/placeholder.svg",
-//     avatar: "TM",
-//     about:
-//       "Leading expert in hormone therapy, diabetes management, and metabolic disorders.",
-//     languages: ["English", "French"],
-//     education: "Mayo Clinic College of Medicine",
-//     consultationModes: ["video", "in-person", "phone"],
-//     nextAvailable: "Today 4:00 PM",
-//     specializations: ["Hormone Therapy", "Diabetes Care", "Thyroid Disorders"],
-//     icon: Activity,
-//   },
-//   {
-//     id: 4,
-//     name: "Dr. James Rodriguez",
-//     specialty: "Orthopedist",
-//     experience: "20 years",
-//     rating: 4.7,
-//     reviews: 156,
-//     location: "Orthopedic Sports Medicine",
-//     availability: "Available in 2 days",
-//     consultationFee: 200,
-//     image: "/placeholder.svg",
-//     avatar: "JR",
-//     about:
-//       "Specialized in sports medicine, joint replacement, and orthopedic trauma surgery.",
-//     languages: ["English", "Spanish"],
-//     education: "Stanford Medical School",
-//     consultationModes: ["in-person"],
-//     nextAvailable: "Jan 11, 9:00 AM",
-//     specializations: ["Sports Medicine", "Joint Replacement", "Spine Surgery"],
-//     icon: Activity,
-//   },
-//   {
-//     id: 5,
-//     name: "Dr. Lisa Thompson",
-//     specialty: "Nutritionist",
-//     experience: "10 years",
-//     rating: 4.6,
-//     reviews: 98,
-//     location: "Wellness Nutrition Center",
-//     availability: "Available Today",
-//     consultationFee: 100,
-//     image: "/placeholder.svg",
-//     avatar: "LT",
-//     about:
-//       "Certified nutritionist specializing in weight management and therapeutic diets.",
-//     languages: ["English"],
-//     education: "Columbia University",
-//     consultationModes: ["video", "phone"],
-//     nextAvailable: "Today 1:00 PM",
-//     specializations: [
-//       "Weight Management",
-//       "Sports Nutrition",
-//       "Therapeutic Diets",
-//     ],
-//     icon: Activity,
-//   },
-//   {
-//     id: 6,
-//     name: "Dr. Emily Davis",
-//     specialty: "General Physician",
-//     experience: "8 years",
-//     rating: 4.5,
-//     reviews: 145,
-//     location: "Family Health Clinic",
-//     availability: "Available Today",
-//     consultationFee: 80,
-//     image: "/placeholder.svg",
-//     avatar: "ED",
-//     about:
-//       "Primary care physician with focus on preventive medicine and family healthcare.",
-//     languages: ["English"],
-//     education: "University of Pennsylvania",
-//     consultationModes: ["video", "in-person", "phone"],
-//     nextAvailable: "Today 11:00 AM",
-//     specializations: [
-//       "Preventive Care",
-//       "Family Medicine",
-//       "Chronic Disease Management",
-//     ],
-//     icon: Stethoscope,
-//   },
-//   {
-//     id: 7,
-//     name: "Dr. Robert Kim",
-//     specialty: "Psychiatrist",
-//     experience: "14 years",
-//     rating: 4.8,
-//     reviews: 203,
-//     location: "Mental Health Associates",
-//     availability: "Available Tomorrow",
-//     consultationFee: 160,
-//     image: "/placeholder.svg",
-//     avatar: "RK",
-//     about:
-//       "Mental health specialist with expertise in anxiety, depression, and cognitive behavioral therapy.",
-//     languages: ["English", "Korean"],
-//     education: "UCLA Medical School",
-//     consultationModes: ["video", "in-person"],
-//     nextAvailable: "Tomorrow 3:00 PM",
-//     specializations: ["Anxiety Disorders", "Depression", "CBT"],
-//     icon: Brain,
-//   },
-//   {
-//     id: 8,
-//     name: "Dr. David Park",
-//     specialty: "Ophthalmologist",
-//     experience: "16 years",
-//     rating: 4.9,
-//     reviews: 187,
-//     location: "Vision Care Center",
-//     availability: "Available in 3 days",
-//     consultationFee: 140,
-//     image: "/placeholder.svg",
-//     avatar: "DP",
-//     about:
-//       "Eye specialist with expertise in cataract surgery, retinal diseases, and vision correction.",
-//     languages: ["English", "Korean"],
-//     education: "Duke University School of Medicine",
-//     consultationModes: ["in-person"],
-//     nextAvailable: "Jan 12, 2:00 PM",
-//     specializations: ["Cataract Surgery", "Retinal Diseases", "LASIK"],
-//     icon: Eye,
-//   },
-// ];
 
 const availabilityFilters = [
   "All",
@@ -241,55 +58,120 @@ export default function Doctors({
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [doctordata, setDoctordata] = useState<DoctorDetails[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties");
   const [selectedAvailability, setSelectedAvailability] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (doctordata?.length > 0) return;
-      try {
+  // Ref for intersection observer
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  const ITEMS_PER_PAGE = 20;
+
+  // Shuffle function
+  function shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  // Fetch doctors with pagination
+  const fetchDoctors = useCallback(async (pageNum: number) => {
+    try {
+      if (pageNum === 1) {
         setLoading(true);
-        let response = await fetch("/api/allDoctorDetails", {
+      } else {
+        setLoadingMore(true);
+      }
+
+      const response = await fetch(
+        `/api/allDoctorDetails?page=${pageNum}&limit=${ITEMS_PER_PAGE}`,
+        {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
-        });
-        if (!response.ok) {
-          throw new Error(`Status:${response.status}`);
         }
-        let doctordetails = await response.json();
+      );
 
-        // Fisher-Yates shuffle algorithm
-        const shuffleArray = (array: any[]) => {
-          const shuffled = [...array];
-          for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-          }
-          return shuffled;
-        };
+      if (!response.ok) {
+        throw new Error(`Status: ${response.status}`);
+      }
 
-        const shuffledDoctors = shuffleArray(
-          doctordetails?.doctordetails || []
-        );
+      const result = await response.json();
+      const newDoctors = (result?.doctordetails || []) as DoctorDetails[];
+
+      // Check if there are more doctors to load
+      if (newDoctors.length < ITEMS_PER_PAGE) {
+        setHasMore(false);
+      }
+
+      // Shuffle new doctors
+      const shuffledDoctors = shuffleArray(newDoctors);
+
+      // Append or set doctors
+      if (pageNum === 1) {
         setDoctordata(shuffledDoctors);
-      } catch (error) {
-        console.log("Error:", error);
-      } finally {
-        setLoading(false);
+      } else {
+        setDoctordata((prev) => [...prev, ...shuffledDoctors]);
+      }
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, []);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchDoctors(1);
+  }, []);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "100px", // Start loading 100px before reaching the bottom
+      }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
       }
     };
+  }, [hasMore, loadingMore, loading]);
 
-    fetchData();
-  }, [doctordata]);
+  // Fetch when page changes
+  useEffect(() => {
+    if (page > 1) {
+      fetchDoctors(page);
+    }
+  }, [page, fetchDoctors]);
 
-  const handleBookAppointment = (doctorId: number) => {
-    const doctor = doctordata.find((d) => d._id === String(doctorId));
+  const handleBookAppointment = (doctorId: string) => {
+    const doctor = doctordata.find((d) => d._id === doctorId);
     if (doctor) {
       setSelectedDoctor(doctor);
       setIsBookingOpen(true);
@@ -321,55 +203,25 @@ export default function Doctors({
     return "bg-green-100 text-green-800";
   };
 
-  const getModeIcon = (mode: string) => {
-    switch (mode) {
-      case "video":
-        return <Video className="h-4 w-4" />;
-      case "phone":
-        return <Phone className="h-4 w-4" />;
-      case "in-person":
-        return <MapPin className="h-4 w-4" />;
-      default:
-        return <Calendar className="h-4 w-4" />;
-    }
-  };
-
   const getDoctorInitials = (doctorName: string) => {
     if (!doctorName) return "DR";
-
-    // Remove DR/Dr prefix and clean the name
-    const cleanName = doctorName
-      .replace(/^(DR\.?|Dr\.?)\s*/i, "") // Remove DR/Dr at the beginning
-      .trim();
-
+    const cleanName = doctorName.replace(/^(DR\.?|Dr\.?)\s*/i, "").trim();
     if (!cleanName) return "DR";
-
-    // Split the cleaned name and get first 2 words
     const words = cleanName.split(" ").filter((word) => word.length > 0);
-
     if (words.length >= 2) {
-      // Get first letter of first 2 words
       return (words[0][0] + words[1][0]).toUpperCase();
     } else if (words.length === 1) {
-      // If only one word, get first 2 letters
       return words[0].substring(0, 2).toUpperCase();
     } else {
       return "DR";
     }
   };
 
-  const handleBookNewAppointment = () => {
-    if (onNavigate) {
-      onNavigate("doctors");
-    }
-  };
-
-  const DoctorCard = ({ doctor }: { doctor: any }) => (
-    <Card className="border-2 transition-all hover:border-primary/50 hover:shadow-lg">
+  const DoctorCard = ({ doctor }: { doctor: DoctorDetails }) => (
+    <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
       <CardContent className="p-6">
         <div className="flex items-start space-x-4 mb-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src={doctor.image || "/placeholder.svg"} />
             <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold text-lg">
               {getDoctorInitials(doctor.name)}
             </AvatarFallback>
@@ -383,9 +235,6 @@ export default function Doctors({
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                 <span className="text-sm font-medium">4.5</span>
-                <span className="text-sm text-gray-500">
-                  ({doctor.reviews})
-                </span>
               </div>
             </div>
             <div>
@@ -427,7 +276,7 @@ export default function Doctors({
           <p className="text-gray-600 text-sm line-clamp-2">{doctor.about}</p>
 
           <div className="flex flex-wrap gap-2">
-            {doctor.specializations
+            {doctor?.specializations
               .slice(0, 3)
               .map((spec: string, index: number) => (
                 <Badge key={index} variant="secondary" className="text-xs">
@@ -438,24 +287,20 @@ export default function Doctors({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {doctor.consultationModes.map((mode: String) => (
-                <Badge className={getAvailabilityColor(doctor.availability)}>
+              {doctor?.consultationModes.map((mode: string, index: number) => (
+                <Badge
+                  key={index}
+                  className={getAvailabilityColor(doctor.availableSlots[0])}
+                >
                   {mode.charAt(0).toUpperCase() + mode.slice(1).toLowerCase()}
                 </Badge>
               ))}
             </div>
-
-            {/* <div className="flex items-center gap-1">
-              <Video className="text-blue-700" />
-              <div className=" text-md flex items-center gap-1 text-gray-800">
-                Video
-              </div>
-            </div> */}
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t">
             <div className="text-lg font-semibold text-gray-900">
-              ${doctor.fees}
+              ${doctor?.fees}
               <span className="text-sm font-normal text-gray-500">
                 {" "}
                 /consultation
@@ -486,7 +331,7 @@ export default function Doctors({
           </p>
         </div>
         <div className="text-sm text-gray-500">
-          {filteredDoctors?.length} doctors available
+          {filteredDoctors?.length} doctors loaded
         </div>
       </div>
 
@@ -523,9 +368,10 @@ export default function Doctors({
                 onChange={(e) => setSelectedSpecialty(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
+                <option value="All Specialties">All Specialties</option>
                 {[
                   ...new Set(
-                    doctordata.flatMap((doctor) => doctor?.specializations)
+                    doctordata.flatMap((doctor) => doctor.specializations)
                   ),
                 ].map((specialty) => (
                   <option key={specialty} value={specialty}>
@@ -544,7 +390,7 @@ export default function Doctors({
                 onChange={(e) => setSelectedAvailability(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                {availabilityFilters?.map((filter) => (
+                {availabilityFilters.map((filter) => (
                   <option key={filter} value={filter}>
                     {filter}
                   </option>
@@ -601,7 +447,10 @@ export default function Doctors({
                   Specialties
                 </p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {doctordata?.length}
+                  {
+                    [...new Set(doctordata.flatMap((d) => d.specializations))]
+                      .length
+                  }
                 </p>
               </div>
               <Heart className="h-8 w-8 text-purple-500" />
@@ -624,13 +473,20 @@ export default function Doctors({
         </Card>
       </div>
 
+      {/* Initial Loading */}
+      {loading && doctordata.length === 0 && (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+        </div>
+      )}
+
       {/* Doctors Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredDoctors?.length > 0 ? (
           filteredDoctors?.map((doctor) => (
             <DoctorCard key={doctor._id} doctor={doctor} />
           ))
-        ) : (
+        ) : !loading ? (
           <div className="col-span-full">
             <Card>
               <CardContent className="p-8 text-center">
@@ -644,8 +500,38 @@ export default function Doctors({
               </CardContent>
             </Card>
           </div>
-        )}
+        ) : null}
       </div>
+
+      {/* Loading More Indicator */}
+      {loadingMore && (
+        <div className="flex justify-center items-center py-8">
+          <div className="flex items-center gap-3 text-blue-600">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span className="text-sm font-medium">Loading more doctors...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Intersection Observer Target */}
+      <div ref={observerTarget} className="h-10" />
+
+      {/* End of List Message */}
+      {!hasMore && doctordata.length > 0 && (
+        <div className="text-center py-8">
+          <Card className="bg-gray-50 border-gray-200">
+            <CardContent className="p-6">
+              <p className="text-gray-600 font-medium">
+                You've reached the end of the list
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Total doctors loaded: {doctordata.length}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <BookAppointment
         isOpen={isBookingOpen}
         doctor={selectedDoctor}
