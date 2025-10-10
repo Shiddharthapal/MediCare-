@@ -57,6 +57,72 @@ const MedicationSchema = new mongoose.Schema(
   },
   { _id: true }
 );
+
+const CardMethodSchema = new mongoose.Schema(
+  {
+    cardholderName: {
+      type: String,
+    },
+    type: {
+      type: String,
+    },
+    cardNumber: {
+      type: String,
+    },
+    expiryMonth: {
+      type: String,
+    },
+    expiryYear: {
+      type: String,
+    },
+    cvv: {
+      type: String,
+    },
+    isPrimary: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: true }
+);
+
+// Mobile Banking Method Sub-Schema
+const MobileBankingMethodSchema = new mongoose.Schema(
+  {
+    provider: {
+      type: String,
+    },
+    mobileNumber: {
+      type: String,
+    },
+    accountName: {
+      type: String,
+    },
+    isPrimary: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: true }
+);
+
+// Main Payment Methods Schema
+const PaymentMethodsSchema = new mongoose.Schema(
+  {
+    cardMethods: {
+      type: [CardMethodSchema],
+      default: [],
+    },
+    mobileBankingMethods: {
+      type: [MobileBankingMethodSchema],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 const PrescriptionSchema = new mongoose.Schema(
   {
     vitalSign: {
@@ -226,6 +292,9 @@ const userDetailsSchema = new mongoose.Schema({
   appointments: {
     type: [appointmentDataSchema], // Changed from [String] to [appointmentDataSchema]
     default: [], // Optional: set default empty array
+  },
+  payment: {
+    type: PaymentMethodsSchema,
   },
   lastTreatmentDate: {
     type: Date,
