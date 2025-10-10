@@ -12,8 +12,8 @@ import {
   MapPin,
   Phone,
   Upload,
-  Eye,
-  Download,
+  ImageIcon,
+  File,
   X,
   FileText,
   Info,
@@ -62,177 +62,6 @@ const mockappointmentdata = {
   paymentMethod: "",
   specialRequests: "",
   status: "",
-};
-
-const prescriptionsData = {
-  9: [
-    {
-      id: 1,
-      medication: "Estradiol",
-      dosage: "2mg",
-      frequency: "Once daily",
-      duration: "30 days",
-      instructions: "Take with food in the morning",
-      prescribedDate: "2024-01-05",
-    },
-    {
-      id: 2,
-      medication: "Progesterone",
-      dosage: "100mg",
-      frequency: "Once daily at bedtime",
-      duration: "30 days",
-      instructions: "Take before sleep",
-      prescribedDate: "2024-01-05",
-    },
-  ],
-  10: [
-    {
-      id: 3,
-      medication: "Multivitamin",
-      dosage: "1 tablet",
-      frequency: "Once daily",
-      duration: "90 days",
-      instructions: "Take with breakfast",
-      prescribedDate: "2024-01-03",
-    },
-  ],
-  11: [
-    {
-      id: 4,
-      medication: "Eye Drops",
-      dosage: "2 drops",
-      frequency: "Twice daily",
-      duration: "14 days",
-      instructions: "Apply to both eyes morning and evening",
-      prescribedDate: "2023-12-28",
-    },
-  ],
-  12: [
-    {
-      id: 5,
-      medication: "Ibuprofen",
-      dosage: "400mg",
-      frequency: "As needed",
-      duration: "7 days",
-      instructions: "Take with food for headache relief",
-      prescribedDate: "2023-12-20",
-    },
-  ],
-  13: [
-    {
-      id: 6,
-      medication: "Antibiotics",
-      dosage: "500mg",
-      frequency: "Twice daily",
-      duration: "10 days",
-      instructions: "Complete full course even if feeling better",
-      prescribedDate: "2023-12-15",
-    },
-  ],
-  15: [
-    {
-      id: 7,
-      medication: "Fluoride Toothpaste",
-      dosage: "As directed",
-      frequency: "Twice daily",
-      duration: "Ongoing",
-      instructions: "Use for daily oral hygiene",
-      prescribedDate: "2023-12-05",
-    },
-  ],
-  16: [
-    {
-      id: 8,
-      medication: "Anti-inflammatory",
-      dosage: "200mg",
-      frequency: "Three times daily",
-      duration: "21 days",
-      instructions: "Take with meals to reduce joint inflammation",
-      prescribedDate: "2023-11-28",
-    },
-  ],
-};
-
-const reportsData = {
-  9: [
-    {
-      id: 1,
-      name: "Blood Test Results.pdf",
-      uploadDate: "2024-01-04",
-      size: "2.3 MB",
-      type: "Lab Report",
-    },
-    {
-      id: 2,
-      name: "Hormone Panel Results.pdf",
-      uploadDate: "2024-01-04",
-      size: "1.8 MB",
-      type: "Lab Report",
-    },
-  ],
-  10: [
-    {
-      id: 3,
-      name: "Previous Medical History.pdf",
-      uploadDate: "2024-01-02",
-      size: "1.8 MB",
-      type: "Medical History",
-    },
-  ],
-  11: [
-    {
-      id: 4,
-      name: "Eye Exam Results.pdf",
-      uploadDate: "2023-12-27",
-      size: "3.2 MB",
-      type: "Medical Report",
-    },
-  ],
-  12: [
-    {
-      id: 5,
-      name: "MRI Scan Results.pdf",
-      uploadDate: "2023-12-19",
-      size: "5.4 MB",
-      type: "Imaging Report",
-    },
-  ],
-  13: [
-    {
-      id: 6,
-      name: "Urine Test Results.pdf",
-      uploadDate: "2023-12-14",
-      size: "1.2 MB",
-      type: "Lab Report",
-    },
-  ],
-  14: [
-    {
-      id: 7,
-      name: "Child Growth Chart.pdf",
-      uploadDate: "2023-12-09",
-      size: "2.1 MB",
-      type: "Medical Report",
-    },
-  ],
-  15: [
-    {
-      id: 8,
-      name: "Dental X-rays.pdf",
-      uploadDate: "2023-12-04",
-      size: "4.7 MB",
-      type: "Imaging Report",
-    },
-  ],
-  16: [
-    {
-      id: 9,
-      name: "Joint X-ray Results.pdf",
-      uploadDate: "2023-11-27",
-      size: "3.8 MB",
-      type: "Imaging Report",
-    },
-  ],
 };
 
 const formatDate = (dateString: string) => {
@@ -366,6 +195,9 @@ const groupAppointmentsByDate = (
     return grouped;
   }, {});
 };
+interface UploadedFile extends File {
+  preview?: string;
+}
 
 export default function Appointments({
   onNavigate,
@@ -376,11 +208,13 @@ export default function Appointments({
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReportsModal, setShowReportsModal] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<appointmentdata | null>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<{ [key: number]: File[] }>(
-    {}
-  );
+
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    [key: number]: UploadedFile[];
+  }>({});
   const [appointmentsData, setAppointmentsData] =
     useState<appointmentdata | null>(null);
 
@@ -467,6 +301,104 @@ export default function Appointments({
     }
   };
 
+  //handle file upload when you upload reports
+  const handleFileUpload = (appointmentId: string, files: FileList) => {
+    const fileArray = Array.from(files) as UploadedFile[];
+
+    // Create preview URLs for images
+    fileArray.forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        file.preview = URL.createObjectURL(file);
+      }
+    });
+
+    setUploadedFiles((prev) => ({
+      ...prev,
+      [appointmentId]: [...(prev[appointmentId] || []), ...fileArray],
+    }));
+  };
+
+  //remove file when you trying to upload
+  const handleRemoveFile = (appointmentId: string, fileIndex: number) => {
+    setUploadedFiles((prev) => {
+      const files = [...(prev[appointmentId] || [])];
+      // Revoke preview URL if it exists
+      if (files[fileIndex]?.preview) {
+        URL.revokeObjectURL(files[fileIndex].preview!);
+      }
+      files.splice(fileIndex, 1);
+      return {
+        ...prev,
+        [appointmentId]: files,
+      };
+    });
+  };
+
+  //user trying to save document
+  const handleSaveDocuments = async () => {
+    if (!selectedAppointment) return;
+
+    const files = uploadedFiles[selectedAppointment._id];
+    if (!files || files.length === 0) {
+      alert("Please upload at least one file");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Create FormData to send files
+      const formData = new FormData();
+      formData.append("appointmentId", selectedAppointment._id.toString());
+      formData.append("doctorName", selectedAppointment.doctorName);
+      formData.append("consultedType", selectedAppointment.consultedType);
+
+      // Append all files
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      // Call the upload API
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const result = await response.json();
+      console.log("[v0] Upload successful:", result);
+
+      // Clear uploaded files for this appointment
+      setUploadedFiles((prev) => {
+        const newState = { ...prev };
+        delete newState[selectedAppointment._id];
+        return newState;
+      });
+
+      alert("Documents uploaded successfully!");
+      setShowReportsModal(false);
+    } catch (error) {
+      console.error("[v0] Upload error:", error);
+      alert("Failed to upload documents. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // for set file icon
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith("image/")) {
+      return <ImageIcon className="h-5 w-5 text-blue-500" />;
+    } else if (file.type === "application/pdf") {
+      return <FileText className="h-5 w-5 text-red-500" />;
+    } else {
+      return <File className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
   const handleViewDetails = (appointment: appointmentdata, status: string) => {
     let appointmentWithStatus = {
       ...appointment,
@@ -483,14 +415,6 @@ export default function Appointments({
   const handleViewReports = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowReportsModal(true);
-  };
-
-  const handleFileUpload = (appointmentId: number, files: FileList) => {
-    const fileArray = Array.from(files);
-    setUploadedFiles((prev) => ({
-      ...prev,
-      [appointmentId]: [...(prev[appointmentId] || []), ...fileArray],
-    }));
   };
 
   const getDoctorInitials = (doctorName: string) => {
@@ -1103,9 +1027,9 @@ export default function Appointments({
               </div>
 
               {selectedAppointment.status === "completed" &&
-              prescriptionsData[selectedAppointment.id] ? (
+              prescriptionsData[selectedAppointment._id] ? (
                 <div className="space-y-4">
-                  {prescriptionsData[selectedAppointment.id].map(
+                  {prescriptionsData[selectedAppointment._id].map(
                     (prescription: any) => (
                       <Card
                         key={prescription.id}
@@ -1167,7 +1091,7 @@ export default function Appointments({
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Reports - {selectedAppointment.type}
+                  Reports - {selectedAppointment.consultedType}
                 </h2>
                 <Button
                   variant="ghost"
@@ -1180,8 +1104,8 @@ export default function Appointments({
 
               <div className="mb-6">
                 <p className="text-sm text-gray-600">
-                  {selectedAppointment.doctor} •{" "}
-                  {formatDate(selectedAppointment.date)}
+                  {selectedAppointment.doctorName} •{" "}
+                  {formatDate(selectedAppointment.appointmentDate)}
                 </p>
               </div>
 
@@ -1191,11 +1115,15 @@ export default function Appointments({
                   <h3 className="text-lg font-medium text-gray-900 mb-3">
                     Upload Reports
                   </h3>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
                     <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                     <p className="text-sm text-gray-600 mb-2">
                       Upload medical reports, lab results, or other documents
                       for your doctor
+                    </p>
+                    <p className="text-xs text-gray-500 mb-4">
+                      Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB per
+                      file)
                     </p>
                     <input
                       type="file"
@@ -1203,98 +1131,92 @@ export default function Appointments({
                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                       onChange={(e) =>
                         e.target.files &&
-                        handleFileUpload(selectedAppointment.id, e.target.files)
+                        handleFileUpload(
+                          selectedAppointment._id,
+                          e.target.files
+                        )
                       }
                       className="hidden"
-                      id={`file-upload-${selectedAppointment.id}`}
+                      id={`file-upload-${selectedAppointment._id}`}
                     />
                     <label
-                      htmlFor={`file-upload-${selectedAppointment.id}`}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                      htmlFor={`file-upload-${selectedAppointment._id}`}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
                     >
                       Choose Files
                     </label>
                   </div>
 
-                  {/* Show uploaded files */}
-                  {uploadedFiles[selectedAppointment.id] &&
-                    uploadedFiles[selectedAppointment.id].length > 0 && (
+                  {/* Show uploaded files with preview */}
+                  {uploadedFiles[selectedAppointment._id] &&
+                    uploadedFiles[selectedAppointment._id].length > 0 && (
                       <div className="mt-4">
-                        <h4 className="text-sm font-medium text-gray-900 mb-2">
-                          Uploaded Files:
+                        <h4 className="text-sm font-medium text-gray-900 mb-3">
+                          Uploaded Files (
+                          {uploadedFiles[selectedAppointment._id].length}):
                         </h4>
-                        <div className="space-y-2">
-                          {uploadedFiles[selectedAppointment.id].map(
+                        <div className="space-y-3">
+                          {uploadedFiles[selectedAppointment._id].map(
                             (file, index) => (
                               <div
                                 key={index}
-                                className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                                className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
                               >
-                                <span className="text-sm text-gray-700">
-                                  {file.name}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                                </span>
+                                {/* File preview or icon */}
+                                <div className="flex-shrink-0">
+                                  {file.preview ? (
+                                    <img
+                                      src={file.preview || "/placeholder.svg"}
+                                      alt={file.name}
+                                      className="w-16 h-16 object-cover rounded"
+                                    />
+                                  ) : (
+                                    <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                                      {getFileIcon(file)}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* File details */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 truncate">
+                                    {file.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {(file.size / 1024 / 1024).toFixed(2)} MB •{" "}
+                                    {file.type || "Unknown type"}
+                                  </p>
+                                </div>
+
+                                {/* Remove button */}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    handleRemoveFile(
+                                      selectedAppointment.id,
+                                      index
+                                    )
+                                  }
+                                  className="flex-shrink-0"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
                               </div>
                             )
                           )}
                         </div>
+                        <Button
+                          onClick={handleSaveDocuments}
+                          className="w-full mt-4"
+                          disabled={isUploading}
+                        >
+                          {isUploading ? "Uploading..." : "Save Documents"}
+                        </Button>
                       </div>
                     )}
                 </div>
               )}
-
-              {/* Existing Reports */}
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">
-                  {selectedAppointment.status === "completed"
-                    ? "Uploaded Reports"
-                    : "Previously Uploaded"}
-                </h3>
-
-                {reportsData[selectedAppointment.id] ? (
-                  <div className="space-y-3">
-                    {reportsData[selectedAppointment.id].map((report: any) => (
-                      <Card key={report.id}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <FileText className="h-8 w-8 text-blue-500" />
-                              <div>
-                                <h4 className="font-medium text-gray-900">
-                                  {report.name}
-                                </h4>
-                                <p className="text-sm text-gray-600">
-                                  {report.type} • Uploaded {report.uploadDate} •{" "}
-                                  {report.size}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4 mr-2" />
-                                View
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <Download className="h-4 w-4 mr-2" />
-                                Download
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">
-                      No reports uploaded yet
-                    </p>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>
