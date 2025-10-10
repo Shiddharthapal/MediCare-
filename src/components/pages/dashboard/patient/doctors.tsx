@@ -250,10 +250,10 @@ export default function Doctors({
 
   useEffect(() => {
     const fetchData = async () => {
-      if (doctordata.length > 0) return;
+      if (doctordata?.length > 0) return;
       try {
         setLoading(true);
-        let response = await fetch("/api/doctor/doctorDetails", {
+        let response = await fetch("/api/allDoctorDetails", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -263,7 +263,21 @@ export default function Doctors({
           throw new Error(`Status:${response.status}`);
         }
         let doctordetails = await response.json();
-        setDoctordata(doctordetails?.doctordetails);
+
+        // Fisher-Yates shuffle algorithm
+        const shuffleArray = (array: any[]) => {
+          const shuffled = [...array];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
+          return shuffled;
+        };
+
+        const shuffledDoctors = shuffleArray(
+          doctordetails?.doctordetails || []
+        );
+        setDoctordata(shuffledDoctors);
       } catch (error) {
         console.log("Error:", error);
       } finally {
@@ -273,6 +287,7 @@ export default function Doctors({
 
     fetchData();
   }, [doctordata]);
+
   const handleBookAppointment = (doctorId: number) => {
     const doctor = doctordata.find((d) => d._id === String(doctorId));
     if (doctor) {
@@ -281,7 +296,7 @@ export default function Doctors({
     }
   };
 
-  const filteredDoctors = doctordata.filter((doctor) => {
+  const filteredDoctors = doctordata?.filter((doctor) => {
     const matchesSearch =
       doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doctor.specializations
@@ -471,7 +486,7 @@ export default function Doctors({
           </p>
         </div>
         <div className="text-sm text-gray-500">
-          {filteredDoctors.length} doctors available
+          {filteredDoctors?.length} doctors available
         </div>
       </div>
 
@@ -510,7 +525,7 @@ export default function Doctors({
               >
                 {[
                   ...new Set(
-                    doctordata.flatMap((doctor) => doctor.specializations)
+                    doctordata.flatMap((doctor) => doctor?.specializations)
                   ),
                 ].map((specialty) => (
                   <option key={specialty} value={specialty}>
@@ -529,7 +544,7 @@ export default function Doctors({
                 onChange={(e) => setSelectedAvailability(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                {availabilityFilters.map((filter) => (
+                {availabilityFilters?.map((filter) => (
                   <option key={filter} value={filter}>
                     {filter}
                   </option>
@@ -550,7 +565,7 @@ export default function Doctors({
                   Total Doctors
                 </p>
                 <p className="text-2xl font-bold text-blue-900">
-                  {doctordata.length}
+                  {doctordata?.length}
                 </p>
               </div>
               <Stethoscope className="h-8 w-8 text-blue-500" />
@@ -567,8 +582,8 @@ export default function Doctors({
                 </p>
                 <p className="text-2xl font-bold text-green-900">
                   {
-                    doctordata.filter((d) =>
-                      d.availableSlots.includes("availableSlots")
+                    doctordata?.filter((d) =>
+                      d.availableSlots?.includes("availableSlots")
                     ).length
                   }
                 </p>
@@ -586,7 +601,7 @@ export default function Doctors({
                   Specialties
                 </p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {doctordata.length}
+                  {doctordata?.length}
                 </p>
               </div>
               <Heart className="h-8 w-8 text-purple-500" />
@@ -611,8 +626,8 @@ export default function Doctors({
 
       {/* Doctors Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredDoctors.length > 0 ? (
-          filteredDoctors.map((doctor) => (
+        {filteredDoctors?.length > 0 ? (
+          filteredDoctors?.map((doctor) => (
             <DoctorCard key={doctor._id} doctor={doctor} />
           ))
         ) : (
