@@ -218,7 +218,7 @@ export default function Doctors({
   };
 
   const DoctorCard = ({ doctor }: { doctor: DoctorDetails }) => (
-    <Card className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
+    <Card className="border-2 transition-all hover:border-primary/50 hover:shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-start space-x-4 mb-4">
           <Avatar className="h-16 w-16">
@@ -287,7 +287,7 @@ export default function Doctors({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {doctor?.consultationModes.map((mode: string, index: number) => (
+              {doctor?.consultationModes?.map((mode: string, index: number) => (
                 <Badge
                   key={index}
                   className={getAvailabilityColor(doctor.availableSlots[0])}
@@ -448,8 +448,9 @@ export default function Doctors({
                 </p>
                 <p className="text-2xl font-bold text-purple-900">
                   {
-                    [...new Set(doctordata.flatMap((d) => d.specializations))]
-                      .length
+                    // [...new Set(doctordata.flatMap((d) => d.specializations))]
+                    //   .length
+                    doctordata.length
                   }
                 </p>
               </div>
