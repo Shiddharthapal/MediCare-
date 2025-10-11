@@ -65,7 +65,7 @@ interface FileUpload {
   url: string;
   checksum: string;
   uploadedAt: Date;
-  userId?: string;
+  userIdWHUP?: string;
   deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
