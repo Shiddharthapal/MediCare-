@@ -13,6 +13,7 @@ import Profile from "./pages/profile";
 import DashboardofDoctor from "./pages/dashboard/doctor";
 import DashboardofPatient from "./pages/dashboard/patient";
 import ProfileofDoctor from "./pages/profile/profilefordoctor";
+import About from "./pages/about";
 import ProtectedRoute from "./ProctedRoute";
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
               <Route path="/profilefordoctor" element={<ProfileofDoctor />} />
               <Route path="/doctor" element={<DashboardofDoctor />} />
               <Route path="/patient" element={<DashboardofPatient />} />
+              <Route path="/about" element={<About />} />
             </Route>
           </Routes>
         </Router>

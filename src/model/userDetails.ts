@@ -57,6 +57,125 @@ const MedicationSchema = new mongoose.Schema(
   },
   { _id: true }
 );
+
+const CardMethodSchema = new mongoose.Schema(
+  {
+    cardholderName: {
+      type: String,
+    },
+    type: {
+      type: String,
+    },
+    cardNumber: {
+      type: String,
+    },
+    expiryMonth: {
+      type: String,
+    },
+    expiryYear: {
+      type: String,
+    },
+    cvv: {
+      type: String,
+    },
+    isPrimary: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: true }
+);
+
+// Mobile Banking Method Sub-Schema
+const MobileBankingMethodSchema = new mongoose.Schema(
+  {
+    provider: {
+      type: String,
+    },
+    mobileNumber: {
+      type: String,
+    },
+    accountName: {
+      type: String,
+    },
+    isPrimary: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: true }
+);
+
+// Main Payment Methods Schema
+const PaymentMethodsSchema = new mongoose.Schema(
+  {
+    cardMethods: {
+      type: [CardMethodSchema],
+      default: [],
+    },
+    mobileBankingMethods: {
+      type: [MobileBankingMethodSchema],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const FileUploadSchema = new mongoose.Schema({
+  filename: {
+    type: String,
+  },
+
+  originalName: {
+    type: String,
+  },
+
+  fileType: {
+    type: String,
+  },
+
+  fileSize: {
+    type: Number,
+  },
+
+  path: {
+    type: String,
+  },
+
+  url: {
+    type: String,
+  },
+
+  checksum: {
+    type: String,
+  },
+
+  uploadedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  userIdWHUP: {
+    type: String,
+  },
+  appointmentId: {
+    type: String,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now(),
+  },
+});
+
 const PrescriptionSchema = new mongoose.Schema(
   {
     vitalSign: {
@@ -226,6 +345,13 @@ const userDetailsSchema = new mongoose.Schema({
   appointments: {
     type: [appointmentDataSchema], // Changed from [String] to [appointmentDataSchema]
     default: [], // Optional: set default empty array
+  },
+  payment: {
+    type: PaymentMethodsSchema,
+  },
+  upload: {
+    type: [FileUploadSchema],
+    default: [],
   },
   lastTreatmentDate: {
     type: Date,

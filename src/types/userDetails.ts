@@ -32,6 +32,46 @@ interface Prescription {
   prescriptionId: string;
   createdAt: Date;
 }
+
+interface CardMethodSchema {
+  cardholderName: string;
+  type: string;
+  cardNumber: string;
+  expiryMonth: string;
+  expiryYear: string;
+  cvv: string;
+  isPrimary: boolean;
+}
+
+interface MobileBankingMethodSchema {
+  provider: string;
+  mobileNumber: string;
+  accountName: string;
+  isPrimary: boolean;
+}
+
+interface PaymentMethods {
+  cardMethods: CardMethodSchema[];
+  mobileBankingMethods: MobileBankingMethodSchema[];
+}
+
+interface FileUpload {
+  _id: string;
+  filename: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  userIdWHUP?: string;
+  appointmentId: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface AppointmentData {
   doctorpatinetId: string;
   doctorUserId: string;
@@ -74,6 +114,8 @@ export interface UserDetails {
   weight: number;
   height?: number;
   appoinments: AppointmentData[];
+  payment: PaymentMethods;
+  upload: FileUpload[];
   lastTreatmentDate?: Date;
   createdAt: Date;
 }

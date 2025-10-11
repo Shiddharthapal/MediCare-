@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAppSelector } from "@/redux/hooks";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,30 +18,31 @@ import {
   Menu,
   X,
   LogOut,
-  Badge,
   Clock,
   Info,
   Upload,
   Phone,
   MapPin,
+  ImageIcon,
+  File,
 } from "lucide-react";
 import Appointments from "./appionments";
 import Doctors from "./doctors";
 import Reports from "./report";
 import SettingPatient from "./setting_patient/index";
+import RescheduleBookAppointments from "./rescheduleBookAppointment";
 
 const menuItems = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
   { id: "appointments", icon: Calendar, label: "Appointments", active: false },
   { id: "doctors", icon: Users, label: "Doctors", active: false },
   { id: "reports", icon: FileText, label: "Reports", active: false },
-  { id: "lab-results", icon: TestTube, label: "Lab Results", active: false },
   { id: "health-records", icon: Heart, label: "Health Records", active: false },
   { id: "settings", icon: Settings, label: "Settings", active: false }, // Changed to "settings"
 ];
 
 interface appointmentdata {
-  _id: string;
+  appointmentId: string;
   doctorUserId: string;
   doctorName: string;
   doctorSpecialist: string;
@@ -89,7 +91,7 @@ interface GroupedAppointments {
 }
 
 const mockappointmentdata = {
-  _id: "",
+  appointmentId: "",
   doctorUserId: "",
   doctorName: "",
   doctorSpecialist: "",
@@ -248,6 +250,10 @@ const getModeIcon = (mode: string) => {
   }
 };
 
+interface UploadedFile extends File {
+  preview?: string;
+}
+
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
@@ -258,15 +264,24 @@ export default function Dashboard() {
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
-
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    [key: number]: UploadedFile[];
+  }>({});
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<appointmentdata | null>(null);
 
-  const user = useAppSelector((state) => state.auth.user);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
+  const [isReschedule, setIsReschedule] = useState(false);
+  const [rescheduleData, setRescheduleData] = useState<Partial<
+    appointmentdata[]
+  > | null>(null);
+
+  const user = useAppSelector((state) => state.auth.user);
+  const id = user?._id;
   useEffect(() => {
-    let id = user?._id;
     const fetchData = async () => {
       try {
         let response = await fetch(`/api/user/${id}`, {
@@ -341,14 +356,22 @@ export default function Dashboard() {
     }
   };
 
+  const handleCloseBooking = () => {
+    setIsBookingOpen(false);
+    setIsReschedule(false);
+    setRescheduleData(null);
+  };
+
   const handleJoinSession = (appointmentId: number) => {
     console.log(`Joining session for appointment ${appointmentId}`);
     // Add video call logic here
   };
 
-  const handleRescheduleAppointment = (appointmentId: number) => {
-    console.log(`Rescheduling appointment ${appointmentId}`);
-    // Add reschedule logic here
+  const handleRescheduleAppointment = (appointment: appointmentdata) => {
+    setRescheduleData(appointment);
+    console.log("🧞‍♂️  appointment --->", appointment);
+    setIsReschedule(true);
+    setIsBookingOpen(true);
   };
 
   const handleViewDetails = (appointment: appointmentdata, status: string) => {
@@ -359,6 +382,8 @@ export default function Dashboard() {
     setSelectedAppointment(appointmentWithStatus);
     setShowDetailsModal(true);
   };
+
+  //for prescription modal
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);
@@ -387,6 +412,106 @@ export default function Dashboard() {
     );
     let appointmentdeleteresponse = await appointmentDeleteResponse.json();
     setAppointmentsData(appointmentdeleteresponse?.userdetails?.appointments);
+  };
+
+  const handleFileUpload = (appointmentId: string, files: FileList) => {
+    const fileArray = Array.from(files) as UploadedFile[];
+
+    // Create preview URLs for images
+    fileArray.forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        file.preview = URL.createObjectURL(file);
+      }
+    });
+
+    setUploadedFiles((prev) => ({
+      ...prev,
+      [appointmentId]: [...(prev[appointmentId] || []), ...fileArray],
+    }));
+  };
+
+  //remove file when you trying to upload
+  const handleRemoveFile = (appointmentId: string, fileIndex: number) => {
+    console.log("🧞‍♂️  appointmentId --->", appointmentId);
+    setUploadedFiles((prev) => {
+      const files = [...(prev[appointmentId] || [])];
+      // Revoke preview URL if it exists
+      if (files[fileIndex]?.preview) {
+        URL.revokeObjectURL(files[fileIndex].preview!);
+      }
+      files.splice(fileIndex, 1);
+      return {
+        ...prev,
+        [appointmentId]: files,
+      };
+    });
+  };
+
+  //user trying to save document
+  const handleSaveDocuments = async () => {
+    if (!selectedAppointment) return;
+
+    const files = uploadedFiles[selectedAppointment._id];
+    if (!files || files.length === 0) {
+      alert("Please upload at least one file");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Create FormData to send files
+      const formData = new FormData();
+      formData.append("appointmentId", selectedAppointment._id.toString());
+      formData.append("doctorName", selectedAppointment.doctorName);
+      formData.append("consultedType", selectedAppointment.consultedType);
+      formData.append("userIdWHUP", selectedAppointment.doctorUserId);
+      formData.append("userId", id || user?._id || "");
+
+      // Append all files
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      // Call the upload API
+      const response = await fetch("/api/user/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const result = await response.json();
+      console.log("[v0] Upload successful:", result);
+
+      // Clear uploaded files for this appointment
+      setUploadedFiles((prev) => {
+        const newState = { ...prev };
+        delete newState[selectedAppointment._id];
+        return newState;
+      });
+
+      alert("Documents uploaded successfully!");
+      setShowReportsModal(false);
+    } catch (error) {
+      console.error("[v0] Upload error:", error);
+      alert("Failed to upload documents. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  //set file icon
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith("image/")) {
+      return <ImageIcon className="h-5 w-5 text-blue-500" />;
+    } else if (file.type === "application/pdf") {
+      return <FileText className="h-5 w-5 text-red-500" />;
+    } else {
+      return <File className="h-5 w-5 text-gray-500" />;
+    }
   };
 
   const AppointmentCard = ({
@@ -458,7 +583,7 @@ export default function Dashboard() {
                       Join
                     </Button>
                   )}
-                {status === "confirmed" && (
+                {status === "pending" && (
                   <>
                     <Button
                       variant="outline"
@@ -470,9 +595,7 @@ export default function Dashboard() {
                     <Button
                       variant="outline"
                       className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                      onClick={() =>
-                        handleRescheduleAppointment(appointment._id)
-                      }
+                      onClick={() => handleRescheduleAppointment(appointment)}
                     >
                       Reschedule
                     </Button>
@@ -934,6 +1057,242 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
+
+                {/* Prescription Modal */}
+                {showPrescriptionModal && selectedAppointment && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-xl font-semibold text-gray-900">
+                            Prescription - {selectedAppointment.consultedType}
+                          </h2>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setShowPrescriptionModal(false)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="mb-4">
+                          <p className="text-sm text-gray-600">
+                            {selectedAppointment.doctorName} •{" "}
+                            {formatDate(selectedAppointment.appointmentDate)}
+                          </p>
+                        </div>
+
+                        {selectedAppointment.status === "completed" &&
+                        prescriptionsData[selectedAppointment._id] ? (
+                          <div className="space-y-4">
+                            {prescriptionsData[selectedAppointment._id].map(
+                              (prescription: any) => (
+                                <Card
+                                  key={prescription.id}
+                                  className="border-l-4 border-l-blue-500"
+                                >
+                                  <CardContent className="p-4">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <h3 className="font-semibold text-gray-900">
+                                        {prescription.medication}
+                                      </h3>
+                                      <Badge variant="outline">
+                                        {prescription.dosage}
+                                      </Badge>
+                                    </div>
+                                    <div className="space-y-1 text-sm text-gray-600">
+                                      <p>
+                                        <strong>Frequency:</strong>{" "}
+                                        {prescription.frequency}
+                                      </p>
+                                      <p>
+                                        <strong>Duration:</strong>{" "}
+                                        {prescription.duration}
+                                      </p>
+                                      <p>
+                                        <strong>Instructions:</strong>{" "}
+                                        {prescription.instructions}
+                                      </p>
+                                      <p>
+                                        <strong>Prescribed:</strong>{" "}
+                                        {prescription.prescribedDate}
+                                      </p>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              )
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                              No Prescription Available
+                            </h3>
+                            <p className="text-gray-600">
+                              {selectedAppointment.status === "completed"
+                                ? "No prescription was provided for this appointment."
+                                : "Prescription will be available after the appointment is completed."}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/*Report modal*/}
+                {showReportsModal && selectedAppointment && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-xl font-semibold text-gray-900">
+                            Reports - {selectedAppointment.consultedType}
+                          </h2>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setShowReportsModal(false)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="mb-6">
+                          <p className="text-sm text-gray-600">
+                            {selectedAppointment?.doctorName} •{" "}
+                            {formatDate(selectedAppointment?.appointmentDate)}
+                          </p>
+                        </div>
+
+                        {/* Upload Section for Upcoming Appointments */}
+                        {selectedAppointment.status !== "completed" && (
+                          <div className="mb-6">
+                            <h3 className="text-lg font-medium text-gray-900 mb-3">
+                              Upload Reports
+                            </h3>
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                              <p className="text-sm text-gray-600 mb-2">
+                                Upload medical reports, lab results, or other
+                                documents for your doctor
+                              </p>
+                              <p className="text-xs text-gray-500 mb-4">
+                                Supported formats: PDF, JPG, PNG, DOC, DOCX (Max
+                                10MB per file)
+                              </p>
+                              <input
+                                type="file"
+                                multiple
+                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                onChange={(e) =>
+                                  e.target.files &&
+                                  handleFileUpload(
+                                    selectedAppointment._id,
+                                    e.target.files
+                                  )
+                                }
+                                className="hidden"
+                                id={`file-upload-${selectedAppointment._id}`}
+                              />
+                              <label
+                                htmlFor={`file-upload-${selectedAppointment._id}`}
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
+                              >
+                                Choose Files
+                              </label>
+                            </div>
+
+                            {/* Show uploaded files with preview */}
+                            {uploadedFiles[selectedAppointment._id] &&
+                              uploadedFiles[selectedAppointment._id].length >
+                                0 && (
+                                <div className="mt-4">
+                                  <h4 className="text-sm font-medium text-gray-900 mb-3">
+                                    Uploaded Files (
+                                    {
+                                      uploadedFiles[selectedAppointment._id]
+                                        .length
+                                    }
+                                    ):
+                                  </h4>
+                                  <div className="space-y-3">
+                                    {uploadedFiles[selectedAppointment._id].map(
+                                      (file, index) => (
+                                        <div
+                                          key={index}
+                                          className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                                        >
+                                          {/* File preview or icon */}
+                                          <div className="flex-shrink-0">
+                                            {file.preview ? (
+                                              <img
+                                                src={
+                                                  file.preview ||
+                                                  "/placeholder.svg"
+                                                }
+                                                alt={file.name}
+                                                className="w-16 h-16 object-cover rounded"
+                                              />
+                                            ) : (
+                                              <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                                                {getFileIcon(file)}
+                                              </div>
+                                            )}
+                                          </div>
+
+                                          {/* File details */}
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate">
+                                              {file.name}
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              {(
+                                                file.size /
+                                                1024 /
+                                                1024
+                                              ).toFixed(2)}{" "}
+                                              MB • {file.type || "Unknown type"}
+                                            </p>
+                                          </div>
+
+                                          {/* Remove button */}
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() =>
+                                              handleRemoveFile(
+                                                selectedAppointment._id,
+                                                index
+                                              )
+                                            }
+                                            className="flex-shrink-0"
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </Button>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                  <Button
+                                    onClick={handleSaveDocuments}
+                                    className="w-full mt-4"
+                                    disabled={isUploading}
+                                  >
+                                    {isUploading
+                                      ? "Uploading..."
+                                      : "Save Documents"}
+                                  </Button>
+                                </div>
+                              )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Medications */}
@@ -1040,6 +1399,14 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+            {/* Book/Reschedule Appointment Dialog */}
+            <RescheduleBookAppointments
+              isOpen={isBookingOpen}
+              onClose={handleCloseBooking}
+              isReschedule={isReschedule}
+              existingAppointmentData={rescheduleData || undefined}
+              id={id || ""}
+            />
           </main>
         )}
 
