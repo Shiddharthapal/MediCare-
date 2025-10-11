@@ -219,7 +219,7 @@ export default function Appointments({
     useState<appointmentdata | null>(null);
 
   const user = useAppSelector((state) => state.auth.user);
-
+  const id = user?._id;
   const categorizedAppointments = useMemo(() => {
     return categorizeAppointments(
       appointmentsData
@@ -231,7 +231,6 @@ export default function Appointments({
   }, [appointmentsData]);
 
   useEffect(() => {
-    let id = user?._id;
     const fetchData = async () => {
       try {
         let response = await fetch(`/api/user/${id}`, {
@@ -353,6 +352,8 @@ export default function Appointments({
       formData.append("appointmentId", selectedAppointment._id.toString());
       formData.append("doctorName", selectedAppointment.doctorName);
       formData.append("consultedType", selectedAppointment.consultedType);
+      formData.append("userIdWHUP", selectedAppointment.doctorUserId);
+      formData.append("userId", id || user?._id || "");
 
       // Append all files
       files.forEach((file) => {

@@ -159,7 +159,9 @@ const FileUploadSchema = new mongoose.Schema({
   userIdWHUP: {
     type: String,
   },
-
+  appointmentId: {
+    type: String,
+  },
   deletedAt: {
     type: Date,
     default: null,
