@@ -216,6 +216,9 @@ const PrescriptionSchema = new mongoose.Schema(
 // Define the appointment data schema as a subdocument
 const appointmentDataSchema = new mongoose.Schema(
   {
+    appointmentId: {
+      type: String,
+    },
     doctorpatinetId: {
       type: String,
     },

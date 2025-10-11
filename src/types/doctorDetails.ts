@@ -65,6 +65,7 @@ interface PracticeSettingData {
   };
 }
 interface AppointmentData {
+  appointmentId: string;
   doctorpatinetId: string;
   doctorName: string;
   doctorSpecialist: string;

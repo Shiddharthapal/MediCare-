@@ -66,6 +66,7 @@ interface AppointmentData {
   specialRequests: string;
   doctorUserId: string;
   patientEmail: string;
+  patientName: string;
   patientPhone: string;
   status: string;
 }
@@ -191,6 +192,7 @@ export default function BookAppointment({
     specialRequests: existingAppointmentData?.specialRequests || "",
     doctorUserId: existingAppointmentData?.doctorUserId || "",
     patientEmail: existingAppointmentData?.patientEmail || "",
+    patientName: existingAppointmentData?.patientName || "",
     patientPhone: existingAppointmentData?.patientPhone || "",
     status: existingAppointmentData?.status || "",
   });
@@ -213,6 +215,7 @@ export default function BookAppointment({
         specialRequests: existingAppointmentData.specialRequests || "",
         doctorUserId: existingAppointmentData?.doctorUserId || "",
         patientEmail: existingAppointmentData?.patientEmail || "",
+        patientName: existingAppointmentData?.patientName || "",
         patientPhone: existingAppointmentData?.patientPhone || "",
         status: existingAppointmentData?.status || "",
       });
@@ -284,7 +287,7 @@ export default function BookAppointment({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ formData }),
+        body: JSON.stringify({ formData, id }),
       });
 
       console.log("Appointment booked:", {
@@ -322,6 +325,7 @@ export default function BookAppointment({
       specialRequests: "",
       doctorUserId: "",
       patientEmail: "",
+      patientName: "",
       patientPhone: "",
       status: "",
     });
@@ -450,6 +454,33 @@ export default function BookAppointment({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
+                      <div className="font-medium text-gray-900">
+                        Full Name *
+                      </div>
+                      <div className="font-small text-gray-900">
+                        {formData?.patientName}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        Email Address *
+                      </div>
+                      <div className="font-small text-gray-900">
+                        {formData?.patientEmail}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        Contact Number *
+                      </div>
+                      <div className="font-small text-gray-900">
+                        {formData?.patientPhone}
+                      </div>
+                    </div>
+
+                    <div>
                       <Label htmlFor="emergencyContact">
                         Emergency Contact
                       </Label>
@@ -464,7 +495,7 @@ export default function BookAppointment({
                       />
                     </div>
 
-                    <div>
+                    <div className="md:col-span-2">
                       <Label htmlFor="emergencyPhone">
                         Emergency Contact Phone
                       </Label>

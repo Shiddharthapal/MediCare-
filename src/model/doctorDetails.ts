@@ -176,6 +176,9 @@ const practiceSettingData = new mongoose.Schema({
 });
 const appointmentDataSchema = new mongoose.Schema(
   {
+    appointmentId: {
+      type: String,
+    },
     doctorpatinetId: {
       type: String,
     },
