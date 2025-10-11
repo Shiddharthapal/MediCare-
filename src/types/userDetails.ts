@@ -73,7 +73,6 @@ interface FileUpload {
 }
 
 interface AppointmentData {
-  appointmentId: string;
   doctorpatinetId: string;
   doctorUserId: string;
   doctorName: string;
