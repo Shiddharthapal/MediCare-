@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAppSelector } from "@/redux/hooks";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,7 +18,6 @@ import {
   Menu,
   X,
   LogOut,
-  Badge,
   Clock,
   Info,
   Upload,
@@ -367,6 +367,8 @@ export default function Dashboard() {
     setSelectedAppointment(appointmentWithStatus);
     setShowDetailsModal(true);
   };
+
+  //for prescription modal
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);
@@ -1042,6 +1044,91 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
+
+                {/* Prescription Modal */}
+                {showPrescriptionModal && selectedAppointment && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-xl font-semibold text-gray-900">
+                            Prescription - {selectedAppointment.consultedType}
+                          </h2>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setShowPrescriptionModal(false)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="mb-4">
+                          <p className="text-sm text-gray-600">
+                            {selectedAppointment.doctorName} •{" "}
+                            {formatDate(selectedAppointment.appointmentDate)}
+                          </p>
+                        </div>
+
+                        {selectedAppointment.status === "completed" &&
+                        prescriptionsData[selectedAppointment._id] ? (
+                          <div className="space-y-4">
+                            {prescriptionsData[selectedAppointment._id].map(
+                              (prescription: any) => (
+                                <Card
+                                  key={prescription.id}
+                                  className="border-l-4 border-l-blue-500"
+                                >
+                                  <CardContent className="p-4">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <h3 className="font-semibold text-gray-900">
+                                        {prescription.medication}
+                                      </h3>
+                                      <Badge variant="outline">
+                                        {prescription.dosage}
+                                      </Badge>
+                                    </div>
+                                    <div className="space-y-1 text-sm text-gray-600">
+                                      <p>
+                                        <strong>Frequency:</strong>{" "}
+                                        {prescription.frequency}
+                                      </p>
+                                      <p>
+                                        <strong>Duration:</strong>{" "}
+                                        {prescription.duration}
+                                      </p>
+                                      <p>
+                                        <strong>Instructions:</strong>{" "}
+                                        {prescription.instructions}
+                                      </p>
+                                      <p>
+                                        <strong>Prescribed:</strong>{" "}
+                                        {prescription.prescribedDate}
+                                      </p>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              )
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                              No Prescription Available
+                            </h3>
+                            <p className="text-gray-600">
+                              {selectedAppointment.status === "completed"
+                                ? "No prescription was provided for this appointment."
+                                : "Prescription will be available after the appointment is completed."}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/*Report modal*/}
                 {showReportsModal && selectedAppointment && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">

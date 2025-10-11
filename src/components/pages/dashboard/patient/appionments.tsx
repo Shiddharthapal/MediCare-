@@ -1010,7 +1010,7 @@ export default function Appointments({
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Prescription -
+                  Prescription - {selectedAppointment.consultedType}
                 </h2>
                 <Button
                   variant="ghost"
