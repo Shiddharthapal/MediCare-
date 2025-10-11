@@ -30,6 +30,7 @@ import Appointments from "./appionments";
 import Doctors from "./doctors";
 import Reports from "./report";
 import SettingPatient from "./setting_patient/index";
+import RescheduleBookAppointments from "./rescheduleBookAppointment";
 
 const menuItems = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
@@ -41,7 +42,7 @@ const menuItems = [
 ];
 
 interface appointmentdata {
-  _id: string;
+  appointmentId: string;
   doctorUserId: string;
   doctorName: string;
   doctorSpecialist: string;
@@ -90,7 +91,7 @@ interface GroupedAppointments {
 }
 
 const mockappointmentdata = {
-  _id: "",
+  appointmentId: "",
   doctorUserId: "",
   doctorName: "",
   doctorSpecialist: "",
@@ -271,6 +272,12 @@ export default function Dashboard() {
     useState<appointmentdata | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+
+  const [isReschedule, setIsReschedule] = useState(false);
+  const [rescheduleData, setRescheduleData] = useState<Partial<
+    appointmentdata[]
+  > | null>(null);
 
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
@@ -349,14 +356,22 @@ export default function Dashboard() {
     }
   };
 
+  const handleCloseBooking = () => {
+    setIsBookingOpen(false);
+    setIsReschedule(false);
+    setRescheduleData(null);
+  };
+
   const handleJoinSession = (appointmentId: number) => {
     console.log(`Joining session for appointment ${appointmentId}`);
     // Add video call logic here
   };
 
-  const handleRescheduleAppointment = (appointmentId: number) => {
-    console.log(`Rescheduling appointment ${appointmentId}`);
-    // Add reschedule logic here
+  const handleRescheduleAppointment = (appointment: appointmentdata) => {
+    setRescheduleData(appointment);
+    console.log("🧞‍♂️  appointment --->", appointment);
+    setIsReschedule(true);
+    setIsBookingOpen(true);
   };
 
   const handleViewDetails = (appointment: appointmentdata, status: string) => {
@@ -568,7 +583,7 @@ export default function Dashboard() {
                       Join
                     </Button>
                   )}
-                {status === "confirmed" && (
+                {status === "pending" && (
                   <>
                     <Button
                       variant="outline"
@@ -580,9 +595,7 @@ export default function Dashboard() {
                     <Button
                       variant="outline"
                       className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                      onClick={() =>
-                        handleRescheduleAppointment(appointment._id)
-                      }
+                      onClick={() => handleRescheduleAppointment(appointment)}
                     >
                       Reschedule
                     </Button>
@@ -1386,6 +1399,14 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+            {/* Book/Reschedule Appointment Dialog */}
+            <RescheduleBookAppointments
+              isOpen={isBookingOpen}
+              onClose={handleCloseBooking}
+              isReschedule={isReschedule}
+              existingAppointmentData={rescheduleData || undefined}
+              id={id || ""}
+            />
           </main>
         )}
 
