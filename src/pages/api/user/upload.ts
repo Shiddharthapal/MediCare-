@@ -60,6 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Parse FormData
     const formData = await request.formData();
+    console.log("🧞‍♂️  formData --->", formData);
 
     // Extract fields
     const userId = formData.get("userId") as string;
