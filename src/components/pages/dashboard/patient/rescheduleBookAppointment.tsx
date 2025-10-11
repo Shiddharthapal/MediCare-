@@ -53,6 +53,7 @@ interface Doctor {
 }
 
 interface AppointmentData {
+  doctorpatinetId: string;
   appointmentDate: string;
   appointmentTime: string;
   consultationType: string;
@@ -179,6 +180,7 @@ export default function BookAppointment({
   const [doctor, setDoctor] = useState<Doctor>();
 
   const [formData, setFormData] = useState<AppointmentData>({
+    doctorpatinetId: existingAppointmentData?.doctorpatinetId || "",
     appointmentDate: existingAppointmentData?.appointmentDate || "",
     appointmentTime: existingAppointmentData?.appointmentTime || "",
     consultationType: existingAppointmentData?.consultationType || "",
@@ -202,6 +204,7 @@ export default function BookAppointment({
   useEffect(() => {
     if (existingAppointmentData && isReschedule) {
       setFormData({
+        doctorpatinetId: existingAppointmentData.doctorpatinetId || "",
         appointmentDate: existingAppointmentData.appointmentDate || "",
         appointmentTime: existingAppointmentData.appointmentTime || "",
         consultationType: existingAppointmentData.consultationType || "",
@@ -282,7 +285,7 @@ export default function BookAppointment({
     setIsSubmitting(true);
 
     try {
-      let response = await fetch("./api/user/bookAppointment", {
+      let response = await fetch("./api/user/reschedulingAppointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -312,6 +315,7 @@ export default function BookAppointment({
     setCurrentStep(1);
     setIsSuccess(false);
     setFormData({
+      doctorpatinetId: formData.doctorpatinetId,
       appointmentDate: "",
       appointmentTime: "",
       consultationType: "",
