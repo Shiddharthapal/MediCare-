@@ -55,6 +55,22 @@ interface PaymentMethods {
   mobileBankingMethods: MobileBankingMethodSchema[];
 }
 
+interface FileUpload {
+  _id: string;
+  filename: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  userId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface AppointmentData {
   doctorpatinetId: string;
   doctorUserId: string;
@@ -98,6 +114,7 @@ export interface UserDetails {
   height?: number;
   appoinments: AppointmentData[];
   payment: PaymentMethods;
+  upload: FileUpload[];
   lastTreatmentDate?: Date;
   createdAt: Date;
 }
