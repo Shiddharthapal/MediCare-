@@ -45,21 +45,23 @@ function getFileTypeFromExtension(extension: string): string | null {
       return mimeType;
     }
   }
-
   return null;
 }
 
+//Get file extension
 function extractExtension(filename: string): string {
   const lastDot = filename.lastIndexOf(".");
   if (lastDot === -1) return "";
   return filename.substring(lastDot).toLowerCase();
 }
 
+//Get file type from file name
 function getFileTypeFromFilename(filename: string): string | null {
   const extension = extractExtension(filename);
   if (!extension) return null;
   return getFileTypeFromExtension(extension);
 }
+
 // Helper function to generate unique filename
 function generateUniqueFilename(originalName: string): string {
   const timestamp = Date.now();
@@ -68,7 +70,6 @@ function generateUniqueFilename(originalName: string): string {
   const nameWithoutExt = originalName
     .substring(0, originalName.lastIndexOf("."))
     .replace(/[^a-zA-Z0-9]/g, "_");
-
   return `${nameWithoutExt}_${timestamp}_${randomString}${extension}`;
 }
 
@@ -82,6 +83,7 @@ function isValidFileType(mimeType: string): boolean {
   return Object.keys(ALLOWED_FILE_TYPES).includes(mimeType);
 }
 
+//Post operation for upload file, document, report
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
     "Content-Type": "application/json",
@@ -94,20 +96,17 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Extract fields
     const userId = formData.get("userId") as string;
-
     const file = formData.get("files") as File;
     const fileType = getFileTypeFromFilename(file.name);
     const category = formData.get("category") || "";
     const doctorName = formData.get("doctorName") || "";
-    console.log("🧞‍♂️  fileType --->", fileType);
-
     const files = formData.getAll("files") as File[];
-    console.log("🧞‍♂️  files --->", files);
     const appointmentId = formData.get("appointmentId") as string | null;
     const useridwhup = formData.get("userIdWHUP") as string;
     const documentNames = formData.getAll("documentNames") as string[];
     const originalNames = formData.getAll("originalNames") as string[];
 
+    //Check some field from formData
     if (!userId) {
       return new Response(
         JSON.stringify({
@@ -131,6 +130,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Connect to DB
     await connect();
 
+    //Check user are exsist in the db
     let userdetails = await userDetails.findOne({ userId: userId });
     if (!userdetails) {
       return new Response(
@@ -144,9 +144,11 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    //Take temporary array for upload and store file, report, document
     const uploadedFiles = [];
     const uploadResults = [];
 
+    //Not sure user upload single or multiple file, that's why use for loop
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const documentName = documentNames[i];
@@ -155,6 +157,7 @@ export const POST: APIRoute = async ({ request }) => {
       // Validate file type
       const fileType = getFileTypeFromFilename(documentName);
 
+      //Check fileType have or not
       if (!fileType) {
         uploadResults.push({
           filename: documentName,
@@ -164,6 +167,7 @@ export const POST: APIRoute = async ({ request }) => {
         continue;
       }
 
+      //Check fileType is valid or not
       if (!isValidFileType(file.type)) {
         uploadResults.push({
           filename: documentName,
@@ -200,6 +204,7 @@ export const POST: APIRoute = async ({ request }) => {
       }
       destinationPath += `/${uniqueFilename}`;
 
+      //Here use try-catch for unexpected error
       try {
         // Upload to Bunny CDN
         await bunnyStorageService.uploadFile(
@@ -231,6 +236,7 @@ export const POST: APIRoute = async ({ request }) => {
           updatedAt: new Date().toISOString(),
         };
 
+        //Push the uploaddata to array for upload the data into db
         uploadedFiles.push(uploadfile);
         uploadResults.push({
           filename: documentName,
@@ -261,6 +267,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    //Return response
     return new Response(
       JSON.stringify({
         success: uploadResults.some((r) => r.success),
