@@ -19,6 +19,7 @@ import {
   Info,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
+import RescheduleBookAppointments from "./rescheduleBookAppointment";
 
 interface appointmentdata {
   _id: string;
@@ -209,6 +210,11 @@ export default function Appointments({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isReschedule, setIsReschedule] = useState(false);
+  const [rescheduleData, setRescheduleData] = useState<Partial<
+    appointmentdata[]
+  > | null>(null);
   const [selectedAppointment, setSelectedAppointment] =
     useState<appointmentdata | null>(null);
 
@@ -288,9 +294,17 @@ export default function Appointments({
     setAppointmentsData(appointmentdeleteresponse?.userdetails?.appointments);
   };
 
-  const handleRescheduleAppointment = (appointmentId: number) => {
-    console.log(`Rescheduling appointment ${appointmentId}`);
-    // Add reschedule logic here
+  //handle bokking when user reschedule appointment booking
+  const handleCloseBooking = () => {
+    setIsBookingOpen(false);
+    setIsReschedule(false);
+    setRescheduleData(null);
+  };
+
+  const handleRescheduleAppointment = (appointment: appointmentdata) => {
+    setRescheduleData(appointment);
+    setIsReschedule(true);
+    setIsBookingOpen(true);
   };
 
   const handleBookNewAppointment = () => {
@@ -517,9 +531,7 @@ export default function Appointments({
                     <Button
                       variant="outline"
                       className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                      onClick={() =>
-                        handleRescheduleAppointment(appointment._id)
-                      }
+                      onClick={() => handleRescheduleAppointment(appointment)}
                     >
                       Reschedule
                     </Button>
@@ -1223,6 +1235,14 @@ export default function Appointments({
           </div>
         </div>
       )}
+      {/* Book/Reschedule Appointment Dialog */}
+      <RescheduleBookAppointments
+        isOpen={isBookingOpen}
+        onClose={handleCloseBooking}
+        isReschedule={isReschedule}
+        existingAppointmentData={rescheduleData || undefined}
+        id={id || ""}
+      />
     </div>
   );
 }

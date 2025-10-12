@@ -369,7 +369,6 @@ export default function Dashboard() {
 
   const handleRescheduleAppointment = (appointment: appointmentdata) => {
     setRescheduleData(appointment);
-    console.log("🧞‍♂️  appointment --->", appointment);
     setIsReschedule(true);
     setIsBookingOpen(true);
   };
