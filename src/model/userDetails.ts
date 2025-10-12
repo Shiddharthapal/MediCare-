@@ -156,6 +156,12 @@ const FileUploadSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  doctorName: {
+    type: String,
+  },
+  category: {
+    type: String,
+  },
   userIdWHUP: {
     type: String,
   },

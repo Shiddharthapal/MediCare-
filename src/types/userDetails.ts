@@ -65,8 +65,10 @@ interface FileUpload {
   url: string;
   checksum: string;
   uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
   userIdWHUP?: string;
-  appointmentId: string;
+  appointmentId?: string;
   deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
