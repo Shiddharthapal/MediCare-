@@ -404,13 +404,11 @@ export default function Reports() {
       formData.append("category", uploadDocumentCategory);
 
       // Add each file with its metadata
-      formData.append("userid", id || "");
+      formData.append("userId", id || "");
       uploadedFiles.forEach((fileData, index) => {
         formData.append(`files`, fileData.file);
         formData.append(`documentNames`, fileData.documentName);
         formData.append(`originalNames`, fileData.name);
-        formData.append(`fileSizes`, fileData.size.toString());
-        formData.append(`fileTypes`, fileData.type);
       });
 
       const response = await fetch("/api/user/upload", {

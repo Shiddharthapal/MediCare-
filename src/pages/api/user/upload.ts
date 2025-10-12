@@ -90,18 +90,24 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Parse FormData
     const formData = await request.formData();
+    console.log("🧞‍♂️  formData --->", formData);
 
     // Extract fields
     const userId = formData.get("userId") as string;
 
     const file = formData.get("files") as File;
     const fileType = getFileTypeFromFilename(file.name);
+    const category = formData.get("category") || "";
+    const doctorName = formData.get("doctorName") || "";
     console.log("🧞‍♂️  fileType --->", fileType);
 
+    const files = formData.getAll("files") as File[];
+    console.log("🧞‍♂️  files --->", files);
     const appointmentId = formData.get("appointmentId") as string | null;
     const useridwhup = formData.get("userIdWHUP") as string;
+    const documentNames = formData.getAll("documentNames") as string[];
+    const originalNames = formData.getAll("originalNames") as string[];
 
-    // Validation
     if (!userId) {
       return new Response(
         JSON.stringify({
@@ -112,81 +118,17 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    if (!fileType) {
+    if (!files || files.length === 0) {
       return new Response(
         JSON.stringify({
           success: false,
-          message: "File type is required (report, document, image, or file)",
+          message: "No files provided",
         }),
         { status: 400, headers }
       );
     }
 
-    if (!file) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          message: "No file provided",
-        }),
-        { status: 400, headers }
-      );
-    }
-
-    // Validate file type
-    if (!isValidFileType(file.type)) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          message: `File type ${file.type} is not allowed. Allowed types: images, PDFs, Word documents, Excel files, text files`,
-        }),
-        { status: 400, headers }
-      );
-    }
-
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          message: `File size exceeds maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
-        }),
-        { status: 400, headers }
-      );
-    }
-
-    // Convert File to Buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    // Generate checksum for integrity
-    const checksum = calculateChecksum(buffer);
-
-    // Generate unique filename
-    const uniqueFilename = generateUniqueFilename(file.name);
-
-    // Construct destination path based on file type
-    // Structure: userId/fileType/appointmentId?/filename
-    let destinationPath = `${userId}/${fileType}`;
-    console.log("🧞‍♂️  destinationPath --->", destinationPath);
-
-    if (appointmentId) {
-      destinationPath += `/${appointmentId}`;
-    }
-
-    destinationPath += `/${uniqueFilename}`;
-
-    // Upload to Bunny CDN
-    const uploadResponse = await bunnyStorageService.uploadFile(
-      destinationPath,
-      buffer,
-      file.type,
-      checksum
-    );
-
-    // Construct public URL for accessing the file
-    const publicUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${destinationPath}`;
-
-    //contect to db
+    // Connect to DB
     await connect();
 
     let userdetails = await userDetails.findOne({ userId: userId });
@@ -202,56 +144,138 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const uploadfile = {
-      filename: uniqueFilename,
-      originalName: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-      path: destinationPath,
-      url: publicUrl,
-      checksum: checksum,
-      uploadedAt: new Date().toISOString(),
-      userIdWHUP: useridwhup,
-      appointmentId: appointmentId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const uploadedFiles = [];
+    const uploadResults = [];
 
-    const updateDoctor = await userDetails.findOneAndUpdate(
-      { userId: userId },
-      {
-        $push: { upload: uploadfile },
-      },
-      {
-        new: true,
-        runValidators: true,
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const documentName = documentNames[i];
+      const originalName = originalNames[i];
+
+      // Validate file type
+      const fileType = getFileTypeFromFilename(documentName);
+
+      if (!fileType) {
+        uploadResults.push({
+          filename: documentName,
+          success: false,
+          message: "Invalid file type",
+        });
+        continue;
       }
-    );
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "File uploaded successfully",
-        data: {
+      if (!isValidFileType(file.type)) {
+        uploadResults.push({
+          filename: documentName,
+          success: false,
+          message: `File type ${file.type} is not allowed`,
+        });
+        continue;
+      }
+
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        uploadResults.push({
+          filename: documentName,
+          success: false,
+          message: `File size exceeds maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
+        });
+        continue;
+      }
+
+      // Convert File to Buffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Generate checksum
+      const checksum = calculateChecksum(buffer);
+
+      // Generate unique filename
+      const uniqueFilename = generateUniqueFilename(documentName);
+
+      // Construct destination path
+      let destinationPath = `${userId}/${fileType}`;
+      if (appointmentId) {
+        destinationPath += `/${appointmentId}`;
+      }
+      destinationPath += `/${uniqueFilename}`;
+
+      try {
+        // Upload to Bunny CDN
+        await bunnyStorageService.uploadFile(
+          destinationPath,
+          buffer,
+          file.type,
+          checksum
+        );
+
+        // Construct public URL
+        const publicUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${destinationPath}`;
+
+        // Prepare upload data
+        const uploadfile = {
           filename: uniqueFilename,
-          originalName: file.name,
+          originalName: originalName,
+          documentName: documentName,
           fileType: file.type,
           fileSize: file.size,
           path: destinationPath,
           url: publicUrl,
           checksum: checksum,
           uploadedAt: new Date().toISOString(),
+          doctorName: doctorName,
+          category: category,
+          userIdWHUP: useridwhup,
+          appointmentId: appointmentId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        uploadedFiles.push(uploadfile);
+        uploadResults.push({
+          filename: documentName,
+          success: true,
+          url: publicUrl,
+        });
+      } catch (error) {
+        console.error(`Error uploading file ${documentName}:`, error);
+        uploadResults.push({
+          filename: documentName,
+          success: false,
+          message: error instanceof Error ? error.message : "Upload failed",
+        });
+      }
+    }
+
+    // Save all successfully uploaded files to DB
+    if (uploadedFiles.length > 0) {
+      await userDetails.findOneAndUpdate(
+        { userId: userId },
+        {
+          $push: { upload: { $each: uploadedFiles } },
         },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: uploadResults.some((r) => r.success),
+        message: `Uploaded ${uploadedFiles.length} of ${files.length} files successfully`,
+        data: uploadResults,
       }),
       { status: 200, headers }
     );
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error("Error uploading files:", error);
 
     return new Response(
       JSON.stringify({
         success: false,
-        message: "Failed to upload file",
+        message: "Failed to upload files",
         error: error instanceof Error ? error.message : "Unknown error",
       }),
       { status: 500, headers }
