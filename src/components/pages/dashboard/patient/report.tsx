@@ -404,6 +404,7 @@ export default function Reports() {
       formData.append("category", uploadDocumentCategory);
 
       // Add each file with its metadata
+      formData.append("userid", id || "");
       uploadedFiles.forEach((fileData, index) => {
         formData.append(`files`, fileData.file);
         formData.append(`documentNames`, fileData.documentName);
@@ -917,7 +918,7 @@ export default function Reports() {
                                   )
                                 }
                                 placeholder="Enter document name"
-                                className="w-full"
+                                className="w-full border-2 transition-all hover:border-primary/50 hover:shadow-lg"
                               />
                             </div>
                             <div>
@@ -926,7 +927,13 @@ export default function Reports() {
                               </p>
                               <p className="text-xs text-gray-500">
                                 {(file.size / 1024 / 1024).toFixed(2)} MB •{" "}
-                                {file.type || "Unknown type"}
+                                {file.type || "Unknown type"}•{" "}
+                                {new Date().toISOString().split("T")[0]}•{" "}
+                                {new Date().toLocaleTimeString("en-US", {
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })}
                               </p>
                             </div>
                           </div>
