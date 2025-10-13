@@ -119,24 +119,22 @@ export default function AIChatInterface({ onClose }: AIChatInterfaceProps) {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto h-[600px] flex flex-col bg-white shadow-xl">
-      <CardHeader className="flex flex-row items-center justify-between p-4 border-b bg-green-50">
+    <Card className="w-full max-w-2xl mx-auto h-auto flex flex-col bg-white shadow-xl my-2">
+      <CardHeader className="flex flex-row items-center justify-between p-4 border-b bg-[hsl(201,96%,32%)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-            <Stethoscope className="w-5 h-5 text-green-600" />
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+            <Stethoscope className="w-5 h-5 text-[hsl(201,96%,32%)]" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">
-              AI Medical Assistant
-            </h3>
-            <p className="text-sm text-gray-600">Online • Ready to help</p>
+            <h3 className="font-semibold text-white">AI Medical Assistant</h3>
+            <p className="text-sm text-white">Online • Ready to help</p>
           </div>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={onClose}
-          className="text-gray-500 hover:text-gray-700"
+          className="text-white hover:text-gray-700"
         >
           <X className="w-5 h-5" />
         </Button>
@@ -151,21 +149,21 @@ export default function AIChatInterface({ onClose }: AIChatInterfaceProps) {
                 className={`flex gap-3 ${message.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 {message.sender === "ai" && (
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <Bot className="w-4 h-4 text-green-600" />
+                  <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Bot className="w-4 h-4 text-[hsl(201,96%,32%)]" />
                   </div>
                 )}
 
                 <div
                   className={`max-w-[80%] p-3 rounded-lg ${
                     message.sender === "user"
-                      ? "bg-green-600 text-white"
+                      ? "bg-[hsl(201,96%,32%)] text-white"
                       : "bg-gray-100 text-gray-900"
                   }`}
                 >
                   <p className="text-sm leading-relaxed">{message.content}</p>
                   <p
-                    className={`text-xs mt-1 ${message.sender === "user" ? "text-green-100" : "text-gray-500"}`}
+                    className={`text-xs mt-1 ${message.sender === "user" ? "text-cyan-100" : "text-gray-500"}`}
                   >
                     {message.timestamp.toLocaleTimeString([], {
                       hour: "2-digit",
@@ -175,8 +173,8 @@ export default function AIChatInterface({ onClose }: AIChatInterfaceProps) {
                 </div>
 
                 {message.sender === "user" && (
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <User className="w-4 h-4 text-blue-600" />
+                  <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <User className="w-4 h-4 text-[hsl(201,96%,32%)]0" />
                   </div>
                 )}
               </div>
@@ -184,8 +182,8 @@ export default function AIChatInterface({ onClose }: AIChatInterfaceProps) {
 
             {isTyping && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <Bot className="w-4 h-4 text-green-600" />
+                <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <Bot className="w-4 h-4 text-[hsl(201,96%,32%)]" />
                 </div>
                 <div className="bg-gray-100 p-3 rounded-lg">
                   <div className="flex gap-1">
@@ -212,13 +210,13 @@ export default function AIChatInterface({ onClose }: AIChatInterfaceProps) {
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Describe your symptoms or ask a health question..."
-              className="flex-1"
+              className="flex-1 "
               disabled={isTyping}
             />
             <Button
               onClick={handleSendMessage}
               disabled={!inputMessage.trim() || isTyping}
-              className="bg-green-600 hover:bg-green-700 text-white px-4"
+              className="bg-[hsl(201,96%,32%)] hover:text-black text-white px-4"
             >
               <Send className="w-4 h-4" />
             </Button>
