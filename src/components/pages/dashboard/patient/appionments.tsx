@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Calendar,
   Clock,
@@ -218,9 +219,7 @@ export default function Appointments({
   const [selectedAppointment, setSelectedAppointment] =
     useState<appointmentdata | null>(null);
 
-  const [uploadedFiles, setUploadedFiles] = useState<{
-    [key: number]: UploadedFile[];
-  }>({});
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [appointmentsData, setAppointmentsData] =
     useState<appointmentdata | null>(null);
 
@@ -316,45 +315,49 @@ export default function Appointments({
 
   //handle file upload when you upload reports
   const handleFileUpload = (appointmentId: string, files: FileList) => {
-    const fileArray = Array.from(files) as UploadedFile[];
+    const newFiles = Array.from(files).map((file) => {
+      const fileData: any = {
+        name: file.name,
+        documentName: file.name.replace(/\.[^/.]+$/, ""), // Default to filename without extension
+        size: file.size,
+        type: file.type,
+        file: file,
+      };
 
-    // Create preview URLs for images
-    fileArray.forEach((file) => {
+      // Create preview for images
       if (file.type.startsWith("image/")) {
-        file.preview = URL.createObjectURL(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          fileData.preview = e.target?.result;
+          setUploadedFiles((prev) => [...prev]);
+        };
+        reader.readAsDataURL(file);
       }
-    });
 
-    setUploadedFiles((prev) => ({
-      ...prev,
-      [appointmentId]: [...(prev[appointmentId] || []), ...fileArray],
-    }));
+      return fileData;
+    });
+    setUploadedFiles((prev) => [...prev, ...newFiles]);
   };
 
   //remove file when you trying to upload
-  const handleRemoveFile = (appointmentId: string, fileIndex: number) => {
-    console.log("🧞‍♂️  appointmentId --->", appointmentId);
-    setUploadedFiles((prev) => {
-      const files = [...(prev[appointmentId] || [])];
-      // Revoke preview URL if it exists
-      if (files[fileIndex]?.preview) {
-        URL.revokeObjectURL(files[fileIndex].preview!);
-      }
-      files.splice(fileIndex, 1);
-      return {
-        ...prev,
-        [appointmentId]: files,
-      };
-    });
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDocumentNameChange = (index: number, newName: string) => {
+    setUploadedFiles((prev) =>
+      prev.map((file, i) =>
+        i === index ? { ...file, documentName: newName } : file
+      )
+    );
   };
 
   //user trying to save document
   const handleSaveDocuments = async () => {
     if (!selectedAppointment) return;
 
-    const files = uploadedFiles[selectedAppointment._id];
-    if (!files || files.length === 0) {
-      alert("Please upload at least one file");
+    if (uploadedFiles.length === 0) {
+      alert("Please select at least one file to upload");
       return;
     }
 
@@ -370,8 +373,10 @@ export default function Appointments({
       formData.append("userId", id || user?._id || "");
 
       // Append all files
-      files.forEach((file) => {
-        formData.append("files", file);
+      uploadedFiles.forEach((fileData, index) => {
+        formData.append(`files`, fileData.file);
+        formData.append(`documentNames`, fileData.documentName);
+        formData.append(`originalNames`, fileData.name);
       });
 
       // Call the upload API
@@ -388,17 +393,19 @@ export default function Appointments({
       console.log("[v0] Upload successful:", result);
 
       // Clear uploaded files for this appointment
-      setUploadedFiles((prev) => {
-        const newState = { ...prev };
-        delete newState[selectedAppointment._id];
-        return newState;
-      });
+      setShowReportsModal(false);
+      setIsUploading(false);
+      setUploadedFiles([]);
 
       alert("Documents uploaded successfully!");
-      setShowReportsModal(false);
     } catch (error) {
       console.error("[v0] Upload error:", error);
-      alert("Failed to upload documents. Please try again.");
+      setIsUploading(false);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to upload documents. Please try again."
+      );
     } finally {
       setIsUploading(false);
     }
@@ -1162,79 +1169,89 @@ export default function Appointments({
                   </div>
 
                   {/* Show uploaded files with preview */}
-                  {uploadedFiles[selectedAppointment._id] &&
-                    uploadedFiles[selectedAppointment._id].length > 0 && (
-                      <div className="mt-4">
-                        <h4 className="text-sm font-medium text-gray-900 mb-3">
-                          Uploaded Files (
-                          {uploadedFiles[selectedAppointment._id].length}):
-                        </h4>
-                        <div className="space-y-3">
-                          {uploadedFiles[selectedAppointment._id].map(
-                            (file, index) => (
-                              <div
-                                key={index}
-                                className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
-                              >
-                                {/* File preview or icon */}
-                                <div className="flex-shrink-0">
-                                  {file.preview ? (
-                                    <img
-                                      src={file.preview || "/placeholder.svg"}
-                                      alt={file.name}
-                                      className="w-16 h-16 object-cover rounded"
-                                    />
-                                  ) : (
-                                    <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
-                                      {getFileIcon(file)}
-                                    </div>
-                                  )}
+                  {uploadedFiles.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">
+                        Uploaded Files ({uploadedFiles.length}):
+                      </h4>
+                      <div className="space-y-3">
+                        {uploadedFiles.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                          >
+                            {/* File preview or icon */}
+                            <div className="flex-shrink-0">
+                              {file.preview ? (
+                                <img
+                                  src={file.preview || "/placeholder.svg"}
+                                  alt={file.name}
+                                  className="w-16 h-16 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                                  {getFileIcon(file)}
                                 </div>
+                              )}
+                            </div>
 
-                                {/* File details */}
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-900 truncate">
-                                    {file.name}
-                                  </p>
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    {(file.size / 1024 / 1024).toFixed(2)} MB •{" "}
-                                    {file.type || "Unknown type"}•{" "}
-                                    {new Date().toISOString().split("T")[0]}•{" "}
-                                    {new Date().toLocaleTimeString("en-US", {
-                                      hour: "numeric",
-                                      minute: "2-digit",
-                                      hour12: true,
-                                    })}
-                                  </p>
-                                </div>
-
-                                {/* Remove button */}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() =>
-                                    handleRemoveFile(
-                                      selectedAppointment._id,
-                                      index
+                            {/* File details */}
+                            <div className="flex-1 min-w-0 space-y-2">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Document Name
+                                </label>
+                                <Input
+                                  type="text"
+                                  value={file.documentName}
+                                  onChange={(e) =>
+                                    handleDocumentNameChange(
+                                      index,
+                                      e.target.value
                                     )
                                   }
-                                  className="flex-shrink-0"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
+                                  placeholder="Enter document name"
+                                  className="w-full border-2 transition-all hover:border-primary/50 hover:shadow-lg"
+                                />
                               </div>
-                            )
-                          )}
-                        </div>
-                        <Button
-                          onClick={handleSaveDocuments}
-                          className="w-full mt-4"
-                          disabled={isUploading}
-                        >
-                          {isUploading ? "Uploading..." : "Save Documents"}
-                        </Button>
+                              <div>
+                                <p className="text-xs text-gray-500">
+                                  File: {file.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB •{" "}
+                                  {file.type || "Unknown type"}•{" "}
+                                  {new Date().toISOString().split("T")[0]}•{" "}
+                                  {new Date().toLocaleTimeString("en-US", {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Remove button */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveFile(index)}
+                              className="flex-shrink-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                    )}
+                      <Button
+                        onClick={handleSaveDocuments}
+                        className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                        disabled={isUploading}
+                      >
+                        {isUploading ? "Uploading..." : "Save Documents"}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
