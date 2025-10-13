@@ -358,10 +358,12 @@ export default function Reports() {
     setUploadedFiles((prev) => [...prev, ...newFiles]);
   };
 
+  //Handle file when you remove from file upload card
   const handleRemoveFile = (index: number) => {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  //Handle to get file icon
   const getFileIcon = (file: any) => {
     if (file.type.includes("pdf")) {
       return <FileText className="h-8 w-8 text-red-500" />;
@@ -373,6 +375,7 @@ export default function Reports() {
     return <FileText className="h-8 w-8 text-gray-500" />;
   };
 
+  //Handle the file rename function with Debouncing
   const debounceTimersRef = useRef<Record<number, NodeJS.Timeout>>({});
   const handleDocumentNameChange = (index: number, newName: string) => {
     // Clear existing timer for this index
@@ -395,6 +398,7 @@ export default function Reports() {
     debounceTimersRef.current[index] = timerId;
   };
 
+  //Handle the file when you want to save it
   const handleSaveDocuments = async () => {
     if (!uploadDocumentCategory) {
       alert("Please select a document category");
