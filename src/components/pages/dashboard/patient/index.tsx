@@ -470,6 +470,16 @@ export default function Dashboard() {
     debounceTimersRef.current[index] = timerId;
   };
 
+  useEffect(() => {
+    return () => {
+      if (!showReportsModal) {
+        Object.values(debounceTimersRef.current).forEach((timer) => {
+          clearTimeout(timer);
+        });
+      }
+    };
+  }, [showReportsModal]);
+
   //user trying to save document
   const handleSaveDocuments = async () => {
     if (!selectedAppointment) return;
