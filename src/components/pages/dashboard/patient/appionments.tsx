@@ -1198,7 +1198,13 @@ export default function Appointments({
                                   </p>
                                   <p className="text-xs text-gray-500 mt-1">
                                     {(file.size / 1024 / 1024).toFixed(2)} MB •{" "}
-                                    {file.type || "Unknown type"}
+                                    {file.type || "Unknown type"}•{" "}
+                                    {new Date().toISOString().split("T")[0]}•{" "}
+                                    {new Date().toLocaleTimeString("en-US", {
+                                      hour: "numeric",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    })}
                                   </p>
                                 </div>
 
