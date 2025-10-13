@@ -275,10 +275,8 @@ export default function Reports() {
       document.tags.some((tag) =>
         tag.toLowerCase().includes(searchTerm.toLowerCase())
       );
-
     const matchesCategory =
       selectedCategory === "all" || document.type === selectedCategory;
-
     return matchesSearch && matchesCategory;
   });
 
@@ -357,7 +355,6 @@ export default function Reports() {
 
       return fileData;
     });
-
     setUploadedFiles((prev) => [...prev, ...newFiles]);
   };
 
@@ -377,7 +374,6 @@ export default function Reports() {
   };
 
   const debounceTimersRef = useRef<Record<number, NodeJS.Timeout>>({});
-
   const handleDocumentNameChange = (index: number, newName: string) => {
     // Clear existing timer for this index
     if (debounceTimersRef.current[index]) {
@@ -396,7 +392,6 @@ export default function Reports() {
       // This is where you could make an API call if needed
       console.log(`Document name updated for index ${index}: ${newName}`);
     }, 500); // 500ms delay
-
     debounceTimersRef.current[index] = timerId;
   };
 
@@ -410,7 +405,6 @@ export default function Reports() {
       alert("Please select at least one file to upload");
       return;
     }
-
     setIsUploading(true);
 
     try {
@@ -458,7 +452,6 @@ export default function Reports() {
 
   const DocumentCard = ({ document }: { document: any }) => {
     const Icon = document.icon || FileText;
-
     return (
       <Card className="hover:shadow-md transition-shadow duration-200">
         <CardContent className="p-4">
