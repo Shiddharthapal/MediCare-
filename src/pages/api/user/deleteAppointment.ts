@@ -46,7 +46,9 @@ export const DELETE: APIRoute = async ({ request }) => {
       );
     }
 
-    return new Response(JSON.stringify({ updatedUser }), {
+    userdetails = await userDetails.findOne({ userId: userId });
+
+    return new Response(JSON.stringify({ userdetails }), {
       status: 200,
       headers,
     });
