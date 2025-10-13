@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -376,12 +376,28 @@ export default function Reports() {
     return <FileText className="h-8 w-8 text-gray-500" />;
   };
 
+  const debounceTimersRef = useRef<Record<number, NodeJS.Timeout>>({});
+
   const handleDocumentNameChange = (index: number, newName: string) => {
+    // Clear existing timer for this index
+    if (debounceTimersRef.current[index]) {
+      clearTimeout(debounceTimersRef.current[index]);
+    }
+
+    // Immediately update the input field (optimistic update)
     setUploadedFiles((prev) =>
       prev.map((file, i) =>
         i === index ? { ...file, documentName: newName } : file
       )
     );
+
+    // Set new debounced timer
+    const timerId = setTimeout(() => {
+      // This is where you could make an API call if needed
+      console.log(`Document name updated for index ${index}: ${newName}`);
+    }, 500); // 500ms delay
+
+    debounceTimersRef.current[index] = timerId;
   };
 
   const handleSaveDocuments = async () => {
