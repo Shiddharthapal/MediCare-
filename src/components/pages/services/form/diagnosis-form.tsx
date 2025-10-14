@@ -119,114 +119,116 @@ export default function AIChatInterface({ onClose }: AIChatInterfaceProps) {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto h-auto flex flex-col bg-white shadow-xl my-2">
-      <CardHeader className="flex flex-row items-center justify-between p-4 border-b bg-[hsl(201,96%,32%)]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-            <Stethoscope className="w-5 h-5 text-[hsl(201,96%,32%)]" />
+    <div className="bg-gray-100">
+      <Card className="w-full max-w-2xl mx-auto h-auto flex flex-col bg-white shadow-xl my-2">
+        <CardHeader className="flex flex-row items-center justify-between p-4 border-b bg-[hsl(201,96%,32%)]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+              <Stethoscope className="w-5 h-5 text-[hsl(201,96%,32%)]" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-white">AI Medical Assistant</h3>
+              <p className="text-sm text-white">Online • Ready to help</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold text-white">AI Medical Assistant</h3>
-            <p className="text-sm text-white">Online • Ready to help</p>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="text-white hover:text-gray-700"
-        >
-          <X className="w-5 h-5" />
-        </Button>
-      </CardHeader>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="text-white hover:text-gray-700"
+          >
+            <X className="w-5 h-5" />
+          </Button>
+        </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-0">
-        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-              >
-                {message.sender === "ai" && (
+        <CardContent className="flex-1 flex flex-col p-0">
+          <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex gap-3 ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  {message.sender === "ai" && (
+                    <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <Bot className="w-4 h-4 text-[hsl(201,96%,32%)]" />
+                    </div>
+                  )}
+
+                  <div
+                    className={`max-w-[80%] p-3 rounded-lg ${
+                      message.sender === "user"
+                        ? "bg-[hsl(201,96%,32%)] text-white"
+                        : "bg-gray-100 text-gray-900"
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    <p
+                      className={`text-xs mt-1 ${message.sender === "user" ? "text-cyan-100" : "text-gray-500"}`}
+                    >
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+
+                  {message.sender === "user" && (
+                    <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <User className="w-4 h-4 text-[hsl(201,96%,32%)]0" />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {isTyping && (
+                <div className="flex gap-3 justify-start">
                   <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <Bot className="w-4 h-4 text-[hsl(201,96%,32%)]" />
                   </div>
-                )}
-
-                <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
-                    message.sender === "user"
-                      ? "bg-[hsl(201,96%,32%)] text-white"
-                      : "bg-gray-100 text-gray-900"
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed">{message.content}</p>
-                  <p
-                    className={`text-xs mt-1 ${message.sender === "user" ? "text-cyan-100" : "text-gray-500"}`}
-                  >
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-
-                {message.sender === "user" && (
-                  <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <User className="w-4 h-4 text-[hsl(201,96%,32%)]0" />
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {isTyping && (
-              <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <Bot className="w-4 h-4 text-[hsl(201,96%,32%)]" />
-                </div>
-                <div className="bg-gray-100 p-3 rounded-lg">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    ></div>
+                  <div className="bg-gray-100 p-3 rounded-lg">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
+              )}
+            </div>
+          </ScrollArea>
 
-        <div className="p-4 border-t bg-gray-50">
-          <div className="flex gap-2">
-            <Input
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Describe your symptoms or ask a health question..."
-              className="flex-1 "
-              disabled={isTyping}
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || isTyping}
-              className="bg-[hsl(201,96%,32%)] hover:text-black text-white px-4"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+          <div className="p-4 border-t bg-gray-50">
+            <div className="flex gap-2">
+              <Input
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Describe your symptoms or ask a health question..."
+                className="flex-1 "
+                disabled={isTyping}
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || isTyping}
+                className="bg-[hsl(201,96%,32%)] hover:text-black text-white px-4"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              This AI assistant provides general information only. Always
+              consult healthcare professionals for medical advice.
+            </p>
           </div>
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            This AI assistant provides general information only. Always consult
-            healthcare professionals for medical advice.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
