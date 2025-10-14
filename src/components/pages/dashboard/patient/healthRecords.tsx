@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Activity, Calendar, Heart, Scale, Stethoscope } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
 
 interface HealthRecord {
   id: string;
@@ -32,6 +33,7 @@ export default function HealthRecords({
   onNavigate?: (page: string) => void;
 }) {
   const [activeTab, setActiveTab] = useState<"add" | "previous">("add");
+  const [isLoading, setIsLoading] = useState(false);
   const [records, setRecords] = useState<HealthRecord[]>([
     {
       id: "1",
@@ -62,7 +64,6 @@ export default function HealthRecords({
     },
   ]);
 
-  console.log("hi");
   const [formData, setFormData] = useState({
     weight: "",
     bloodPressure: "",
@@ -71,8 +72,24 @@ export default function HealthRecords({
     notes: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const user = useAppSelector((state) => state.auth.user);
+  const id = user?._id;
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+
+    const response = await fetch("/api/user/heathrecords", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ formData, id }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save health record");
+    }
+    const result = await response.json();
 
     const newRecord: HealthRecord = {
       id: Date.now().toString(),
@@ -135,18 +152,18 @@ export default function HealthRecords({
             Health Records
           </h1>
           <p className="text-muted-foreground text-pretty">
-            Track and manage your health data over time
+            Track and manage your health records
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex gap-2 rounded-lg bg-muted p-1">
+        <div className="flex gap-2 bg-gray-300 rounded-lg bg-muted p-1">
           <button
             onClick={() => setActiveTab("add")}
             className={`flex-1 rounded-md px-6 py-3 text-sm font-medium transition-all ${
               activeTab === "add"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-background text-foreground shadow-sm border-2 border-primary/50"
+                : "hover:text-muted-foreground text-foreground"
             }`}
           >
             Add New Health Record
@@ -155,8 +172,8 @@ export default function HealthRecords({
             onClick={() => setActiveTab("previous")}
             className={`flex-1 rounded-md px-6 py-3 text-sm font-medium transition-all ${
               activeTab === "previous"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-background text-foreground shadow-sm border-2 border-primary/50"
+                : "hover:text-muted-foreground text-foreground"
             }`}
           >
             Previous Health Records
@@ -167,7 +184,7 @@ export default function HealthRecords({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-primary" />
+                <Heart className="h-5 w-5 text-green-600" />
                 Add New Health Record
               </CardTitle>
               <CardDescription>
@@ -191,6 +208,7 @@ export default function HealthRecords({
                       value={formData.weight}
                       onChange={handleInputChange}
                       required
+                      className="border-2 border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg"
                     />
                   </div>
 
@@ -199,7 +217,7 @@ export default function HealthRecords({
                       htmlFor="bloodPressure"
                       className="flex items-center gap-2"
                     >
-                      <Activity className="h-4 w-4" />
+                      <Activity className="h-4 w-4 text-red-600" />
                       Blood Pressure (mmHg)
                     </Label>
                     <Input
@@ -210,6 +228,7 @@ export default function HealthRecords({
                       value={formData.bloodPressure}
                       onChange={handleInputChange}
                       required
+                      className="border-2 border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg"
                     />
                   </div>
 
@@ -218,7 +237,7 @@ export default function HealthRecords({
                       htmlFor="heartRate"
                       className="flex items-center gap-2"
                     >
-                      <Heart className="h-4 w-4" />
+                      <Heart className="h-4 w-4 text-red-600" />
                       Heart Rate (bpm)
                     </Label>
                     <Input
@@ -229,6 +248,7 @@ export default function HealthRecords({
                       value={formData.heartRate}
                       onChange={handleInputChange}
                       required
+                      className="border-2 border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg"
                     />
                   </div>
 
@@ -237,7 +257,7 @@ export default function HealthRecords({
                       htmlFor="temperature"
                       className="flex items-center gap-2"
                     >
-                      <Stethoscope className="h-4 w-4" />
+                      <Stethoscope className="h-4 w-4 text-amber-600" />
                       Temperature (°F)
                     </Label>
                     <Input
@@ -249,6 +269,7 @@ export default function HealthRecords({
                       value={formData.temperature}
                       onChange={handleInputChange}
                       required
+                      className="border-2 border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg"
                     />
                   </div>
                 </div>
@@ -262,10 +283,14 @@ export default function HealthRecords({
                     value={formData.notes}
                     onChange={handleInputChange}
                     rows={4}
+                    className="border-2 border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg"
                   />
                 </div>
 
-                <Button type="submit" className="w-full md:w-auto">
+                <Button
+                  type="submit"
+                  className="w-full md:w-auto hover:bg-cyan-700 hover:text-black"
+                >
                   Save Health Record
                 </Button>
               </form>
@@ -282,17 +307,17 @@ export default function HealthRecords({
             {Object.entries(groupedRecords).map(([date, dateRecords]) => (
               <div key={date} className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <Calendar className="h-5 w-5 text-muted-foreground text-[hsl(273,100%,60%)]" />
                   <h3 className="text-xl font-medium">{formatDate(date)}</h3>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-2 ">
                   {dateRecords.map((record) => (
                     <Card
                       key={record.id}
                       className="hover:shadow-md transition-shadow"
                     >
-                      <CardContent className="pt-6">
+                      <CardContent className="">
                         <div className="grid gap-4">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
@@ -307,7 +332,7 @@ export default function HealthRecords({
 
                             <div className="space-y-1">
                               <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <Activity className="h-3 w-3" />
+                                <Activity className="h-3 w-3 text-red-600" />
                                 Blood Pressure
                               </p>
                               <p className="text-lg font-semibold">
@@ -317,7 +342,7 @@ export default function HealthRecords({
 
                             <div className="space-y-1">
                               <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <Heart className="h-3 w-3" />
+                                <Heart className="h-3 w-3 text-red-600" />
                                 Heart Rate
                               </p>
                               <p className="text-lg font-semibold">
@@ -327,7 +352,7 @@ export default function HealthRecords({
 
                             <div className="space-y-1">
                               <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <Stethoscope className="h-3 w-3" />
+                                <Stethoscope className="h-3 w-3 text-amber-600" />
                                 Temperature
                               </p>
                               <p className="text-lg font-semibold">
