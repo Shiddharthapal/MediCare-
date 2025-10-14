@@ -130,7 +130,7 @@ export default function ReportAnalysisForm({
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
                     }
                     required
-                    className="border-2 border-gray-800 hover:border-primary/50"
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -143,7 +143,7 @@ export default function ReportAnalysisForm({
                       setFormData((prev) => ({ ...prev, age: e.target.value }))
                     }
                     required
-                    className="border-2 border-gray-800 hover:border-primary/50"
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function ReportAnalysisForm({
                     setFormData((prev) => ({ ...prev, gender: value }))
                   }
                 >
-                  <SelectTrigger className="border-2 border-gray-800 hover:border-primary/50">
+                  <SelectTrigger className="border-2 border-gray-600 hover:border-primary/50">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
@@ -177,7 +177,7 @@ export default function ReportAnalysisForm({
                       setFormData((prev) => ({ ...prev, reportType: value }))
                     }
                   >
-                    <SelectTrigger className="border-2 border-gray-800 hover:border-primary/50">
+                    <SelectTrigger className="border-2 border-gray-600 hover:border-primary/50">
                       <SelectValue placeholder="Select report type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -204,15 +204,15 @@ export default function ReportAnalysisForm({
                         testDate: e.target.value,
                       }))
                     }
-                    className="border-2 border-gray-800 hover:border-primary/50"
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="file-upload">Upload Medical Reports *</Label>
-                <div className="border-2 border-dashed border-gray-800 rounded-lg p-6 text-center  hover:border-primary/50">
-                  <Upload className="w-12 h-12 text-gray-800 mx-auto mb-4" />
+                <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center  hover:border-primary/50">
+                  <Upload className="w-12 h-12 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">
                     Drag and drop your files here, or click to browse
                   </p>
@@ -274,7 +274,7 @@ export default function ReportAnalysisForm({
                     }))
                   }
                   rows={3}
-                  className="border-2 border-gray-800 hover:border-primary/50"
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 />
               </div>
 
@@ -291,7 +291,7 @@ export default function ReportAnalysisForm({
                     }))
                   }
                   rows={3}
-                  className="border-2 border-gray-800 hover:border-primary/50"
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 />
               </div>
 
@@ -308,7 +308,7 @@ export default function ReportAnalysisForm({
                     }))
                   }
                   rows={3}
-                  className="border-2 border-gray-800 hover:border-primary/50"
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 />
               </div>
 
@@ -334,7 +334,7 @@ export default function ReportAnalysisForm({
                   type="button"
                   variant="outline"
                   onClick={onClose}
-                  className="border-2 border-black hover:border-primary/50"
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 >
                   Cancel
                 </Button>
