@@ -33,13 +33,14 @@ import Doctors from "./doctors";
 import Reports from "./report";
 import SettingPatient from "./setting_patient/index";
 import RescheduleBookAppointments from "./rescheduleBookAppointment";
+import HealthRecords from "./healthRecords";
 
 const menuItems = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
   { id: "appointments", icon: Calendar, label: "Appointments", active: false },
   { id: "doctors", icon: Users, label: "Doctors", active: false },
   { id: "reports", icon: FileText, label: "Reports", active: false },
-  { id: "health-records", icon: Heart, label: "Health Records", active: false },
+  { id: "healthrecords", icon: Heart, label: "Health Records", active: false },
   { id: "settings", icon: Settings, label: "Settings", active: false }, // Changed to "settings"
 ];
 
@@ -1488,7 +1489,13 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
+        {currentPage === "health records" && (
+          <div className="h-screen  p-6 lg:p-6 ">
+            <div className="max-w-6xl mx-auto">
+              <HealthRecords onNavigate={setCurrentPage} />
+            </div>
+          </div>
+        )}
         {currentPage === "settings" && (
           <div className="h-screen  p-6 lg:p-6 ">
             <div className="max-w-6xl mx-auto">

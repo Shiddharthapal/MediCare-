@@ -197,7 +197,7 @@ export default function MedicationLandingPage() {
                 <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
                   <CardHeader>
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-[hsl(273,100%,60%)] rounded-lg flex items-center justify-center">
                         <Calendar className="h-6 w-6 text-white" />
                       </div>
                       <CardTitle className="text-xl">Appointments</CardTitle>
@@ -218,7 +218,7 @@ export default function MedicationLandingPage() {
                 <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
                   <CardHeader>
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
                         <Users className="h-6 w-6 text-white" />
                       </div>
                       <CardTitle className="text-xl">Doctors</CardTitle>
@@ -239,7 +239,7 @@ export default function MedicationLandingPage() {
                 <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
                   <CardHeader>
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
                         <FileText className="h-6 w-6 text-white" />
                       </div>
                       <CardTitle className="text-xl">Reports</CardTitle>
@@ -259,7 +259,7 @@ export default function MedicationLandingPage() {
               <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
                 <CardHeader>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-[hsl(355,89%,52%)] rounded-lg flex items-center justify-center">
                       <Heart className="h-6 w-6 text-white" />
                     </div>
                     <CardTitle className="text-xl">Health Records</CardTitle>
@@ -279,7 +279,7 @@ export default function MedicationLandingPage() {
                 <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
                   <CardHeader>
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center">
                         <Settings className="h-6 w-6 text-white" />
                       </div>
                       <CardTitle className="text-xl">Settings</CardTitle>
