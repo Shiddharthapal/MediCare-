@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useLocation } from "react-router-dom";
 import {
   Heart,
   FileText,
@@ -258,7 +259,9 @@ interface UploadedFile extends File {
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState("dashboard");
+  const location = useLocation();
+  const file = location.state?.file;
+  const [currentPage, setCurrentPage] = useState(file || "dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);

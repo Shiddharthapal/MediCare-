@@ -14,12 +14,14 @@ import DashboardofDoctor from "./pages/dashboard/doctor";
 import DashboardofPatient from "./pages/dashboard/patient";
 import ProfileofDoctor from "./pages/profile/profilefordoctor";
 import About from "./pages/about";
+import ScrollToTop from "./ScrollToTop";
 import ProtectedRoute from "./ProctedRoute";
 export default function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <Router>
+          <ScrollToTop />
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />

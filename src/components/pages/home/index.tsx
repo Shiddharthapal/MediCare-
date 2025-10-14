@@ -193,61 +193,67 @@ export default function MedicationLandingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Appointments */}
-              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
-                      <Calendar className="h-6 w-6 text-white" />
+              <Link to="/patient" state={{ file: "appointments", id: 123 }}>
+                <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                        <Calendar className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle className="text-xl">Appointments</CardTitle>
                     </div>
-                    <CardTitle className="text-xl">Appointments</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base leading-relaxed">
-                    Schedule and manage appointments with doctors and
-                    specialists. Get reminders and track your upcoming visits
-                    all in one place.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-base leading-relaxed">
+                      Schedule and manage appointments with doctors and
+                      specialists. Get reminders and track your upcoming visits
+                      all in one place.
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
 
               {/* Doctors */}
-              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
-                      <Users className="h-6 w-6 text-white" />
+              <Link to="patient" state={{ file: "doctors", id: 123 }}>
+                <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                        <Users className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle className="text-xl">Doctors</CardTitle>
                     </div>
-                    <CardTitle className="text-xl">Doctors</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base leading-relaxed">
-                    Browse and connect with licensed healthcare professionals.
-                    View profiles, specializations, and book consultations
-                    instantly.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-base leading-relaxed">
+                      Browse and connect with licensed healthcare professionals.
+                      View profiles, specializations, and book consultations
+                      instantly.
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
 
               {/* Reports */}
-              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-white" />
+              <Link to="patient" state={{ file: "reports", id: 123 }}>
+                <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                        <FileText className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle className="text-xl">Reports</CardTitle>
                     </div>
-                    <CardTitle className="text-xl">Reports</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base leading-relaxed">
-                    Access all your medical reports and test results in one
-                    secure location. Download, share, and track your health data
-                    over time.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-base leading-relaxed">
+                      Access all your medical reports and test results in one
+                      secure location. Download, share, and track your health
+                      data over time.
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
 
               {/* Health Records */}
               <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
@@ -269,23 +275,25 @@ export default function MedicationLandingPage() {
               </Card>
 
               {/* Settings */}
-              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
-                      <Settings className="h-6 w-6 text-white" />
+              <Link to="patient" state={{ file: "settings", id: 123 }}>
+                <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                        <Settings className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle className="text-xl">Settings</CardTitle>
                     </div>
-                    <CardTitle className="text-xl">Settings</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base leading-relaxed">
-                    Customize your experience with personalized preferences,
-                    notification settings, privacy controls, and account
-                    management options.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-base leading-relaxed">
+                      Customize your experience with personalized preferences,
+                      notification settings, privacy controls, and account
+                      management options.
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
 
               {/* CTA Card */}
               <Card className="border-2 border-[hsl(201,96%,32%)] bg-gradient-to-br from-[hsl(201,96%,32%)] to-[hsl(201,96%,25%)] text-white">
