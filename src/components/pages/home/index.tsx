@@ -13,6 +13,10 @@ import {
   Zap,
   BookOpen,
   Activity,
+  Calendar,
+  FileText,
+  Heart,
+  Settings,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -170,6 +174,136 @@ export default function MedicationLandingPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/*Dashboard features*/}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+                Dashboard Features
+              </h2>
+              <p className="mt-4 text-lg text-gray-600">
+                Manage your health journey with our comprehensive dashboard
+                tools
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Appointments */}
+              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                      <Calendar className="h-6 w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-xl">Appointments</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base leading-relaxed">
+                    Schedule and manage appointments with doctors and
+                    specialists. Get reminders and track your upcoming visits
+                    all in one place.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              {/* Doctors */}
+              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                      <Users className="h-6 w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-xl">Doctors</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base leading-relaxed">
+                    Browse and connect with licensed healthcare professionals.
+                    View profiles, specializations, and book consultations
+                    instantly.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              {/* Reports */}
+              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-xl">Reports</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base leading-relaxed">
+                    Access all your medical reports and test results in one
+                    secure location. Download, share, and track your health data
+                    over time.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              {/* Health Records */}
+              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                      <Heart className="h-6 w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-xl">Health Records</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base leading-relaxed">
+                    Maintain a complete digital health record including
+                    medications, allergies, conditions, and treatment history
+                    for better care coordination.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              {/* Settings */}
+              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
+                      <Settings className="h-6 w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-xl">Settings</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base leading-relaxed">
+                    Customize your experience with personalized preferences,
+                    notification settings, privacy controls, and account
+                    management options.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              {/* CTA Card */}
+              <Card className="border-2 border-[hsl(201,96%,32%)] bg-gradient-to-br from-[hsl(201,96%,32%)] to-[hsl(201,96%,25%)] text-white">
+                <CardHeader>
+                  <CardTitle className="text-xl text-white">
+                    Ready to Get Started?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-white leading-relaxed">
+                    Create your account today and access all these powerful
+                    features to manage your health effectively.
+                  </p>
+                  <Button className="w-full bg-white text-[hsl(201,96%,32%)] hover:bg-gray-100 font-semibold">
+                    Create Account
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
