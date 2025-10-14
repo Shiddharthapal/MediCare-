@@ -42,6 +42,7 @@ interface appointmentdata {
   paymentMethod: string;
   specialRequests: string;
   status: string;
+  meetLink?: string;
 }
 
 const mockappointmentdata = {
@@ -268,11 +269,57 @@ export default function Appointments({
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
 
-  const handleJoinSession = (appointmentId: number) => {
-    console.log(`Joining session for appointment ${appointmentId}`);
-    // Add video call logic here
+  //Handle to join in video conferrance
+  const handleJoinSession = async (appointment: appointmentdata) => {
+    console.log(`[v0] Joining session for appointment ${appointment._id}`);
+
+    // If meet link exists, open it
+    if (appointment.meetLink) {
+      window.open(appointment.meetLink, "_blank");
+      return;
+    }
+
+    // If no meet link, try to create one
+    try {
+      const response = await fetch("/api/google/create-meet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          appointmentId: appointment._id,
+          doctorName: appointment.doctorName,
+          patientName: appointment.patientName,
+          patientEmail: appointment.patientEmail,
+          appointmentDate: appointment.appointmentDate,
+          appointmentTime: appointment.appointmentTime,
+          reasonForVisit: appointment.reasonForVisit,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.meetLink) {
+        // Update appointment with new meet link
+        appointment.meetLink = result.meetLink;
+
+        // Open the meet link
+        window.open(result.meetLink, "_blank");
+
+        // Show success message
+        alert("Google Meet link created successfully!");
+      } else {
+        throw new Error(result.error || "Failed to create Meet link");
+      }
+    } catch (error) {
+      console.error("[v0] Error creating Meet link:", error);
+      alert(
+        "Failed to create video call link. Please try again or contact support."
+      );
+    }
   };
 
+  //Cancel the appointment
   const handleCancelAppointment = async (appointmentId: number) => {
     console.log(`Cancelling appointment ${appointmentId}`);
     let id = user?._id;
@@ -544,10 +591,10 @@ export default function Appointments({
                   appointment.consultationType === "video" && (
                     <Button
                       className="bg-pink-500 hover:bg-pink-600 text-white"
-                      onClick={() => handleJoinSession(appointment._id)}
+                      onClick={() => handleJoinSession(appointment)}
                     >
                       <Video className="h-4 w-4 mr-2" />
-                      Join
+                      {appointment.meetLink ? "Join" : "Create & Join"}
                     </Button>
                   )}
                 {status === "pending" && (
