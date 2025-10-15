@@ -38,7 +38,7 @@ export default function HealthcareServices() {
         "Receive AI-powered disease predictions with confidence scores and detailed explanations",
       icon: Zap,
       buttonText: "View Diagnosis",
-      color: "bg-green-100",
+      color: "bg-blue-400",
     },
     {
       id: "report" as const,
@@ -47,7 +47,7 @@ export default function HealthcareServices() {
         "Upload your test reports and medical documents for AI-powered analysis and disease prediction",
       icon: BarChart3,
       buttonText: "Upload Reports",
-      color: "bg-green-100",
+      color: "bg-[hsl(355,89%,52%)]",
     },
     {
       id: "treatment" as const,
@@ -56,7 +56,7 @@ export default function HealthcareServices() {
         "Get personalized treatment recommendations and medication suggestions based on AI diagnosis",
       icon: BookOpen,
       buttonText: "Get Treatment",
-      color: "bg-green-100",
+      color: "bg-[hsl(273,100%,60%)]",
     },
     {
       id: "monitoring" as const,
@@ -65,7 +65,7 @@ export default function HealthcareServices() {
         "Continuous AI-powered health monitoring with alerts and recommendations for preventive care",
       icon: Activity,
       buttonText: "Start Monitoring",
-      color: "bg-green-100",
+      color: "bg-green-500",
     },
   ];
 
@@ -115,7 +115,7 @@ export default function HealthcareServices() {
                   >
                     <CardHeader className="text-center pb-4">
                       <div
-                        className={`w-16 h-16  rounded-full flex items-center justify-center mx-auto mb-4`}
+                        className={`w-16 h-16  rounded-full ${service.color} flex items-center justify-center mx-auto mb-4`}
                       >
                         <IconComponent className="w-8 h-8 text-white" />
                       </div>
