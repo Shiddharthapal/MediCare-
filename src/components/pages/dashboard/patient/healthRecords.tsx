@@ -19,12 +19,13 @@ import { useAppSelector } from "@/redux/hooks";
 
 interface HealthRecord {
   id: string;
-  date: string;
   weight: string;
   bloodPressure: string;
   heartRate: string;
   temperature: string;
   notes: string;
+  date: string;
+  createdAt?: Date;
 }
 
 export default function HealthRecords({

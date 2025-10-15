@@ -33,6 +33,16 @@ interface Prescription {
   createdAt: Date;
 }
 
+interface HealthRecord {
+  _id: string;
+  weight: string;
+  bloodPressure: string;
+  heartRate: string;
+  temperature: string;
+  notes: string;
+  createdAt: Date;
+}
+
 interface CardMethodSchema {
   cardholderName: string;
   type: string;
@@ -118,6 +128,7 @@ export interface UserDetails {
   appoinments: AppointmentData[];
   payment: PaymentMethods;
   upload: FileUpload[];
+  healthRecord: HealthRecord[];
   lastTreatmentDate?: Date;
   createdAt: Date;
 }
