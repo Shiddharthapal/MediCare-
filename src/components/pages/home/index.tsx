@@ -256,23 +256,25 @@ export default function MedicationLandingPage() {
               </Link>
 
               {/* Health Records */}
-              <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[hsl(355,89%,52%)] rounded-lg flex items-center justify-center">
-                      <Heart className="h-6 w-6 text-white" />
+              <Link to="patient" state={{ file: "health records", id: 123 }}>
+                <Card className="border-2 border-gray-200 hover:border-[hsl(201,96%,32%)] hover:shadow-lg transition-all">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-[hsl(355,89%,52%)] rounded-lg flex items-center justify-center">
+                        <Heart className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle className="text-xl">Health Records</CardTitle>
                     </div>
-                    <CardTitle className="text-xl">Health Records</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base leading-relaxed">
-                    Maintain a complete digital health record including
-                    medications, allergies, conditions, and treatment history
-                    for better care coordination.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-base leading-relaxed">
+                      Maintain a complete digital health record including
+                      medications, allergies, conditions, and treatment history
+                      for better care coordination.
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
 
               {/* Settings */}
               <Link to="patient" state={{ file: "settings", id: 123 }}>
