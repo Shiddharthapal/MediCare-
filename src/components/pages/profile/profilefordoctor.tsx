@@ -20,9 +20,9 @@ import {
   Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -35,6 +35,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import {
   setEditMode,
@@ -60,7 +67,16 @@ interface Doctor {
   language: string[];
   about: string;
   image: string;
-  availableSlots: string[];
+}
+
+interface PracticeData {
+  appointmentSlot: {
+    [key: string]: {
+      enabled: boolean;
+      startTime: string;
+      endTime: string;
+    };
+  };
 }
 
 // Mock data - in real app, this would come from API/database
@@ -81,7 +97,6 @@ const mockDoctor: Doctor = {
   language: [],
   about: "",
   image: "",
-  availableSlots: [],
 };
 
 export default function DoctorProfilePage() {
@@ -91,10 +106,23 @@ export default function DoctorProfilePage() {
   const [newSlot, setNewSlot] = useState("");
   const [language, setLanguage] = useState("");
   const [specializations, setSpecializations] = useState("");
+  const [savedData, setSavedData] = useState<PracticeData | null>(null);
   const [hasProfile, setHasProfile] = useState(false);
+  const [formData, setFormData] = useState<PracticeData>({
+    appointmentSlot: {
+      Monday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Tuesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Wednesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Thursday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Friday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Saturday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Sunday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+    },
+  });
   const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.auth.token);
   const user = useAppSelector((state) => state.auth.user);
+  const id = user?._id;
 
   useEffect(() => {
     // const profileExists =
@@ -107,39 +135,7 @@ export default function DoctorProfilePage() {
     // setHasProfile(Boolean(profileExists));
     // setEditedDoctor({ ...doctor });
 
-    const getUserId = async (): Promise<string | null> => {
-      // First try to get from user object
-      if (user?._id) {
-        return user._id;
-      }
-
-      // Fallback to token verification
-      try {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-          throw new Error("No auth token found");
-        }
-        let response = await fetch("/api/getId/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token }),
-        });
-        let userid = await response.json();
-        console.log("🧞‍♂️userid --->", userid);
-        if (!userid) {
-          throw new Error("Invalid token or no user ID");
-        }
-
-        return userid.userId;
-      } catch (error) {
-        console.error("Failed to get user ID:", error);
-        return null;
-      }
-    };
     const fetchDetails = async () => {
-      let id = await getUserId();
       console.log("🧞‍♂️id --->", id);
       if (!id) {
         // Handle auth error - redirect to login or show error
@@ -166,6 +162,48 @@ export default function DoctorProfilePage() {
     fetchDetails();
   }, [user]);
 
+  const handleWorkingHourChange = (day: string, field: string, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      appointmentSlot: {
+        ...prev.appointmentSlot,
+        [day]: {
+          ...prev.appointmentSlot[day],
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  const formatTo12Hour = (time24) => {
+    if (!time24) return "";
+
+    const [hours, minutes] = time24.split(":");
+    const hour = parseInt(hours, 10);
+    const minute = minutes || "00";
+
+    if (hour === 0) {
+      return `12:${minute} AM`;
+    } else if (hour < 12) {
+      return `${hour}:${minute} AM`;
+    } else if (hour === 12) {
+      return `12:${minute} PM`;
+    } else {
+      return `${hour - 12}:${minute} PM`;
+    }
+  };
+
+  const formatWorkingHours = (hours) => {
+    if (!hours?.enabled) {
+      return "Closed";
+    }
+
+    const startTime = formatTo12Hour(hours.startTime);
+    const endTime = formatTo12Hour(hours.endTime);
+
+    return `${startTime} - ${endTime}`;
+  };
+
   const handleEdit = () => {
     setIsEditing(true);
   };
@@ -178,7 +216,7 @@ export default function DoctorProfilePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ editedDoctor, token }),
+        body: JSON.stringify({ editedDoctor, id, formData }),
       });
       if (!response.ok) {
         throw new Error(`Status: ${response.status}`);
@@ -228,26 +266,6 @@ export default function DoctorProfilePage() {
     setEditedDoctor({
       ...editedDoctor,
       [field]: value,
-    });
-  };
-
-  const handleAddSlot = () => {
-    if (newSlot.trim()) {
-      setEditedDoctor({
-        ...editedDoctor,
-        availableSlots: [
-          ...(editedDoctor?.availableSlots || []),
-          newSlot.trim(),
-        ],
-      });
-      setNewSlot("");
-    }
-  };
-
-  const handleRemoveSlot = (index: number) => {
-    setEditedDoctor({
-      ...editedDoctor,
-      availableSlots: editedDoctor.availableSlots.filter((_, i) => i !== index),
     });
   };
 
@@ -612,46 +630,96 @@ export default function DoctorProfilePage() {
                     <Clock className="h-5 w-5 mr-2" />
                     Available Time Slots
                   </Label>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap gap-2">
-                      {currentDoctor?.availableSlots?.length > 0
-                        ? currentDoctor?.availableSlots.map((slot, index) => (
-                            <div key={index} className="flex items-center">
-                              <Badge variant="outline" className="text-sm">
-                                {slot}
-                              </Badge>
-                              {isEditing && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleRemoveSlot(index)}
-                                  className="ml-1 h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              )}
+                  {isEditing ? (
+                    <div>
+                      <Card>
+                        <CardHeader>
+                          <CardDescription>
+                            Set your visiting hours
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {[
+                            "Monday",
+                            "Tuesday",
+                            "Wednesday",
+                            "Thursday",
+                            "Friday",
+                            "Saturday",
+                            "Sunday",
+                          ].map((day) => (
+                            <div
+                              key={day}
+                              className="flex items-center justify-between"
+                            >
+                              <div className="flex items-center space-x-4">
+                                <Switch
+                                  checked={
+                                    formData.appointmentSlot[day].enabled
+                                  }
+                                  onCheckedChange={(checked) =>
+                                    handleWorkingHourChange(
+                                      day,
+                                      "enabled",
+                                      checked
+                                    )
+                                  }
+                                />
+                                <Label className="w-20">{day}</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Input
+                                  type="time"
+                                  value={
+                                    formData.appointmentSlot[day].startTime
+                                  }
+                                  onChange={(e) =>
+                                    handleWorkingHourChange(
+                                      day,
+                                      "startTime",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-32"
+                                />
+                                <span>to</span>
+                                <Input
+                                  type="time"
+                                  value={formData.appointmentSlot[day].endTime}
+                                  onChange={(e) =>
+                                    handleWorkingHourChange(
+                                      day,
+                                      "endTime",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-32"
+                                />
+                              </div>
                             </div>
-                          ))
-                        : !isEditing && (
-                            <p className="text-gray-500 text-sm">
-                              No time slots available
-                            </p>
-                          )}
+                          ))}
+                        </CardContent>
+                      </Card>
                     </div>
-                    {isEditing && (
-                      <div className="flex gap-2 mt-3">
-                        <Input
-                          value={newSlot}
-                          onChange={(e) => setNewSlot(e.target.value)}
-                          placeholder="Add time slot (e.g., 09:00 AM - 10:00 AM)"
-                          className="flex-1"
-                        />
-                        <Button onClick={handleAddSlot} size="sm">
-                          Add
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                      {savedData?.appointmentSlot &&
+                        Object.entries(savedData?.appointmentSlot).map(
+                          ([day, hours]) => (
+                            <div key={day} className="flex items-center py-1">
+                              <span className="capitalize font-medium text-gray-700 w-20">
+                                {day}:
+                              </span>
+                              <span
+                                className={`${hours?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
+                              >
+                                {formatWorkingHours(hours)}
+                              </span>
+                            </div>
+                          )
+                        )}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label className="text-lg font-semibold flex items-center mb-1 ">

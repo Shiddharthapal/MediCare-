@@ -64,6 +64,15 @@ interface PracticeSettingData {
     };
   };
 }
+
+interface appointmentSlot {
+  [key: string]: {
+    enabled: boolean;
+    startTime: string;
+    endTime: string;
+  };
+}
+
 interface AppointmentData {
   doctorpatinetId: string;
   doctorName: string;
@@ -111,8 +120,8 @@ export interface DoctorDetails {
   degree: string;
   language: string[];
   about: string;
-  payment: PaymentMethods[];
-  availableSlots: string[];
+  payment?: PaymentMethods;
+  availableSlots: appointmentSlot;
   appointments: AppointmentData[];
   practiceSettingData: PracticeSettingData[];
   consultationModes: string[];

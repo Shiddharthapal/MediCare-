@@ -174,6 +174,22 @@ const practiceSettingData = new mongoose.Schema({
     },
   },
 });
+
+const appointmentSlot = new mongoose.Schema({
+  type: Map,
+  of: {
+    enabled: {
+      type: Boolean,
+    },
+    startTime: {
+      type: String,
+    },
+    endTime: {
+      type: String,
+    },
+  },
+});
+
 const appointmentDataSchema = new mongoose.Schema(
   {
     doctorpatinetId: {
@@ -348,18 +364,11 @@ const doctorDetailsSchema = new mongoose.Schema({
 
   payment: {
     type: PaymentMethods,
-    default: [],
   },
 
   availableSlots: {
-    type: [String],
-    require: true,
-    validate: {
-      validator: function (arr) {
-        return arr.length > 0;
-      },
-      message: "Available slot must contain at least one slot",
-    },
+    type: appointmentSlot,
+    default: {},
   },
   appointments: {
     type: [appointmentDataSchema],

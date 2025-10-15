@@ -1,7 +1,6 @@
 import connect from "@/lib/connection";
 import Doctor from "@/model/doctor";
 import DoctorDetails from "@/model/doctorDetails";
-import { verifyToken } from "@/utils/token";
 import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ request }) => {
@@ -11,7 +10,9 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     // console.log("🧞‍♂️body --->", body);
-    const { editedDoctor, token } = body;
+    const { editedDoctor, id, formData } = body;
+    console.log("🧞‍♂️  id --->", id);
+    console.log("🧞‍♂️  formData --->", formData);
     const {
       name,
       specialist,
@@ -78,19 +79,69 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // console.log("🧞‍♂️tokenDetails --->", editedDoctor);
-    const tokenDetails = await verifyToken(token);
-    // console.log("🧞‍♂️tokenDetails --->", tokenDetails);
+    if (!id) {
+      return new Response(
+        JSON.stringify({
+          message: "Id required",
+        }),
+        {
+          status: 404,
+          headers,
+        }
+      );
+    }
+
+    if (!formData) {
+      return new Response(
+        JSON.stringify({
+          message: "Formdata required",
+        }),
+        {
+          status: 404,
+          headers,
+        }
+      );
+    }
 
     await connect();
 
-    const doctordata = await Doctor.findOne({ _id: tokenDetails?.userId });
+    let parsedSlots;
+    if (formData) {
+      try {
+        if (formData.availableSlots) {
+          parsedSlots = JSON.parse(formData.availableSlots);
+          // If it's an array, take the first element
+          parsedSlots = Array.isArray(parsedSlots)
+            ? parsedSlots[0]
+            : parsedSlots;
+        } else {
+          parsedSlots = availableSlots; // Use from editedDoctor instead
+        }
+      } catch (parseError) {
+        console.error("Error parsing availableSlots:", parseError);
+        parsedSlots = availableSlots; // Fallback to editedDoctor
+      }
+    }
+
+    const doctordata = await Doctor.findOne({ _id: id });
+    if (!doctordata) {
+      return new Response(
+        JSON.stringify({
+          message: "Login required",
+        }),
+        {
+          status: 404,
+          headers,
+        }
+      );
+    }
+
     let doctordetails = await DoctorDetails.findOne({
-      userId: tokenDetails?.userId,
+      userId: id,
     });
     if (!doctordetails) {
       doctordetails = new DoctorDetails({
-        userId: tokenDetails?.userId,
+        userId: id,
         name,
         email: doctordata?.email,
         registrationNo: doctordata?.registrationNo,
@@ -102,37 +153,44 @@ export const POST: APIRoute = async ({ request }) => {
         fees,
         experience,
         education,
+        availableSlots: parsedSlots,
         degree,
         language,
         about,
-        availableSlots,
+        payment: {
+          acceptCreditCards: false,
+          acceptDebitCards: false,
+          acceptBkash: false,
+          acceptNagad: false,
+          acceptRocket: false,
+        },
         consultationModes,
       });
-      console.log("doctordetails=>", doctordetails);
 
       await doctordetails.save();
     } else {
-      (doctordetails.name = name || doctordetails.name),
-        (doctordetails.email = doctordata?.email || doctordetails.email),
-        (doctordata.registrationNo =
-          doctordata?.registrationNo || doctordetails.registrationNo),
-        (doctordetails.contact = contact || doctordetails.contact),
-        (doctordetails.specialist = specialist || doctordetails.specialist),
-        (doctordetails.specializations =
-          specializations || doctordetails.specializations),
-        (doctordetails.hospital = hospital || doctordetails.hospital),
-        (doctordetails.gender = gender || doctordetails.gender),
-        (doctordetails.fees = fees || doctordetails.fees),
-        (doctordetails.experience = experience || doctordetails.experience),
-        (doctordetails.education = education || doctordetails.education),
-        (doctordetails.degree = degree || doctordetails.degree),
-        (doctordetails.language = language || doctordetails.language),
-        (doctordetails.about = about || doctordetails.about),
-        (doctordetails.availableSlots =
-          availableSlots || doctordetails.availableSlots),
-        (doctordetails.consultationModes =
-          consultationModes || doctordetails.consultationModes),
-        await doctordetails.save();
+      doctordetails.name = name ?? doctordetails.name;
+      doctordetails.email = doctordata?.email ?? doctordetails.email;
+      doctordetails.registrationNo =
+        doctordata?.registrationNo ?? doctordetails.registrationNo;
+      doctordetails.contact = contact ?? doctordetails.contact;
+      doctordetails.specialist = specialist ?? doctordetails.specialist;
+      doctordetails.specializations =
+        specializations ?? doctordetails.specializations;
+      doctordetails.hospital = hospital ?? doctordetails.hospital;
+      doctordetails.gender = gender ?? doctordetails.gender;
+      doctordetails.fees = fees ?? doctordetails.fees;
+      doctordetails.experience = experience ?? doctordetails.experience;
+      doctordetails.education = education ?? doctordetails.education;
+      doctordetails.degree = degree ?? doctordetails.degree;
+      doctordetails.language = language ?? doctordetails.language;
+      doctordetails.about = about ?? doctordetails.about;
+      doctordetails.availableSlots =
+        parsedSlots ?? doctordetails.availableSlots;
+      doctordetails.consultationModes =
+        consultationModes ?? doctordetails.consultationModes;
+
+      await doctordetails.save();
     }
     return new Response(JSON.stringify({ doctordetails }), {
       status: 200,
