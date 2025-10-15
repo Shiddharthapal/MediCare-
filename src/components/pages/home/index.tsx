@@ -393,7 +393,7 @@ export default function MedicationLandingPage() {
             <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="text-center border-0 shadow-lg bg-[hsl(201,96%,32%)]">
                 <CardHeader>
-                  <div className="mx-auto w-12 h-12  rounded-lg flex items-center justify-center">
+                  <div className="mx-auto w-12 h-12  rounded-lg bg-blue-400 flex items-center justify-center">
                     <Shield className="h-6 w-6 text-white" />
                   </div>
                   <CardTitle className="text-lg">Secure & Licensed</CardTitle>
@@ -408,7 +408,7 @@ export default function MedicationLandingPage() {
 
               <Card className="text-center border-0 shadow-lg bg-[hsl(201,96%,32%)]">
                 <CardHeader>
-                  <div className="mx-auto w-12 h-12  rounded-lg flex items-center justify-center">
+                  <div className="mx-auto w-12 h-12  rounded-lg bg-[hsl(273,100%,60%)] flex items-center justify-center">
                     <Clock className="h-6 w-6 text-white" />
                   </div>
                   <CardTitle className="text-lg">24/7 Support</CardTitle>
@@ -423,7 +423,7 @@ export default function MedicationLandingPage() {
 
               <Card className="text-center border-0 shadow-lg bg-[hsl(201,96%,32%)]">
                 <CardHeader>
-                  <div className="mx-auto w-12 h-12 rounded-lg flex items-center justify-center">
+                  <div className="mx-auto w-12 h-12 rounded-lg bg-[hsl(355,89%,52%)] flex items-center justify-center">
                     <Truck className="h-6 w-6 text-white" />
                   </div>
                   <CardTitle className="text-lg">Fast Delivery</CardTitle>
@@ -438,7 +438,7 @@ export default function MedicationLandingPage() {
 
               <Card className="text-center border-0 shadow-lg bg-[hsl(201,96%,32%)]">
                 <CardHeader>
-                  <div className="mx-auto w-12 h-12  rounded-lg flex items-center justify-center">
+                  <div className="mx-auto w-12 h-12  rounded-lg bg-green-600 flex items-center justify-center">
                     <Users className="h-6 w-6 text-white" />
                   </div>
                   <CardTitle className="text-lg">Expert Care</CardTitle>
@@ -553,7 +553,7 @@ export default function MedicationLandingPage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 text-black hover:border-primary/50"
+                className="border-2 text-black hover:border-primary/50 hover:underline"
               >
                 Contact Support
               </Button>
