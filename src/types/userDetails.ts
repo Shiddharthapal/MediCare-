@@ -38,6 +38,7 @@ interface HealthRecord {
   weight: string;
   bloodPressure: string;
   heartRate: string;
+  date: string;
   temperature: string;
   notes: string;
   createdAt: Date;

@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -18,7 +18,7 @@ import { Activity, Calendar, Heart, Scale, Stethoscope } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
 interface HealthRecord {
-  id: string;
+  _id: string;
   weight: string;
   bloodPressure: string;
   heartRate: string;
@@ -35,51 +35,39 @@ export default function HealthRecords({
 }) {
   const [activeTab, setActiveTab] = useState<"add" | "previous">("add");
   const [isLoading, setIsLoading] = useState(false);
-  const [records, setRecords] = useState<HealthRecord[]>([
-    {
-      id: "1",
-      date: "2025-01-10",
-      weight: "75",
-      bloodPressure: "120/80",
-      heartRate: "72",
-      temperature: "98.6",
-      notes: "Feeling healthy, regular checkup",
-    },
-    {
-      id: "2",
-      date: "2025-01-05",
-      weight: "76",
-      bloodPressure: "118/78",
-      heartRate: "70",
-      temperature: "98.4",
-      notes: "Slight cold symptoms",
-    },
-    {
-      id: "3",
-      date: "2024-12-28",
-      weight: "77",
-      bloodPressure: "122/82",
-      heartRate: "75",
-      temperature: "98.7",
-      notes: "Post-holiday checkup",
-    },
-  ]);
+  const [records, setRecords] = useState<HealthRecord[]>([]);
 
   const [formData, setFormData] = useState({
     weight: "",
     bloodPressure: "",
     heartRate: "",
+    date: "",
     temperature: "",
     notes: "",
   });
 
+  //Findout the user
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch(`/api/user/${id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+      let result = await response.json();
+      console.log("🧞‍♂️  result --->", result);
+      setRecords(result?.userdetails?.healthRecords);
+    };
+    fetchData();
+  }, [user]);
+
+  //Handle submit function to submit the data of form
   const handleSubmit = async () => {
     setIsLoading(true);
 
-    const response = await fetch("/api/user/heathrecords", {
+    const response = await fetch("/api/user/healthrecords", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -92,26 +80,20 @@ export default function HealthRecords({
     }
     const result = await response.json();
 
-    const newRecord: HealthRecord = {
-      id: Date.now().toString(),
-      date: new Date().toISOString().split("T")[0],
-      ...formData,
-    };
-
-    setRecords([newRecord, ...records]);
-
     // Reset form
     setFormData({
       weight: "",
       bloodPressure: "",
       heartRate: "",
       temperature: "",
+      date: "",
       notes: "",
     });
 
     setActiveTab("previous");
   };
 
+  //Handle input change
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -122,7 +104,7 @@ export default function HealthRecords({
   };
 
   // Group records by date
-  const groupedRecords = records.reduce(
+  const groupedRecords = records?.reduce(
     (acc, record) => {
       const date = record.date;
       if (!acc[date]) {
@@ -305,78 +287,90 @@ export default function HealthRecords({
               Previous Records
             </h2>
 
-            {Object.entries(groupedRecords).map(([date, dateRecords]) => (
-              <div key={date} className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-muted-foreground text-[hsl(273,100%,60%)]" />
-                  <h3 className="text-xl font-medium">{formatDate(date)}</h3>
+            {groupedRecords ? (
+              Object?.entries(groupedRecords || "")?.map(
+                ([date, dateRecords]) => (
+                  <div key={date} className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-muted-foreground text-[hsl(273,100%,60%)]" />
+                      <h3 className="text-xl font-medium">
+                        {formatDate(date)}
+                      </h3>
+                    </div>
+
+                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 ">
+                      {dateRecords.map((record) => (
+                        <Card
+                          key={record._id}
+                          className="hover:shadow-md transition-shadow"
+                        >
+                          <CardContent className="">
+                            <div className="grid gap-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <Scale className="h-3 w-3" />
+                                    Weight
+                                  </p>
+                                  <p className="text-lg font-semibold">
+                                    {record.weight} kg
+                                  </p>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <Activity className="h-3 w-3 text-red-600" />
+                                    Blood Pressure
+                                  </p>
+                                  <p className="text-lg font-semibold">
+                                    {record.bloodPressure}
+                                  </p>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <Heart className="h-3 w-3 text-red-600" />
+                                    Heart Rate
+                                  </p>
+                                  <p className="text-lg font-semibold">
+                                    {record.heartRate} bpm
+                                  </p>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <Stethoscope className="h-3 w-3 text-amber-600" />
+                                    Temperature
+                                  </p>
+                                  <p className="text-lg font-semibold">
+                                    {record.temperature}°F
+                                  </p>
+                                </div>
+                              </div>
+
+                              {record.notes && (
+                                <div className="space-y-1 border-t pt-4">
+                                  <p className="text-sm font-medium">Notes</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {record.notes}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )
+            ) : (
+              <Card>
+                <div className="text-red-600 text-center py-4">
+                  No health records are available
                 </div>
-
-                <div className="grid gap-4 grid-cols-1 md:grid-cols-2 ">
-                  {dateRecords.map((record) => (
-                    <Card
-                      key={record.id}
-                      className="hover:shadow-md transition-shadow"
-                    >
-                      <CardContent className="">
-                        <div className="grid gap-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <Scale className="h-3 w-3" />
-                                Weight
-                              </p>
-                              <p className="text-lg font-semibold">
-                                {record.weight} kg
-                              </p>
-                            </div>
-
-                            <div className="space-y-1">
-                              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <Activity className="h-3 w-3 text-red-600" />
-                                Blood Pressure
-                              </p>
-                              <p className="text-lg font-semibold">
-                                {record.bloodPressure}
-                              </p>
-                            </div>
-
-                            <div className="space-y-1">
-                              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <Heart className="h-3 w-3 text-red-600" />
-                                Heart Rate
-                              </p>
-                              <p className="text-lg font-semibold">
-                                {record.heartRate} bpm
-                              </p>
-                            </div>
-
-                            <div className="space-y-1">
-                              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <Stethoscope className="h-3 w-3 text-amber-600" />
-                                Temperature
-                              </p>
-                              <p className="text-lg font-semibold">
-                                {record.temperature}°F
-                              </p>
-                            </div>
-                          </div>
-
-                          {record.notes && (
-                            <div className="space-y-1 border-t pt-4">
-                              <p className="text-sm font-medium">Notes</p>
-                              <p className="text-sm text-muted-foreground">
-                                {record.notes}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ))}
+              </Card>
+            )}
           </div>
         )}
       </div>

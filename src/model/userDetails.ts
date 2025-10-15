@@ -192,6 +192,9 @@ const HealthRecord = new mongoose.Schema({
   heartRate: {
     type: String,
   },
+  date: {
+    type: String,
+  },
   temperature: {
     type: String,
   },

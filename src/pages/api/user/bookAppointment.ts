@@ -25,24 +25,7 @@ export const POST: APIRoute = async ({ request }) => {
     } = formData;
     console.log("🧞‍♂️formData --->", formData);
 
-    const {
-      userId,
-      name,
-      specialist,
-      specializations,
-      hospital,
-      fees,
-      gender,
-      rating,
-      experience,
-      education,
-      degree,
-      language,
-      about,
-      availableSlots,
-      Appointments,
-      consultationModes,
-    } = doctor;
+    const { userId, name, specialist, gender } = doctor;
 
     if (
       !appointmentDate ||
