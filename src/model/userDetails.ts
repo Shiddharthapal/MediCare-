@@ -156,6 +156,12 @@ const FileUploadSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  doctorName: {
+    type: String,
+  },
+  category: {
+    type: String,
+  },
   userIdWHUP: {
     type: String,
   },
@@ -171,6 +177,31 @@ const FileUploadSchema = new mongoose.Schema({
     default: Date.now(),
   },
   updatedAt: {
+    type: Date,
+    default: Date.now(),
+  },
+});
+
+const HealthRecord = new mongoose.Schema({
+  weight: {
+    type: String,
+  },
+  bloodPressure: {
+    type: String,
+  },
+  heartRate: {
+    type: String,
+  },
+  date: {
+    type: String,
+  },
+  temperature: {
+    type: String,
+  },
+  notes: {
+    type: String,
+  },
+  createdAt: {
     type: Date,
     default: Date.now(),
   },
@@ -351,6 +382,10 @@ const userDetailsSchema = new mongoose.Schema({
   },
   upload: {
     type: [FileUploadSchema],
+    default: [],
+  },
+  healthRecord: {
+    type: [HealthRecord],
     default: [],
   },
   lastTreatmentDate: {

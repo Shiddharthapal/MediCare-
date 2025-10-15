@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import {
   Search,
   FileText,
@@ -28,7 +35,11 @@ import {
   Stethoscope,
   ChevronDown,
   ChevronUp,
+  X,
+  Upload,
+  File,
 } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
 
 // Mock document data
 const documentData = [
@@ -245,9 +256,16 @@ export default function Reports() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>(
     {}
   );
+  const [uploadDocumentCategory, setUploadDocumentCategory] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const user = useAppSelector((state) => state.auth.user);
+  const id = user?._id;
 
   const filteredDocuments = documentData.filter((document) => {
     const matchesSearch =
@@ -257,10 +275,8 @@ export default function Reports() {
       document.tags.some((tag) =>
         tag.toLowerCase().includes(searchTerm.toLowerCase())
       );
-
     const matchesCategory =
       selectedCategory === "all" || document.type === selectedCategory;
-
     return matchesSearch && matchesCategory;
   });
 
@@ -317,9 +333,129 @@ export default function Reports() {
     }
   };
 
+  const handleFileUpload = (files: FileList) => {
+    const newFiles = Array.from(files).map((file) => {
+      const fileData: any = {
+        name: file.name,
+        documentName: file.name.replace(/\.[^/.]+$/, ""), // Default to filename without extension
+        size: file.size,
+        type: file.type,
+        file: file,
+      };
+
+      // Create preview for images
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          fileData.preview = e.target?.result;
+          setUploadedFiles((prev) => [...prev]);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      return fileData;
+    });
+    setUploadedFiles((prev) => [...prev, ...newFiles]);
+  };
+
+  //Handle file when you remove from file upload card
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  //Handle to get file icon
+  const getFileIcon = (file: any) => {
+    if (file.type.includes("pdf")) {
+      return <FileText className="h-8 w-8 text-red-500" />;
+    } else if (file.type.includes("image")) {
+      return <FileText className="h-8 w-8 text-blue-500" />;
+    } else if (file.type.includes("document") || file.type.includes("word")) {
+      return <File className="h-8 w-8 text-blue-600" />;
+    }
+    return <FileText className="h-8 w-8 text-gray-500" />;
+  };
+
+  //Handle the file rename function with Debouncing
+  const debounceTimersRef = useRef<Record<number, NodeJS.Timeout>>({});
+  const handleDocumentNameChange = (index: number, newName: string) => {
+    // Clear existing timer for this index
+    if (debounceTimersRef.current[index]) {
+      clearTimeout(debounceTimersRef.current[index]);
+    }
+
+    // Immediately update the input field (optimistic update)
+    setUploadedFiles((prev) =>
+      prev.map((file, i) =>
+        i === index ? { ...file, documentName: newName } : file
+      )
+    );
+
+    // Set new debounced timer
+    const timerId = setTimeout(() => {
+      // This is where you could make an API call if needed
+      console.log(`Document name updated for index ${index}: ${newName}`);
+    }, 500); // 500ms delay
+    debounceTimersRef.current[index] = timerId;
+  };
+
+  //Handle the file when you want to save it
+  const handleSaveDocuments = async () => {
+    if (!uploadDocumentCategory) {
+      alert("Please select a document category");
+      return;
+    }
+
+    if (uploadedFiles.length === 0) {
+      alert("Please select at least one file to upload");
+      return;
+    }
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+
+      // Add category to form data
+      formData.append("category", uploadDocumentCategory);
+
+      // Add each file with its metadata
+      formData.append("userId", id || "");
+      uploadedFiles.forEach((fileData, index) => {
+        formData.append(`files`, fileData.file);
+        formData.append(`documentNames`, fileData.documentName);
+        formData.append(`originalNames`, fileData.name);
+      });
+
+      const response = await fetch("/api/user/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to upload documents");
+      }
+
+      const result = await response.json();
+      console.log("[v0] Upload successful:", result);
+
+      setIsUploading(false);
+      setShowUploadModal(false);
+      setUploadedFiles([]);
+      setUploadDocumentCategory("");
+      alert(`Successfully uploaded ${uploadedFiles.length} document(s)!`);
+    } catch (error) {
+      console.error("[v0] Upload error:", error);
+      setIsUploading(false);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to upload documents. Please try again."
+      );
+    }
+  };
+
   const DocumentCard = ({ document }: { document: any }) => {
     const Icon = document.icon || FileText;
-
     return (
       <Card className="hover:shadow-md transition-shadow duration-200">
         <CardContent className="p-4">
@@ -399,7 +535,10 @@ export default function Reports() {
             Access and manage your medical documents and reports
           </p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={() => setShowUploadModal(true)}
+        >
           <FilePlus className="h-4 w-4 mr-2" />
           Upload Document
         </Button>
@@ -666,6 +805,176 @@ export default function Reports() {
           )}
         </DialogContent>
       </Dialog>
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Upload Medical Documents
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowUploadModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-sm text-gray-600">
+                  Upload medical reports, lab results, prescriptions, or other
+                  medical documents
+                </p>
+              </div>
+
+              {/* Document Category Dropdown */}
+              <div className="mb-6 ">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Document Category
+                </label>
+                <Select
+                  value={uploadDocumentCategory}
+                  onValueChange={setUploadDocumentCategory}
+                >
+                  <SelectTrigger className="w-full border-2 transition-all hover:border-primary/50 hover:shadow-lg">
+                    <SelectValue placeholder="Select document category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Laboratory">Laboratory</SelectItem>
+                    <SelectItem value="Dermatology">Dermatology</SelectItem>
+                    <SelectItem value="Neurology">Neurology</SelectItem>
+                    <SelectItem value="General">General</SelectItem>
+                    <SelectItem value="Cardiology">Cardiology</SelectItem>
+                    <SelectItem value="Radiology">Radiology</SelectItem>
+                    <SelectItem value="Medication">Medication</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Upload Section */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">
+                  Select Files
+                </h3>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600 mb-2">
+                    Upload medical reports, lab results, or other documents
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB per
+                    file)
+                  </p>
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    onChange={(e) =>
+                      e.target.files && handleFileUpload(e.target.files)
+                    }
+                    className="hidden"
+                    id="file-upload-modal"
+                  />
+                  <label
+                    htmlFor="file-upload-modal"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
+                  >
+                    Choose Files
+                  </label>
+                </div>
+
+                {/* Show uploaded files with preview */}
+                {uploadedFiles.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">
+                      Uploaded Files ({uploadedFiles.length}):
+                    </h4>
+                    <div className="space-y-3">
+                      {uploadedFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          {/* File preview or icon */}
+                          <div className="flex-shrink-0">
+                            {file.preview ? (
+                              <img
+                                src={file.preview || "/placeholder.svg"}
+                                alt={file.name}
+                                className="w-16 h-16 object-cover rounded"
+                              />
+                            ) : (
+                              <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                                {getFileIcon(file)}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* File details */}
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                                Document Name
+                              </label>
+                              <Input
+                                type="text"
+                                value={file.documentName}
+                                onChange={(e) =>
+                                  handleDocumentNameChange(
+                                    index,
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Enter document name"
+                                className="w-full border-2 transition-all hover:border-primary/50 hover:shadow-lg"
+                              />
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">
+                                File: {file.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {(file.size / 1024 / 1024).toFixed(2)} MB •{" "}
+                                {file.type || "Unknown type"}•{" "}
+                                {new Date().toISOString().split("T")[0]}•{" "}
+                                {new Date().toLocaleTimeString("en-US", {
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Remove button */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveFile(index)}
+                            className="flex-shrink-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      onClick={handleSaveDocuments}
+                      className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                      disabled={isUploading}
+                    >
+                      {isUploading ? "Uploading..." : "Save Documents"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

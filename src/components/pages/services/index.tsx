@@ -38,7 +38,7 @@ export default function HealthcareServices() {
         "Receive AI-powered disease predictions with confidence scores and detailed explanations",
       icon: Zap,
       buttonText: "View Diagnosis",
-      color: "bg-green-100",
+      color: "bg-blue-400",
     },
     {
       id: "report" as const,
@@ -47,7 +47,7 @@ export default function HealthcareServices() {
         "Upload your test reports and medical documents for AI-powered analysis and disease prediction",
       icon: BarChart3,
       buttonText: "Upload Reports",
-      color: "bg-green-100",
+      color: "bg-[hsl(355,89%,52%)]",
     },
     {
       id: "treatment" as const,
@@ -56,7 +56,7 @@ export default function HealthcareServices() {
         "Get personalized treatment recommendations and medication suggestions based on AI diagnosis",
       icon: BookOpen,
       buttonText: "Get Treatment",
-      color: "bg-green-100",
+      color: "bg-[hsl(273,100%,60%)]",
     },
     {
       id: "monitoring" as const,
@@ -65,7 +65,7 @@ export default function HealthcareServices() {
         "Continuous AI-powered health monitoring with alerts and recommendations for preventive care",
       icon: Activity,
       buttonText: "Start Monitoring",
-      color: "bg-green-100",
+      color: "bg-green-500",
     },
   ];
 
@@ -89,10 +89,10 @@ export default function HealthcareServices() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+    <div className="min-h-screen ">
       {/* AI-Powered Services Section */}
-      <section id="services" className="py-16">
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
+      <section id="services" className="">
+        <div className="min-h-screen pt-14  p-6">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -110,26 +110,26 @@ export default function HealthcareServices() {
                 return (
                   <Card
                     key={service.id}
-                    className={` bg-green-100 hover:shadow-lg hover:ring-4 transition-all duration-300 border-0 shadow-md`}
+                    className={` bg-[hsl(201,96%,32%)] hover:shadow-lg hover:ring-4 transition-all duration-300 border-0 shadow-md`}
                     onClick={() => setActiveService(service.id)}
                   >
                     <CardHeader className="text-center pb-4">
                       <div
-                        className={`w-16 h-16 ${service.color} rounded-full flex items-center justify-center mx-auto mb-4`}
+                        className={`w-16 h-16  rounded-full ${service.color} flex items-center justify-center mx-auto mb-4`}
                       >
-                        <IconComponent className="w-8 h-8 text-green-600" />
+                        <IconComponent className="w-8 h-8 text-white" />
                       </div>
                       <CardTitle className="text-xl font-semibold text-gray-900">
                         {service.title}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="text-center">
-                      <CardDescription className="text-gray-600 mb-6 leading-relaxed">
+                      <CardDescription className="text-black mb-6 leading-relaxed">
                         {service.description}
                       </CardDescription>
                       <Button
                         onClick={() => setActiveService(service.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                        className="bg-white text-black hover:bg-cyan-900 hover:text-white  px-6 py-2 rounded-md font-medium transition-colors duration-200"
                       >
                         {service.buttonText}
                       </Button>
@@ -143,7 +143,7 @@ export default function HealthcareServices() {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 bg-gray-50">
+      <section id="how-it-works" className="py-16 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
@@ -156,7 +156,7 @@ export default function HealthcareServices() {
 
           <div className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+              <div className="mx-auto w-16 h-16 bg-[hsl(201,96%,32%)] rounded-full flex items-center justify-center text-white font-bold text-xl">
                 1
               </div>
               <h3 className="mt-4 text-xl font-semibold text-gray-900">
@@ -169,7 +169,7 @@ export default function HealthcareServices() {
             </div>
 
             <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+              <div className="mx-auto w-16 h-16 bg-[hsl(201,96%,32%)] rounded-full flex items-center justify-center text-white font-bold text-xl">
                 2
               </div>
               <h3 className="mt-4 text-xl font-semibold text-gray-900">
@@ -182,7 +182,7 @@ export default function HealthcareServices() {
             </div>
 
             <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+              <div className="mx-auto w-16 h-16 bg-[hsl(201,96%,32%)] rounded-full flex items-center justify-center text-white font-bold text-xl">
                 3
               </div>
               <h3 className="mt-4 text-xl font-semibold text-gray-900">
@@ -198,7 +198,7 @@ export default function HealthcareServices() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-green-600">
+      <section className="py-16 bg-[hsl(201,96%,32%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
             <div className="text-center">
@@ -235,12 +235,16 @@ export default function HealthcareServices() {
             <Button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               size="lg"
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-[hsl(201,96%,32%)] hover:text-black hover:underline"
             >
               Start Your Medication
             </Button>
-            <Button variant="outline" size="lg">
-              <Link to="/contact" className="text-gray-900">
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-2 border-black hover:border-primary/50"
+            >
+              <Link to="/contact" className="text-gray-900 ">
                 Contact Support
               </Link>
             </Button>
@@ -254,7 +258,7 @@ export default function HealthcareServices() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[hsl(201,96%,32%)] rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">M</span>
                 </div>
                 <span className="ml-2 text-xl font-bold text-white">

@@ -168,7 +168,7 @@ export default function HealthMonitoringForm({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <Button variant="ghost" onClick={onClose} className="mb-4">
@@ -179,8 +179,8 @@ export default function HealthMonitoringForm({
 
         <Card className="shadow-lg">
           <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Activity className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Activity className="w-8 h-8 text-[hsl(201,96%,32%)]" />
             </div>
             <CardTitle className="text-2xl">Health Monitoring</CardTitle>
             <CardDescription>
@@ -192,7 +192,9 @@ export default function HealthMonitoringForm({
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
+                  <Label htmlFor="name">
+                    Full Name<span className="text-red-500 ">*</span>
+                  </Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -200,10 +202,13 @@ export default function HealthMonitoringForm({
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
                     }
                     required
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="age">Age *</Label>
+                  <Label htmlFor="age">
+                    Age<span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="age"
                     type="number"
@@ -212,18 +217,21 @@ export default function HealthMonitoringForm({
                       setFormData((prev) => ({ ...prev, age: e.target.value }))
                     }
                     required
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="gender">Gender *</Label>
+                <Label htmlFor="gender">
+                  Gender<span className="text-red-500">*</span>
+                </Label>
                 <Select
                   onValueChange={(value) =>
                     setFormData((prev) => ({ ...prev, gender: value }))
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-2 border-gray-600 hover:border-primary/50">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
@@ -248,6 +256,7 @@ export default function HealthMonitoringForm({
                         onCheckedChange={(checked) =>
                           handleGoalChange(goal, checked as boolean)
                         }
+                        className="border-2 border-gray-600 hover:border-primary/50"
                       />
                       <Label htmlFor={goal} className="text-sm">
                         {goal}
@@ -272,6 +281,7 @@ export default function HealthMonitoringForm({
                     }))
                   }
                   rows={3}
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 />
               </div>
 
@@ -286,6 +296,7 @@ export default function HealthMonitoringForm({
                         onCheckedChange={(checked) =>
                           handleRiskFactorChange(factor, checked as boolean)
                         }
+                        className="border-2 border-gray-600 hover:border-primary/50"
                       />
                       <Label htmlFor={factor} className="text-sm">
                         {factor}
@@ -313,6 +324,7 @@ export default function HealthMonitoringForm({
                           },
                         }))
                       }
+                      className="border-2 border-gray-600 hover:border-primary/50"
                     />
                   </div>
                   <div className="space-y-2">
@@ -330,6 +342,7 @@ export default function HealthMonitoringForm({
                           },
                         }))
                       }
+                      className="border-2 border-gray-600 hover:border-primary/50"
                     />
                   </div>
                   <div className="space-y-2">
@@ -347,6 +360,7 @@ export default function HealthMonitoringForm({
                           },
                         }))
                       }
+                      className="border-2 border-gray-600 hover:border-primary/50"
                     />
                   </div>
                   <div className="space-y-2">
@@ -364,6 +378,7 @@ export default function HealthMonitoringForm({
                           },
                         }))
                       }
+                      className="border-2 border-gray-600 hover:border-primary/50"
                     />
                   </div>
                   <div className="space-y-2">
@@ -381,6 +396,7 @@ export default function HealthMonitoringForm({
                           },
                         }))
                       }
+                      className="border-2 border-gray-600 hover:border-primary/50"
                     />
                   </div>
                   <div className="space-y-2">
@@ -398,6 +414,7 @@ export default function HealthMonitoringForm({
                           },
                         }))
                       }
+                      className="border-2 border-gray-600 hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -415,6 +432,7 @@ export default function HealthMonitoringForm({
                       medications: e.target.value,
                     }))
                   }
+                  className="border-2 border-gray-600 hover:border-primary/50"
                   rows={3}
                 />
               </div>
@@ -432,6 +450,7 @@ export default function HealthMonitoringForm({
                     }))
                   }
                   rows={3}
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 />
               </div>
 
@@ -448,6 +467,7 @@ export default function HealthMonitoringForm({
                     }))
                   }
                   rows={3}
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 />
               </div>
 
@@ -463,7 +483,7 @@ export default function HealthMonitoringForm({
                     }))
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-2 border-gray-600 hover:border-primary/50">
                     <SelectValue placeholder="How often should we monitor?" />
                   </SelectTrigger>
                   <SelectContent>
@@ -489,6 +509,7 @@ export default function HealthMonitoringForm({
                         onCheckedChange={(checked) =>
                           handleAlertChange(alert, checked as boolean)
                         }
+                        className="border-2 border-gray-600 hover:border-primary/50"
                       />
                       <Label htmlFor={alert} className="text-sm">
                         {alert}
@@ -509,6 +530,7 @@ export default function HealthMonitoringForm({
                         onCheckedChange={(checked) =>
                           handleDeviceChange(device, checked as boolean)
                         }
+                        className="border-2 border-gray-600 hover:border-primary/50"
                       />
                       <Label htmlFor={device} className="text-sm">
                         {device}
@@ -531,6 +553,7 @@ export default function HealthMonitoringForm({
                         emergencyContact: e.target.value,
                       }))
                     }
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -545,15 +568,16 @@ export default function HealthMonitoringForm({
                         doctorInfo: e.target.value,
                       }))
                     }
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
               </div>
 
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 mb-2">
+              <div className="bg-cyan-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-[hsl(201,96%,32%)] mb-2">
                   Monitoring Features
                 </h4>
-                <p className="text-sm text-green-800">
+                <p className="text-sm text-cyan-800">
                   Your AI health monitoring will track trends, detect anomalies,
                   provide personalized insights, and alert you and your
                   healthcare providers when intervention may be needed.
@@ -563,11 +587,16 @@ export default function HealthMonitoringForm({
               <div className="flex gap-4 pt-6">
                 <Button
                   type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="flex-1 bg-[hsl(201,96%,32%)] hover:bg-cyan-700 hover:text-black"
                 >
                   Start Health Monitoring
                 </Button>
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="border-2 border-gray-600 hover:border-primary/50"
+                >
                   Cancel
                 </Button>
               </div>

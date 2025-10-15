@@ -99,7 +99,7 @@ export default function ReportAnalysisForm({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <Button variant="ghost" onClick={onClose} className="mb-4">
@@ -110,8 +110,8 @@ export default function ReportAnalysisForm({
 
         <Card className="shadow-lg">
           <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <BarChart3 className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <BarChart3 className="w-8 h-8 text-[hsl(201,96%,32%)]" />
             </div>
             <CardTitle className="text-2xl">Report Analysis</CardTitle>
             <CardDescription>
@@ -130,6 +130,7 @@ export default function ReportAnalysisForm({
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
                     }
                     required
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -142,6 +143,7 @@ export default function ReportAnalysisForm({
                       setFormData((prev) => ({ ...prev, age: e.target.value }))
                     }
                     required
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
               </div>
@@ -153,7 +155,7 @@ export default function ReportAnalysisForm({
                     setFormData((prev) => ({ ...prev, gender: value }))
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-2 border-gray-600 hover:border-primary/50">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
@@ -175,7 +177,7 @@ export default function ReportAnalysisForm({
                       setFormData((prev) => ({ ...prev, reportType: value }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-2 border-gray-600 hover:border-primary/50">
                       <SelectValue placeholder="Select report type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -202,14 +204,15 @@ export default function ReportAnalysisForm({
                         testDate: e.target.value,
                       }))
                     }
+                    className="border-2 border-gray-600 hover:border-primary/50"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="file-upload">Upload Medical Reports *</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center  hover:border-primary/50">
+                  <Upload className="w-12 h-12 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">
                     Drag and drop your files here, or click to browse
                   </p>
@@ -271,6 +274,7 @@ export default function ReportAnalysisForm({
                     }))
                   }
                   rows={3}
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 />
               </div>
 
@@ -287,6 +291,7 @@ export default function ReportAnalysisForm({
                     }))
                   }
                   rows={3}
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 />
               </div>
 
@@ -303,6 +308,7 @@ export default function ReportAnalysisForm({
                     }))
                   }
                   rows={3}
+                  className="border-2 border-gray-600 hover:border-primary/50"
                 />
               </div>
 
@@ -320,11 +326,16 @@ export default function ReportAnalysisForm({
               <div className="flex gap-4 pt-6">
                 <Button
                   type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="flex-1 bg-[hsl(201,96%,32%)] hover:bg-cyan-700 hover:text-black"
                 >
                   Analyze Reports
                 </Button>
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="border-2 border-gray-600 hover:border-primary/50"
+                >
                   Cancel
                 </Button>
               </div>
