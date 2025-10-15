@@ -115,44 +115,38 @@ export function GeneralSettings() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className=" bg-green-50 border-green-200">
         <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
+          <CardTitle className="text-green-800 text-xl">
+            Profile Information
+          </CardTitle>
           <CardDescription>
             Update your personal and professional details
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <p className="text-gray-700 leading-relaxed text-lg">
-                {formData?.profile?.name || "Not Provided"}
-              </p>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <strong>First Name:</strong>{" "}
+              {formData?.profile?.name || "Not Provided"}
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <p className="text-gray-700 leading-relaxed text-lg">
+            <div>
+              <strong>Email:</strong>{" "}
               {formData?.profile?.email || "Not Provided"}
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <p className="text-gray-700 leading-relaxed text-lg">
+            </div>
+            <div>
+              <strong>Phone Number:</strong>{" "}
               {formData?.profile?.contact || "Not Provided"}
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="bio">Professional Bio</Label>
-            <p className="text-gray-700 leading-relaxed text-lg">
-              {formData.profile.about || "Not Provided"}
-            </p>
+            </div>
+            <div>
+              <strong>Professional Bio:</strong>{" "}
+              {formData?.profile?.about || "Not Provided"}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border border-gray-400">
         <CardHeader>
           <CardTitle>System Preferences</CardTitle>
           <CardDescription>

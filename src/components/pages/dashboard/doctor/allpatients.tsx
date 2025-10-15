@@ -1113,7 +1113,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         </header>
 
         {/* Tabs */}
-        <div className="grid grid-cols-4 md:gap-10 px-6 py-3 border-b border-gray-100 bg-white">
+        <div className="grid grid-cols-4 md:gap-10 px-6 py-3 border-b border-gray-400 bg-white">
           <button
             className={`pb-2 border-b-4 transition-colors font-semibold ${
               activeTab === "overview"
@@ -1164,8 +1164,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "overview" && (
                 <div className="py-6">
                   {/* Personal Information */}
-                  <div className="mb-6">
-                    <Card>
+                  <div className="mb-6 px-1">
+                    <Card className="border border-gray-400">
                       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200/60">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <User className="h-5 w-5 text-blue-600" />
@@ -1249,8 +1249,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </div>
 
                   {/* Medical Summary and Active Conditions */}
-                  <div className="mb-6">
-                    <Card>
+                  <div className="mb-6 px-1">
+                    <Card className="border border-gray-400">
                       <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-200/60">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <Activity className="h-5 w-5 text-purple-600" />
@@ -1294,7 +1294,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </div>
 
                   {/* Upcoming Appointments */}
-                  <Card className="mb-6">
+                  <Card className="mb-6 mx-1 border-gray-400">
                     <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-yellow-600" />
@@ -1376,7 +1376,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </Card>
 
                   {/* Recent Activity */}
-                  <Card>
+                  <Card className="mx-1 border border-gray-400">
                     <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Clock className="h-5 w-5 text-green-600" />
@@ -1426,8 +1426,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               )}
 
               {activeTab === "history" && (
-                <div className="space-y-6">
-                  <Card>
+                <div className="space-y-6 my-4 px-1">
+                  <Card className="border border-gray-400">
                     <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900">
                         Medical History - All Conditions (Severity: High to Low)
@@ -1439,7 +1439,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                           (disease, index) => (
                             <div
                               key={index}
-                              className="border rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50"
+                              className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50"
                             >
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-3">
@@ -1511,8 +1511,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               )}
 
               {activeTab === "appointments" && (
-                <div className="space-y-6">
-                  <Card>
+                <div className="space-y-6 my-2 px-1">
+                  <Card className="border border-gray-400">
                     <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-blue-600" />
@@ -1526,7 +1526,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             (appointment, index) => (
                               <div
                                 key={index}
-                                className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-cyan-50"
+                                className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-blue-50 to-cyan-50"
                               >
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center gap-3">
@@ -1591,8 +1591,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               )}
 
               {activeTab === "documents" && (
-                <div className="space-y-6">
-                  <Card>
+                <div className="space-y-6 my-2 px-1">
+                  <Card className="border border-gray-400">
                     <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-200/60">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -1607,7 +1607,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                     </CardHeader>
                     <CardContent>
                       {/* Document Filters */}
-                      <div className="flex items-center gap-4 mb-6 p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border border-gray-200">
+                      <div className="flex border border-gray-400 items-center gap-4 mb-1 p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl">
                         <div className="flex items-center gap-3 flex-wrap">
                           <span className="text-sm font-semibold text-gray-700">
                             Filter by type:
@@ -1649,13 +1649,60 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                         </div>
                       </div>
 
+                      {/* Document Statistics */}
+                      <div className="mt-2 mb-6 p-2 bg-gradient-to-r from-gray-100 via-slate-100 to-gray-100 rounded-xl border border-gray-400 shadow-sm">
+                        <h4 className="font-bold mb-1 text-gray-900 text-lg">
+                          Document Summary
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-blue-600 ">
+                              {selectedPatient.documents?.filter(
+                                (d) => d.type === "Prescription"
+                              ).length || 0}
+                            </p>
+                            <p className="text-gray-600 font-medium">
+                              Prescriptions
+                            </p>
+                          </div>
+                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-green-600 ">
+                              {selectedPatient.documents?.filter(
+                                (d) => d.type === "Lab Report"
+                              ).length || 0}
+                            </p>
+                            <p className="text-gray-600 font-medium">
+                              Lab Reports
+                            </p>
+                          </div>
+                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-purple-600 ">
+                              {selectedPatient.documents?.filter(
+                                (d) => d.type === "Imaging Report"
+                              ).length || 0}
+                            </p>
+                            <p className="text-gray-600 font-medium">
+                              Imaging Reports
+                            </p>
+                          </div>
+                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-gray-600 ">
+                              {selectedPatient.documents?.length || 0}
+                            </p>
+                            <p className="text-gray-600 font-medium">
+                              Total Documents
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Documents List */}
                       <div className="space-y-4">
                         {selectedPatient?.previousAppointments.map(
                           (document, index) => (
                             <div
                               key={index}
-                              className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
+                              className="border border-gray-400 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-4 flex-1">
@@ -1759,7 +1806,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="text-xs bg-transparent border bg-blue-100 hover:border-primary/50"
+                                    className="text-xs bg-transparent border border-gray-400 bg-blue-100 hover:border-primary/50"
                                   >
                                     <Eye className="h-3 w-3 mr-1 text-blue-600" />
                                     View
@@ -1773,53 +1820,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             </div>
                           )
                         )}
-                      </div>
-
-                      {/* Document Statistics */}
-                      <div className="mt-8 p-6 bg-gradient-to-r from-gray-50 via-slate-50 to-gray-50 rounded-xl border-2 border-gray-200 shadow-sm">
-                        <h4 className="font-bold mb-4 text-gray-900 text-lg">
-                          Document Summary
-                        </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-                          <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-blue-600 mb-1">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Prescription"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Prescriptions
-                            </p>
-                          </div>
-                          <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-green-600 mb-1">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Lab Report"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Lab Reports
-                            </p>
-                          </div>
-                          <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-purple-600 mb-1">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Imaging Report"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Imaging Reports
-                            </p>
-                          </div>
-                          <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-gray-600 mb-1">
-                              {selectedPatient.documents?.length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Total Documents
-                            </p>
-                          </div>
-                        </div>
                       </div>
                     </CardContent>
                   </Card>

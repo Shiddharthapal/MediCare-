@@ -804,7 +804,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     showDate: boolean;
     isPrevious?: boolean;
   }) => (
-    <Card className="mb-4  border-2 border-gray-600 transition-all  hover:shadow-lg">
+    <Card className="mb-4  border border-gray-600 transition-all  hover:shadow-lg">
       <CardContent className="p-1">
         <div className="flex items-center justify-between">
           <div className="flex items-start gap-4 flex-1">
@@ -943,7 +943,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       {/* Header */}
       <header className="flex items-center  justify-between p-6   bg-white">
         <div className="flex flex-row  justify-between gap-24 md:gap-52">
-          <div className="relative border-2 border-gray-400 rounded-md transition-all hover:border-primary/50 hover:shadow-lg">
+          <div className="relative border border-gray-400 rounded-md transition-all hover:border-primary/50 hover:shadow-lg">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-500 " />
             <input
               type="text"
@@ -957,7 +957,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             <Button
               variant="outline"
               size="sm"
-              className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
+              className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
             >
               <Filter className="h-4 w-4 mr-2" />
               Filter
@@ -974,7 +974,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       <main className="flex-1 overflow-y-auto p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
+          <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1002,7 +1002,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
               </div>
             </CardContent>
           </Card> */}
-          <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
+          <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1015,7 +1015,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
+          <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1048,7 +1048,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
           {/* Today's Appointments */}
           <TabsContent value="today" className="mt-6">
-            <Card className="border-2 border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg">
+            <Card className="border border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-[hsl(273,100%,60%)]" />
@@ -1329,7 +1329,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           {/* Upcoming Appointments */}
           <TabsContent value="upcoming" className="mt-6">
             <div className="space-y-3">
-              <Card className="border-2 border-gray-400">
+              <Card className="border border-gray-400">
                 <CardHeader className="flex items-center gap-2 text-2xl pb-2">
                   <Clock className="h-6 w-6 text-blue-500" />
                   Upcoming Appointments
@@ -1419,7 +1419,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
           {/* Previous Appointments */}
           <TabsContent value="previous" className="mt-6">
-            <Card>
+            <Card className="border border-gray-400">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl">
                   <CheckCircle className="h-6 w-6 text-green-600" />

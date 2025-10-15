@@ -21,7 +21,7 @@ export default function SettingsPage({ onNavigate }: SettingPageProps) {
         </div>
 
         <Tabs defaultValue="general" className="w-full space-y-6 ">
-          <TabsList className="w-full grid grid-cols-5 gap-0 p-0 ">
+          <TabsList className="w-full grid grid-cols-5 gap-0 p-0  bg-gray-300">
             <TabsTrigger value="general" className="flex-1 mx-10">
               General
             </TabsTrigger>
