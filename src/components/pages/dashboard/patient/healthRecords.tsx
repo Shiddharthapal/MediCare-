@@ -64,33 +64,39 @@ export default function HealthRecords({
   }, [user]);
 
   //Handle submit function to submit the data of form
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
+    try {
+      const response = await fetch("/api/user/healthrecords", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ formData, id }),
+      });
 
-    const response = await fetch("/api/user/healthrecords", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ formData, id }),
-    });
+      if (!response.ok) {
+        throw new Error("Failed to save health record");
+      }
+      const result = await response.json();
+      setRecords(result?.userdetails?.healthRecords);
 
-    if (!response.ok) {
-      throw new Error("Failed to save health record");
+      // Reset form
+      setFormData({
+        weight: "",
+        bloodPressure: "",
+        heartRate: "",
+        temperature: "",
+        date: "",
+        notes: "",
+      });
+      setActiveTab("previous");
+    } catch (error) {
+      console.error("Error saving health record:", error);
+    } finally {
+      setIsLoading(false);
     }
-    const result = await response.json();
-
-    // Reset form
-    setFormData({
-      weight: "",
-      bloodPressure: "",
-      heartRate: "",
-      temperature: "",
-      date: "",
-      notes: "",
-    });
-
-    setActiveTab("previous");
   };
 
   //Handle input change
@@ -262,7 +268,7 @@ export default function HealthRecords({
                   <Textarea
                     id="notes"
                     name="notes"
-                    placeholder="Add any additional notes about your health..."
+                    placeholder="Add any additional notes about your health... e.g: Feeling sick (word<35)"
                     value={formData.notes}
                     onChange={handleInputChange}
                     rows={4}
