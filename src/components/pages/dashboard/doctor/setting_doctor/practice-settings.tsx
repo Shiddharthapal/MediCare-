@@ -32,13 +32,6 @@ interface PracticeData {
   bufferTime: string;
   allowOnlineBooking: boolean;
   sendReminders: boolean;
-  workingHours: {
-    [key: string]: {
-      enabled: boolean;
-      startTime: string;
-      endTime: string;
-    };
-  };
 }
 
 export function PracticeSettings() {
@@ -52,15 +45,6 @@ export function PracticeSettings() {
     bufferTime: "5",
     allowOnlineBooking: true,
     sendReminders: true,
-    workingHours: {
-      Monday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Tuesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Wednesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Thursday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Friday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Saturday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Sunday: { enabled: false, startTime: "09:00", endTime: "17:00" },
-    },
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -125,48 +109,6 @@ export function PracticeSettings() {
     }));
   };
 
-  const handleWorkingHourChange = (day: string, field: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      workingHours: {
-        ...prev.workingHours,
-        [day]: {
-          ...prev.workingHours[day],
-          [field]: value,
-        },
-      },
-    }));
-  };
-
-  const formatTo12Hour = (time24) => {
-    if (!time24) return "";
-
-    const [hours, minutes] = time24.split(":");
-    const hour = parseInt(hours, 10);
-    const minute = minutes || "00";
-
-    if (hour === 0) {
-      return `12:${minute} AM`;
-    } else if (hour < 12) {
-      return `${hour}:${minute} AM`;
-    } else if (hour === 12) {
-      return `12:${minute} PM`;
-    } else {
-      return `${hour - 12}:${minute} PM`;
-    }
-  };
-
-  const formatWorkingHours = (hours) => {
-    if (!hours?.enabled) {
-      return "Closed";
-    }
-
-    const startTime = formatTo12Hour(hours.startTime);
-    const endTime = formatTo12Hour(hours.endTime);
-
-    return `${startTime} - ${endTime}`;
-  };
-
   return (
     <div className="space-y-6">
       {savedData && (
@@ -192,24 +134,6 @@ export function PracticeSettings() {
               </div>
               <div>
                 <strong>Fax:</strong> {savedData.fax}
-              </div>
-            </div>
-            <div className="mt-4">
-              <strong>Working Hours:</strong>
-              <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-                {savedData.workingHours &&
-                  Object.entries(savedData.workingHours).map(([day, hours]) => (
-                    <div key={day} className="flex items-center py-1">
-                      <span className="capitalize font-medium text-gray-700 w-20">
-                        {day}:
-                      </span>
-                      <span
-                        className={`${hours?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
-                      >
-                        {formatWorkingHours(hours)}
-                      </span>
-                    </div>
-                  ))}
               </div>
             </div>
           </CardContent>
@@ -361,55 +285,6 @@ export function PracticeSettings() {
               }
             />
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Working Hours</CardTitle>
-          <CardDescription>Set your practice operating hours</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-          ].map((day) => (
-            <div key={day} className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Switch
-                  checked={formData.workingHours[day].enabled}
-                  onCheckedChange={(checked) =>
-                    handleWorkingHourChange(day, "enabled", checked)
-                  }
-                />
-                <Label className="w-20">{day}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Input
-                  type="time"
-                  value={formData.workingHours[day].startTime}
-                  onChange={(e) =>
-                    handleWorkingHourChange(day, "startTime", e.target.value)
-                  }
-                  className="w-32"
-                />
-                <span>to</span>
-                <Input
-                  type="time"
-                  value={formData.workingHours[day].endTime}
-                  onChange={(e) =>
-                    handleWorkingHourChange(day, "endTime", e.target.value)
-                  }
-                  className="w-32"
-                />
-              </div>
-            </div>
-          ))}
         </CardContent>
       </Card>
 
