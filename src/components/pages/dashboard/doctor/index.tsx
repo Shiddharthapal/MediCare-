@@ -392,9 +392,9 @@ export default function DashboardPage() {
   console.log("🧞‍♂️  id --->", id);
   // console.log("🧞‍♂️doctor --->", doctor);
   const datagender = [
-    { name: "Male", value: genderOfPatient?.Male || 10, color: "#3b82f6" },
-    { name: "Female", value: genderOfPatient?.Female || 7, color: "#ec4899" },
-    { name: "Other", value: genderOfPatient?.Other || 1, color: "#047857" },
+    { name: "Male", value: genderOfPatient?.Male || 0, color: "#3b82f6" },
+    { name: "Female", value: genderOfPatient?.Female || 0, color: "#ec4899" },
+    { name: "Other", value: genderOfPatient?.Other || 0, color: "#047857" },
   ];
 
   const dataAppointmentCount = [
@@ -744,7 +744,10 @@ export default function DashboardPage() {
                 <div className="xl:col-span-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     {stats.map((stat, index) => (
-                      <Card key={index}>
+                      <Card
+                        key={index}
+                        className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
+                      >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div>
@@ -760,7 +763,7 @@ export default function DashboardPage() {
                     ))}
                   </div>
                   <div className="pb-6">
-                    <Card>
+                    <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                       <CardContent className="p-6 text-center">
                         <Avatar className="h-20 w-20 mx-auto mb-4">
                           <AvatarImage src="/placeholder.svg?height=80&width=80" />
@@ -804,7 +807,7 @@ export default function DashboardPage() {
 
                   {/* Charts */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <Card>
+                    <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                       <CardHeader>
                         <div className="flex items-center justify-between gap-36">
                           <CardTitle>Appointments</CardTitle>
@@ -884,7 +887,7 @@ export default function DashboardPage() {
                       </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                       <CardHeader>
                         <CardTitle>Gender Distribution</CardTitle>
                       </CardHeader>
@@ -950,7 +953,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Today's Appointments */}
-                  <Card>
+                  <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                     <CardHeader>
                       <CardTitle>{"Today's Appointments"}</CardTitle>
                     </CardHeader>

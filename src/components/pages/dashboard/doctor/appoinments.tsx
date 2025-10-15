@@ -804,7 +804,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     showDate: boolean;
     isPrevious?: boolean;
   }) => (
-    <Card className="mb-4 hover:shadow-md transition-shadow">
+    <Card className="mb-4  border-2 border-gray-600 transition-all  hover:shadow-lg">
       <CardContent className="p-1">
         <div className="flex items-center justify-between">
           <div className="flex items-start gap-4 flex-1">
@@ -833,16 +833,16 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                 <div className="flex flex-col  gap-1">
                   <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="h-4 w-4 text-[hsl(273,100%,60%)]" />
                     {showDate && <span>{appointment?.appointmentDate} </span>}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-4 w-4 text-red-500" />
                     <span>{appointment.appointmentTime} • 30 Minutes</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
+                  <MapPin className="h-4 w-4 text-orange-500" />
                   <span>
                     {appointment.consultationType === "video" || "phone"
                       ? "In home (online)"
@@ -850,11 +850,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Phone className="h-4 w-4" />
+                  <Phone className="h-4 w-4 text-cyan-600" />
                   <span>{appointment.patientPhone}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Mail className="h-4 w-4" />
+                  <Mail className="h-4 w-4 text-blue-500" />
                   <span>{appointment.patientEmail}</span>
                 </div>
               </div>
@@ -886,21 +886,21 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-xs bg-transparent"
+                  className="text-xs  border-2 border-gray-400 transition-all hover:border-primary/50 "
                 >
                   Edit
                 </Button>
                 <div className="flex gap-1">
                   <Button
                     size="sm"
-                    className="text-xs bg-blue-500 hover:bg-blue-600 text-white flex-1"
+                    className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
                   >
                     <Video className="h-3 w-3 mr-1" />
                     Start
                   </Button>
                   <Button
                     size="sm"
-                    className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
+                    className="text-xs bg-green-500 hover:bg-green-600 hover:text-black text-white flex-1"
                     onClick={() => handleCreatePrescription(appointment)}
                   >
                     <FileEdit className="h-3 w-3 mr-1" />
@@ -911,7 +911,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-xs bg-transparent"
+                    className="text-xs border-2 border-gray-400 transition-all hover:border-0 hover:bg-red-200 hover:shadow-lg"
                     onClick={() => handleCancelAppointment(appointment)}
                   >
                     Cancel
@@ -939,26 +939,30 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   );
 
   return (
-    <div className="flex-1 flex flex-col items-center mx-28 overflow-hidden min-h-screen bg-gray-50">
+    <div className="flex-1 flex flex-col items-center mx-2 overflow-hidden min-h-screen bg-white">
       {/* Header */}
-      <header className="flex items-center  justify-between p-6 border-b border-gray-100 bg-white">
+      <header className="flex items-center  justify-between p-6   bg-white">
         <div className="flex flex-row  justify-between gap-24 md:gap-52">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="relative border-2 border-gray-400 rounded-md transition-all hover:border-primary/50 hover:shadow-lg">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-500 " />
             <input
               type="text"
               placeholder="Search appointments..."
-              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="flex gap-6">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
+            >
               <Filter className="h-4 w-4 mr-2" />
               Filter
             </Button>
-            <Button size="sm" className="">
+            <Button size="sm" className=" hover:bg-cyan-700 hover:text-black">
               <Plus className="h-4 w-4 mr-2" />
               New Appointment
             </Button>
@@ -970,7 +974,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       <main className="flex-1 overflow-y-auto p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card>
+          <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -998,7 +1002,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
               </div>
             </CardContent>
           </Card> */}
-          <Card>
+          <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1007,11 +1011,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                     {Object.entries(futureGrouped).length}
                   </p>
                 </div>
-                <Clock className="h-8 w-8 text-green-500" />
+                <Clock className="h-8 w-8 text-[hsl(273,100%,60%)]" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1020,7 +1024,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                     {Object.entries(pastGrouped).length}
                   </p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-gray-500" />
+                <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
@@ -1028,7 +1032,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
         {/* Appointments Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-300">
             <TabsTrigger value="today">Today</TabsTrigger>
             {/* <TabsTrigger value="requests">
               Requests
@@ -1044,11 +1048,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
           {/* Today's Appointments */}
           <TabsContent value="today" className="mt-6">
-            <Card>
+            <Card className="border-2 border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  {`Today's Appointments - ${new Date()}`}
+                  <Calendar className="h-5 w-5 text-[hsl(273,100%,60%)]" />
+                  {`Today's Appointments - ${new Date().toISOString().split("T")}`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1325,21 +1329,18 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           {/* Upcoming Appointments */}
           <TabsContent value="upcoming" className="mt-6">
             <div className="space-y-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5" />
-                    Previous Appointments
-                  </CardTitle>
+              <Card className="border-2 border-gray-400">
+                <CardHeader className="flex items-center gap-2 text-2xl pb-2">
+                  <Clock className="h-6 w-6 text-blue-500" />
+                  Upcoming Appointments
                 </CardHeader>
-              </Card>
-              {Object.keys(futureGrouped).length > 0 ? (
-                Object.entries(futureGrouped).map(
-                  ([date, appointments]: [string, AppointmentData[]]) => (
-                    <Card key={date}>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <div className="flex items-center gap-2 pb-2 border-b">
+
+                <CardContent>
+                  {Object.keys(futureGrouped).length > 0 ? (
+                    Object.entries(futureGrouped).map(
+                      ([date, appointments]: [string, AppointmentData[]]) => (
+                        <div key={date} className="mb-6">
+                          <div className="flex items-center gap-2 pb-2 border-b mb-4">
                             <h3 className="text-lg font-medium text-gray-800">
                               {formatDate(date)}
                             </h3>
@@ -1350,61 +1351,69 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                                 year: "numeric",
                               })}
                             </span>
-                            <Badge variant="outline" className="ml-2">
+                            <Badge
+                              variant="outline"
+                              className="ml-2 bg-[hsl(273,100%,60%)] text-white"
+                            >
                               {appointments.length} appointment
                               {appointments.length !== 1 ? "s" : ""}
                             </Badge>
                           </div>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {appointments && appointments.length > 0 ? (
-                          appointments.map((appointment: AppointmentData) => {
-                            // Add individual appointment validation
-                            if (!appointment || !appointment._id) {
-                              console.warn(
-                                "Invalid appointment data:",
-                                appointment
-                              );
-                              return null;
-                            }
-                            if (appointment.status !== "cancelled") {
-                              return (
-                                <AppointmentCard
-                                  status="pending"
-                                  key={appointment._id}
-                                  appointment={appointment}
-                                  showDate={true}
-                                />
-                              );
-                            }
-                          })
-                        ) : (
-                          <div className="text-gray-500 text-center py-4">
-                            No appointments found for this date
-                          </div>
-                        )}
+
+                          {appointments && appointments.length > 0 ? (
+                            <div className="space-y-3">
+                              {appointments.map(
+                                (appointment: AppointmentData) => {
+                                  // Add individual appointment validation
+                                  if (!appointment || !appointment._id) {
+                                    console.warn(
+                                      "Invalid appointment data:",
+                                      appointment
+                                    );
+                                    return null;
+                                  }
+
+                                  if (appointment.status !== "cancelled") {
+                                    return (
+                                      <AppointmentCard
+                                        status="pending"
+                                        key={appointment._id}
+                                        appointment={appointment}
+                                        showDate={true}
+                                      />
+                                    );
+                                  }
+                                  return null;
+                                }
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-gray-500 text-center py-4">
+                              No appointments found for this date
+                            </div>
+                          )}
+                        </div>
+                      )
+                    )
+                  ) : (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          No upcoming appointments
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          You don't have any appointments scheduled for the next
+                          7 days.
+                        </p>
+                        {/* <Button onClick={handleBookNewAppointment}>
+            Book New Appointment
+          </Button> */}
                       </CardContent>
                     </Card>
-                  )
-                )
-              ) : (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      No upcoming appointments
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      You don't have any appointments scheduled for the next 7
-                      days.
-                    </p>
-                    {/* <Button onClick={handleBookNewAppointment}>
-                  Book New Appointment
-                </Button> */}
-                  </CardContent>
-                </Card>
-              )}
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -1412,8 +1421,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           <TabsContent value="previous" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
                   Previous Appointments
                 </CardTitle>
               </CardHeader>

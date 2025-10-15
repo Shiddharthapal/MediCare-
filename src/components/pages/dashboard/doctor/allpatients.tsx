@@ -1039,14 +1039,14 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-white">
       {/* Left Sidebar - Fixed */}
-      <aside className="w-min-44 border-r border-gray-100 bg-white overflow-y-auto">
+      <aside className="w-min-44 border-r  bg-white overflow-y-auto">
         {/* Patient List */}
         {showPatientList && (
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium text-gray-900">
+              <h3 className="font-medium text-blue-500">
                 Patient Lists ({Object.entries(patientData).length})
               </h3>
               <Button variant="ghost" size="icon">
@@ -1059,8 +1059,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   key={id}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                     selectedPatient?.id === id
-                      ? "bg-blue-50 border border-blue-200"
-                      : "hover:bg-gray-50"
+                      ? "bg-blue-100 border border-blue-300"
+                      : "hover:bg-gray-100"
                   }`}
                   onClick={() => setSelectedPatient(patient)}
                 >
@@ -1091,7 +1091,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         {/* Header */}
         <header className="flex items-center justify-between pt-6 pl-6 pr-6 pb-3 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-4">
-            <Avatar className="w-12 h-12">
+            <Avatar className="w-12 h-12 ring-4 ring-blue-200">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>
                 {getPatientInitials(selectedPatient?.patientInfo?.patientName)}
@@ -1110,20 +1110,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="text-gray-500">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-gray-500">
-              <Bell className="h-5 w-5" />
-            </Button>
-          </div>
         </header>
 
         {/* Tabs */}
         <div className="grid grid-cols-4 md:gap-10 px-6 py-3 border-b border-gray-100 bg-white">
           <button
-            className={`pb-2 border-b-2 transition-colors ${
+            className={`pb-2 border-b-4 transition-colors font-semibold ${
               activeTab === "overview"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -1133,7 +1125,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             Overview
           </button>
           <button
-            className={`pb-2 border-b-2 transition-colors ${
+            className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "history"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -1143,7 +1135,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             Medical History
           </button>
           <button
-            className={`pb-2 border-b-2 transition-colors ${
+            className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "appointments"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -1153,7 +1145,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             Appointments History
           </button>
           <button
-            className={`pb-2 border-b-2 transition-colors ${
+            className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "documents"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -1170,12 +1162,13 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             {/* Scrollable Content */}
             <main className="flex-1 w-full overflow-y-auto ">
               {activeTab === "overview" && (
-                <div className="p-6">
+                <div className="py-6">
                   {/* Personal Information */}
                   <div className="mb-6">
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">
+                      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200/60">
+                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                          <User className="h-5 w-5 text-blue-600" />
                           Personal Information
                         </CardTitle>
                       </CardHeader>
@@ -1258,8 +1251,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   {/* Medical Summary and Active Conditions */}
                   <div className="mb-6">
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">
+                      <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-200/60">
+                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                          <Activity className="h-5 w-5 text-purple-600" />
                           Previous Conditions
                         </CardTitle>
                       </CardHeader>
@@ -1269,7 +1263,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             (values, index) => (
                               <div
                                 key={index}
-                                className="flex items-center justify-between p-4 bg-gray-100 rounded-lg"
+                                className="flex items-center justify-between p-4 
+                                bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg"
                               >
                                 <div className="flex items-center gap-3">
                                   {getStatusIcon(values?.reason)}
@@ -1300,9 +1295,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                   {/* Upcoming Appointments */}
                   <Card className="mb-6">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Calendar className="h-5 w-5" />
+                    <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50 border-b border-gray-200/60">
+                      <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-yellow-600" />
                         Upcoming Appointments
                       </CardTitle>
                     </CardHeader>
@@ -1382,8 +1377,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                   {/* Recent Activity */}
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">
+                    <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200/60">
+                      <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-green-600" />
                         Last Appointment
                       </CardTitle>
                     </CardHeader>
@@ -1432,8 +1428,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "history" && (
                 <div className="space-y-6">
                   <Card>
-                    <CardHeader>
-                      <CardTitle>
+                    <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200/60">
+                      <CardTitle className="text-xl font-bold text-gray-900">
                         Medical History - All Conditions (Severity: High to Low)
                       </CardTitle>
                     </CardHeader>
@@ -1441,7 +1437,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                       <div className="space-y-4">
                         {selectedPatient?.reasonForVisit.map(
                           (disease, index) => (
-                            <div key={index} className="border rounded-lg p-4">
+                            <div
+                              key={index}
+                              className="border rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50"
+                            >
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-3">
                                   {getStatusIcon(disease.reason)}
@@ -1514,8 +1513,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "appointments" && (
                 <div className="space-y-6">
                   <Card>
-                    <CardHeader>
-                      <CardTitle>Previous Appointments History</CardTitle>
+                    <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-gray-200/60">
+                      <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-blue-600" />
+                        Previous Appointments History
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -1524,7 +1526,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             (appointment, index) => (
                               <div
                                 key={index}
-                                className="border rounded-lg p-4"
+                                className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-cyan-50"
                               >
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center gap-3">
@@ -1591,44 +1593,57 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "documents" && (
                 <div className="space-y-6">
                   <Card>
-                    <CardHeader>
+                    <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-200/60">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5" />
+                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-violet-600" />
                           Patient Documents
                         </CardTitle>
-                        <div className="">
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download All
-                          </Button>
-                        </div>
+                        <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
+                          <Download className="h-4 w-4 mr-2" />
+                          Download All
+                        </Button>
                       </div>
                     </CardHeader>
                     <CardContent>
                       {/* Document Filters */}
-                      <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">
+                      <div className="flex items-center gap-4 mb-6 p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border border-gray-200">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-sm font-semibold text-gray-700">
                             Filter by type:
                           </span>
                           <Button
-                            variant="outline"
                             size="sm"
-                            className="text-xs bg-transparent"
+                            className="text-xs bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
                           >
                             All
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs hover:bg-blue-50"
+                          >
                             Prescriptions
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs hover:bg-blue-50"
+                          >
                             Lab Reports
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs hover:bg-blue-50"
+                          >
                             Imaging
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs hover:bg-blue-50"
+                          >
                             Consultation
                           </Button>
                         </div>
@@ -1640,12 +1655,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                           (document, index) => (
                             <div
                               key={index}
-                              className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                              className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-4 flex-1">
                                   {/* Document Icon */}
-                                  <div className="p-3 rounded-lg bg-blue-50">
+                                  <div className="p-3 rounded-lg bg-blue-100">
                                     {document.prescription && (
                                       <Pill className="h-6 w-6 text-blue-600" />
                                     )}
@@ -1744,16 +1759,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="text-xs bg-transparent"
+                                    className="text-xs bg-transparent border bg-blue-100 hover:border-primary/50"
                                   >
-                                    <Eye className="h-3 w-3 mr-1" />
+                                    <Eye className="h-3 w-3 mr-1 text-blue-600" />
                                     View
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-xs bg-transparent"
-                                  >
+                                  <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
                                     <Download className="h-3 w-3 mr-1" />
                                     Download
                                   </Button>
@@ -1765,38 +1776,48 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                       </div>
 
                       {/* Document Statistics */}
-                      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                        <h4 className="font-medium mb-3">Document Summary</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div className="text-center">
-                            <p className="font-semibold text-lg text-blue-600">
+                      <div className="mt-8 p-6 bg-gradient-to-r from-gray-50 via-slate-50 to-gray-50 rounded-xl border-2 border-gray-200 shadow-sm">
+                        <h4 className="font-bold mb-4 text-gray-900 text-lg">
+                          Document Summary
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                          <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-blue-600 mb-1">
                               {selectedPatient.documents?.filter(
                                 (d) => d.type === "Prescription"
                               ).length || 0}
                             </p>
-                            <p className="text-gray-600">Prescriptions</p>
+                            <p className="text-gray-600 font-medium">
+                              Prescriptions
+                            </p>
                           </div>
-                          <div className="text-center">
-                            <p className="font-semibold text-lg text-green-600">
+                          <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-green-600 mb-1">
                               {selectedPatient.documents?.filter(
                                 (d) => d.type === "Lab Report"
                               ).length || 0}
                             </p>
-                            <p className="text-gray-600">Lab Reports</p>
+                            <p className="text-gray-600 font-medium">
+                              Lab Reports
+                            </p>
                           </div>
-                          <div className="text-center">
-                            <p className="font-semibold text-lg text-purple-600">
+                          <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-purple-600 mb-1">
                               {selectedPatient.documents?.filter(
                                 (d) => d.type === "Imaging Report"
                               ).length || 0}
                             </p>
-                            <p className="text-gray-600">Imaging Reports</p>
+                            <p className="text-gray-600 font-medium">
+                              Imaging Reports
+                            </p>
                           </div>
-                          <div className="text-center">
-                            <p className="font-semibold text-lg text-gray-600">
+                          <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-gray-600 mb-1">
                               {selectedPatient.documents?.length || 0}
                             </p>
-                            <p className="text-gray-600">Total Documents</p>
+                            <p className="text-gray-600 font-medium">
+                              Total Documents
+                            </p>
                           </div>
                         </div>
                       </div>
