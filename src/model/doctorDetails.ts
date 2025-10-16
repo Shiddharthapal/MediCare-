@@ -313,11 +313,10 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
   specialist: {
     type: String,
-    require: true,
   },
   specializations: {
     type: [String],
-    require: true,
+
     validate: {
       validator: function (arr) {
         return arr.length > 0;
@@ -327,30 +326,25 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
   hospital: {
     type: String,
-    require: true,
   },
   fees: {
     type: Number,
-    require: true,
   },
   rating: {
     type: Number,
   },
   experience: {
     type: String,
-    require: true,
   },
   education: {
     type: String,
-    require: true,
   },
   degree: {
     type: String,
-    require: true,
   },
   language: {
     type: [String],
-    require: true,
+
     validate: {
       validator: function (arr) {
         return arr.length > 0;
@@ -364,6 +358,7 @@ const doctorDetailsSchema = new mongoose.Schema({
 
   payment: {
     type: PaymentMethods,
+    default: () => ({}),
   },
 
   availableSlots: {
@@ -376,7 +371,6 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
   consultationModes: {
     type: [String],
-    require: true,
     validate: {
       validator: function (arr) {
         return arr.length > 0;

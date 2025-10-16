@@ -116,7 +116,7 @@ export interface DoctorDetails {
   payment?: PaymentMethods;
   availableSlots: appointmentSlot;
   appointments: AppointmentData[];
-  practiceSettingData: PracticeSettingData[];
+  practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
   createdAt: Date;
 }
