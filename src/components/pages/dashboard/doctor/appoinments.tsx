@@ -580,6 +580,7 @@ interface PatientsPageProps {
 export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
+  const [edit, setEdit] = useState(false);
   const [appointmentData, setAppointmentData] =
     useState<DoctorDetails>(mockDoctorDetails);
   const [showPrescription, setShowPrescription] = useState(false);
@@ -714,6 +715,13 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const handleCreatePrescription = (patient: any) => {
     setSelectedPatient(patient);
     setShowPrescription(true);
+    setEdit(true);
+  };
+
+  const handleShowPrescription = (patient: any) => {
+    setSelectedPatient(patient);
+    setShowPrescription(true);
+    setEdit(false);
   };
 
   const handleClosePrescription = () => {
@@ -788,6 +796,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           doctorGender: appointmentData.gender,
           doctorId: id,
         }}
+        edit={edit}
         onClose={handleClosePrescription}
       />
     );
@@ -808,7 +817,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       <CardContent className="p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-start gap-4 flex-1">
-            <Avatar className="w-12 h-12">
+            <Avatar className="w-12 h-12 ring-1">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>
                 {getPatientInitials(appointment?.patientName)}
@@ -924,7 +933,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   <Button
                     size="sm"
                     className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
-                    onClick={() => handleCreatePrescription(appointment)}
+                    onClick={() => handleShowPrescription(appointment)}
                   >
                     <Eye className="h-3 w-3 mr-1" />
                     See Prescription

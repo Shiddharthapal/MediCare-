@@ -49,6 +49,7 @@ interface PrescriptionProps {
   onClose: () => void;
   savedPrescription?: any;
   isEditMode?: boolean;
+  edit?: boolean;
   onSave?: (prescriptionData: any) => void;
 }
 interface VitalSign {
@@ -174,6 +175,7 @@ export default function Prescription({
   onClose,
   savedPrescription,
   isEditMode = false,
+  edit,
   onSave,
 }: PrescriptionProps) {
   const [prescriptionForm, setPrescriptionForm] =
@@ -248,38 +250,11 @@ export default function Prescription({
       setPrescriptiondata(data);
       setIsSaved(true);
       setViewMode(true);
-      console.log("prescription data=>", prescriptiondata);
       <PrescriptionView />;
     };
     fetchPrescription();
-  }, [savedPrescription]);
+  }, [edit === false]);
 
-  // medications: [
-  //   {
-  //     id: 1,
-  //     name: "",
-  //     dosage: "",
-  //     frequency: "",
-  //     duration: "",
-  //     instructions: "",
-  //     quantity: "",
-  //   },
-  // ],
-  // diagnosis: "",
-  // symptoms: "",
-  // testsAndReports: "", // Add this new field
-  // vitalSigns: {
-  //   bloodPressure: "",
-  //   heartRate: "",
-  //   temperature: "",
-  //   weight: "",
-  //   height: "",
-  // },
-  // allergies: "",
-  // notes: "",
-  // followUpDate: "",
-  // labTests: [],
-  // restrictions: "",
   const handleSavePrescription = async () => {
     try {
       const prescriptionData = {
@@ -334,10 +309,22 @@ export default function Prescription({
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Dashboard
         </Button>
-        <Button onClick={handlePrint} className="w-full sm:w-auto">
-          <Printer className="h-4 w-4 mr-2" />
-          Print Prescription
-        </Button>
+        <div className="flex flex-row gap-2">
+          {edit && (
+            <Button
+              variant="outline"
+              onClick={handleEditPrescription}
+              className="border border-gray-400"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Prescription
+            </Button>
+          )}
+          <Button onClick={handlePrint} className="w-full sm:w-auto">
+            <Printer className="h-4 w-4 mr-2" />
+            Print Prescription
+          </Button>
+        </div>
       </div>
 
       {/* Prescription Content - Optimized for single page */}
