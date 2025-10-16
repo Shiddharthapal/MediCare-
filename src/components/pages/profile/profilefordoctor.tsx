@@ -50,6 +50,7 @@ import {
   updateProfileSuccess,
   updateProfileFailure,
 } from "@/redux/slices/profileSlice";
+import { useNavigate } from "react-router-dom";
 
 interface Doctor {
   name: string;
@@ -118,10 +119,8 @@ export default function DoctorProfilePage() {
   const [doctor, setDoctor] = useState<Doctor>(mockDoctor);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDoctor, setEditedDoctor] = useState<Doctor>(mockDoctor);
-  const [newSlot, setNewSlot] = useState("");
   const [language, setLanguage] = useState("");
   const [specializations, setSpecializations] = useState("");
-  const [savedData, setSavedData] = useState<PracticeData | null>(null);
   const [hasProfile, setHasProfile] = useState(false);
   const [formData, setFormData] = useState<PracticeData>({
     appointmentSlot: {
@@ -138,6 +137,7 @@ export default function DoctorProfilePage() {
   const token = useAppSelector((state) => state.auth.token);
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
+  const navigate = useNavigate();
 
   useEffect(() => {
     // const profileExists =
@@ -313,6 +313,10 @@ export default function DoctorProfilePage() {
     }
   };
 
+  const handleClose = () => {
+    navigate("/");
+  };
+
   const handleRemoveSpecializations = (index: number) => {
     setEditedDoctor({
       ...editedDoctor,
@@ -336,17 +340,20 @@ export default function DoctorProfilePage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white pt-4 pb-2">
+          <CardHeader className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white pt-4 pb-2  relative">
+            <Button
+              onClick={handleClose}
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-110"
+            >
+              <X className="h-5 w-5" />
+            </Button>
             <div className="flex items-center space-x-6">
               <Avatar className="h-24 w-24 border-4 border-white">
-                <AvatarImage src="/image (4).jpg" alt="DR" />
-                <AvatarFallback className="text-2xl bg-blue-500">
-                  {currentDoctor?.name
-                    ? currentDoctor.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                    : "DR"}
+                <AvatarImage src="/image(4).jpg" alt="DR" />
+                <AvatarFallback className="text-2xl font-semibold bg-gradient-to-br from-blue-500 to-indigo-600">
+                  DR
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
