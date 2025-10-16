@@ -3,6 +3,11 @@ import Doctor from "@/model/doctor";
 import DoctorDetails from "@/model/doctorDetails";
 import type { APIRoute } from "astro";
 
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+}
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
     "Content-Type": "application/json",
@@ -26,7 +31,6 @@ export const POST: APIRoute = async ({ request }) => {
       degree,
       language,
       about,
-      availableSlots,
       consultationModes,
     } = editedDoctor;
     if (
@@ -42,7 +46,6 @@ export const POST: APIRoute = async ({ request }) => {
       !degree ||
       !language ||
       !about ||
-      !availableSlots ||
       !consultationModes
     ) {
       return new Response(
@@ -64,9 +67,6 @@ export const POST: APIRoute = async ({ request }) => {
             degree: !degree ? "Degree is required" : null,
             language: !language ? "Language is required" : null,
             about: !about ? "About is required" : null,
-            availableSlots: !availableSlots
-              ? "AvailableSlots is required"
-              : null,
             consultationModes: !consultationModes
               ? "Consultation Modes is required"
               : null,
@@ -105,22 +105,16 @@ export const POST: APIRoute = async ({ request }) => {
 
     await connect();
 
-    let parsedSlots;
-    if (formData) {
-      try {
-        if (formData.availableSlots) {
-          parsedSlots = JSON.parse(formData.availableSlots);
-          // If it's an array, take the first element
-          parsedSlots = Array.isArray(parsedSlots)
-            ? parsedSlots[0]
-            : parsedSlots;
-        } else {
-          parsedSlots = availableSlots; // Use from editedDoctor instead
+    if (!formData || !formData.appointmentSlot) {
+      return new Response(
+        JSON.stringify({
+          message: "Appointment slots data required",
+        }),
+        {
+          status: 404,
+          headers,
         }
-      } catch (parseError) {
-        console.error("Error parsing availableSlots:", parseError);
-        parsedSlots = availableSlots; // Fallback to editedDoctor
-      }
+      );
     }
 
     const doctordata = await Doctor.findOne({ _id: id });
@@ -135,6 +129,32 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
+
+    // Process availableSlots
+    const availableSlotsMap = new Map<string, AppointmentSlot>();
+
+    if (formData.appointmentSlot) {
+      // Handle both object and Map input
+      const slotsData =
+        formData.appointmentSlot instanceof Map
+          ? Object.fromEntries(formData.appointmentSlot)
+          : formData.appointmentSlot;
+
+      // Validate and add each day's slot
+      for (const [dayName, dayData] of Object.entries(slotsData)) {
+        const slot = dayData as AppointmentSlot;
+
+        // Validate time format
+
+        availableSlotsMap.set(dayName, {
+          enabled: slot.enabled,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+        });
+      }
+    }
+
+    console.log("availableSlotsMap", availableSlotsMap);
 
     let doctordetails = await DoctorDetails.findOne({
       userId: id,
@@ -153,17 +173,11 @@ export const POST: APIRoute = async ({ request }) => {
         fees,
         experience,
         education,
-        availableSlots: parsedSlots,
+        availableSlots:
+          availableSlotsMap.size > 0 ? availableSlotsMap : undefined,
         degree,
         language,
         about,
-        payment: {
-          acceptCreditCards: false,
-          acceptDebitCards: false,
-          acceptBkash: false,
-          acceptNagad: false,
-          acceptRocket: false,
-        },
         consultationModes,
       });
 
@@ -185,10 +199,12 @@ export const POST: APIRoute = async ({ request }) => {
       doctordetails.degree = degree ?? doctordetails.degree;
       doctordetails.language = language ?? doctordetails.language;
       doctordetails.about = about ?? doctordetails.about;
-      doctordetails.availableSlots =
-        parsedSlots ?? doctordetails.availableSlots;
       doctordetails.consultationModes =
         consultationModes ?? doctordetails.consultationModes;
+
+      if (availableSlotsMap && availableSlotsMap.size > 0) {
+        doctordetails.availableSlots = availableSlotsMap;
+      }
 
       await doctordetails.save();
     }

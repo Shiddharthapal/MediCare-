@@ -58,12 +58,10 @@ interface PracticeSettingData {
   sendReminders?: boolean;
 }
 
-interface appointmentSlot {
-  [key: string]: {
-    enabled: boolean;
-    startTime: string;
-    endTime: string;
-  };
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
 }
 
 interface AppointmentData {
@@ -114,7 +112,7 @@ export interface DoctorDetails {
   language: string[];
   about: string;
   payment?: PaymentMethods;
-  availableSlots: appointmentSlot;
+  availableSlots: Map<string, AppointmentSlot>;
   appointments: AppointmentData[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];

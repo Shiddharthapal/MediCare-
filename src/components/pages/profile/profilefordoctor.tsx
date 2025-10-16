@@ -66,7 +66,14 @@ interface Doctor {
   degree: string;
   language: string[];
   about: string;
+  availableSlots: AppointmentSlot;
   image: string;
+}
+
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
 }
 
 interface PracticeData {
@@ -78,6 +85,12 @@ interface PracticeData {
     };
   };
 }
+
+const mockAppointmentSlot: AppointmentSlot = {
+  enabled: false,
+  startTime: "",
+  endTime: "",
+};
 
 // Mock data - in real app, this would come from API/database
 const mockDoctor: Doctor = {
@@ -96,6 +109,7 @@ const mockDoctor: Doctor = {
   degree: "",
   language: [],
   about: "",
+  availableSlots: mockAppointmentSlot,
   image: "",
 };
 
@@ -148,13 +162,12 @@ export default function DoctorProfilePage() {
           "Content-Type": "application/json",
         },
       });
-
-      //console.log("🧞‍♂️responseData --->", response);
       if (!response.ok) {
         throw new Error(`Status:${response.status}`);
       }
 
       const responseData = await response.json();
+      console.log("🧞‍♂️  responseData --->", responseData);
       setHasProfile(Boolean(responseData.doctordetails));
       setDoctor(responseData.doctordetails);
       setEditedDoctor(responseData.doctordetails);
@@ -703,8 +716,8 @@ export default function DoctorProfilePage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-                      {savedData?.appointmentSlot &&
-                        Object.entries(savedData?.appointmentSlot).map(
+                      {doctor?.availableSlots &&
+                        Object.entries(doctor?.availableSlots).map(
                           ([day, hours]) => (
                             <div key={day} className="flex items-center py-1">
                               <span className="capitalize font-medium text-gray-700 w-20">

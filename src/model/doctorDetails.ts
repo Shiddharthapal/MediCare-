@@ -175,20 +175,23 @@ const practiceSettingData = new mongoose.Schema({
   },
 });
 
-const appointmentSlot = new mongoose.Schema({
-  type: Map,
-  of: {
+const AppointmentSlotSchema = new mongoose.Schema(
+  {
     enabled: {
       type: Boolean,
+      default: false,
     },
     startTime: {
       type: String,
+      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:MM format validation
     },
     endTime: {
       type: String,
+      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:MM format validation
     },
   },
-});
+  { _id: false } // Disable _id for subdocuments
+);
 
 const appointmentDataSchema = new mongoose.Schema(
   {
@@ -362,8 +365,18 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
 
   availableSlots: {
-    type: appointmentSlot,
-    default: {},
+    type: Map,
+    of: AppointmentSlotSchema,
+    default: () =>
+      new Map([
+        ["Monday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Tuesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Wednesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Thursday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Friday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Saturday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Sunday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+      ]),
   },
   appointments: {
     type: [appointmentDataSchema],
