@@ -62,7 +62,7 @@ export function PracticeSettings() {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log("🧞‍♂️  data --->", data);
+        setSavedData(data?.doctordetails?.practiceSettingData);
         setFormData({
           practiceName: "",
           specialty: "",
@@ -70,13 +70,13 @@ export function PracticeSettings() {
           phone: "",
           fax: "",
         });
-        setSavedData(data?.doctordetails?.practiceSettingData);
       }
     } catch (error) {
       console.error("Failed to load practice data:", error);
     }
   };
 
+  //Handle when you trying to save data of user
   const handleSaveChanges = async () => {
     let id = doctor?._id;
     setIsLoading(true);
@@ -91,7 +91,7 @@ export function PracticeSettings() {
 
       if (response.ok) {
         const savedData = await response.json();
-        setSavedData(savedData);
+        setSavedData(savedData?.data?.practiceSettingData);
         alert("Practice settings saved successfully!");
       } else {
         alert("Failed to save practice settings");
@@ -111,6 +111,7 @@ export function PracticeSettings() {
     }
   };
 
+  //Input change of form
   const handleInputChange = (field: keyof PracticeData, value: any) => {
     setFormData((prev) => ({
       ...prev,

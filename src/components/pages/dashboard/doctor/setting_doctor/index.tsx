@@ -12,7 +12,7 @@ interface SettingPageProps {
 export default function SettingsPage({ onNavigate }: SettingPageProps) {
   return (
     <div className="flex-1 flex flex-col items-center overflow-hidden mx-8 w-full min-h-screen bg-gray-50">
-      <div className=" space-y-6">
+      <div className="w-full max-w-4xl py-8 space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-muted-foreground">
@@ -20,21 +20,18 @@ export default function SettingsPage({ onNavigate }: SettingPageProps) {
           </p>
         </div>
 
-        <Tabs defaultValue="general" className="w-full space-y-6 ">
-          <TabsList className="w-full grid grid-cols-5 gap-0 p-0  bg-gray-300">
-            <TabsTrigger value="general" className="flex-1 mx-10">
+        <Tabs defaultValue="general" className="w-full space-y-6">
+          <TabsList className="w-full grid grid-cols-4 h-8 md:h-12 bg-gray-300">
+            <TabsTrigger value="general" className="h-full">
               General
             </TabsTrigger>
-            <TabsTrigger value="practice" className="flex-1 mx-10">
+            <TabsTrigger value="practice" className="h-full">
               Practice
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex-1 mx-10">
-              Notifications
-            </TabsTrigger>
-            <TabsTrigger value="security" className="flex-1 mx-10">
+            <TabsTrigger value="security" className="h-full">
               Security
             </TabsTrigger>
-            <TabsTrigger value="billing" className="flex-1 mx-10">
+            <TabsTrigger value="billing" className="h-full">
               Billing
             </TabsTrigger>
           </TabsList>
@@ -45,10 +42,6 @@ export default function SettingsPage({ onNavigate }: SettingPageProps) {
 
           <TabsContent value="practice">
             <PracticeSettings />
-          </TabsContent>
-
-          <TabsContent value="notifications">
-            <NotificationSettings />
           </TabsContent>
 
           <TabsContent value="security">

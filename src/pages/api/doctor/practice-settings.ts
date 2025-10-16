@@ -46,7 +46,7 @@ export const POST: APIRoute = async ({ request }) => {
       { new: true, runValidators: true }
       // upsert: true,
     );
-    console.log("🧞‍♂️  updatedDoctor --->", updatedDoctor);
+    // console.log("🧞‍♂️  updatedDoctor --->", updatedDoctor);
 
     if (!updatedDoctor) {
       return new Response(
@@ -61,7 +61,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(
       JSON.stringify({
         message: "Practice Data updated successfully",
-        data: updatedDoctor.practiceSettingData,
+        data: updatedDoctor,
       }),
       { status: 200, headers }
     );
