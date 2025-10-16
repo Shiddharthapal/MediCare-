@@ -52,17 +52,10 @@ interface PracticeSettingData {
   address: string;
   phone: string;
   fax: string;
-  appointmentDuration: string;
-  bufferTime: string;
-  allowOnlineBooking: boolean;
-  sendReminders: boolean;
-  workingHours: {
-    [key: string]: {
-      enabled: boolean;
-      startTime: string;
-      endTime: string;
-    };
-  };
+  appointmentDuration?: string;
+  bufferTime?: string;
+  allowOnlineBooking?: boolean;
+  sendReminders?: boolean;
 }
 
 interface appointmentSlot {

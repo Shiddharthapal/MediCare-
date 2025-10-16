@@ -442,6 +442,7 @@ export default function DashboardPage() {
       icon: User,
     },
   ];
+
   let countAppointmentInMonth = (
     appointments: AppointmentData[]
   ): AppointmentCount => {

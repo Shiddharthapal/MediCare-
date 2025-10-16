@@ -114,8 +114,8 @@ export function GeneralSettings() {
   };
 
   return (
-    <div className="space-y-6">
-      <Card className=" bg-green-50 border-green-200">
+    <div className="space-y-6 ">
+      <Card className=" bg-green-50 border-green-200 ">
         <CardHeader>
           <CardTitle className="text-green-800 text-xl">
             Profile Information
@@ -135,12 +135,12 @@ export function GeneralSettings() {
               {formData?.profile?.email || "Not Provided"}
             </div>
             <div>
-              <strong>Phone Number:</strong>{" "}
-              {formData?.profile?.contact || "Not Provided"}
-            </div>
-            <div>
               <strong>Professional Bio:</strong>{" "}
               {formData?.profile?.about || "Not Provided"}
+            </div>
+            <div>
+              <strong>Phone Number:</strong>{" "}
+              {formData?.profile?.contact || "Not Provided"}
             </div>
           </div>
         </CardContent>

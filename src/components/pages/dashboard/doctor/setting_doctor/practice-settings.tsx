@@ -28,10 +28,10 @@ interface PracticeData {
   address: string;
   phone: string;
   fax: string;
-  appointmentDuration: string;
-  bufferTime: string;
-  allowOnlineBooking: boolean;
-  sendReminders: boolean;
+  appointmentDuration?: string;
+  bufferTime?: string;
+  allowOnlineBooking?: boolean;
+  sendReminders?: boolean;
 }
 
 export function PracticeSettings() {
@@ -41,10 +41,6 @@ export function PracticeSettings() {
     address: "",
     phone: "",
     fax: "",
-    appointmentDuration: "30",
-    bufferTime: "5",
-    allowOnlineBooking: true,
-    sendReminders: true,
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -67,7 +63,13 @@ export function PracticeSettings() {
       if (response.ok) {
         const data = await response.json();
         console.log("🧞‍♂️  data --->", data);
-        setFormData(data?.doctordetails?.practiceSettingData);
+        setFormData({
+          practiceName: "",
+          specialty: "",
+          address: "",
+          phone: "",
+          fax: "",
+        });
         setSavedData(data?.doctordetails?.practiceSettingData);
       }
     } catch (error) {
@@ -94,6 +96,13 @@ export function PracticeSettings() {
       } else {
         alert("Failed to save practice settings");
       }
+      setFormData({
+        practiceName: "",
+        specialty: "",
+        address: "",
+        phone: "",
+        fax: "",
+      });
     } catch (error) {
       console.error("Error saving practice settings:", error);
       alert("Error saving practice settings");
@@ -110,7 +119,7 @@ export function PracticeSettings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mb-6 bg-white">
       {savedData && (
         <Card className="bg-green-50 border-green-200">
           <CardHeader>
@@ -140,32 +149,38 @@ export function PracticeSettings() {
         </Card>
       )}
 
-      <Card>
+      <Card className="border border-gray-400">
         <CardHeader>
-          <CardTitle>Practice Information</CardTitle>
+          <CardTitle className="text-xl">Practice Information</CardTitle>
           <CardDescription>
             Manage your medical practice details
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="practiceName">Practice Name</Label>
+            <Label htmlFor="practiceName" className="text-md">
+              Practice Name
+            </Label>
             <Input
               id="practiceName"
               value={formData.practiceName}
+              placeholder="MediCare+ intern practice"
               onChange={(e) =>
                 handleInputChange("practiceName", e.target.value)
               }
+              className="border border-gray-400 hover:border-primary/50"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="specialty">Medical Specialty</Label>
+            <Label htmlFor="specialty" className="text-md">
+              Medical Specialty
+            </Label>
             <Select
               value={formData.specialty}
               onValueChange={(value) => handleInputChange("specialty", value)}
             >
-              <SelectTrigger>
-                <SelectValue />
+              <SelectTrigger className="border border-gray-400 hover:border-primary/50">
+                <SelectValue placeholder="Family Medicine" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="family">Family Medicine</SelectItem>
@@ -177,40 +192,55 @@ export function PracticeSettings() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="address">Practice Address</Label>
+            <Label htmlFor="address" className="text-md">
+              Practice Address
+            </Label>
             <Textarea
               id="address"
               placeholder="Enter complete practice address"
               value={formData.address}
               onChange={(e) => handleInputChange("address", e.target.value)}
+              className="border border-gray-400 hover:border-primary/50"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Practice Institute Phone</Label>
+              <Label htmlFor="phone" className="text-md">
+                Practice Institute Phone
+              </Label>
               <Input
                 id="phone"
                 type="tel"
                 placeholder="01*********"
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
+                className="border border-gray-400 hover:border-primary/50"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fax">Fax Number</Label>
+              <Label htmlFor="fax" className="text-md">
+                Fax Number
+              </Label>
               <Input
                 id="fax"
                 type="tel"
                 placeholder="+1 (555) 123-4568"
                 value={formData.fax}
                 onChange={(e) => handleInputChange("fax", e.target.value)}
+                className="border border-gray-400 hover:border-primary/50"
               />
             </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Button onClick={handleSaveChanges} disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Appointment Settings</CardTitle>
           <CardDescription>
@@ -286,13 +316,7 @@ export function PracticeSettings() {
             />
           </div>
         </CardContent>
-      </Card>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSaveChanges} disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save Changes"}
-        </Button>
-      </div>
+      </Card> */}
     </div>
   );
 }
