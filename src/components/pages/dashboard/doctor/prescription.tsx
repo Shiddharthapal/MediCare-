@@ -613,7 +613,7 @@ export default function Prescription({
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-4">
-            <Avatar className="w-12 h-12">
+            <Avatar className="w-12 h-12 ring-2">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>
                 {getPatientInitials(patientData.patientName)}
@@ -634,7 +634,7 @@ export default function Prescription({
       <main className="max-w-6xl mx-auto p-6">
         <div className="space-y-6">
           {/* Patient Information Summary */}
-          <Card>
+          <Card className="border border-gray-400">
             <CardContent>
               <div className="grid grid-cols-3  text-sm">
                 <div>
@@ -665,7 +665,7 @@ export default function Prescription({
                 </div>
                 <div className="flex items-start">
                   <div className="flex-shrink-0 flex items-center pl-4">
-                    <div className="w-8 h-8 bg-green-600 pb-2 rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-[hsl(201,96%,32%)] pb-2 rounded-lg flex items-center justify-center">
                       <span className="text-white font-bold text-3xl">+</span>
                     </div>
                     <span className="ml-2 text-xl font-bold text-gray-900">
@@ -704,7 +704,7 @@ export default function Prescription({
           </Card>
 
           {/* Vital Signs */}
-          <Card>
+          <Card className="border border-gray-400">
             <CardHeader>
               <CardTitle className="text-lg">Vital Signs</CardTitle>
             </CardHeader>
@@ -816,7 +816,7 @@ export default function Prescription({
 
           {/* Diagnosis and Symptoms */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="border border-gray-400">
               <CardHeader>
                 <CardTitle className="text-lg">Primary Diagnosis</CardTitle>
               </CardHeader>
@@ -834,7 +834,7 @@ export default function Prescription({
                 />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border border-gray-400">
               <CardHeader>
                 <CardTitle className="text-lg">Symptoms</CardTitle>
               </CardHeader>
@@ -855,7 +855,7 @@ export default function Prescription({
           </div>
 
           {/* Test & Report Section */}
-          <Card>
+          <Card className="border border-gray-400">
             <CardHeader>
               <CardTitle className="text-lg">Test & Report</CardTitle>
             </CardHeader>
@@ -879,10 +879,15 @@ export default function Prescription({
           </Card>
 
           {/* Medications */}
-          <Card>
+          <Card className="border border-gray-400">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Medications</CardTitle>
+                <div>
+                  <CardTitle className="text-lg">Medications</CardTitle>
+                  <div className="text-sm">
+                    To add medicine 'Click' on 'Add Medication'
+                  </div>
+                </div>
                 <Button
                   size="sm"
                   onClick={() => {
@@ -909,7 +914,7 @@ export default function Prescription({
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-4 border border-gray-400">
                 {prescriptionForm.medication.map((medication, index) => (
                   <div
                     key={medication.id}
@@ -1070,7 +1075,7 @@ export default function Prescription({
 
           {/* Additional Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="border border-gray-400">
               <CardHeader>
                 <CardTitle className="text-lg">
                   Allergies & Restrictions
@@ -1095,7 +1100,7 @@ export default function Prescription({
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border border-gray-400">
               <CardHeader>
                 <CardTitle className="text-lg">Follow-up & Notes</CardTitle>
               </CardHeader>
@@ -1153,8 +1158,12 @@ export default function Prescription({
             </CardContent>
           </Card>
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-4 pt-6 border-t bg-white p-6 rounded-lg">
-            <Button variant="outline" onClick={onClose}>
+          <div className="flex items-center justify-end gap-4 pt-3   bg-white p-6 rounded-lg">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="border-gray-400"
+            >
               Cancel
             </Button>
             <Button
