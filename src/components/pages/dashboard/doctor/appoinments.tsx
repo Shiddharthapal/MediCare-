@@ -804,9 +804,9 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     showDate: boolean;
     isPrevious?: boolean;
   }) => (
-    <Card className="mb-4  border border-gray-600 transition-all  hover:shadow-lg">
-      <CardContent className="p-1">
-        <div className="flex items-center justify-between">
+    <Card className="mb-4  border border-gray-600 transition-all  hover:shadow-lg w-full max-w-full">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-start gap-4 flex-1">
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
@@ -939,11 +939,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   );
 
   return (
-    <div className="flex-1 flex flex-col items-center mx-2 overflow-hidden min-h-screen bg-white">
+    <div className="flex-1 flex flex-col mx-auto w-full max-w-7xl overflow-hidden min-h-screen bg-white">
       {/* Header */}
-      <header className="flex items-center  justify-between p-6   bg-white">
-        <div className="flex flex-row  justify-between gap-24 md:gap-52">
-          <div className="relative border border-gray-400 rounded-md transition-all hover:border-primary/50 hover:shadow-lg">
+      <header className="flex items-center justify-between p-6 bg-white border-b">
+        <div className="flex flex-col md:flex-row justify-between gap-4 md:gap-8 w-full">
+          <div className="relative border border-gray-400 rounded-md transition-all hover:border-primary/50 hover:shadow-lg flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-500 " />
             <input
               type="text"
@@ -961,10 +961,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             >
               <Filter className="h-4 w-4 mr-2" />
               Filter
-            </Button>
-            <Button size="sm" className=" hover:bg-cyan-700 hover:text-black">
-              <Plus className="h-4 w-4 mr-2" />
-              New Appointment
             </Button>
           </div>
         </div>
