@@ -634,6 +634,10 @@ export default function DoctorProfilePage() {
                     <BadgeDollarSign className="h-5 w-5 mr-2 text-red-600" />
                     Consultation Fees
                   </Label>
+                  <div className="text-sm">
+                    (To set your Receive payment method go to
+                    Dahboard-Setting-Billing setting)
+                  </div>
                   {isEditing ? (
                     <Input
                       type="number"
