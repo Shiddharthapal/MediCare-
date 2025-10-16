@@ -18,6 +18,7 @@ import {
   BadgeDollarSign,
   Mail,
   Phone,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -335,7 +336,7 @@ export default function DoctorProfilePage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white pt-2">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white pt-4 pb-2">
             <div className="flex items-center space-x-6">
               <Avatar className="h-24 w-24 border-4 border-white">
                 <AvatarImage src="/image (4).jpg" alt="DR" />
@@ -381,9 +382,9 @@ export default function DoctorProfilePage() {
 
           <CardContent className="p-8">
             {!hasProfile && !isEditing && (
-              <div className="text-center py-8 mb-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <div className="text-center py-8 mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-dashed border-blue-300">
                 <div className="text-gray-500 mb-4">
-                  <User className="h-12 w-12 mx-auto mb-2" />
+                  <User className="h-12 w-12 mx-auto mb-2 text-blue-500" />
                   <h3 className="text-lg font-semibold">
                     No Profile Information
                   </h3>
@@ -393,7 +394,7 @@ export default function DoctorProfilePage() {
                 </div>
                 <Button
                   onClick={handleEdit}
-                  className="flex items-center gap-2 mx-auto"
+                  className="flex items-center gap-2 mx-auto bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:text-black"
                 >
                   <Plus className="h-4 w-4" />
                   Create Profile
@@ -402,7 +403,8 @@ export default function DoctorProfilePage() {
             )}
 
             <div className="mb-4">
-              <Label className="text-lg font-semibold flex items-center ">
+              <Label className="text-lg font-semibold flex items-center text-purple-900">
+                <Target className="text-purple-600" />
                 Specializations
               </Label>
               <div className="space-y-2">
@@ -410,7 +412,10 @@ export default function DoctorProfilePage() {
                   {currentDoctor?.specializations?.length > 0
                     ? currentDoctor?.specializations.map((slot, index) => (
                         <div key={index} className="flex items-center">
-                          <Badge variant="outline" className="text-sm">
+                          <Badge
+                            variant="outline"
+                            className="text-sm bg-purple-200"
+                          >
                             {slot}
                           </Badge>
                           {isEditing && (
@@ -437,7 +442,7 @@ export default function DoctorProfilePage() {
                       value={specializations}
                       onChange={(e) => setSpecializations(e.target.value)}
                       placeholder="Add your specializations(e.g., Heart Surgery, Skin Cancer )"
-                      className="flex-1"
+                      className="flex-1  border border-gray-400"
                     />
                     <Button onClick={handleAddSpecializations} size="sm">
                       Add
@@ -450,8 +455,8 @@ export default function DoctorProfilePage() {
               {/* Left Column */}
               <div className="space-y-6">
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Building2 className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-blue-900 mb-0">
+                    <Building2 className="h-5 w-5 mr-2 text-blue-600" />
                     Hospital/Clinic
                   </Label>
                   {isEditing ? (
@@ -461,6 +466,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("hospital", e.target.value)
                       }
                       placeholder="Enter hospital or clinic name"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -470,8 +476,8 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <GraduationCap className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-amber-900 mb-0">
+                    <GraduationCap className="h-5 w-5 mr-2 text-amber-600" />
                     Education
                   </Label>
                   {isEditing ? (
@@ -481,6 +487,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("education", e.target.value)
                       }
                       placeholder="Enter your medical collage name"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -490,8 +497,8 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <BookText className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-teal-900 mb-0">
+                    <BookText className="h-5 w-5 mr-2 text-teal-600" />
                     Medical Degree
                   </Label>
                   {isEditing ? (
@@ -501,6 +508,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("degree", e.target.value)
                       }
                       placeholder="Enter your medical degree"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -510,8 +518,8 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <User className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-indigo-900 mb-0">
+                    <User className="h-5 w-5 mr-2 text-indigo-600" />
                     Experience
                   </Label>
                   {isEditing ? (
@@ -521,6 +529,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("experience", e.target.value)
                       }
                       placeholder="e.g., 2+ years"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -529,8 +538,8 @@ export default function DoctorProfilePage() {
                   )}
                 </div>
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Phone className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-green-900 mb-0">
+                    <Phone className="h-5 w-5 mr-2 text-green-600" />
                     Contact Number
                   </Label>
                   {isEditing ? (
@@ -541,6 +550,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("contact", e.target.value)
                       }
                       placeholder="Enter your contact number"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -550,8 +560,8 @@ export default function DoctorProfilePage() {
                 </div>
                 {/* New Email Field */}
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Mail className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-rose-900 mb-0">
+                    <Mail className="h-5 w-5 mr-2 text-rose-600" />
                     Email
                   </Label>
 
@@ -562,8 +572,8 @@ export default function DoctorProfilePage() {
                 </div>
                 <div className="">
                   <div>
-                    <Label className="text-lg font-semibold flex items-center mb-3">
-                      <Video className="h-5 w-5 mr-2" />
+                    <Label className="text-lg font-semibold flex items-center text-cyan-900 mb-1">
+                      <Video className="h-5 w-5 mr-2 text-cyan-600" />
                       Consultation Mode
                     </Label>
                     {isEditing ? (
@@ -580,7 +590,7 @@ export default function DoctorProfilePage() {
                               className={`cursor-pointer px-4 py-2 text-base ${
                                 editedDoctor?.consultationModes?.includes(mode)
                                   ? "bg-blue-500 text-white hover:bg-blue-600"
-                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200  border border-gray-400"
                               }`}
                               onClick={() => handleToggleConsultationMode(mode)}
                             >
@@ -596,7 +606,7 @@ export default function DoctorProfilePage() {
                             <Badge
                               key={index}
                               variant="outline"
-                              className="text-sm"
+                              className="text-sm bg-cyan-100"
                             >
                               {mode}
                             </Badge>
@@ -613,8 +623,8 @@ export default function DoctorProfilePage() {
               {/* Right Column */}
               <div className="space-y-6">
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3 ">
-                    <BadgeDollarSign className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center mb-0 ">
+                    <BadgeDollarSign className="h-5 w-5 mr-2 text-red-600" />
                     Consultation Fees
                   </Label>
                   {isEditing ? (
@@ -628,6 +638,7 @@ export default function DoctorProfilePage() {
                         )
                       }
                       placeholder="Enter consultation fees"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-3xl font-bold text-green-600">
@@ -639,19 +650,19 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-1">
-                    <Clock className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-orange-900 mb-1">
+                    <Clock className="h-5 w-5 mr-2 text-orange-600" />
                     Available Time Slots
                   </Label>
                   {isEditing ? (
                     <div>
-                      <Card>
+                      <Card className=" border border-gray-400">
                         <CardHeader>
                           <CardDescription>
                             Set your visiting hours
                           </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-2">
                           {[
                             "Monday",
                             "Tuesday",
@@ -735,8 +746,8 @@ export default function DoctorProfilePage() {
                   )}
                 </div>
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-1 ">
-                    <Languages className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-violet-900 mb-1 ">
+                    <Languages className="h-5 w-5 mr-2 text-violet-600" />
                     Language
                   </Label>
                   <div className="space-y-2">
@@ -744,7 +755,10 @@ export default function DoctorProfilePage() {
                       {currentDoctor?.language?.length > 0
                         ? currentDoctor?.language.map((slot, index) => (
                             <div key={index} className="flex items-center">
-                              <Badge variant="outline" className="text-sm">
+                              <Badge
+                                variant="outline"
+                                className="text-sm bg-violet-200"
+                              >
                                 {slot}
                               </Badge>
                               {isEditing && (
@@ -771,7 +785,7 @@ export default function DoctorProfilePage() {
                           value={language}
                           onChange={(e) => setLanguage(e.target.value)}
                           placeholder="Add language (English, other)"
-                          className="flex-1"
+                          className="flex-1  border border-gray-400"
                         />
                         <Button onClick={handleAddLanguage} size="sm">
                           Add
@@ -781,8 +795,8 @@ export default function DoctorProfilePage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Transgender className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-pink-900 mb-0">
+                    <Transgender className="h-5 w-5 mr-2 text-pink-600" />
                     Gender
                   </Label>
                   {isEditing ? (
@@ -793,7 +807,7 @@ export default function DoctorProfilePage() {
                           handleInputChange("gender", value)
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className=" border border-gray-400">
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
                         <SelectContent>
@@ -804,7 +818,7 @@ export default function DoctorProfilePage() {
                       </Select>
                     </>
                   ) : (
-                    <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    <p className=" pl-2  ">
                       {currentDoctor?.gender || "Not provided"}
                     </p>
                   )}
@@ -824,7 +838,7 @@ export default function DoctorProfilePage() {
                   onChange={(e) => handleInputChange("about", e.target.value)}
                   placeholder="Tell patients about yourself, your approach to medicine, and your expertise..."
                   rows={4}
-                  className="resize-none"
+                  className="resize-none  border border-gray-400"
                 />
               ) : (
                 <p className="text-gray-700 leading-relaxed text-lg">
@@ -841,7 +855,7 @@ export default function DoctorProfilePage() {
                   <>
                     <Button
                       onClick={handleSave}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 bg-blue-600 hover:text-black"
                     >
                       <Save className="h-4 w-4" />
                       Save Profile
@@ -849,7 +863,7 @@ export default function DoctorProfilePage() {
                     <Button
                       onClick={handleCancel}
                       variant="outline"
-                      className="flex items-center gap-2 bg-transparent"
+                      className="flex items-center gap-2 bg-transparent border border-gray-400 hover:border-primary/50"
                     >
                       <X className="h-4 w-4" />
                       Cancel
@@ -860,7 +874,7 @@ export default function DoctorProfilePage() {
                     <Button
                       onClick={handleEdit}
                       variant="outline"
-                      className="flex items-center gap-2 bg-transparent"
+                      className="flex items-center gap-2 text-white  border border-gray-400 bg-blue-600 hover:text-black hover:bg-cyan-700"
                     >
                       <Edit3 className="h-4 w-4" />
                       {hasProfile ? "Edit Profile" : "Create Profile"}

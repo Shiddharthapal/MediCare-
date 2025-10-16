@@ -16,8 +16,6 @@ export const POST: APIRoute = async ({ request }) => {
     const body = await request.json();
     // console.log("🧞‍♂️body --->", body);
     const { editedDoctor, id, formData } = body;
-    console.log("🧞‍♂️  id --->", id);
-    console.log("🧞‍♂️  formData --->", formData);
     const {
       name,
       specialist,
@@ -153,8 +151,6 @@ export const POST: APIRoute = async ({ request }) => {
         });
       }
     }
-
-    console.log("availableSlotsMap", availableSlotsMap);
 
     let doctordetails = await DoctorDetails.findOne({
       userId: id,
