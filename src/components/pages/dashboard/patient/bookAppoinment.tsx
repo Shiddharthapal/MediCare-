@@ -35,6 +35,12 @@ import {
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+}
+
 interface Doctor {
   _id: string;
   userId: string;
@@ -50,7 +56,7 @@ interface Doctor {
   degree: string;
   language: string[];
   about: string;
-  availableSlots: string[];
+  availableSlots: AppointmentSlot;
   consultationModes: string[];
 }
 
@@ -345,6 +351,35 @@ export default function BookAppointment({
     return consultation ? consultation.icon : Calendar;
   };
 
+  const formatTo12Hour = (time24) => {
+    if (!time24) return "";
+
+    const [hours, minutes] = time24.split(":");
+    const hour = parseInt(hours, 10);
+    const minute = minutes || "00";
+
+    if (hour === 0) {
+      return `12:${minute} AM`;
+    } else if (hour < 12) {
+      return `${hour}:${minute} AM`;
+    } else if (hour === 12) {
+      return `12:${minute} PM`;
+    } else {
+      return `${hour - 12}:${minute} PM`;
+    }
+  };
+
+  const formatWorkingHours = (hours) => {
+    if (!hours?.enabled) {
+      return "Closed";
+    }
+
+    const startTime = formatTo12Hour(hours.startTime);
+    const endTime = formatTo12Hour(hours.endTime);
+
+    return `${startTime} - ${endTime}`;
+  };
+
   if (!doctor) return null;
 
   return (
@@ -557,11 +592,19 @@ export default function BookAppointment({
                           <SelectValue placeholder="Select time" />
                         </SelectTrigger>
                         <SelectContent>
-                          {doctor.availableSlots.map((time) => (
-                            <SelectItem key={time} value={time}>
-                              {time}
-                            </SelectItem>
-                          ))}
+                          {doctor?.availableSlots &&
+                            Object.entries(doctor?.availableSlots)
+                              .filter(([day, hours]) => hours?.enabled) // Optional: only show enabled days
+                              .map(([day, hours]) => (
+                                <SelectItem
+                                  key={day}
+                                  value={day}
+                                  className="font-medium"
+                                >
+                                  <span className="capitalize">{day}</span>:{" "}
+                                  {formatWorkingHours(hours)}
+                                </SelectItem>
+                              ))}
                         </SelectContent>
                       </Select>
                       {errors.appointmentTime && (
