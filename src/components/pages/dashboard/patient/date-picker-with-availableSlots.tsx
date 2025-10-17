@@ -33,7 +33,6 @@ export function DatePickerWithSlots({
   maxDate,
   error,
 }: DatePickerWithSlotsProps) {
-  console.log("🧞‍♂️  availableSlots --->", availableSlots);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isOpen, setIsOpen] = useState(false);
 
@@ -44,7 +43,6 @@ export function DatePickerWithSlots({
       .toLowerCase();
     const dayName =
       dayNameLower.charAt(0).toUpperCase() + dayNameLower.slice(1);
-
     return (
       availableSlots?.some((slot) => slot.day === dayName && slot.enabled) ??
       false
@@ -59,33 +57,37 @@ export function DatePickerWithSlots({
     return true;
   };
 
+  //Get the dates of a month
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   };
 
+  //Get the first day of month
   const getFirstDayOfMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
+  //Handler function to move previous month
   const handlePrevMonth = () => {
     setCurrentMonth(
       new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
     );
   };
 
+  //Handler function to move next month
   const handleNextMonth = () => {
     setCurrentMonth(
       new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
     );
   };
 
+  //Handler function to click date
   const handleDateClick = (day: number) => {
     const selectedDate = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth(),
       day
     );
-
     if (isDateAvailable(selectedDate) && isDateInRange(selectedDate)) {
       const dateString = selectedDate.toISOString().split("T")[0];
       onChange(dateString);
@@ -107,11 +109,13 @@ export function DatePickerWithSlots({
     days.push(i);
   }
 
+  //findout the month name
   const monthName = currentMonth.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
   });
 
+  //findout date object
   const selectedDateObj = value ? new Date(value + "T00:00:00") : null;
   const displayDate = selectedDateObj
     ? selectedDateObj.toLocaleDateString("en-US", {
@@ -140,6 +144,12 @@ export function DatePickerWithSlots({
           <div className="p-4">
             {/* Month navigation */}
             <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={handlePrevMonth}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
               <h3 className="font-semibold text-sm">{monthName}</h3>
               <button
                 onClick={handleNextMonth}
@@ -167,7 +177,6 @@ export function DatePickerWithSlots({
                 if (day === null) {
                   return <div key={`empty-${index}`} className="w-8 h-8" />;
                 }
-
                 const date = new Date(
                   currentMonth.getFullYear(),
                   currentMonth.getMonth(),
