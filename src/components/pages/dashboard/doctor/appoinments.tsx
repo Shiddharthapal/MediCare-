@@ -815,7 +815,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   }
 
   // If prescription is shown, render only the prescription component
-  if (showPrescription && showDocument) {
+  if (showDocument) {
     let id = doctor?._id;
     console.log("selected patient=>", selectedPatient);
     return (

@@ -39,9 +39,15 @@ interface DoctorDetails {
   degree: string;
   language: string[];
   about: string;
-  availableSlots: string[];
+  availableSlots: AppointmentSlot;
   consultationModes: string[];
   createdAt: Date;
+}
+
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
 }
 
 const availabilityFilters = [
@@ -217,6 +223,35 @@ export default function Doctors({
     }
   };
 
+  const formatTo12Hour = (time24) => {
+    if (!time24) return "";
+
+    const [hours, minutes] = time24.split(":");
+    const hour = parseInt(hours, 10);
+    const minute = minutes || "00";
+
+    if (hour === 0) {
+      return `12:${minute} AM`;
+    } else if (hour < 12) {
+      return `${hour}:${minute} AM`;
+    } else if (hour === 12) {
+      return `12:${minute} PM`;
+    } else {
+      return `${hour - 12}:${minute} PM`;
+    }
+  };
+
+  const formatWorkingHours = (hours) => {
+    if (!hours?.enabled) {
+      return "Closed";
+    }
+
+    const startTime = formatTo12Hour(hours.startTime);
+    const endTime = formatTo12Hour(hours.endTime);
+
+    return `${startTime} - ${endTime}`;
+  };
+
   const DoctorCard = ({ doctor }: { doctor: DoctorDetails }) => (
     <Card className="border-2 transition-all hover:border-primary/50 hover:shadow-lg">
       <CardContent className="p-6">
@@ -265,7 +300,24 @@ export default function Doctors({
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-gray-400" />
                 <span className="text-gray-600 text-sm">
-                  Next available: {doctor.availableSlots}
+                  Next available:{" "}
+                  <div className="grid grid-cols-2 gap-x-4">
+                    {doctor?.availableSlots &&
+                      Object.entries(doctor?.availableSlots).map(
+                        ([day, hours]) => (
+                          <div key={day} className="flex items-center py-1">
+                            <span className="capitalize font-medium text-gray-700 w-20">
+                              {day}:
+                            </span>
+                            <span
+                              className={`${hours?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
+                            >
+                              {formatWorkingHours(hours)}
+                            </span>
+                          </div>
+                        )
+                      )}
+                  </div>
                 </span>
               </div>
             </div>
@@ -288,10 +340,7 @@ export default function Doctors({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {doctor?.consultationModes?.map((mode: string, index: number) => (
-                <Badge
-                  key={index}
-                  className={getAvailabilityColor(doctor.availableSlots[0])}
-                >
+                <Badge key={index} className={getAvailabilityColor(doctor)}>
                   {mode.charAt(0).toUpperCase() + mode.slice(1).toLowerCase()}
                 </Badge>
               ))}
@@ -428,9 +477,15 @@ export default function Doctors({
                 </p>
                 <p className="text-2xl font-bold text-green-900">
                   {
-                    doctordata?.filter((d) =>
-                      d.availableSlots?.includes("availableSlots")
-                    ).length
+                    doctordata?.filter((doctor) => {
+                      // Check if availableSlots exists
+                      if (!doctor?.availableSlots) return false;
+
+                      // Check if any day has enabled slots
+                      return Object.values(doctor.availableSlots).some(
+                        (slot) => slot?.enabled === true
+                      );
+                    }).length
                   }
                 </p>
               </div>
