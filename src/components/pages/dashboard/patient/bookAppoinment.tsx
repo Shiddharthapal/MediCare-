@@ -601,7 +601,6 @@ export default function BookAppointment({
                                   value={day}
                                   className="font-medium"
                                 >
-                                  <span className="capitalize">{day}</span>:{" "}
                                   {formatWorkingHours(hours)}
                                 </SelectItem>
                               ))}
