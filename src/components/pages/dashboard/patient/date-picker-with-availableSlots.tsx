@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -10,43 +10,52 @@ import {
 } from "@/components/ui/popover";
 
 interface AppointmentSlot {
+  day: string;
   enabled: boolean;
-  startTime: string;
-  endTime: string;
+  startTime: any;
+  endTime: any;
 }
 
-interface DatePickerWithAvailabilityProps {
+interface DatePickerWithSlotsProps {
   value: string;
   onChange: (date: string) => void;
-  availableSlots: Record<string, AppointmentSlot>;
+  availableSlots: AppointmentSlot[] | undefined;
   minDate?: string;
   maxDate?: string;
   error?: string;
 }
 
-export function DatePickerWithAvailability({
+export function DatePickerWithSlots({
   value,
   onChange,
   availableSlots,
   minDate,
   maxDate,
   error,
-}: DatePickerWithAvailabilityProps) {
-  console.log("=>", availableSlots);
+}: DatePickerWithSlotsProps) {
+  console.log("🧞‍♂️  availableSlots --->", availableSlots);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isOpen, setIsOpen] = useState(false);
 
+  // Check if a date's day is enabled in availableSlots
   const isDateAvailable = (date: Date): boolean => {
-    const dayOfWeek = date
-      .toLocaleDateString("en-US", { weekday: "short" })
+    const dayNameLower = date
+      .toLocaleDateString("en-US", { weekday: "long" })
       .toLowerCase();
-    const daySlot = availableSlots[dayOfWeek as keyof typeof availableSlots];
-    return daySlot?.enabled === true;
+    const dayName =
+      dayNameLower.charAt(0).toUpperCase() + dayNameLower.slice(1);
+
+    return (
+      availableSlots?.some((slot) => slot.day === dayName && slot.enabled) ??
+      false
+    );
   };
 
+  // Check if date is within min/max range
   const isDateInRange = (date: Date): boolean => {
-    if (minDate && date < new Date(minDate)) return false;
-    if (maxDate && date > new Date(maxDate)) return false;
+    const dateStr = date.toISOString().split("T")[0];
+    if (minDate && dateStr < minDate) return false;
+    if (maxDate && dateStr > maxDate) return false;
     return true;
   };
 
@@ -88,10 +97,12 @@ export function DatePickerWithAvailability({
   const firstDayOfMonth = getFirstDayOfMonth(currentMonth);
   const days = [];
 
+  // Add empty cells for days before month starts
   for (let i = 0; i < firstDayOfMonth; i++) {
     days.push(null);
   }
 
+  // Add all days in month
   for (let i = 1; i <= daysInMonth; i++) {
     days.push(i);
   }
@@ -100,12 +111,14 @@ export function DatePickerWithAvailability({
     month: "long",
     year: "numeric",
   });
-  const selectedDateObj = value ? new Date(value) : null;
+
+  const selectedDateObj = value ? new Date(value + "T00:00:00") : null;
   const displayDate = selectedDateObj
     ? selectedDateObj.toLocaleDateString("en-US", {
         weekday: "short",
         month: "short",
         day: "numeric",
+        year: "numeric",
       })
     : "Select date";
 
@@ -119,18 +132,14 @@ export function DatePickerWithAvailability({
               error ? "border-red-500" : ""
             } ${!value ? "text-muted-foreground" : ""}`}
           >
+            <Calendar className="mr-2 h-4 w-4" />
             {displayDate}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <div className="p-4">
+            {/* Month navigation */}
             <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={handlePrevMonth}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
               <h3 className="font-semibold text-sm">{monthName}</h3>
               <button
                 onClick={handleNextMonth}
@@ -140,17 +149,19 @@ export function DatePickerWithAvailability({
               </button>
             </div>
 
+            {/* Weekday headers */}
             <div className="grid grid-cols-7 gap-2 mb-2">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
                 <div
                   key={day}
-                  className="text-center text-xs font-medium text-gray-500 w-8 h-8"
+                  className="text-center text-xs font-medium text-gray-500 w-8 h-8 flex items-center justify-center"
                 >
                   {day}
                 </div>
               ))}
             </div>
 
+            {/* Calendar days */}
             <div className="grid grid-cols-7 gap-2">
               {days.map((day, index) => {
                 if (day === null) {
@@ -163,7 +174,9 @@ export function DatePickerWithAvailability({
                   day
                 );
                 const isAvailable = isDateAvailable(date);
+                console.log("🧞‍♂️  isAvailable --->", date);
                 const isInRange = isDateInRange(date);
+                const isSelectable = isAvailable && isInRange;
                 const isSelected =
                   selectedDateObj &&
                   selectedDateObj.toDateString() === date.toDateString();
@@ -174,17 +187,17 @@ export function DatePickerWithAvailability({
                   <button
                     key={day}
                     onClick={() => handleDateClick(day)}
-                    disabled={!isAvailable || !isInRange}
+                    disabled={!isSelectable}
                     className={`
                       w-8 h-8 rounded text-sm font-medium transition-colors
                       ${
                         isSelected
-                          ? "bg-blue-600 text-white"
-                          : isAvailable && isInRange
+                          ? "bg-blue-600 text-white hover:bg-blue-700"
+                          : isSelectable
                             ? "hover:bg-blue-100 text-gray-900"
-                            : "text-gray-300 cursor-not-allowed bg-gray-50"
+                            : "text-gray-300 cursor-not-allowed bg-gray-50 line-through"
                       }
-                      ${isToday && !isSelected ? "border border-blue-600" : ""}
+                      ${isToday && !isSelected ? "border-2 border-blue-600" : ""}
                     `}
                   >
                     {day}
@@ -193,9 +206,10 @@ export function DatePickerWithAvailability({
               })}
             </div>
 
+            {/* Legend */}
             <div className="mt-4 pt-4 border-t space-y-2 text-xs">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-100 rounded border border-blue-600" />
+                <div className="w-3 h-3 rounded border-2 border-blue-600" />
                 <span className="text-gray-600">Today</span>
               </div>
               <div className="flex items-center gap-2">

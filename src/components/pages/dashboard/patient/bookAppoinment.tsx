@@ -34,12 +34,14 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
+import { DatePickerWithSlots } from "./date-picker-with-availableSlots";
 
 interface AppointmentSlot {
   enabled: boolean;
   startTime: string;
   endTime: string;
 }
+[];
 
 interface Doctor {
   _id: string;
@@ -80,6 +82,13 @@ interface AppointmentData {
   emergencyPhone: string;
   paymentMethod: string;
   specialRequests: string;
+}
+
+interface Appointmentslot {
+  day: string;
+  enabled: boolean;
+  startTime: any;
+  endTime: any;
 }
 
 const consultationType = [
@@ -184,9 +193,11 @@ export default function BookAppointment({
   onClose,
   doctor,
 }: BookAppointmentProps) {
+  console.log("🧞‍♂️  doctor --->", doctor?.availableSlots);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [enabledDays, setEnabledDays] = useState<Appointmentslot[]>();
   const [formData, setFormData] = useState<AppointmentData>({
     appointmentDate: "",
     appointmentTime: "",
@@ -256,7 +267,6 @@ export default function BookAppointment({
           },
         });
         let userdata = await response.json();
-        console.log("🧞‍♂️userdata --->", userdata);
         setPatientdata({
           userId: userdata?.userdetails?.userId || userdata?.userId,
           email: userdata?.userdetails?.email || userdata?.email,
@@ -310,6 +320,33 @@ export default function BookAppointment({
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response =
+          doctor?.availableSlots &&
+          Object.entries(doctor.availableSlots)
+            .filter(([day, schedule]) => schedule.enabled)
+            .map(([day, schedule]) => ({
+              day,
+              enabled: schedule.enabled,
+              startTime: schedule.startTime,
+              endTime: schedule.endTime,
+            }));
+        if (!response) {
+          console.log("doctor availavelslots is not valid");
+        }
+
+        setEnabledDays(response || []);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, [doctor?.availableSlots]);
+
+  console.log("🧞‍♂️  enabledDays --->", enabledDays);
 
   const resetForm = () => {
     setCurrentStep(1);
@@ -552,26 +589,28 @@ export default function BookAppointment({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="appointmentDate">Preferred Date *</Label>
-                      <Input
-                        id="appointmentDate"
-                        type="date"
+                      <DatePickerWithSlots
                         value={formData.appointmentDate}
-                        onChange={(e) =>
-                          handleInputChange("appointmentDate", e.target.value)
+                        onChange={(date) =>
+                          handleInputChange("appointmentDate", date)
                         }
-                        min={getMinDate()}
-                        max={getMaxDate()}
-                        className={
-                          errors.appointmentDate
-                            ? "border-red-500 mt-2"
-                            : "mt-2"
-                        }
+                        availableSlots={enabledDays}
+                        minDate={getMinDate()}
+                        maxDate={getMaxDate()}
+                        error={errors.appointmentDate}
                       />
-                      {errors.appointmentDate && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.appointmentDate}
-                        </p>
-                      )}
+                      <p className="text-xs text-gray-500 mt-2">
+                        Available days:{" "}
+                        {doctor?.availableSlots
+                          ? Object.entries(doctor.availableSlots)
+                              .filter(([_, slot]) => slot?.enabled)
+                              .map(
+                                ([day]) =>
+                                  day.charAt(0).toUpperCase() + day.slice(1)
+                              )
+                              .join(", ")
+                          : "Check doctor availability"}
+                      </p>
                     </div>
 
                     <div>
