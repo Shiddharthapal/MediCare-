@@ -127,20 +127,23 @@ export function DatePickerWithSlots({
     : "Select date";
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 ">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className={`w-full justify-start text-left font-normal ${
+            className={` justify-start text-left font-normal ${
               error ? "border-red-500" : ""
             } ${!value ? "text-muted-foreground" : ""}`}
           >
-            <Calendar className="mr-2 h-4 w-4" />
+            <Calendar className="mr-1 h-4 w-4" />
             {displayDate}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent
+          className="w-auto p-0 border border-gray-400"
+          align="start"
+        >
           <div className="p-4">
             {/* Month navigation */}
             <div className="flex items-center justify-between mb-4">
@@ -213,22 +216,6 @@ export function DatePickerWithSlots({
                   </button>
                 );
               })}
-            </div>
-
-            {/* Legend */}
-            <div className="mt-4 pt-4 border-t space-y-2 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded border-2 border-blue-600" />
-                <span className="text-gray-600">Today</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-600 rounded" />
-                <span className="text-gray-600">Selected</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-gray-50 rounded border border-gray-200" />
-                <span className="text-gray-600">Unavailable</span>
-              </div>
             </div>
           </div>
         </PopoverContent>

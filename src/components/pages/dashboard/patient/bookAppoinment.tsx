@@ -183,11 +183,13 @@ const paymentMethods = [
   "Credit Card",
   "Debit Card",
 ];
+
 interface BookAppointmentProps {
   isOpen: boolean;
   onClose: () => void;
   doctor: Doctor | null;
 }
+
 export default function BookAppointment({
   isOpen,
   onClose,
@@ -198,6 +200,7 @@ export default function BookAppointment({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [enabledDays, setEnabledDays] = useState<Appointmentslot[]>();
+  const [errors, setErrors] = useState<Partial<AppointmentData>>({});
   const [formData, setFormData] = useState<AppointmentData>({
     appointmentDate: "",
     appointmentTime: "",
@@ -211,8 +214,6 @@ export default function BookAppointment({
     paymentMethod: "",
     specialRequests: "",
   });
-
-  const [errors, setErrors] = useState<Partial<AppointmentData>>({});
   const [patientdata, setPatientdata] = useState<User>({
     userId: "",
     email: "",
@@ -222,6 +223,7 @@ export default function BookAppointment({
   });
   const user = useAppSelector((state) => state.auth.user);
 
+  //Handler function to change input from the bookappoinment form
   const handleInputChange = (field: keyof AppointmentData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
@@ -232,7 +234,6 @@ export default function BookAppointment({
 
   const validateStep = (step: number): boolean => {
     const newErrors: Partial<AppointmentData> = {};
-
     switch (step) {
       case 2:
         if (!formData.appointmentDate)
@@ -251,7 +252,6 @@ export default function BookAppointment({
           newErrors.paymentMethod = "Payment method is required";
         break;
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -282,23 +282,24 @@ export default function BookAppointment({
     fetchData();
   }, [user?._id]);
 
+  //handle when i want to move one front step
   const handleNext = () => {
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => prev + 1);
     }
   };
 
+  //handle when i want to move one backward step
   const handlePrevious = () => {
     setCurrentStep((prev) => prev - 1);
   };
 
+  //handler function to submit form
   const handleSubmit = async () => {
     if (!validateStep(4)) return;
 
     setIsSubmitting(true);
-
     const id = user?._id;
-    // Simulate API call
     try {
       let response = await fetch("./api/user/bookAppointment", {
         method: "POST",
@@ -337,7 +338,6 @@ export default function BookAppointment({
         if (!response) {
           console.log("doctor availavelslots is not valid");
         }
-
         setEnabledDays(response || []);
       } catch (err) {
         console.log(err);
@@ -346,8 +346,7 @@ export default function BookAppointment({
     fetchData();
   }, [doctor?.availableSlots]);
 
-  console.log("🧞‍♂️  enabledDays --->", enabledDays);
-
+  //Reset the form when submit the form
   const resetForm = () => {
     setCurrentStep(1);
     setIsSuccess(false);
@@ -367,16 +366,19 @@ export default function BookAppointment({
     setErrors({});
   };
 
+  //close the form
   const handleClose = () => {
     resetForm();
     onClose();
   };
 
+  //set min date of calender when i set appointment date for book appoinment
   const getMinDate = () => {
     const today = new Date();
     return today.toISOString().split("T")[0];
   };
 
+  ///set max date(7 days) of calender when i set appointment date for book appoinment
   const getMaxDate = () => {
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 7); // 7 days from now
@@ -388,9 +390,9 @@ export default function BookAppointment({
     return consultation ? consultation.icon : Calendar;
   };
 
+  //Set the time in pm/am formate
   const formatTo12Hour = (time24) => {
     if (!time24) return "";
-
     const [hours, minutes] = time24.split(":");
     const hour = parseInt(hours, 10);
     const minute = minutes || "00";
@@ -406,6 +408,7 @@ export default function BookAppointment({
     }
   };
 
+  //set the format the working hour
   const formatWorkingHours = (hours) => {
     if (!hours?.enabled) {
       return "Closed";
@@ -413,10 +416,10 @@ export default function BookAppointment({
 
     const startTime = formatTo12Hour(hours.startTime);
     const endTime = formatTo12Hour(hours.endTime);
-
     return `${startTime} - ${endTime}`;
   };
 
+  //check the doctor is not
   if (!doctor) return null;
 
   return (
@@ -588,7 +591,9 @@ export default function BookAppointment({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="appointmentDate">Preferred Date *</Label>
+                      <Label htmlFor="appointmentDate" className="mb-2">
+                        Preferred Date *
+                      </Label>
                       <DatePickerWithSlots
                         value={formData.appointmentDate}
                         onChange={(date) =>
@@ -630,7 +635,7 @@ export default function BookAppointment({
                         >
                           <SelectValue placeholder="Select time" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="border border-gray-400">
                           {doctor?.availableSlots &&
                             Object.entries(doctor?.availableSlots)
                               .filter(([day, hours]) => hours?.enabled) // Optional: only show enabled days
@@ -783,6 +788,7 @@ export default function BookAppointment({
                       </p>
                     )}
                   </div>
+
                   {/* Reason for Visit now depends on Consulted Type */}
                   <div>
                     <Label htmlFor="reasonForVisit">Reason for Visit *</Label>
