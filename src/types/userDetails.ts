@@ -109,6 +109,7 @@ interface AppointmentData {
   paymentMethod: string;
   specialRequests: string;
   prescription: Prescription;
+  document?: FileUpload[];
   createdAt: Date;
 }
 

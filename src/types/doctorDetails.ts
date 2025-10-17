@@ -116,5 +116,6 @@ export interface DoctorDetails {
   appointments: AppointmentData[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
+  prescription?: Prescription;
   createdAt: Date;
 }

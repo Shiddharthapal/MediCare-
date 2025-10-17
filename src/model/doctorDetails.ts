@@ -391,6 +391,10 @@ const doctorDetailsSchema = new mongoose.Schema({
       message: "consultation Modes slot must contain at least one Modes",
     },
   },
+  prescription: {
+    type: [PrescriptionSchema],
+    default: [],
+  },
 
   practiceSettingData: {
     type: practiceSettingData,

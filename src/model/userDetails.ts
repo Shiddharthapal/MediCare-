@@ -325,6 +325,10 @@ const appointmentDataSchema = new mongoose.Schema(
       type: PrescriptionSchema,
       default: {},
     },
+    document: {
+      type: [FileUploadSchema],
+      default: [],
+    },
     createdAt: {
       type: Date,
     },

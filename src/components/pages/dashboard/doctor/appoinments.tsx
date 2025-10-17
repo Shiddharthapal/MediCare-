@@ -25,6 +25,7 @@ import {
   FileEdit,
 } from "lucide-react";
 import Prescription from "./prescription";
+import Document from "./document";
 import { useAppSelector } from "@/redux/hooks";
 
 interface AppointmentData {
@@ -584,6 +585,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [appointmentData, setAppointmentData] =
     useState<DoctorDetails>(mockDoctorDetails);
   const [showPrescription, setShowPrescription] = useState(false);
+  const [showDocument, setShowDocument] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const doctor = useAppSelector((state) => state.auth.user);
   // console.log("🧞‍♂️doctor --->", doctor);
@@ -718,6 +720,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     setEdit(true);
   };
 
+  const handleSeeDocument = (patient: any) => {
+    setSelectedPatient(patient);
+    setShowDocument(true);
+  };
+
   const handleShowPrescription = (patient: any) => {
     setSelectedPatient(patient);
     setShowPrescription(true);
@@ -725,6 +732,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   };
 
   const handleClosePrescription = () => {
+    setShowPrescription(false);
+    setSelectedPatient(null);
+  };
+
+  const handleCloseDocument = () => {
     setShowPrescription(false);
     setSelectedPatient(null);
   };
@@ -798,6 +810,25 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
         }}
         edit={edit}
         onClose={handleClosePrescription}
+      />
+    );
+  }
+
+  // If prescription is shown, render only the prescription component
+  if (showPrescription && showDocument) {
+    let id = doctor?._id;
+    console.log("selected patient=>", selectedPatient);
+    return (
+      <Document
+        DocumentData={{
+          ...selectedPatient,
+          hospital: appointmentData.hospital,
+          doctorContact: appointmentData.contact,
+          doctorEmail: appointmentData.email,
+          doctorGender: appointmentData.gender,
+          doctorId: id,
+        }}
+        onClose={handleCloseDocument}
       />
     );
   }
@@ -895,9 +926,10 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={() => handleSeeDocument(appointment)}
                   className="text-xs  border-2 border-gray-400 transition-all hover:border-primary/50 "
                 >
-                  Edit
+                  Document
                 </Button>
                 <div className="flex gap-1">
                   <Button
