@@ -31,6 +31,7 @@ import { useAppSelector } from "@/redux/hooks";
 interface AppointmentData {
   _id: string;
   doctorName: string;
+  doctorpatinetId: string;
   doctorSpecialist: string;
   doctorEmail: string;
   patientId: string;
@@ -78,6 +79,7 @@ export interface DoctorDetails {
 const mockAppointmentData: AppointmentData = {
   _id: "",
   doctorName: "",
+  doctorpatinetId: "",
   doctorSpecialist: "",
   doctorEmail: "",
   patientId: "",
@@ -122,324 +124,6 @@ const mockDoctorDetails: DoctorDetails = {
   appointments: [],
   consultationModes: [],
   createdAt: new Date(),
-};
-
-// Mock data for appointments
-const appointmentsData = {
-  today: [
-    {
-      id: 1,
-      patient: {
-        name: "Floyd Miles",
-        avatar: "FM",
-        phone: "(603) 555-0123",
-        email: "floydmiles@gmail.com",
-        age: 54,
-        gender: "Male",
-      },
-      time: "09:30 AM",
-      duration: "30 min",
-      type: "Regular Checkup",
-      doctor: "Dr. Edward Bailey",
-      status: "confirmed",
-      location: "Room 101",
-      notes: "Follow-up for hypertension management",
-    },
-    {
-      id: 2,
-      patient: {
-        name: "Annette Black",
-        avatar: "AB",
-        phone: "(555) 123-4567",
-        email: "annette.black@email.com",
-        age: 42,
-        gender: "Female",
-      },
-      time: "11:00 AM",
-      duration: "45 min",
-      type: "Consultation",
-      doctor: "Dr. Sarah Johnson",
-      status: "in-progress",
-      location: "Room 203",
-      notes: "Asthma review and medication adjustment",
-    },
-    {
-      id: 3,
-      patient: {
-        name: "Guy Hawkins",
-        avatar: "GH",
-        phone: "(555) 987-6543",
-        email: "guy.hawkins@email.com",
-        age: 38,
-        gender: "Male",
-      },
-      time: "02:15 PM",
-      duration: "30 min",
-      type: "Physical Therapy",
-      doctor: "Dr. Amanda Lee",
-      status: "confirmed",
-      location: "PT Room 1",
-      notes: "Lower back pain treatment session",
-    },
-    {
-      id: 4,
-      patient: {
-        name: "Kristina Stokes",
-        avatar: "KS",
-        phone: "(555) 456-7890",
-        email: "kristina.stokes@email.com",
-        age: 29,
-        gender: "Female",
-      },
-      time: "04:30 PM",
-      duration: "30 min",
-      type: "Consultation",
-      doctor: "Dr. Edward Bailey",
-      status: "pending",
-      location: "Room 101",
-      notes: "General health checkup",
-    },
-  ],
-  upcoming: [
-    {
-      id: 5,
-      date: "Tomorrow",
-      fullDate: "December 10, 2024",
-      appointments: [
-        {
-          id: 51,
-          patient: {
-            name: "Robert Johnson",
-            avatar: "RJ",
-            phone: "(555) 111-2222",
-            email: "robert.j@email.com",
-            age: 45,
-            gender: "Male",
-          },
-          time: "10:00 AM",
-          duration: "30 min",
-          type: "Follow-up",
-          doctor: "Dr. Edward Bailey",
-          status: "confirmed",
-          location: "Room 101",
-          notes: "Diabetes management follow-up",
-        },
-        {
-          id: 52,
-          patient: {
-            name: "Maria Garcia",
-            avatar: "MG",
-            phone: "(555) 333-4444",
-            email: "maria.garcia@email.com",
-            age: 35,
-            gender: "Female",
-          },
-          time: "02:00 PM",
-          duration: "45 min",
-          type: "Consultation",
-          doctor: "Dr. Michael Chen",
-          status: "confirmed",
-          location: "Room 205",
-          notes: "Cardiology consultation",
-        },
-      ],
-    },
-    {
-      id: 6,
-      date: "2 days after",
-      fullDate: "December 11, 2024",
-      appointments: [
-        {
-          id: 61,
-          patient: {
-            name: "James Wilson",
-            avatar: "JW",
-            phone: "(555) 555-6666",
-            email: "james.wilson@email.com",
-            age: 52,
-            gender: "Male",
-          },
-          time: "09:15 AM",
-          duration: "30 min",
-          type: "Lab Results Review",
-          doctor: "Dr. Sarah Johnson",
-          status: "confirmed",
-          location: "Room 203",
-          notes: "Blood work results discussion",
-        },
-      ],
-    },
-    {
-      id: 7,
-      date: "3 days after",
-      fullDate: "December 12, 2024",
-      appointments: [
-        {
-          id: 71,
-          patient: {
-            name: "Linda Davis",
-            avatar: "LD",
-            phone: "(555) 777-8888",
-            email: "linda.davis@email.com",
-            age: 48,
-            gender: "Female",
-          },
-          time: "11:30 AM",
-          duration: "30 min",
-          type: "Routine Checkup",
-          doctor: "Dr. Edward Bailey",
-          status: "confirmed",
-          location: "Room 101",
-          notes: "Annual physical examination",
-        },
-        {
-          id: 72,
-          patient: {
-            name: "David Brown",
-            avatar: "DB",
-            phone: "(555) 999-0000",
-            email: "david.brown@email.com",
-            age: 41,
-            gender: "Male",
-          },
-          time: "03:45 PM",
-          duration: "45 min",
-          type: "Specialist Consultation",
-          doctor: "Dr. Lisa Wong",
-          status: "pending",
-          location: "Room 301",
-          notes: "Sleep disorder evaluation",
-        },
-      ],
-    },
-    {
-      id: 8,
-      date: "4 days after",
-      fullDate: "December 13, 2024",
-      appointments: [
-        {
-          id: 81,
-          patient: {
-            name: "Sarah Miller",
-            avatar: "SM",
-            phone: "(555) 123-9876",
-            email: "sarah.miller@email.com",
-            age: 33,
-            gender: "Female",
-          },
-          time: "10:15 AM",
-          duration: "30 min",
-          type: "Prenatal Checkup",
-          doctor: "Dr. Amanda Lee",
-          status: "confirmed",
-          location: "Room 401",
-          notes: "20-week pregnancy checkup",
-        },
-      ],
-    },
-  ],
-  previous: [
-    {
-      id: 101,
-      patient: {
-        name: "Floyd Miles",
-        avatar: "FM",
-        phone: "(603) 555-0123",
-        email: "floydmiles@gmail.com",
-        age: 54,
-        gender: "Male",
-      },
-      date: "December 1, 2024",
-      time: "12:45 PM",
-      duration: "30 min",
-      type: "Regular Checkup",
-      doctor: "Dr. Edward Bailey",
-      status: "completed",
-      location: "Room 101",
-      notes: "Blood pressure monitoring, medication adjustment",
-      outcome: "Prescribed new medication for hypertension",
-    },
-    {
-      id: 102,
-      patient: {
-        name: "Annette Black",
-        avatar: "AB",
-        phone: "(555) 123-4567",
-        email: "annette.black@email.com",
-        age: 42,
-        gender: "Female",
-      },
-      date: "November 28, 2024",
-      time: "03:30 PM",
-      duration: "45 min",
-      type: "Asthma Review",
-      doctor: "Dr. Robert Kim",
-      status: "completed",
-      location: "Room 203",
-      notes: "Asthma control assessment",
-      outcome: "Inhaler technique reviewed, no changes needed",
-    },
-    {
-      id: 103,
-      patient: {
-        name: "Guy Hawkins",
-        avatar: "GH",
-        phone: "(555) 987-6543",
-        email: "guy.hawkins@email.com",
-        age: 38,
-        gender: "Male",
-      },
-      date: "November 25, 2024",
-      time: "01:00 PM",
-      duration: "45 min",
-      type: "Physical Therapy",
-      doctor: "Dr. Amanda Lee",
-      status: "completed",
-      location: "PT Room 1",
-      notes: "Lower back pain treatment",
-      outcome: "Significant improvement, continue exercises",
-    },
-    {
-      id: 104,
-      patient: {
-        name: "Robert Johnson",
-        avatar: "RJ",
-        phone: "(555) 111-2222",
-        email: "robert.j@email.com",
-        age: 45,
-        gender: "Male",
-      },
-      date: "November 20, 2024",
-      time: "10:30 AM",
-      duration: "30 min",
-      type: "Diabetes Consultation",
-      doctor: "Dr. Michael Chen",
-      status: "completed",
-      location: "Room 205",
-      notes: "Blood sugar levels review",
-      outcome: "Good control, continue current medication",
-    },
-    {
-      id: 105,
-      patient: {
-        name: "Maria Garcia",
-        avatar: "MG",
-        phone: "(555) 333-4444",
-        email: "maria.garcia@email.com",
-        age: 35,
-        gender: "Female",
-      },
-      date: "November 15, 2024",
-      time: "02:15 PM",
-      duration: "45 min",
-      type: "Cardiology Consultation",
-      doctor: "Dr. Sarah Johnson",
-      status: "completed",
-      location: "Room 203",
-      notes: "Heart palpitations evaluation",
-      outcome: "ECG normal, lifestyle modifications recommended",
-    },
-  ],
 };
 
 const formatDate = (dateString: string) => {
@@ -637,7 +321,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
   useEffect(() => {
     let id = doctor?._id;
-    console.log("🧞‍♂️id --->", id);
     const fetchData = async () => {
       const response = await fetch(`/api/doctor/${id}`, {
         method: "GET",
@@ -646,7 +329,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
         },
       });
       const responsedata = await response.json();
-      // console.log("🧞‍♂️responsedata --->", responsedata);
       setAppointmentData(responsedata.doctordetails);
     };
 
@@ -668,17 +350,14 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
         ))
     );
   }
-  console.log("today appointment=>", todayGrouped);
 
   const futureGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.future);
   }, [categorizedAppointments.future]);
-  console.log("future appointment=>", futureGrouped);
 
   const pastGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
-  console.log("🧞‍♂️  pastGrouped --->", pastGrouped);
 
   const handleAcceptRequest = (
     requestId: number,
