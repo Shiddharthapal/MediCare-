@@ -100,12 +100,24 @@ export default function Document({
   isEditMode = false,
   onSave,
 }: PrescriptionProps) {
+  console.log("🧞‍♂️  DocumentData --->", DocumentData);
   const [documentForm, setDocumentForm] =
     useState<DocumentData>(mockDocumentdata);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState(!!savedPrescription && !isEditMode);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    let id = documentForm.patientId;
+    const fetchData = async () => {
+      const response = await fetch(`/api/user/${id}`);
+      if (!response.ok) {
+        console.error("Invalid patient");
+      }
+      let result = await response.json();
+      //add setDocument when i good morning
+    };
+    fetchData();
+  }, []);
 
   const getDocumentIcon = (type: string) => {
     switch (type) {
@@ -154,16 +166,17 @@ export default function Document({
             <div>
               <h1 className="text-3xl font-bold">Patient Documents</h1>
               <p className="text-gray-600 mt-1">
-                {patientData?.patientName} • Appointment ID: {appointmentId}
+                {DocumentData?.patientName} • Appointment ID:{" "}
+                {DocumentData?.doctorpatinetId}
               </p>
             </div>
           </div>
         </div>
 
         {/* Documents Grid */}
-        {patientData && patientData.documents.length > 0 ? (
+        {DocumentData && DocumentData.documents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {patientData.documents.map((doc) => (
+            {DocumentData.documents.map((doc) => (
               <Card key={doc.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
