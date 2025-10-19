@@ -388,26 +388,28 @@ export default function DashboardPage() {
     useState<DoctorDetails>(mockDoctorDetails);
 
   let doctor = useAppSelector((state) => state.auth.user);
+  const id = doctor?._id;
+  console.log("🧞‍♂️  id --->", id);
   // console.log("🧞‍♂️doctor --->", doctor);
   const datagender = [
-    { name: "Male", value: genderOfPatient?.Male || 10, color: "#3b82f6" },
-    { name: "Female", value: genderOfPatient?.Female || 7, color: "#ec4899" },
-    { name: "Other", value: genderOfPatient?.Other || 1, color: "#047857" },
+    { name: "Male", value: genderOfPatient?.Male || 0, color: "#3b82f6" },
+    { name: "Female", value: genderOfPatient?.Female || 0, color: "#ec4899" },
+    { name: "Other", value: genderOfPatient?.Other || 0, color: "#047857" },
   ];
 
   const dataAppointmentCount = [
-    { name: "Jan", appointments: appointmentNumberinMonth?.Jan || 22 },
-    { name: "Feb", appointments: appointmentNumberinMonth?.Feb || 2 },
-    { name: "Mar", appointments: appointmentNumberinMonth?.Mar || 13 },
-    { name: "Apr", appointments: appointmentNumberinMonth?.Apr || 5 },
-    { name: "May", appointments: appointmentNumberinMonth?.May || 7 },
-    { name: "Jun", appointments: appointmentNumberinMonth?.Jun || 2 },
-    { name: "Jul", appointments: appointmentNumberinMonth?.Jul || 19 },
-    { name: "Aug", appointments: appointmentNumberinMonth?.Aug || 4 },
-    { name: "Sep", appointments: appointmentNumberinMonth?.Sep || 15 },
-    { name: "Oct", appointments: appointmentNumberinMonth?.Oct || 23 },
-    { name: "Nov", appointments: appointmentNumberinMonth?.Nov || 2 },
-    { name: "Dec", appointments: appointmentNumberinMonth?.Dec || 14 },
+    { name: "Jan", appointments: appointmentNumberinMonth?.Jan || 0 },
+    { name: "Feb", appointments: appointmentNumberinMonth?.Feb || 0 },
+    { name: "Mar", appointments: appointmentNumberinMonth?.Mar || 0 },
+    { name: "Apr", appointments: appointmentNumberinMonth?.Apr || 0 },
+    { name: "May", appointments: appointmentNumberinMonth?.May || 0 },
+    { name: "Jun", appointments: appointmentNumberinMonth?.Jun || 0 },
+    { name: "Jul", appointments: appointmentNumberinMonth?.Jul || 0 },
+    { name: "Aug", appointments: appointmentNumberinMonth?.Aug || 0 },
+    { name: "Sep", appointments: appointmentNumberinMonth?.Sep || 0 },
+    { name: "Oct", appointments: appointmentNumberinMonth?.Oct || 0 },
+    { name: "Nov", appointments: appointmentNumberinMonth?.Nov || 0 },
+    { name: "Dec", appointments: appointmentNumberinMonth?.Dec || 0 },
   ];
 
   const stats = [
@@ -440,6 +442,7 @@ export default function DashboardPage() {
       icon: User,
     },
   ];
+
   let countAppointmentInMonth = (
     appointments: AppointmentData[]
   ): AppointmentCount => {
@@ -506,15 +509,18 @@ export default function DashboardPage() {
     return countgender;
   };
 
+  //Count the number of appointment
   const handleAppointmentCount = (appointments: AppointmentData[]) => {
     if (!appointments) {
       throw new Error("No appointments are available now");
     }
     let appointment_total = countAppointmentInMonth(appointments);
+    console.log("🧞‍♂️  appointment_total --->", appointment_total);
     setAppointmentNumberinMonth(appointment_total);
     return true;
   };
 
+  //handle count the patient gender
   const handleGenderCountofPatient = (appointments: AppointmentData[]) => {
     if (!appointments) {
       throw new Error("No appointments are available now");
@@ -525,38 +531,6 @@ export default function DashboardPage() {
     return true;
   };
 
-  const getUserId = async (): Promise<string | null> => {
-    // First try to get from user object
-    if (doctor?._id) {
-      return doctor._id;
-    }
-
-    // Fallback to token verification
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No auth token found");
-      }
-      let response = await fetch("/api/getId/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token }),
-      });
-      let userid = await response.json();
-
-      // console.log("🧞‍♂️userid --->", userid);
-      if (!userid) {
-        throw new Error("Invalid token or no user ID");
-      }
-
-      return userid.userId;
-    } catch (error) {
-      console.error("Failed to get user ID:", error);
-      return null;
-    }
-  };
   const categorizedAppointments = useMemo(() => {
     return categorizeAppointments(
       doctorData.appointments
@@ -570,7 +544,6 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let id = await getUserId();
         // console.log("🧞‍♂️id --->", id);
         let response = await fetch(`/api/doctor/${id}`, {
           method: "GET",
@@ -579,7 +552,7 @@ export default function DashboardPage() {
           },
         });
         let responsedata = await response.json();
-        // console.log("🧞‍♂️responsedata --->", responsedata?.doctordetails);
+
         setDoctorData(responsedata?.doctordetails);
       } catch (err) {
         console.log("Index error:", err);
@@ -765,14 +738,17 @@ export default function DashboardPage() {
       >
         {/* Main Content */}
         {currentPage === "dashboard" && (
-          <div className="flex-1 flex items-center mx-28 flex-col ">
+          <div className="flex-1 flex items-center mx-1 flex-col ">
             <main className="flex-1 overflow-y-auto p-6">
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
                 {/* Stats Cards */}
                 <div className="xl:col-span-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     {stats.map((stat, index) => (
-                      <Card key={index}>
+                      <Card
+                        key={index}
+                        className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
+                      >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div>
@@ -788,7 +764,7 @@ export default function DashboardPage() {
                     ))}
                   </div>
                   <div className="pb-6">
-                    <Card>
+                    <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                       <CardContent className="p-6 text-center">
                         <Avatar className="h-20 w-20 mx-auto mb-4">
                           <AvatarImage src="/placeholder.svg?height=80&width=80" />
@@ -832,7 +808,7 @@ export default function DashboardPage() {
 
                   {/* Charts */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <Card>
+                    <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                       <CardHeader>
                         <div className="flex items-center justify-between gap-36">
                           <CardTitle>Appointments</CardTitle>
@@ -912,7 +888,7 @@ export default function DashboardPage() {
                       </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                       <CardHeader>
                         <CardTitle>Gender Distribution</CardTitle>
                       </CardHeader>
@@ -978,7 +954,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Today's Appointments */}
-                  <Card>
+                  <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                     <CardHeader>
                       <CardTitle>{"Today's Appointments"}</CardTitle>
                     </CardHeader>

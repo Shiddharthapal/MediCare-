@@ -25,11 +25,13 @@ import {
   FileEdit,
 } from "lucide-react";
 import Prescription from "./prescription";
+import Document from "./document";
 import { useAppSelector } from "@/redux/hooks";
 
 interface AppointmentData {
   _id: string;
   doctorName: string;
+  doctorpatinetId: string;
   doctorSpecialist: string;
   doctorEmail: string;
   patientId: string;
@@ -77,6 +79,7 @@ export interface DoctorDetails {
 const mockAppointmentData: AppointmentData = {
   _id: "",
   doctorName: "",
+  doctorpatinetId: "",
   doctorSpecialist: "",
   doctorEmail: "",
   patientId: "",
@@ -121,324 +124,6 @@ const mockDoctorDetails: DoctorDetails = {
   appointments: [],
   consultationModes: [],
   createdAt: new Date(),
-};
-
-// Mock data for appointments
-const appointmentsData = {
-  today: [
-    {
-      id: 1,
-      patient: {
-        name: "Floyd Miles",
-        avatar: "FM",
-        phone: "(603) 555-0123",
-        email: "floydmiles@gmail.com",
-        age: 54,
-        gender: "Male",
-      },
-      time: "09:30 AM",
-      duration: "30 min",
-      type: "Regular Checkup",
-      doctor: "Dr. Edward Bailey",
-      status: "confirmed",
-      location: "Room 101",
-      notes: "Follow-up for hypertension management",
-    },
-    {
-      id: 2,
-      patient: {
-        name: "Annette Black",
-        avatar: "AB",
-        phone: "(555) 123-4567",
-        email: "annette.black@email.com",
-        age: 42,
-        gender: "Female",
-      },
-      time: "11:00 AM",
-      duration: "45 min",
-      type: "Consultation",
-      doctor: "Dr. Sarah Johnson",
-      status: "in-progress",
-      location: "Room 203",
-      notes: "Asthma review and medication adjustment",
-    },
-    {
-      id: 3,
-      patient: {
-        name: "Guy Hawkins",
-        avatar: "GH",
-        phone: "(555) 987-6543",
-        email: "guy.hawkins@email.com",
-        age: 38,
-        gender: "Male",
-      },
-      time: "02:15 PM",
-      duration: "30 min",
-      type: "Physical Therapy",
-      doctor: "Dr. Amanda Lee",
-      status: "confirmed",
-      location: "PT Room 1",
-      notes: "Lower back pain treatment session",
-    },
-    {
-      id: 4,
-      patient: {
-        name: "Kristina Stokes",
-        avatar: "KS",
-        phone: "(555) 456-7890",
-        email: "kristina.stokes@email.com",
-        age: 29,
-        gender: "Female",
-      },
-      time: "04:30 PM",
-      duration: "30 min",
-      type: "Consultation",
-      doctor: "Dr. Edward Bailey",
-      status: "pending",
-      location: "Room 101",
-      notes: "General health checkup",
-    },
-  ],
-  upcoming: [
-    {
-      id: 5,
-      date: "Tomorrow",
-      fullDate: "December 10, 2024",
-      appointments: [
-        {
-          id: 51,
-          patient: {
-            name: "Robert Johnson",
-            avatar: "RJ",
-            phone: "(555) 111-2222",
-            email: "robert.j@email.com",
-            age: 45,
-            gender: "Male",
-          },
-          time: "10:00 AM",
-          duration: "30 min",
-          type: "Follow-up",
-          doctor: "Dr. Edward Bailey",
-          status: "confirmed",
-          location: "Room 101",
-          notes: "Diabetes management follow-up",
-        },
-        {
-          id: 52,
-          patient: {
-            name: "Maria Garcia",
-            avatar: "MG",
-            phone: "(555) 333-4444",
-            email: "maria.garcia@email.com",
-            age: 35,
-            gender: "Female",
-          },
-          time: "02:00 PM",
-          duration: "45 min",
-          type: "Consultation",
-          doctor: "Dr. Michael Chen",
-          status: "confirmed",
-          location: "Room 205",
-          notes: "Cardiology consultation",
-        },
-      ],
-    },
-    {
-      id: 6,
-      date: "2 days after",
-      fullDate: "December 11, 2024",
-      appointments: [
-        {
-          id: 61,
-          patient: {
-            name: "James Wilson",
-            avatar: "JW",
-            phone: "(555) 555-6666",
-            email: "james.wilson@email.com",
-            age: 52,
-            gender: "Male",
-          },
-          time: "09:15 AM",
-          duration: "30 min",
-          type: "Lab Results Review",
-          doctor: "Dr. Sarah Johnson",
-          status: "confirmed",
-          location: "Room 203",
-          notes: "Blood work results discussion",
-        },
-      ],
-    },
-    {
-      id: 7,
-      date: "3 days after",
-      fullDate: "December 12, 2024",
-      appointments: [
-        {
-          id: 71,
-          patient: {
-            name: "Linda Davis",
-            avatar: "LD",
-            phone: "(555) 777-8888",
-            email: "linda.davis@email.com",
-            age: 48,
-            gender: "Female",
-          },
-          time: "11:30 AM",
-          duration: "30 min",
-          type: "Routine Checkup",
-          doctor: "Dr. Edward Bailey",
-          status: "confirmed",
-          location: "Room 101",
-          notes: "Annual physical examination",
-        },
-        {
-          id: 72,
-          patient: {
-            name: "David Brown",
-            avatar: "DB",
-            phone: "(555) 999-0000",
-            email: "david.brown@email.com",
-            age: 41,
-            gender: "Male",
-          },
-          time: "03:45 PM",
-          duration: "45 min",
-          type: "Specialist Consultation",
-          doctor: "Dr. Lisa Wong",
-          status: "pending",
-          location: "Room 301",
-          notes: "Sleep disorder evaluation",
-        },
-      ],
-    },
-    {
-      id: 8,
-      date: "4 days after",
-      fullDate: "December 13, 2024",
-      appointments: [
-        {
-          id: 81,
-          patient: {
-            name: "Sarah Miller",
-            avatar: "SM",
-            phone: "(555) 123-9876",
-            email: "sarah.miller@email.com",
-            age: 33,
-            gender: "Female",
-          },
-          time: "10:15 AM",
-          duration: "30 min",
-          type: "Prenatal Checkup",
-          doctor: "Dr. Amanda Lee",
-          status: "confirmed",
-          location: "Room 401",
-          notes: "20-week pregnancy checkup",
-        },
-      ],
-    },
-  ],
-  previous: [
-    {
-      id: 101,
-      patient: {
-        name: "Floyd Miles",
-        avatar: "FM",
-        phone: "(603) 555-0123",
-        email: "floydmiles@gmail.com",
-        age: 54,
-        gender: "Male",
-      },
-      date: "December 1, 2024",
-      time: "12:45 PM",
-      duration: "30 min",
-      type: "Regular Checkup",
-      doctor: "Dr. Edward Bailey",
-      status: "completed",
-      location: "Room 101",
-      notes: "Blood pressure monitoring, medication adjustment",
-      outcome: "Prescribed new medication for hypertension",
-    },
-    {
-      id: 102,
-      patient: {
-        name: "Annette Black",
-        avatar: "AB",
-        phone: "(555) 123-4567",
-        email: "annette.black@email.com",
-        age: 42,
-        gender: "Female",
-      },
-      date: "November 28, 2024",
-      time: "03:30 PM",
-      duration: "45 min",
-      type: "Asthma Review",
-      doctor: "Dr. Robert Kim",
-      status: "completed",
-      location: "Room 203",
-      notes: "Asthma control assessment",
-      outcome: "Inhaler technique reviewed, no changes needed",
-    },
-    {
-      id: 103,
-      patient: {
-        name: "Guy Hawkins",
-        avatar: "GH",
-        phone: "(555) 987-6543",
-        email: "guy.hawkins@email.com",
-        age: 38,
-        gender: "Male",
-      },
-      date: "November 25, 2024",
-      time: "01:00 PM",
-      duration: "45 min",
-      type: "Physical Therapy",
-      doctor: "Dr. Amanda Lee",
-      status: "completed",
-      location: "PT Room 1",
-      notes: "Lower back pain treatment",
-      outcome: "Significant improvement, continue exercises",
-    },
-    {
-      id: 104,
-      patient: {
-        name: "Robert Johnson",
-        avatar: "RJ",
-        phone: "(555) 111-2222",
-        email: "robert.j@email.com",
-        age: 45,
-        gender: "Male",
-      },
-      date: "November 20, 2024",
-      time: "10:30 AM",
-      duration: "30 min",
-      type: "Diabetes Consultation",
-      doctor: "Dr. Michael Chen",
-      status: "completed",
-      location: "Room 205",
-      notes: "Blood sugar levels review",
-      outcome: "Good control, continue current medication",
-    },
-    {
-      id: 105,
-      patient: {
-        name: "Maria Garcia",
-        avatar: "MG",
-        phone: "(555) 333-4444",
-        email: "maria.garcia@email.com",
-        age: 35,
-        gender: "Female",
-      },
-      date: "November 15, 2024",
-      time: "02:15 PM",
-      duration: "45 min",
-      type: "Cardiology Consultation",
-      doctor: "Dr. Sarah Johnson",
-      status: "completed",
-      location: "Room 203",
-      notes: "Heart palpitations evaluation",
-      outcome: "ECG normal, lifestyle modifications recommended",
-    },
-  ],
 };
 
 const formatDate = (dateString: string) => {
@@ -580,9 +265,11 @@ interface PatientsPageProps {
 export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [activeTab, setActiveTab] = useState("today");
   const [searchTerm, setSearchTerm] = useState("");
+  const [edit, setEdit] = useState(false);
   const [appointmentData, setAppointmentData] =
     useState<DoctorDetails>(mockDoctorDetails);
   const [showPrescription, setShowPrescription] = useState(false);
+  const [showDocument, setShowDocument] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const doctor = useAppSelector((state) => state.auth.user);
   // console.log("🧞‍♂️doctor --->", doctor);
@@ -634,7 +321,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
   useEffect(() => {
     let id = doctor?._id;
-    console.log("🧞‍♂️id --->", id);
     const fetchData = async () => {
       const response = await fetch(`/api/doctor/${id}`, {
         method: "GET",
@@ -643,7 +329,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
         },
       });
       const responsedata = await response.json();
-      // console.log("🧞‍♂️responsedata --->", responsedata);
       setAppointmentData(responsedata.doctordetails);
     };
 
@@ -665,17 +350,14 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
         ))
     );
   }
-  console.log("today appointment=>", todayGrouped);
 
   const futureGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.future);
   }, [categorizedAppointments.future]);
-  console.log("future appointment=>", futureGrouped);
 
   const pastGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
-  console.log("🧞‍♂️  pastGrouped --->", pastGrouped);
 
   const handleAcceptRequest = (
     requestId: number,
@@ -714,10 +396,27 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const handleCreatePrescription = (patient: any) => {
     setSelectedPatient(patient);
     setShowPrescription(true);
+    setEdit(true);
+  };
+
+  const handleSeeDocument = (patient: any) => {
+    setSelectedPatient(patient);
+    setShowDocument(true);
+  };
+
+  const handleShowPrescription = (patient: any) => {
+    setSelectedPatient(patient);
+    setShowPrescription(true);
+    setEdit(false);
   };
 
   const handleClosePrescription = () => {
     setShowPrescription(false);
+    setSelectedPatient(null);
+  };
+
+  const handleCloseDocument = () => {
+    setShowDocument(false);
     setSelectedPatient(null);
   };
 
@@ -788,7 +487,27 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           doctorGender: appointmentData.gender,
           doctorId: id,
         }}
+        edit={edit}
         onClose={handleClosePrescription}
+      />
+    );
+  }
+
+  // If prescription is shown, render only the prescription component
+  if (showDocument) {
+    let id = doctor?._id;
+    console.log("selected patient=>", selectedPatient);
+    return (
+      <Document
+        DocumentData={{
+          ...selectedPatient,
+          hospital: appointmentData.hospital,
+          doctorContact: appointmentData.contact,
+          doctorEmail: appointmentData.email,
+          doctorGender: appointmentData.gender,
+          doctorId: id,
+        }}
+        onClose={handleCloseDocument}
       />
     );
   }
@@ -804,11 +523,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     showDate: boolean;
     isPrevious?: boolean;
   }) => (
-    <Card className="mb-4 hover:shadow-md transition-shadow">
-      <CardContent className="p-1">
-        <div className="flex items-center justify-between">
+    <Card className="mb-4  border border-gray-600 transition-all  hover:shadow-lg w-full max-w-full">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-start gap-4 flex-1">
-            <Avatar className="w-12 h-12">
+            <Avatar className="w-12 h-12 ring-1">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>
                 {getPatientInitials(appointment?.patientName)}
@@ -833,16 +552,16 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                 <div className="flex flex-col  gap-1">
                   <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="h-4 w-4 text-[hsl(273,100%,60%)]" />
                     {showDate && <span>{appointment?.appointmentDate} </span>}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-4 w-4 text-red-500" />
                     <span>{appointment.appointmentTime} • 30 Minutes</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
+                  <MapPin className="h-4 w-4 text-orange-500" />
                   <span>
                     {appointment.consultationType === "video" || "phone"
                       ? "In home (online)"
@@ -850,11 +569,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Phone className="h-4 w-4" />
+                  <Phone className="h-4 w-4 text-cyan-600" />
                   <span>{appointment.patientPhone}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Mail className="h-4 w-4" />
+                  <Mail className="h-4 w-4 text-blue-500" />
                   <span>{appointment.patientEmail}</span>
                 </div>
               </div>
@@ -886,21 +605,22 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-xs bg-transparent"
+                  onClick={() => handleSeeDocument(appointment)}
+                  className="text-xs  border-2 border-gray-400 transition-all hover:border-primary/50 "
                 >
-                  Edit
+                  Document
                 </Button>
                 <div className="flex gap-1">
                   <Button
                     size="sm"
-                    className="text-xs bg-blue-500 hover:bg-blue-600 text-white flex-1"
+                    className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
                   >
                     <Video className="h-3 w-3 mr-1" />
                     Start
                   </Button>
                   <Button
                     size="sm"
-                    className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
+                    className="text-xs bg-green-500 hover:bg-green-600 hover:text-black text-white flex-1"
                     onClick={() => handleCreatePrescription(appointment)}
                   >
                     <FileEdit className="h-3 w-3 mr-1" />
@@ -911,7 +631,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-xs bg-transparent"
+                    className="text-xs border-2 border-gray-400 transition-all hover:border-0 hover:bg-red-200 hover:shadow-lg"
                     onClick={() => handleCancelAppointment(appointment)}
                   >
                     Cancel
@@ -924,7 +644,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   <Button
                     size="sm"
                     className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
-                    onClick={() => handleCreatePrescription(appointment)}
+                    onClick={() => handleShowPrescription(appointment)}
                   >
                     <Eye className="h-3 w-3 mr-1" />
                     See Prescription
@@ -939,28 +659,28 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   );
 
   return (
-    <div className="flex-1 flex flex-col items-center mx-28 overflow-hidden min-h-screen bg-gray-50">
+    <div className="flex-1 flex flex-col mx-auto w-full max-w-7xl overflow-hidden min-h-screen bg-white">
       {/* Header */}
-      <header className="flex items-center  justify-between p-6 border-b border-gray-100 bg-white">
-        <div className="flex flex-row  justify-between gap-24 md:gap-52">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <header className="flex items-center justify-between p-6 bg-white border-b">
+        <div className="flex flex-col md:flex-row justify-between gap-4 md:gap-8 w-full">
+          <div className="relative border border-gray-400 rounded-md transition-all hover:border-primary/50 hover:shadow-lg flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-500 " />
             <input
               type="text"
               placeholder="Search appointments..."
-              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="flex gap-6">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
+            >
               <Filter className="h-4 w-4 mr-2" />
               Filter
-            </Button>
-            <Button size="sm" className="">
-              <Plus className="h-4 w-4 mr-2" />
-              New Appointment
             </Button>
           </div>
         </div>
@@ -970,7 +690,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       <main className="flex-1 overflow-y-auto p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card>
+          <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -998,7 +718,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
               </div>
             </CardContent>
           </Card> */}
-          <Card>
+          <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1007,11 +727,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                     {Object.entries(futureGrouped).length}
                   </p>
                 </div>
-                <Clock className="h-8 w-8 text-green-500" />
+                <Clock className="h-8 w-8 text-[hsl(273,100%,60%)]" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1020,7 +740,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                     {Object.entries(pastGrouped).length}
                   </p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-gray-500" />
+                <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
@@ -1028,7 +748,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
         {/* Appointments Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-300">
             <TabsTrigger value="today">Today</TabsTrigger>
             {/* <TabsTrigger value="requests">
               Requests
@@ -1044,11 +764,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
           {/* Today's Appointments */}
           <TabsContent value="today" className="mt-6">
-            <Card>
+            <Card className="border border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  {`Today's Appointments - ${new Date()}`}
+                  <Calendar className="h-5 w-5 text-[hsl(273,100%,60%)]" />
+                  {`Today's Appointments - ${new Date().toISOString().split("T")}`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1325,21 +1045,18 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           {/* Upcoming Appointments */}
           <TabsContent value="upcoming" className="mt-6">
             <div className="space-y-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5" />
-                    Previous Appointments
-                  </CardTitle>
+              <Card className="border border-gray-400">
+                <CardHeader className="flex items-center gap-2 text-2xl pb-2">
+                  <Clock className="h-6 w-6 text-blue-500" />
+                  Upcoming Appointments
                 </CardHeader>
-              </Card>
-              {Object.keys(futureGrouped).length > 0 ? (
-                Object.entries(futureGrouped).map(
-                  ([date, appointments]: [string, AppointmentData[]]) => (
-                    <Card key={date}>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <div className="flex items-center gap-2 pb-2 border-b">
+
+                <CardContent>
+                  {Object.keys(futureGrouped).length > 0 ? (
+                    Object.entries(futureGrouped).map(
+                      ([date, appointments]: [string, AppointmentData[]]) => (
+                        <div key={date} className="mb-6">
+                          <div className="flex items-center gap-2 pb-2 border-b mb-4">
                             <h3 className="text-lg font-medium text-gray-800">
                               {formatDate(date)}
                             </h3>
@@ -1350,70 +1067,78 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                                 year: "numeric",
                               })}
                             </span>
-                            <Badge variant="outline" className="ml-2">
+                            <Badge
+                              variant="outline"
+                              className="ml-2 bg-[hsl(273,100%,60%)] text-white"
+                            >
                               {appointments.length} appointment
                               {appointments.length !== 1 ? "s" : ""}
                             </Badge>
                           </div>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {appointments && appointments.length > 0 ? (
-                          appointments.map((appointment: AppointmentData) => {
-                            // Add individual appointment validation
-                            if (!appointment || !appointment._id) {
-                              console.warn(
-                                "Invalid appointment data:",
-                                appointment
-                              );
-                              return null;
-                            }
-                            if (appointment.status !== "cancelled") {
-                              return (
-                                <AppointmentCard
-                                  status="pending"
-                                  key={appointment._id}
-                                  appointment={appointment}
-                                  showDate={true}
-                                />
-                              );
-                            }
-                          })
-                        ) : (
-                          <div className="text-gray-500 text-center py-4">
-                            No appointments found for this date
-                          </div>
-                        )}
+
+                          {appointments && appointments.length > 0 ? (
+                            <div className="space-y-3">
+                              {appointments.map(
+                                (appointment: AppointmentData) => {
+                                  // Add individual appointment validation
+                                  if (!appointment || !appointment._id) {
+                                    console.warn(
+                                      "Invalid appointment data:",
+                                      appointment
+                                    );
+                                    return null;
+                                  }
+
+                                  if (appointment.status !== "cancelled") {
+                                    return (
+                                      <AppointmentCard
+                                        status="pending"
+                                        key={appointment._id}
+                                        appointment={appointment}
+                                        showDate={true}
+                                      />
+                                    );
+                                  }
+                                  return null;
+                                }
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-gray-500 text-center py-4">
+                              No appointments found for this date
+                            </div>
+                          )}
+                        </div>
+                      )
+                    )
+                  ) : (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          No upcoming appointments
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          You don't have any appointments scheduled for the next
+                          7 days.
+                        </p>
+                        {/* <Button onClick={handleBookNewAppointment}>
+            Book New Appointment
+          </Button> */}
                       </CardContent>
                     </Card>
-                  )
-                )
-              ) : (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      No upcoming appointments
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      You don't have any appointments scheduled for the next 7
-                      days.
-                    </p>
-                    {/* <Button onClick={handleBookNewAppointment}>
-                  Book New Appointment
-                </Button> */}
-                  </CardContent>
-                </Card>
-              )}
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
           {/* Previous Appointments */}
           <TabsContent value="previous" className="mt-6">
-            <Card>
+            <Card className="border border-gray-400">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
                   Previous Appointments
                 </CardTitle>
               </CardHeader>

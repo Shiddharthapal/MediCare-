@@ -47,6 +47,7 @@ const menuItems = [
 interface appointmentdata {
   _id: string;
   appointmentId: string;
+  doctorpatinetId: string;
   doctorUserId: string;
   doctorName: string;
   doctorSpecialist: string;
@@ -497,8 +498,8 @@ export default function Dashboard() {
     try {
       // Create FormData to send files
       const formData = new FormData();
-      formData.append("appointmentId", selectedAppointment._id.toString());
-      formData.append("doctorName", selectedAppointment.doctorName);
+      formData.append("doctorpatinetId", selectedAppointment.doctorpatinetId);
+      formData.append("doctorId", selectedAppointment.doctorUserId);
       formData.append("consultedType", selectedAppointment.consultedType);
       formData.append("userIdWHUP", selectedAppointment.doctorUserId);
       formData.append("userId", id || user?._id || "");

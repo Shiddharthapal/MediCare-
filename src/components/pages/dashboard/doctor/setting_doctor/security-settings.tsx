@@ -130,10 +130,8 @@ export function SecuritySettings() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Password & Authentication</CardTitle>
-          <CardDescription>
-            Manage your account security settings
-          </CardDescription>
+          <CardTitle className="text-xl">Change Password</CardTitle>
+          <CardDescription>Manage your password</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -148,6 +146,7 @@ export function SecuritySettings() {
                   checkIfSamePassword(e.target.value, newPassword);
                 }}
                 disabled={isLoading}
+                className="border border-gray-400 hover:border-primary/50"
               />
               <Button
                 type="button"
@@ -176,11 +175,13 @@ export function SecuritySettings() {
                   checkIfSamePassword(currentPassword, e.target.value);
                 }}
                 disabled={isLoading}
-                className={
-                  isSamePassword && newPassword !== ""
-                    ? "border-red-500 focus:border-red-500"
-                    : ""
-                }
+                className={`border border-gray-400 hover:border-primary/50
+                  ${
+                    isSamePassword && newPassword !== ""
+                      ? "border-red-500 focus:border-red-500"
+                      : ""
+                  }
+                `}
               />
               <Button
                 type="button"
@@ -213,11 +214,13 @@ export function SecuritySettings() {
                   checkPasswordsMatch(newPassword, e.target.value);
                 }}
                 disabled={isLoading}
-                className={
-                  !passwordsMatch && confirmPassword !== ""
-                    ? "border-red-500 focus:border-red-500"
-                    : ""
-                }
+                className={`border border-gray-400 hover:border-primary/50
+                  ${
+                    !passwordsMatch && confirmPassword !== ""
+                      ? "border-red-500 focus:border-red-500"
+                      : ""
+                  }
+                `}
               />
               <Button
                 type="button"

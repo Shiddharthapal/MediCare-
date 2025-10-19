@@ -124,7 +124,14 @@ const PaymentMethodsSchema = new mongoose.Schema(
 );
 
 const FileUploadSchema = new mongoose.Schema({
+  patientId: {
+    type: String,
+  },
   filename: {
+    type: String,
+  },
+
+  doctorId: {
     type: String,
   },
 
@@ -209,8 +216,23 @@ const HealthRecord = new mongoose.Schema({
 
 const PrescriptionSchema = new mongoose.Schema(
   {
+    doctorId: {
+      type: String,
+    },
+    doctorName: {
+      type: String,
+    },
+    patientId: {
+      type: String,
+    },
+    doctorpatinetId: {
+      type: String,
+    },
     vitalSign: {
       type: VitalSignSchema,
+    },
+    reasonForVisit: {
+      type: String,
     },
     primaryDiagnosis: {
       type: String,
@@ -324,6 +346,10 @@ const appointmentDataSchema = new mongoose.Schema(
     prescription: {
       type: PrescriptionSchema,
       default: {},
+    },
+    document: {
+      type: [FileUploadSchema],
+      default: [],
     },
     createdAt: {
       type: Date,

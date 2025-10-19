@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSelector } from "@/redux/hooks";
+import { BadgeDollarSign } from "lucide-react";
 
 interface PaymentMethods {
   acceptCreditCards: boolean;
@@ -107,9 +108,12 @@ export function BillingSettings() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="border border-gray-400">
         <CardHeader>
-          <CardTitle>Payment Methods</CardTitle>
+          <CardTitle className="text-xl font-semibold flex items-center mb-0">
+            <BadgeDollarSign className="h-6 w-6 mr-2 text-blue-600" />
+            Payment Methods
+          </CardTitle>
           <CardDescription>
             Manage accepted payment methods for your practice
           </CardDescription>
@@ -118,8 +122,10 @@ export function BillingSettings() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Accept Credit Cards</Label>
-                <p className="text-sm text-muted-foreground">
+                <Label className="text-[hsl(210,92%,45%)] text-md">
+                  Accept Credit Cards
+                </Label>
+                <p className="text-sm text-muted-foreground text-[hsl(210,92%,45%)]">
                   Visa, MasterCard, American Express
                 </p>
               </div>
@@ -128,6 +134,7 @@ export function BillingSettings() {
                 onCheckedChange={(checked) => {
                   handleInputChange("acceptCreditCards", checked);
                 }}
+                className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-300"
               />
             </div>
             <div className="ml-4">
@@ -138,7 +145,7 @@ export function BillingSettings() {
                 id="credit-card-number"
                 placeholder="Enter your card number"
                 disabled={!formData?.acceptCreditCards}
-                className="mt-1"
+                className="mt-1 border border-gray-400"
                 value={formData?.creditCardNumber}
                 onChange={(e) =>
                   handleInputChange("creditCardNumber", e.target.value)
@@ -150,8 +157,10 @@ export function BillingSettings() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Accept Debit Cards</Label>
-                <p className="text-sm text-muted-foreground">
+                <Label className="text-cyan-700 text-md">
+                  Accept Debit Cards
+                </Label>
+                <p className="text-sm text-muted-foreground text-cyan-700">
                   PIN and signature debit cards
                 </p>
               </div>
@@ -160,6 +169,7 @@ export function BillingSettings() {
                 onCheckedChange={(checked) => {
                   handleInputChange("acceptDebitCards", checked);
                 }}
+                className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-300"
               />
             </div>
             <div className="ml-4">
@@ -170,7 +180,7 @@ export function BillingSettings() {
                 id="debit-card-number"
                 placeholder="Enter your account number"
                 disabled={!formData?.acceptDebitCards}
-                className="mt-1"
+                className="mt-1 border border-gray-400"
                 value={formData?.debitAccountNumber}
                 onChange={(e) =>
                   handleInputChange("debitAccountNumber", e.target.value)
@@ -192,8 +202,10 @@ export function BillingSettings() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Accept bKash</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label className="text-[hsl(334,84%,48%)] text-md">
+                    Accept bKash
+                  </Label>
+                  <p className="text-sm text-muted-foreground text-[hsl(334,84%,48%)]">
                     bKash mobile banking payments
                   </p>
                 </div>
@@ -202,6 +214,7 @@ export function BillingSettings() {
                   onCheckedChange={(checked) => {
                     handleInputChange("acceptBkash", checked);
                   }}
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-300"
                 />
               </div>
               <div className="ml-4">
@@ -212,7 +225,7 @@ export function BillingSettings() {
                   id="bkash-number"
                   placeholder="Enter your bKash merchant number"
                   disabled={!formData?.acceptBkash}
-                  className="mt-1"
+                  className="mt-1 border border-gray-400"
                   value={formData?.bkashNumber}
                   onChange={(e) =>
                     handleInputChange("bkashNumber", e.target.value)
@@ -224,8 +237,10 @@ export function BillingSettings() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Accept Nagad</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label className="text-[hsl(5,65%,49%)] text-md">
+                    Accept Nagad
+                  </Label>
+                  <p className="text-sm text-muted-foreground text-[hsl(5,65%,49%)]">
                     Nagad mobile banking payments
                   </p>
                 </div>
@@ -234,6 +249,7 @@ export function BillingSettings() {
                   onCheckedChange={(checked) => {
                     handleInputChange("acceptNagad", checked);
                   }}
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-300"
                 />
               </div>
               <div className="ml-4">
@@ -244,7 +260,7 @@ export function BillingSettings() {
                   id="nagad-number"
                   placeholder="Enter your Nagad merchant number"
                   disabled={!formData?.acceptNagad}
-                  className="mt-1"
+                  className="mt-1 border border-gray-400"
                   value={formData?.nagadNumber}
                   onChange={(e) =>
                     handleInputChange("nagadNumber", e.target.value)
@@ -255,8 +271,10 @@ export function BillingSettings() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Accept Rocket</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label className="text-[hsl(296,62%,36%)] text-md">
+                    Accept Rocket
+                  </Label>
+                  <p className="text-sm text-muted-foreground text-[hsl(296,62%,36%)]">
                     Rocket mobile banking payments
                   </p>
                 </div>
@@ -265,17 +283,18 @@ export function BillingSettings() {
                   onCheckedChange={(checked) => {
                     handleInputChange("acceptRocket", checked);
                   }}
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-300"
                 />
               </div>
               <div className="ml-4">
-                <Label htmlFor="rocket-number" className="text-sm">
+                <Label htmlFor="rocket-number" className="text-sm ">
                   Rocket Merchant Number
                 </Label>
                 <Input
                   id="rocket-number"
                   placeholder="Enter your Rocket merchant number"
                   disabled={!formData?.acceptRocket}
-                  className="mt-1"
+                  className="mt-1 border border-gray-400"
                   value={formData?.rocketNumber}
                   onChange={(e) =>
                     handleInputChange("rocketNumber", e.target.value)

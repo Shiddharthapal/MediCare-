@@ -21,6 +21,11 @@ interface Medication {
   endDate?: Date;
 }
 interface Prescription {
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  reasonForVisit: string;
+  doctorpatinetId: string;
   vitalSign: VitalSign;
   primaryDiagnosis: string;
   symptoms: string;
@@ -68,6 +73,8 @@ interface PaymentMethods {
 
 interface FileUpload {
   _id: string;
+  patientId: string;
+  doctorId?: string;
   filename: string;
   originalName: string;
   fileType: string;
@@ -109,6 +116,7 @@ interface AppointmentData {
   paymentMethod: string;
   specialRequests: string;
   prescription: Prescription;
+  document?: FileUpload[];
   createdAt: Date;
 }
 

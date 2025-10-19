@@ -96,9 +96,91 @@ const MedicationSchema = new mongoose.Schema({
     type: Date,
   },
 });
+
+const FileUploadSchema = new mongoose.Schema({
+  patientId: {
+    type: String,
+  },
+  filename: {
+    type: String,
+  },
+
+  doctorId: {
+    type: String,
+  },
+
+  originalName: {
+    type: String,
+  },
+
+  fileType: {
+    type: String,
+  },
+
+  fileSize: {
+    type: Number,
+  },
+
+  path: {
+    type: String,
+  },
+
+  url: {
+    type: String,
+  },
+
+  checksum: {
+    type: String,
+  },
+
+  uploadedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  doctorName: {
+    type: String,
+  },
+  category: {
+    type: String,
+  },
+  userIdWHUP: {
+    type: String,
+  },
+  appointmentId: {
+    type: String,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now(),
+  },
+});
+
 const PrescriptionSchema = new mongoose.Schema({
+  doctorId: {
+    type: String,
+  },
+  doctorName: {
+    type: String,
+  },
+  patientId: {
+    type: String,
+  },
+  doctorpatinetId: {
+    type: String,
+  },
   vitalSign: {
     type: VitalSignSchema,
+  },
+  reasonForVisit: {
+    type: String,
   },
   primaryDiagnosis: {
     type: String,
@@ -174,6 +256,25 @@ const practiceSettingData = new mongoose.Schema({
     },
   },
 });
+
+const AppointmentSlotSchema = new mongoose.Schema(
+  {
+    enabled: {
+      type: Boolean,
+      default: false,
+    },
+    startTime: {
+      type: String,
+      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:MM format validation
+    },
+    endTime: {
+      type: String,
+      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:MM format validation
+    },
+  },
+  { _id: false } // Disable _id for subdocuments
+);
+
 const appointmentDataSchema = new mongoose.Schema(
   {
     doctorpatinetId: {
@@ -297,11 +398,10 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
   specialist: {
     type: String,
-    require: true,
   },
   specializations: {
     type: [String],
-    require: true,
+
     validate: {
       validator: function (arr) {
         return arr.length > 0;
@@ -311,30 +411,25 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
   hospital: {
     type: String,
-    require: true,
   },
   fees: {
     type: Number,
-    require: true,
   },
   rating: {
     type: Number,
   },
   experience: {
     type: String,
-    require: true,
   },
   education: {
     type: String,
-    require: true,
   },
   degree: {
     type: String,
-    require: true,
   },
   language: {
     type: [String],
-    require: true,
+
     validate: {
       validator: function (arr) {
         return arr.length > 0;
@@ -348,18 +443,22 @@ const doctorDetailsSchema = new mongoose.Schema({
 
   payment: {
     type: PaymentMethods,
-    default: [],
+    default: () => ({}),
   },
 
   availableSlots: {
-    type: [String],
-    require: true,
-    validate: {
-      validator: function (arr) {
-        return arr.length > 0;
-      },
-      message: "Available slot must contain at least one slot",
-    },
+    type: Map,
+    of: AppointmentSlotSchema,
+    default: () =>
+      new Map([
+        ["Monday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Tuesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Wednesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Thursday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Friday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Saturday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Sunday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+      ]),
   },
   appointments: {
     type: [appointmentDataSchema],
@@ -367,13 +466,16 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
   consultationModes: {
     type: [String],
-    require: true,
     validate: {
       validator: function (arr) {
         return arr.length > 0;
       },
       message: "consultation Modes slot must contain at least one Modes",
     },
+  },
+  prescription: {
+    type: [PrescriptionSchema],
+    default: [],
   },
 
   practiceSettingData: {

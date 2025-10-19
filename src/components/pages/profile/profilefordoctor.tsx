@@ -18,11 +18,12 @@ import {
   BadgeDollarSign,
   Mail,
   Phone,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -35,6 +36,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import {
   setEditMode,
@@ -42,6 +50,7 @@ import {
   updateProfileSuccess,
   updateProfileFailure,
 } from "@/redux/slices/profileSlice";
+import { useNavigate } from "react-router-dom";
 
 interface Doctor {
   name: string;
@@ -59,9 +68,31 @@ interface Doctor {
   degree: string;
   language: string[];
   about: string;
+  availableSlots: AppointmentSlot;
   image: string;
-  availableSlots: string[];
 }
+
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+interface PracticeData {
+  appointmentSlot: {
+    [key: string]: {
+      enabled: boolean;
+      startTime: string;
+      endTime: string;
+    };
+  };
+}
+
+const mockAppointmentSlot: AppointmentSlot = {
+  enabled: false,
+  startTime: "",
+  endTime: "",
+};
 
 // Mock data - in real app, this would come from API/database
 const mockDoctor: Doctor = {
@@ -80,21 +111,33 @@ const mockDoctor: Doctor = {
   degree: "",
   language: [],
   about: "",
+  availableSlots: mockAppointmentSlot,
   image: "",
-  availableSlots: [],
 };
 
 export default function DoctorProfilePage() {
   const [doctor, setDoctor] = useState<Doctor>(mockDoctor);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDoctor, setEditedDoctor] = useState<Doctor>(mockDoctor);
-  const [newSlot, setNewSlot] = useState("");
   const [language, setLanguage] = useState("");
   const [specializations, setSpecializations] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
+  const [formData, setFormData] = useState<PracticeData>({
+    appointmentSlot: {
+      Monday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Tuesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Wednesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Thursday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Friday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Saturday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Sunday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+    },
+  });
   const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.auth.token);
   const user = useAppSelector((state) => state.auth.user);
+  const id = user?._id;
+  const navigate = useNavigate();
 
   useEffect(() => {
     // const profileExists =
@@ -107,39 +150,7 @@ export default function DoctorProfilePage() {
     // setHasProfile(Boolean(profileExists));
     // setEditedDoctor({ ...doctor });
 
-    const getUserId = async (): Promise<string | null> => {
-      // First try to get from user object
-      if (user?._id) {
-        return user._id;
-      }
-
-      // Fallback to token verification
-      try {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-          throw new Error("No auth token found");
-        }
-        let response = await fetch("/api/getId/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token }),
-        });
-        let userid = await response.json();
-        console.log("🧞‍♂️userid --->", userid);
-        if (!userid) {
-          throw new Error("Invalid token or no user ID");
-        }
-
-        return userid.userId;
-      } catch (error) {
-        console.error("Failed to get user ID:", error);
-        return null;
-      }
-    };
     const fetchDetails = async () => {
-      let id = await getUserId();
       console.log("🧞‍♂️id --->", id);
       if (!id) {
         // Handle auth error - redirect to login or show error
@@ -152,19 +163,60 @@ export default function DoctorProfilePage() {
           "Content-Type": "application/json",
         },
       });
-
-      //console.log("🧞‍♂️responseData --->", response);
       if (!response.ok) {
         throw new Error(`Status:${response.status}`);
       }
 
       const responseData = await response.json();
+      console.log("🧞‍♂️  responseData --->", responseData);
       setHasProfile(Boolean(responseData.doctordetails));
       setDoctor(responseData.doctordetails);
       setEditedDoctor(responseData.doctordetails);
     };
     fetchDetails();
   }, [user]);
+
+  const handleWorkingHourChange = (day: string, field: string, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      appointmentSlot: {
+        ...prev.appointmentSlot,
+        [day]: {
+          ...prev.appointmentSlot[day],
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  const formatTo12Hour = (time24) => {
+    if (!time24) return "";
+
+    const [hours, minutes] = time24.split(":");
+    const hour = parseInt(hours, 10);
+    const minute = minutes || "00";
+
+    if (hour === 0) {
+      return `12:${minute} AM`;
+    } else if (hour < 12) {
+      return `${hour}:${minute} AM`;
+    } else if (hour === 12) {
+      return `12:${minute} PM`;
+    } else {
+      return `${hour - 12}:${minute} PM`;
+    }
+  };
+
+  const formatWorkingHours = (hours) => {
+    if (!hours?.enabled) {
+      return "Closed";
+    }
+
+    const startTime = formatTo12Hour(hours.startTime);
+    const endTime = formatTo12Hour(hours.endTime);
+
+    return `${startTime} - ${endTime}`;
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -178,7 +230,7 @@ export default function DoctorProfilePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ editedDoctor, token }),
+        body: JSON.stringify({ editedDoctor, id, formData }),
       });
       if (!response.ok) {
         throw new Error(`Status: ${response.status}`);
@@ -231,26 +283,6 @@ export default function DoctorProfilePage() {
     });
   };
 
-  const handleAddSlot = () => {
-    if (newSlot.trim()) {
-      setEditedDoctor({
-        ...editedDoctor,
-        availableSlots: [
-          ...(editedDoctor?.availableSlots || []),
-          newSlot.trim(),
-        ],
-      });
-      setNewSlot("");
-    }
-  };
-
-  const handleRemoveSlot = (index: number) => {
-    setEditedDoctor({
-      ...editedDoctor,
-      availableSlots: editedDoctor.availableSlots.filter((_, i) => i !== index),
-    });
-  };
-
   const handleAddLanguage = () => {
     if (language.trim()) {
       setEditedDoctor({
@@ -281,6 +313,10 @@ export default function DoctorProfilePage() {
     }
   };
 
+  const handleClose = () => {
+    navigate("/");
+  };
+
   const handleRemoveSpecializations = (index: number) => {
     setEditedDoctor({
       ...editedDoctor,
@@ -304,17 +340,20 @@ export default function DoctorProfilePage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white pt-2">
+          <CardHeader className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white pt-4 pb-2  relative">
+            <Button
+              onClick={handleClose}
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-110"
+            >
+              <X className="h-5 w-5" />
+            </Button>
             <div className="flex items-center space-x-6">
               <Avatar className="h-24 w-24 border-4 border-white">
-                <AvatarImage src="/image (4).jpg" alt="DR" />
-                <AvatarFallback className="text-2xl bg-blue-500">
-                  {currentDoctor?.name
-                    ? currentDoctor.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                    : "DR"}
+                <AvatarImage src="/image(4).jpg" alt="DR" />
+                <AvatarFallback className="text-2xl font-semibold bg-gradient-to-br from-blue-500 to-indigo-600">
+                  DR
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
@@ -350,9 +389,9 @@ export default function DoctorProfilePage() {
 
           <CardContent className="p-8">
             {!hasProfile && !isEditing && (
-              <div className="text-center py-8 mb-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <div className="text-center py-8 mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-dashed border-blue-300">
                 <div className="text-gray-500 mb-4">
-                  <User className="h-12 w-12 mx-auto mb-2" />
+                  <User className="h-12 w-12 mx-auto mb-2 text-blue-500" />
                   <h3 className="text-lg font-semibold">
                     No Profile Information
                   </h3>
@@ -362,7 +401,7 @@ export default function DoctorProfilePage() {
                 </div>
                 <Button
                   onClick={handleEdit}
-                  className="flex items-center gap-2 mx-auto"
+                  className="flex items-center gap-2 mx-auto bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:text-black"
                 >
                   <Plus className="h-4 w-4" />
                   Create Profile
@@ -371,7 +410,8 @@ export default function DoctorProfilePage() {
             )}
 
             <div className="mb-4">
-              <Label className="text-lg font-semibold flex items-center ">
+              <Label className="text-lg font-semibold flex items-center text-purple-900">
+                <Target className="text-purple-600" />
                 Specializations
               </Label>
               <div className="space-y-2">
@@ -379,7 +419,10 @@ export default function DoctorProfilePage() {
                   {currentDoctor?.specializations?.length > 0
                     ? currentDoctor?.specializations.map((slot, index) => (
                         <div key={index} className="flex items-center">
-                          <Badge variant="outline" className="text-sm">
+                          <Badge
+                            variant="outline"
+                            className="text-sm bg-purple-200"
+                          >
                             {slot}
                           </Badge>
                           {isEditing && (
@@ -406,7 +449,7 @@ export default function DoctorProfilePage() {
                       value={specializations}
                       onChange={(e) => setSpecializations(e.target.value)}
                       placeholder="Add your specializations(e.g., Heart Surgery, Skin Cancer )"
-                      className="flex-1"
+                      className="flex-1  border border-gray-400"
                     />
                     <Button onClick={handleAddSpecializations} size="sm">
                       Add
@@ -419,8 +462,8 @@ export default function DoctorProfilePage() {
               {/* Left Column */}
               <div className="space-y-6">
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Building2 className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-blue-900 mb-0">
+                    <Building2 className="h-5 w-5 mr-2 text-blue-600" />
                     Hospital/Clinic
                   </Label>
                   {isEditing ? (
@@ -430,6 +473,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("hospital", e.target.value)
                       }
                       placeholder="Enter hospital or clinic name"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -439,8 +483,8 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <GraduationCap className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-amber-900 mb-0">
+                    <GraduationCap className="h-5 w-5 mr-2 text-amber-600" />
                     Education
                   </Label>
                   {isEditing ? (
@@ -450,6 +494,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("education", e.target.value)
                       }
                       placeholder="Enter your medical collage name"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -459,8 +504,8 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <BookText className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-teal-900 mb-0">
+                    <BookText className="h-5 w-5 mr-2 text-teal-600" />
                     Medical Degree
                   </Label>
                   {isEditing ? (
@@ -470,6 +515,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("degree", e.target.value)
                       }
                       placeholder="Enter your medical degree"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -479,8 +525,8 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <User className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-indigo-900 mb-0">
+                    <User className="h-5 w-5 mr-2 text-indigo-600" />
                     Experience
                   </Label>
                   {isEditing ? (
@@ -490,6 +536,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("experience", e.target.value)
                       }
                       placeholder="e.g., 2+ years"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -498,8 +545,8 @@ export default function DoctorProfilePage() {
                   )}
                 </div>
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Phone className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-green-900 mb-0">
+                    <Phone className="h-5 w-5 mr-2 text-green-600" />
                     Contact Number
                   </Label>
                   {isEditing ? (
@@ -510,6 +557,7 @@ export default function DoctorProfilePage() {
                         handleInputChange("contact", e.target.value)
                       }
                       placeholder="Enter your contact number"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
@@ -519,8 +567,8 @@ export default function DoctorProfilePage() {
                 </div>
                 {/* New Email Field */}
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Mail className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-rose-900 mb-0">
+                    <Mail className="h-5 w-5 mr-2 text-rose-600" />
                     Email
                   </Label>
 
@@ -531,8 +579,8 @@ export default function DoctorProfilePage() {
                 </div>
                 <div className="">
                   <div>
-                    <Label className="text-lg font-semibold flex items-center mb-3">
-                      <Video className="h-5 w-5 mr-2" />
+                    <Label className="text-lg font-semibold flex items-center text-cyan-900 mb-1">
+                      <Video className="h-5 w-5 mr-2 text-cyan-600" />
                       Consultation Mode
                     </Label>
                     {isEditing ? (
@@ -549,7 +597,7 @@ export default function DoctorProfilePage() {
                               className={`cursor-pointer px-4 py-2 text-base ${
                                 editedDoctor?.consultationModes?.includes(mode)
                                   ? "bg-blue-500 text-white hover:bg-blue-600"
-                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200  border border-gray-400"
                               }`}
                               onClick={() => handleToggleConsultationMode(mode)}
                             >
@@ -565,7 +613,7 @@ export default function DoctorProfilePage() {
                             <Badge
                               key={index}
                               variant="outline"
-                              className="text-sm"
+                              className="text-sm bg-cyan-100"
                             >
                               {mode}
                             </Badge>
@@ -582,10 +630,14 @@ export default function DoctorProfilePage() {
               {/* Right Column */}
               <div className="space-y-6">
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-3 ">
-                    <BadgeDollarSign className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center mb-0 ">
+                    <BadgeDollarSign className="h-5 w-5 mr-2 text-red-600" />
                     Consultation Fees
                   </Label>
+                  <div className="text-sm">
+                    (To set your Receive payment method go to
+                    Dahboard-Setting-Billing setting)
+                  </div>
                   {isEditing ? (
                     <Input
                       type="number"
@@ -597,6 +649,7 @@ export default function DoctorProfilePage() {
                         )
                       }
                       placeholder="Enter consultation fees"
+                      className=" border border-gray-400"
                     />
                   ) : (
                     <p className="text-3xl font-bold text-green-600">
@@ -608,54 +661,104 @@ export default function DoctorProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-1">
-                    <Clock className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-orange-900 mb-1">
+                    <Clock className="h-5 w-5 mr-2 text-orange-600" />
                     Available Time Slots
                   </Label>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap gap-2">
-                      {currentDoctor?.availableSlots?.length > 0
-                        ? currentDoctor?.availableSlots.map((slot, index) => (
-                            <div key={index} className="flex items-center">
-                              <Badge variant="outline" className="text-sm">
-                                {slot}
-                              </Badge>
-                              {isEditing && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleRemoveSlot(index)}
-                                  className="ml-1 h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              )}
+                  {isEditing ? (
+                    <div>
+                      <Card className=" border border-gray-400">
+                        <CardHeader>
+                          <CardDescription>
+                            Set your visiting hours
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {[
+                            "Monday",
+                            "Tuesday",
+                            "Wednesday",
+                            "Thursday",
+                            "Friday",
+                            "Saturday",
+                            "Sunday",
+                          ].map((day) => (
+                            <div
+                              key={day}
+                              className="flex items-center justify-between"
+                            >
+                              <div className="flex items-center space-x-4">
+                                <Switch
+                                  checked={
+                                    formData.appointmentSlot[day].enabled
+                                  }
+                                  onCheckedChange={(checked) =>
+                                    handleWorkingHourChange(
+                                      day,
+                                      "enabled",
+                                      checked
+                                    )
+                                  }
+                                />
+                                <Label className="w-20">{day}</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Input
+                                  type="time"
+                                  value={
+                                    formData.appointmentSlot[day].startTime
+                                  }
+                                  onChange={(e) =>
+                                    handleWorkingHourChange(
+                                      day,
+                                      "startTime",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-32"
+                                />
+                                <span>to</span>
+                                <Input
+                                  type="time"
+                                  value={formData.appointmentSlot[day].endTime}
+                                  onChange={(e) =>
+                                    handleWorkingHourChange(
+                                      day,
+                                      "endTime",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-32"
+                                />
+                              </div>
                             </div>
-                          ))
-                        : !isEditing && (
-                            <p className="text-gray-500 text-sm">
-                              No time slots available
-                            </p>
-                          )}
+                          ))}
+                        </CardContent>
+                      </Card>
                     </div>
-                    {isEditing && (
-                      <div className="flex gap-2 mt-3">
-                        <Input
-                          value={newSlot}
-                          onChange={(e) => setNewSlot(e.target.value)}
-                          placeholder="Add time slot (e.g., 09:00 AM - 10:00 AM)"
-                          className="flex-1"
-                        />
-                        <Button onClick={handleAddSlot} size="sm">
-                          Add
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                      {doctor?.availableSlots &&
+                        Object.entries(doctor?.availableSlots).map(
+                          ([day, hours]) => (
+                            <div key={day} className="flex items-center py-1">
+                              <span className="capitalize font-medium text-gray-700 w-20">
+                                {day}:
+                              </span>
+                              <span
+                                className={`${hours?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
+                              >
+                                {formatWorkingHours(hours)}
+                              </span>
+                            </div>
+                          )
+                        )}
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <Label className="text-lg font-semibold flex items-center mb-1 ">
-                    <Languages className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-violet-900 mb-1 ">
+                    <Languages className="h-5 w-5 mr-2 text-violet-600" />
                     Language
                   </Label>
                   <div className="space-y-2">
@@ -663,7 +766,10 @@ export default function DoctorProfilePage() {
                       {currentDoctor?.language?.length > 0
                         ? currentDoctor?.language.map((slot, index) => (
                             <div key={index} className="flex items-center">
-                              <Badge variant="outline" className="text-sm">
+                              <Badge
+                                variant="outline"
+                                className="text-sm bg-violet-200"
+                              >
                                 {slot}
                               </Badge>
                               {isEditing && (
@@ -690,7 +796,7 @@ export default function DoctorProfilePage() {
                           value={language}
                           onChange={(e) => setLanguage(e.target.value)}
                           placeholder="Add language (English, other)"
-                          className="flex-1"
+                          className="flex-1  border border-gray-400"
                         />
                         <Button onClick={handleAddLanguage} size="sm">
                           Add
@@ -700,8 +806,8 @@ export default function DoctorProfilePage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-lg font-semibold flex items-center mb-3">
-                    <Transgender className="h-5 w-5 mr-2" />
+                  <Label className="text-lg font-semibold flex items-center text-pink-900 mb-0">
+                    <Transgender className="h-5 w-5 mr-2 text-pink-600" />
                     Gender
                   </Label>
                   {isEditing ? (
@@ -712,7 +818,7 @@ export default function DoctorProfilePage() {
                           handleInputChange("gender", value)
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className=" border border-gray-400">
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
                         <SelectContent>
@@ -723,7 +829,7 @@ export default function DoctorProfilePage() {
                       </Select>
                     </>
                   ) : (
-                    <p className="text-gray-700 p-2 bg-gray-50 rounded">
+                    <p className=" pl-2  ">
                       {currentDoctor?.gender || "Not provided"}
                     </p>
                   )}
@@ -743,7 +849,7 @@ export default function DoctorProfilePage() {
                   onChange={(e) => handleInputChange("about", e.target.value)}
                   placeholder="Tell patients about yourself, your approach to medicine, and your expertise..."
                   rows={4}
-                  className="resize-none"
+                  className="resize-none  border border-gray-400"
                 />
               ) : (
                 <p className="text-gray-700 leading-relaxed text-lg">
@@ -760,7 +866,7 @@ export default function DoctorProfilePage() {
                   <>
                     <Button
                       onClick={handleSave}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 bg-blue-600 hover:text-black"
                     >
                       <Save className="h-4 w-4" />
                       Save Profile
@@ -768,7 +874,7 @@ export default function DoctorProfilePage() {
                     <Button
                       onClick={handleCancel}
                       variant="outline"
-                      className="flex items-center gap-2 bg-transparent"
+                      className="flex items-center gap-2 bg-transparent border border-gray-400 hover:border-primary/50"
                     >
                       <X className="h-4 w-4" />
                       Cancel
@@ -779,7 +885,7 @@ export default function DoctorProfilePage() {
                     <Button
                       onClick={handleEdit}
                       variant="outline"
-                      className="flex items-center gap-2 bg-transparent"
+                      className="flex items-center gap-2 text-white  border border-gray-400 bg-blue-600 hover:text-black hover:bg-cyan-700"
                     >
                       <Edit3 className="h-4 w-4" />
                       {hasProfile ? "Edit Profile" : "Create Profile"}

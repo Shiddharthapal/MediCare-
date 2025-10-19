@@ -34,7 +34,34 @@ interface Medication {
   startDate?: Date;
   endDate?: Date;
 }
+
+interface FileUpload {
+  _id: string;
+  patientId: string;
+  doctorId: string;
+  filename: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
+  userIdWHUP?: string;
+  appointmentId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface Prescription {
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  doctorpatinetId: string;
+  reasonForVisit: string;
   vitalSign: VitalSign;
   primaryDiagnosis: string;
   symptoms: string;
@@ -52,18 +79,18 @@ interface PracticeSettingData {
   address: string;
   phone: string;
   fax: string;
-  appointmentDuration: string;
-  bufferTime: string;
-  allowOnlineBooking: boolean;
-  sendReminders: boolean;
-  workingHours: {
-    [key: string]: {
-      enabled: boolean;
-      startTime: string;
-      endTime: string;
-    };
-  };
+  appointmentDuration?: string;
+  bufferTime?: string;
+  allowOnlineBooking?: boolean;
+  sendReminders?: boolean;
 }
+
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+}
+
 interface AppointmentData {
   doctorpatinetId: string;
   doctorName: string;
@@ -91,6 +118,7 @@ interface AppointmentData {
   paymentMethod: string;
   specialRequests: string;
   prescription: Prescription;
+  document: FileUpload[];
   createdAt: Date;
 }
 export interface DoctorDetails {
@@ -111,10 +139,11 @@ export interface DoctorDetails {
   degree: string;
   language: string[];
   about: string;
-  payment: PaymentMethods[];
-  availableSlots: string[];
+  payment?: PaymentMethods;
+  availableSlots: Map<string, AppointmentSlot>;
   appointments: AppointmentData[];
-  practiceSettingData: PracticeSettingData[];
+  practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
+  prescription?: Prescription;
   createdAt: Date;
 }

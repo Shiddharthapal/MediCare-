@@ -8,21 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { formatInTimeZone } from "date-fns-tz";
 import {
   Search,
-  Bell,
   Calendar,
   Users,
   UserRoundPlus,
   ChevronRight,
-  AlertTriangle,
   CheckCircle,
-  XCircle,
   FileText,
-  Plus,
   Download,
   Eye,
   Pill,
-  ClipboardList,
-  ImageIcon,
   Clock,
   Heart,
   Airplay,
@@ -60,6 +54,8 @@ interface Medication {
 }
 interface Prescription {
   vitalSign: VitalSign;
+  doctorName: string;
+  reasonForVisit: String;
   primaryDiagnosis: string;
   testandReport: string;
   medication: Medication[];
@@ -97,6 +93,7 @@ interface AppointmentData {
   paymentMethod: string;
   specialRequests: string;
   prescription: Prescription;
+  document: FileUpload[];
   createdAt: Date;
 }
 
@@ -123,6 +120,25 @@ interface DoctorDetails {
   createdAt: Date;
 }
 
+const mockFileUpload: FileUpload = {
+  _id: "",
+  filename: "",
+  originalName: "",
+  fileType: "",
+  fileSize: 0,
+  path: "",
+  url: "",
+  checksum: "",
+  uploadedAt: new Date(),
+  doctorName: "",
+  category: "",
+  userIdWHUP: "",
+  appointmentId: "",
+  deletedAt: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
 const mockVitalsign: VitalSign = {
   bloodPressure: " ",
   heartRate: "",
@@ -148,7 +164,9 @@ const mockMedication: Medication = {
 };
 
 const mockPrescription: Prescription = {
+  doctorName: "",
   vitalSign: mockVitalsign,
+  reasonForVisit: "",
   primaryDiagnosis: "",
   testandReport: "",
   medication: [mockMedication],
@@ -186,6 +204,7 @@ const mockAppointmentData: AppointmentData = {
   paymentMethod: "",
   specialRequests: "",
   prescription: mockPrescription,
+  document: mockFileUpload,
   createdAt: new Date(),
 };
 
@@ -212,305 +231,27 @@ const mockDoctorDetails: DoctorDetails = {
   createdAt: new Date(),
 };
 
+interface FileUpload {
+  _id: string;
+  filename: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
+  userIdWHUP?: string;
+  appointmentId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Mock data for patients
-const patients = [
-  {
-    id: 1,
-    name: "Floyd Miles",
-    address: "7529 E. Pecan St.",
-    avatar: "FM",
-    isActive: true,
-    age: 54,
-    gender: "Male",
-    phone: "(603) 555-0123",
-    email: "floydmiles@gmail.com",
-    fullAddress: "7529 E. Pecan St.",
-    insurance:
-      "Member ID: 78146284/201, Wellbeing Medicare New York, United States of America",
-    language: "English",
-    diseases: [
-      {
-        name: "Hypertension",
-        severity: "High",
-        status: "Active",
-        diagnosedDate: "2020-03-15",
-      },
-      {
-        name: "Type 2 Diabetes",
-        severity: "High",
-        status: "Active",
-        diagnosedDate: "2019-08-22",
-      },
-      {
-        name: "Sleep Apnea",
-        severity: "Medium",
-        status: "Active",
-        diagnosedDate: "2021-01-10",
-      },
-      {
-        name: "Gastritis",
-        severity: "Medium",
-        status: "Treated",
-        diagnosedDate: "2018-11-05",
-      },
-      {
-        name: "Seasonal Allergies",
-        severity: "Low",
-        status: "Active",
-        diagnosedDate: "2017-04-12",
-      },
-      {
-        name: "Migraine",
-        severity: "Low",
-        status: "Treated",
-        diagnosedDate: "2016-09-18",
-      },
-    ],
-    appointments: [
-      {
-        date: "12/01/2024",
-        time: "12:45 PM",
-        type: "Regular Checkup",
-        doctor: "Dr. Edward Bailey",
-        status: "Completed",
-      },
-      {
-        date: "11/15/2024",
-        time: "10:30 AM",
-        type: "Blood Test Follow-up",
-        doctor: "Dr. Sarah Johnson",
-        status: "Completed",
-      },
-      {
-        date: "10/28/2024",
-        time: "2:15 PM",
-        type: "Diabetes Consultation",
-        doctor: "Dr. Michael Chen",
-        status: "Completed",
-      },
-      {
-        date: "10/10/2024",
-        time: "9:00 AM",
-        type: "Hypertension Check",
-        doctor: "Dr. Edward Bailey",
-        status: "Completed",
-      },
-      {
-        date: "09/22/2024",
-        time: "11:20 AM",
-        type: "Sleep Study Review",
-        doctor: "Dr. Lisa Wong",
-        status: "Completed",
-      },
-    ],
-    documents: [
-      {
-        id: 1,
-        name: "Blood Pressure Prescription",
-        type: "Prescription",
-        doctor: "Dr. Edward Bailey",
-        date: "December 1, 2024",
-        time: "12:45 PM",
-        size: "245 KB",
-        format: "PDF",
-        description:
-          "Lisinopril 10mg daily prescription for hypertension management",
-        status: "Active",
-      },
-      {
-        id: 2,
-        name: "Lab Results - Complete Blood Count",
-        type: "Lab Report",
-        doctor: "Dr. Sarah Johnson",
-        date: "November 28, 2024",
-        time: "09:30 AM",
-        size: "1.2 MB",
-        format: "PDF",
-        description: "Complete blood count analysis with normal values",
-        status: "Reviewed",
-      },
-      {
-        id: 3,
-        name: "Chest X-Ray Report",
-        type: "Imaging Report",
-        doctor: "Dr. Michael Chen",
-        date: "November 25, 2024",
-        time: "02:15 PM",
-        size: "3.4 MB",
-        format: "PDF",
-        description:
-          "Chest X-ray showing clear lungs, no abnormalities detected",
-        status: "Reviewed",
-      },
-      {
-        id: 4,
-        name: "Diabetes Medication Prescription",
-        type: "Prescription",
-        doctor: "Dr. Edward Bailey",
-        date: "November 20, 2024",
-        time: "11:00 AM",
-        size: "198 KB",
-        format: "PDF",
-        description:
-          "Metformin 500mg twice daily for Type 2 diabetes management",
-        status: "Active",
-      },
-      {
-        id: 5,
-        name: "Cardiology Consultation Report",
-        type: "Consultation Report",
-        doctor: "Dr. Lisa Wong",
-        date: "November 15, 2024",
-        time: "03:30 PM",
-        size: "567 KB",
-        format: "PDF",
-        description: "Comprehensive cardiac evaluation and recommendations",
-        status: "Reviewed",
-      },
-      {
-        id: 6,
-        name: "Sleep Study Results",
-        type: "Study Report",
-        doctor: "Dr. Amanda Lee",
-        date: "November 10, 2024",
-        time: "08:00 AM",
-        size: "2.1 MB",
-        format: "PDF",
-        description: "Polysomnography results showing moderate sleep apnea",
-        status: "Reviewed",
-      },
-      {
-        id: 7,
-        name: "Physical Therapy Plan",
-        type: "Treatment Plan",
-        doctor: "Dr. Robert Kim",
-        date: "November 5, 2024",
-        time: "10:30 AM",
-        size: "324 KB",
-        format: "PDF",
-        description: "12-week physical therapy program for lower back pain",
-        status: "Active",
-      },
-      {
-        id: 8,
-        name: "Allergy Test Results",
-        type: "Lab Report",
-        doctor: "Dr. Sarah Johnson",
-        date: "October 28, 2024",
-        time: "01:45 PM",
-        size: "892 KB",
-        format: "PDF",
-        description:
-          "Comprehensive allergy panel showing reactions to peanuts and shellfish",
-        status: "Reviewed",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Annette Black",
-    address: "7529 E. Pecan St.",
-    avatar: "AB",
-    isActive: false,
-    age: 42,
-    gender: "Female",
-    phone: "(555) 123-4567",
-    email: "annette.black@email.com",
-    diseases: [
-      {
-        name: "Asthma",
-        severity: "Medium",
-        status: "Active",
-        diagnosedDate: "2015-06-20",
-      },
-      {
-        name: "Anxiety Disorder",
-        severity: "Medium",
-        status: "Active",
-        diagnosedDate: "2020-02-14",
-      },
-    ],
-    appointments: [
-      {
-        date: "11/28/2024",
-        time: "3:30 PM",
-        type: "Asthma Review",
-        doctor: "Dr. Robert Kim",
-        status: "Completed",
-      },
-    ],
-    documents: [
-      {
-        id: 1,
-        name: "Blood Pressure Prescription",
-        type: "Prescription",
-        doctor: "Dr. Edward Bailey",
-        date: "December 1, 2024",
-        time: "12:45 PM",
-        size: "245 KB",
-        format: "PDF",
-        description:
-          "Lisinopril 10mg daily prescription for hypertension management",
-        status: "Active",
-      },
-      {
-        id: 2,
-        name: "Lab Results - Complete Blood Count",
-        type: "Lab Report",
-        doctor: "Dr. Sarah Johnson",
-        date: "November 28, 2024",
-        time: "09:30 AM",
-        size: "1.2 MB",
-        format: "PDF",
-        description: "Complete blood count analysis with normal values",
-        status: "Reviewed",
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Guy Hawkins",
-    address: "775 Rolling Green Rd.",
-    avatar: "GH",
-    isActive: false,
-    age: 38,
-    gender: "Male",
-    phone: "(555) 987-6543",
-    email: "guy.hawkins@email.com",
-    diseases: [
-      {
-        name: "Lower Back Pain",
-        severity: "Medium",
-        status: "Active",
-        diagnosedDate: "2022-01-15",
-      },
-    ],
-    appointments: [
-      {
-        date: "12/05/2024",
-        time: "1:00 PM",
-        type: "Physical Therapy",
-        doctor: "Dr. Amanda Lee",
-        status: "Completed",
-      },
-    ],
-    documents: [
-      {
-        id: 1,
-        name: "Blood Pressure Prescription",
-        type: "Prescription",
-        doctor: "Dr. Edward Bailey",
-        date: "December 1, 2024",
-        time: "12:45 PM",
-        size: "245 KB",
-        format: "PDF",
-        description:
-          "Lisinopril 10mg daily prescription for hypertension management",
-        status: "Active",
-      },
-    ],
-  },
-];
+
 interface ReasonForVisit {
   appointment: AppointmentData;
   reason: string;
@@ -675,19 +416,18 @@ interface PatientsPageProps {
   onNavigate: (page: string) => void;
 }
 
+//Starting portion of the function
 export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [selectedPatient, setSelectedPatient] =
     useState<PatientData>(mockPatientData);
   const [showPatientList, setShowPatientList] = useState(true);
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
-  const [appointmentData, setAppointmentData] =
-    useState<DoctorDetails>(mockDoctorDetails);
+  const [appointmentData, setAppointmentData] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
-
   let doctor = useAppSelector((state) => state.auth.user);
 
+  //Group appointment by patientid
   const groupAppointmentsByPatientId = (responseData: DoctorDetails) => {
-    console.log("🧞‍♂️  responseData2 --->", responseData);
     if (!responseData.appointments || responseData.appointments.length === 0)
       return;
 
@@ -755,7 +495,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
       // Filter upcoming appointments
       const today = new Date();
-      console.log("🧞‍♂️  today --->", today);
       groupedData[patientId].upcomingAppointments = groupedData[
         patientId
       ].appointments.filter((appointment) => {
@@ -775,11 +514,16 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       });
     });
 
-    console.log("=>", groupedData);
     // Update the state with grouped data
     setPatientData(groupedData);
   };
 
+  // // Safely extract documents
+  // const documents = Array.isArray(appointment.document)
+  //   ? appointment.document
+  //   : [];
+
+  //Categorized appointments
   const categorizedAppointments = useMemo(() => {
     let appointmentdata = appointmentData.appointments;
     return categorizeAppointments(
@@ -802,7 +546,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       });
 
       let responseData = await response.json();
-      console.log("🧞‍♂️  responseData --->", responseData.doctordetails);
       groupAppointmentsByPatientId(responseData.doctordetails);
     };
     fetchData();
@@ -820,6 +563,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
 
+  //Tunction to cancel appointment
   const handleCancelAppointment = async (appointment: any) => {
     let id = doctor?._id;
     try {
@@ -1016,17 +760,15 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     }
   };
 
+  //Get function that return name initial of patient
   const getPatientInitials = (patientName: string) => {
-    console.log("🧞‍♂️  patientName --->", patientName);
     if (!patientName) return "AB";
 
     const cleanName = patientName.trim();
-
     if (!cleanName) return "AB";
 
     // Split the cleaned name and get first 2 words
     const words = cleanName.split(" ").filter((word) => word.length > 0);
-
     if (words.length >= 2) {
       // Get first letter of first 2 words
       return (words[0][0] + words[1][0]).toUpperCase();
@@ -1038,15 +780,76 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     }
   };
 
+  let result = useMemo(() => {
+    if (!selectedPatient) {
+      return [];
+    }
+
+    // Safely extract prescriptions
+    return selectedPatient?.appointments.map((appointments) => {
+      const prescription = appointments.prescription;
+      console.log("🧞‍♂️  prescription --->", prescription);
+
+      const document = Array.isArray(appointments.document)
+        ? appointments.document
+        : [];
+
+      return {
+        prescriptions: prescription
+          ? {
+              prescriptionId: prescription.prescriptionId || "",
+              vitalSign: prescription.vitalSign || {},
+              primaryDiagnosis: prescription.primaryDiagnosis || "",
+              symptoms: prescription.symptoms || "",
+              testandReport: prescription.testandReport || "",
+              medication: prescription.medication || [],
+              restrictions: prescription.restrictions || "",
+              followUpDate: prescription.followUpDate || null,
+              additionalNote: prescription.additionalNote || "",
+              createdAt: prescription.createdAt || null,
+            }
+          : null,
+
+        // Documents
+        documents: document.map((d) => ({
+          documentId: d._id || "",
+          filename: d.filename || "",
+          originalName: d.originalName || "",
+          fileType: d.fileType || "",
+          fileSize: d.fileSize || 0,
+          url: d.url || "",
+          uploadedAt: d.uploadedAt || null,
+          category: d.category || "",
+        })),
+      };
+    });
+  }, [selectedPatient]);
+
+  // useEffect(() => {
+  //   let doctorId = doctor?._id;
+  //   const fetchData = async () => {
+  //     let response = await fetch("/api/doctor/alldocumentofuser", {
+  //       method: "POST",
+  //       body: JSON.stringify({
+  //         doctorId,
+  //         patientId: selectedPatient?.patientInfo?.patientId,
+  //       }),
+  //     });
+  //     let result = await response.json();
+  //     console.log("🧞‍♂️  result --->", result);
+  //   };
+  //   fetchData;
+  // }, [activeTab === "documents" && selectedPatient]);
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-white">
       {/* Left Sidebar - Fixed */}
-      <aside className="w-min-44 border-r border-gray-100 bg-white overflow-y-auto">
+      <aside className="w-min-44 border-r  bg-white overflow-y-auto">
         {/* Patient List */}
         {showPatientList && (
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium text-gray-900">
+              <h3 className="font-medium text-blue-500">
                 Patient Lists ({Object.entries(patientData).length})
               </h3>
               <Button variant="ghost" size="icon">
@@ -1059,8 +862,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   key={id}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                     selectedPatient?.id === id
-                      ? "bg-blue-50 border border-blue-200"
-                      : "hover:bg-gray-50"
+                      ? "bg-blue-100 border border-blue-300"
+                      : "hover:bg-gray-100"
                   }`}
                   onClick={() => setSelectedPatient(patient)}
                 >
@@ -1091,7 +894,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         {/* Header */}
         <header className="flex items-center justify-between pt-6 pl-6 pr-6 pb-3 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-4">
-            <Avatar className="w-12 h-12">
+            <Avatar className="w-12 h-12 ring-4 ring-blue-200">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>
                 {getPatientInitials(selectedPatient?.patientInfo?.patientName)}
@@ -1110,20 +913,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="text-gray-500">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-gray-500">
-              <Bell className="h-5 w-5" />
-            </Button>
-          </div>
         </header>
 
         {/* Tabs */}
-        <div className="grid grid-cols-4 md:gap-10 px-6 py-3 border-b border-gray-100 bg-white">
+        <div className="grid grid-cols-4 md:gap-10 px-6 py-3 border-b border-gray-400 bg-white">
           <button
-            className={`pb-2 border-b-2 transition-colors ${
+            className={`pb-2 border-b-4 transition-colors font-semibold ${
               activeTab === "overview"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -1133,7 +928,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             Overview
           </button>
           <button
-            className={`pb-2 border-b-2 transition-colors ${
+            className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "history"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -1143,7 +938,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             Medical History
           </button>
           <button
-            className={`pb-2 border-b-2 transition-colors ${
+            className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "appointments"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -1153,7 +948,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             Appointments History
           </button>
           <button
-            className={`pb-2 border-b-2 transition-colors ${
+            className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "documents"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -1170,12 +965,13 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             {/* Scrollable Content */}
             <main className="flex-1 w-full overflow-y-auto ">
               {activeTab === "overview" && (
-                <div className="p-6">
+                <div className="py-6">
                   {/* Personal Information */}
-                  <div className="mb-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">
+                  <div className="mb-6 px-1">
+                    <Card className="border border-gray-400">
+                      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200/60">
+                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                          <User className="h-5 w-5 text-blue-600" />
                           Personal Information
                         </CardTitle>
                       </CardHeader>
@@ -1256,10 +1052,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </div>
 
                   {/* Medical Summary and Active Conditions */}
-                  <div className="mb-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">
+                  <div className="mb-6 px-1">
+                    <Card className="border border-gray-400">
+                      <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-200/60">
+                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                          <Activity className="h-5 w-5 text-purple-600" />
                           Previous Conditions
                         </CardTitle>
                       </CardHeader>
@@ -1269,7 +1066,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             (values, index) => (
                               <div
                                 key={index}
-                                className="flex items-center justify-between p-4 bg-gray-100 rounded-lg"
+                                className="flex items-center justify-between p-4 
+                                bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg"
                               >
                                 <div className="flex items-center gap-3">
                                   {getStatusIcon(values?.reason)}
@@ -1299,10 +1097,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </div>
 
                   {/* Upcoming Appointments */}
-                  <Card className="mb-6">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Calendar className="h-5 w-5" />
+                  <Card className="mb-6 mx-1 border-gray-400">
+                    <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50 border-b border-gray-200/60">
+                      <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-yellow-600" />
                         Upcoming Appointments
                       </CardTitle>
                     </CardHeader>
@@ -1381,9 +1179,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </Card>
 
                   {/* Recent Activity */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">
+                  <Card className="mx-1 border border-gray-400">
+                    <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200/60">
+                      <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-green-600" />
                         Last Appointment
                       </CardTitle>
                     </CardHeader>
@@ -1430,10 +1229,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               )}
 
               {activeTab === "history" && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
+                <div className="space-y-6 my-4 px-1">
+                  <Card className="border border-gray-400">
+                    <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200/60">
+                      <CardTitle className="text-xl font-bold text-gray-900">
                         Medical History - All Conditions (Severity: High to Low)
                       </CardTitle>
                     </CardHeader>
@@ -1441,7 +1240,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                       <div className="space-y-4">
                         {selectedPatient?.reasonForVisit.map(
                           (disease, index) => (
-                            <div key={index} className="border rounded-lg p-4">
+                            <div
+                              key={index}
+                              className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50"
+                            >
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-3">
                                   {getStatusIcon(disease.reason)}
@@ -1512,10 +1314,13 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               )}
 
               {activeTab === "appointments" && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Previous Appointments History</CardTitle>
+                <div className="space-y-6 my-2 px-1">
+                  <Card className="border border-gray-400">
+                    <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-gray-200/60">
+                      <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-blue-600" />
+                        Previous Appointments History
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -1524,7 +1329,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             (appointment, index) => (
                               <div
                                 key={index}
-                                className="border rounded-lg p-4"
+                                className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-blue-50 to-cyan-50"
                               >
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center gap-3">
@@ -1589,67 +1394,126 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               )}
 
               {activeTab === "documents" && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
+                <div className="space-y-6 my-2 px-1">
+                  <Card className="border border-gray-400">
+                    <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-200/60">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5" />
+                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-violet-600" />
                           Patient Documents
                         </CardTitle>
-                        <div className="">
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download All
-                          </Button>
-                        </div>
+                        <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
+                          <Download className="h-4 w-4 mr-2" />
+                          Download All
+                        </Button>
                       </div>
                     </CardHeader>
                     <CardContent>
                       {/* Document Filters */}
-                      <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">
+                      <div className="flex border border-gray-400 items-center gap-4 mb-1 p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-sm font-semibold text-gray-700">
                             Filter by type:
                           </span>
                           <Button
-                            variant="outline"
                             size="sm"
-                            className="text-xs bg-transparent"
+                            className="text-xs bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
                           >
                             All
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs hover:bg-blue-50"
+                          >
                             Prescriptions
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs hover:bg-blue-50"
+                          >
                             Lab Reports
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs hover:bg-blue-50"
+                          >
                             Imaging
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs hover:bg-blue-50"
+                          >
                             Consultation
                           </Button>
                         </div>
                       </div>
 
+                      {/* Document Statistics */}
+                      <div className="mt-2 mb-6 p-2 bg-gradient-to-r from-gray-100 via-slate-100 to-gray-100 rounded-xl border border-gray-400 shadow-sm">
+                        <h4 className="font-bold mb-1 text-gray-900 text-lg">
+                          Document Summary
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-blue-600 ">
+                              {selectedPatient.documents?.filter(
+                                (d) => d.type === "Prescription"
+                              ).length || 0}
+                            </p>
+                            <p className="text-gray-600 font-medium">
+                              Prescriptions
+                            </p>
+                          </div>
+                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-green-600 ">
+                              {selectedPatient.documents?.filter(
+                                (d) => d.type === "Lab Report"
+                              ).length || 0}
+                            </p>
+                            <p className="text-gray-600 font-medium">
+                              Lab Reports
+                            </p>
+                          </div>
+                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-purple-600 ">
+                              {selectedPatient.documents?.filter(
+                                (d) => d.type === "Imaging Report"
+                              ).length || 0}
+                            </p>
+                            <p className="text-gray-600 font-medium">
+                              Imaging Reports
+                            </p>
+                          </div>
+                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
+                            <p className="font-bold text-2xl text-gray-600 ">
+                              {selectedPatient.documents?.length || 0}
+                            </p>
+                            <p className="text-gray-600 font-medium">
+                              Total Documents
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Documents List */}
                       <div className="space-y-4">
-                        {selectedPatient?.previousAppointments.map(
-                          (document, index) => (
-                            <div
-                              key={index}
-                              className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start gap-4 flex-1">
-                                  {/* Document Icon */}
-                                  <div className="p-3 rounded-lg bg-blue-50">
-                                    {document.prescription && (
-                                      <Pill className="h-6 w-6 text-blue-600" />
-                                    )}
-                                    {/* {document.type === "Lab Report" && (
+                        {result?.map((document, index) => (
+                          <div
+                            key={index}
+                            className="border border-gray-400 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-4 flex-1">
+                                {/* Document Icon */}
+                                <div className="p-3 rounded-lg bg-blue-100">
+                                  {document.prescriptions && (
+                                    <Pill className="h-6 w-6 text-blue-600" />
+                                  )}
+                                  {/* {document.type === "Lab Report" && (
                                       <ClipboardList className="h-6 w-6 text-green-600" />
                                     )}
                                     {document.type === "Imaging Report" && (
@@ -1665,7 +1529,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     {document.type === "Treatment Plan" && (
                                       <FileText className="h-6 w-6 text-teal-600" />
                                     )} */}
-                                    {/* {![
+                                  {/* {![
                                       "Prescription",
                                       "Lab Report",
                                       "Imaging Report",
@@ -1675,130 +1539,88 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     ].includes(document.type) && (
                                       <FileText className="h-6 w-6 text-gray-600" />
                                     )} */}
-                                  </div>
-
-                                  {/* Document Details */}
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <h3 className="font-semibold text-lg">
-                                        {document.reasonForVisit}
-                                      </h3>
-                                      <Badge
-                                        variant={
-                                          document?.prescription
-                                            ? "default"
-                                            : "secondary"
-                                        }
-                                        className={
-                                          document?.prescription
-                                            ? "bg-green-100 text-green-800"
-                                            : "bg-gray-100 text-gray-800"
-                                        }
-                                      >
-                                        {document?.prescription
-                                          ? "Active"
-                                          : "Reviewed"}
-                                      </Badge>
-                                    </div>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
-                                      <div className="flex items-center gap-1">
-                                        <FileText className="h-4 w-4" />
-                                        <span>{document.type}</span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>
-                                          {new Date(
-                                            document.prescription.createdAt
-                                          ).toLocaleDateString()}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <Clock className="h-4 w-4" />
-                                        <span>
-                                          {formatInTimeZone(
-                                            document?.prescription?.createdAt,
-                                            "Etc/UTC",
-                                            "hh:mm a"
-                                          )}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <UserRoundPlus className="h-5 w-5" />
-                                        <span>{document?.doctorName}</span>
-                                      </div>
-                                    </div>
-                                    <p className="text-sm text-gray-700 mb-2">
-                                      <strong>Description:</strong>{" "}
-                                      {document?.prescription?.primaryDiagnosis}
-                                    </p>
-                                    <div className="flex items-center gap-4 text-xs text-gray-500">
-                                      <span>Size: {document.size}</span>
-                                      <span>Format: {document.format}</span>
-                                    </div>
-                                  </div>
                                 </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex flex-col  gap-2 ml-4 mt-6">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-xs bg-transparent"
-                                  >
-                                    <Eye className="h-3 w-3 mr-1" />
-                                    View
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-xs bg-transparent"
-                                  >
-                                    <Download className="h-3 w-3 mr-1" />
-                                    Download
-                                  </Button>
+                                {/* Document Details */}
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-semibold text-lg">
+                                      {document?.prescriptions?.reasonForVisit}
+                                    </h3>
+                                    <Badge
+                                      variant={
+                                        document?.prescriptions
+                                          ? "default"
+                                          : "secondary"
+                                      }
+                                      className={
+                                        document?.prescriptions
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-gray-100 text-gray-800"
+                                      }
+                                    >
+                                      {document?.prescriptions
+                                        ? "Active"
+                                        : "Reviewed"}
+                                    </Badge>
+                                  </div>
+                                  <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                                    <div className="flex items-center gap-1">
+                                      <FileText className="h-4 w-4" />
+                                      <span className="font-semibold">
+                                        Prescription
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4" />
+                                      <span>
+                                        {new Date(
+                                          document?.prescriptions?.createdAt
+                                        ).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4" />
+                                      <span>
+                                        {formatInTimeZone(
+                                          document?.prescriptions?.createdAt,
+                                          "Etc/UTC",
+                                          "hh:mm a"
+                                        )}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <UserRoundPlus className="h-5 w-5" />
+                                      <span>
+                                        {document?.prescriptions?.doctorName}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <p className="text-sm text-gray-700 mb-2">
+                                    <strong>Description:</strong>{" "}
+                                    {document?.prescriptions?.primaryDiagnosis}
+                                  </p>
                                 </div>
                               </div>
-                            </div>
-                          )
-                        )}
-                      </div>
 
-                      {/* Document Statistics */}
-                      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                        <h4 className="font-medium mb-3">Document Summary</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div className="text-center">
-                            <p className="font-semibold text-lg text-blue-600">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Prescription"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600">Prescriptions</p>
+                              {/* Action Buttons */}
+                              <div className="flex flex-col  gap-2 ml-4 mt-6">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-transparent border border-gray-400 bg-blue-100 hover:border-primary/50"
+                                >
+                                  <Eye className="h-3 w-3 mr-1 text-blue-600" />
+                                  View
+                                </Button>
+                                <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
+                                  <Download className="h-3 w-3 mr-1" />
+                                  Download
+                                </Button>
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-center">
-                            <p className="font-semibold text-lg text-green-600">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Lab Report"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600">Lab Reports</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="font-semibold text-lg text-purple-600">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Imaging Report"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600">Imaging Reports</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="font-semibold text-lg text-gray-600">
-                              {selectedPatient.documents?.length || 0}
-                            </p>
-                            <p className="text-gray-600">Total Documents</p>
-                          </div>
-                        </div>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>

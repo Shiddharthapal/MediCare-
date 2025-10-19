@@ -30,7 +30,7 @@ export default function ReportsPage({ onNavigate }: SettingPageProps) {
           className="space-y-4 mx-14 mt-4 width: 100%"
         >
           <div className="overflow-x-auto">
-            <TabsList className="grid w-full grid-cols-5 min-w-[500px] sm:min-w-0">
+            <TabsList className="grid w-full grid-cols-5 min-w-[500px] sm:min-w-0 bg-gray-300">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="medical">Medical</TabsTrigger>
               <TabsTrigger value="diagnoses">Diagnoses</TabsTrigger>

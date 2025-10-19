@@ -34,6 +34,14 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
+import { DatePickerWithSlots } from "./date-picker-with-availableSlots";
+
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+}
+[];
 
 interface Doctor {
   _id: string;
@@ -50,7 +58,7 @@ interface Doctor {
   degree: string;
   language: string[];
   about: string;
-  availableSlots: string[];
+  availableSlots: AppointmentSlot;
   consultationModes: string[];
 }
 
@@ -74,6 +82,13 @@ interface AppointmentData {
   emergencyPhone: string;
   paymentMethod: string;
   specialRequests: string;
+}
+
+interface Appointmentslot {
+  day: string;
+  enabled: boolean;
+  startTime: any;
+  endTime: any;
 }
 
 const consultationType = [
@@ -168,19 +183,24 @@ const paymentMethods = [
   "Credit Card",
   "Debit Card",
 ];
+
 interface BookAppointmentProps {
   isOpen: boolean;
   onClose: () => void;
   doctor: Doctor | null;
 }
+
 export default function BookAppointment({
   isOpen,
   onClose,
   doctor,
 }: BookAppointmentProps) {
+  console.log("🧞‍♂️  doctor --->", doctor?.availableSlots);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [enabledDays, setEnabledDays] = useState<Appointmentslot[]>();
+  const [errors, setErrors] = useState<Partial<AppointmentData>>({});
   const [formData, setFormData] = useState<AppointmentData>({
     appointmentDate: "",
     appointmentTime: "",
@@ -194,8 +214,6 @@ export default function BookAppointment({
     paymentMethod: "",
     specialRequests: "",
   });
-
-  const [errors, setErrors] = useState<Partial<AppointmentData>>({});
   const [patientdata, setPatientdata] = useState<User>({
     userId: "",
     email: "",
@@ -205,6 +223,7 @@ export default function BookAppointment({
   });
   const user = useAppSelector((state) => state.auth.user);
 
+  //Handler function to change input from the bookappoinment form
   const handleInputChange = (field: keyof AppointmentData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
@@ -215,7 +234,6 @@ export default function BookAppointment({
 
   const validateStep = (step: number): boolean => {
     const newErrors: Partial<AppointmentData> = {};
-
     switch (step) {
       case 2:
         if (!formData.appointmentDate)
@@ -234,7 +252,6 @@ export default function BookAppointment({
           newErrors.paymentMethod = "Payment method is required";
         break;
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -250,7 +267,6 @@ export default function BookAppointment({
           },
         });
         let userdata = await response.json();
-        console.log("🧞‍♂️userdata --->", userdata);
         setPatientdata({
           userId: userdata?.userdetails?.userId || userdata?.userId,
           email: userdata?.userdetails?.email || userdata?.email,
@@ -266,23 +282,24 @@ export default function BookAppointment({
     fetchData();
   }, [user?._id]);
 
+  //handle when i want to move one front step
   const handleNext = () => {
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => prev + 1);
     }
   };
 
+  //handle when i want to move one backward step
   const handlePrevious = () => {
     setCurrentStep((prev) => prev - 1);
   };
 
+  //handler function to submit form
   const handleSubmit = async () => {
     if (!validateStep(4)) return;
 
     setIsSubmitting(true);
-
     const id = user?._id;
-    // Simulate API call
     try {
       let response = await fetch("./api/user/bookAppointment", {
         method: "POST",
@@ -305,6 +322,31 @@ export default function BookAppointment({
     }
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response =
+          doctor?.availableSlots &&
+          Object.entries(doctor.availableSlots)
+            .filter(([day, schedule]) => schedule.enabled)
+            .map(([day, schedule]) => ({
+              day,
+              enabled: schedule.enabled,
+              startTime: schedule.startTime,
+              endTime: schedule.endTime,
+            }));
+        if (!response) {
+          console.log("doctor availavelslots is not valid");
+        }
+        setEnabledDays(response || []);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, [doctor?.availableSlots]);
+
+  //Reset the form when submit the form
   const resetForm = () => {
     setCurrentStep(1);
     setIsSuccess(false);
@@ -324,16 +366,19 @@ export default function BookAppointment({
     setErrors({});
   };
 
+  //close the form
   const handleClose = () => {
     resetForm();
     onClose();
   };
 
+  //set min date of calender when i set appointment date for book appoinment
   const getMinDate = () => {
     const today = new Date();
     return today.toISOString().split("T")[0];
   };
 
+  ///set max date(7 days) of calender when i set appointment date for book appoinment
   const getMaxDate = () => {
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 7); // 7 days from now
@@ -345,6 +390,36 @@ export default function BookAppointment({
     return consultation ? consultation.icon : Calendar;
   };
 
+  //Set the time in pm/am formate
+  const formatTo12Hour = (time24) => {
+    if (!time24) return "";
+    const [hours, minutes] = time24.split(":");
+    const hour = parseInt(hours, 10);
+    const minute = minutes || "00";
+
+    if (hour === 0) {
+      return `12:${minute} AM`;
+    } else if (hour < 12) {
+      return `${hour}:${minute} AM`;
+    } else if (hour === 12) {
+      return `12:${minute} PM`;
+    } else {
+      return `${hour - 12}:${minute} PM`;
+    }
+  };
+
+  //set the format the working hour
+  const formatWorkingHours = (hours) => {
+    if (!hours?.enabled) {
+      return "Closed";
+    }
+
+    const startTime = formatTo12Hour(hours.startTime);
+    const endTime = formatTo12Hour(hours.endTime);
+    return `${startTime} - ${endTime}`;
+  };
+
+  //check the doctor is not
   if (!doctor) return null;
 
   return (
@@ -516,27 +591,31 @@ export default function BookAppointment({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="appointmentDate">Preferred Date *</Label>
-                      <Input
-                        id="appointmentDate"
-                        type="date"
+                      <Label htmlFor="appointmentDate" className="mb-2">
+                        Preferred Date *
+                      </Label>
+                      <DatePickerWithSlots
                         value={formData.appointmentDate}
-                        onChange={(e) =>
-                          handleInputChange("appointmentDate", e.target.value)
+                        onChange={(date) =>
+                          handleInputChange("appointmentDate", date)
                         }
-                        min={getMinDate()}
-                        max={getMaxDate()}
-                        className={
-                          errors.appointmentDate
-                            ? "border-red-500 mt-2"
-                            : "mt-2"
-                        }
+                        availableSlots={enabledDays}
+                        minDate={getMinDate()}
+                        maxDate={getMaxDate()}
+                        error={errors.appointmentDate}
                       />
-                      {errors.appointmentDate && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.appointmentDate}
-                        </p>
-                      )}
+                      <p className="text-xs text-gray-500 mt-2">
+                        Available days:{" "}
+                        {doctor?.availableSlots
+                          ? Object.entries(doctor.availableSlots)
+                              .filter(([_, slot]) => slot?.enabled)
+                              .map(
+                                ([day]) =>
+                                  day.charAt(0).toUpperCase() + day.slice(1)
+                              )
+                              .join(", ")
+                          : "Check doctor availability"}
+                      </p>
                     </div>
 
                     <div>
@@ -556,12 +635,19 @@ export default function BookAppointment({
                         >
                           <SelectValue placeholder="Select time" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {doctor.availableSlots.map((time) => (
-                            <SelectItem key={time} value={time}>
-                              {time}
-                            </SelectItem>
-                          ))}
+                        <SelectContent className="border border-gray-400">
+                          {doctor?.availableSlots &&
+                            Object.entries(doctor?.availableSlots)
+                              .filter(([day, hours]) => hours?.enabled) // Optional: only show enabled days
+                              .map(([day, hours]) => (
+                                <SelectItem
+                                  key={day}
+                                  value={day}
+                                  className="font-medium"
+                                >
+                                  {formatWorkingHours(hours)}
+                                </SelectItem>
+                              ))}
                         </SelectContent>
                       </Select>
                       {errors.appointmentTime && (
@@ -702,6 +788,7 @@ export default function BookAppointment({
                       </p>
                     )}
                   </div>
+
                   {/* Reason for Visit now depends on Consulted Type */}
                   <div>
                     <Label htmlFor="reasonForVisit">Reason for Visit *</Label>
