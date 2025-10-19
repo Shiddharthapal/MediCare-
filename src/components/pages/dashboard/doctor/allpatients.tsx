@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { formatInTimeZone } from "date-fns-tz";
 import {
   Search,
-  Bell,
   Calendar,
   Users,
   UserRoundPlus,
@@ -76,6 +75,7 @@ interface AppointmentData {
   doctorName: string;
   doctorSpecialist: string;
   doctorEmail: string;
+  doctorUserId: string;
   patientId: string;
   patientName: string;
   patientEmail: string;
@@ -185,6 +185,7 @@ const mockAppointmentData: AppointmentData = {
   doctorName: "",
   doctorSpecialist: "",
   doctorEmail: "",
+  doctorUserId: "",
   patientId: "",
   patientName: "",
   patientEmail: "",
@@ -253,304 +254,7 @@ interface FileUpload {
 }
 
 // Mock data for patients
-const patients = [
-  {
-    id: 1,
-    name: "Floyd Miles",
-    address: "7529 E. Pecan St.",
-    avatar: "FM",
-    isActive: true,
-    age: 54,
-    gender: "Male",
-    phone: "(603) 555-0123",
-    email: "floydmiles@gmail.com",
-    fullAddress: "7529 E. Pecan St.",
-    insurance:
-      "Member ID: 78146284/201, Wellbeing Medicare New York, United States of America",
-    language: "English",
-    diseases: [
-      {
-        name: "Hypertension",
-        severity: "High",
-        status: "Active",
-        diagnosedDate: "2020-03-15",
-      },
-      {
-        name: "Type 2 Diabetes",
-        severity: "High",
-        status: "Active",
-        diagnosedDate: "2019-08-22",
-      },
-      {
-        name: "Sleep Apnea",
-        severity: "Medium",
-        status: "Active",
-        diagnosedDate: "2021-01-10",
-      },
-      {
-        name: "Gastritis",
-        severity: "Medium",
-        status: "Treated",
-        diagnosedDate: "2018-11-05",
-      },
-      {
-        name: "Seasonal Allergies",
-        severity: "Low",
-        status: "Active",
-        diagnosedDate: "2017-04-12",
-      },
-      {
-        name: "Migraine",
-        severity: "Low",
-        status: "Treated",
-        diagnosedDate: "2016-09-18",
-      },
-    ],
-    appointments: [
-      {
-        date: "12/01/2024",
-        time: "12:45 PM",
-        type: "Regular Checkup",
-        doctor: "Dr. Edward Bailey",
-        status: "Completed",
-      },
-      {
-        date: "11/15/2024",
-        time: "10:30 AM",
-        type: "Blood Test Follow-up",
-        doctor: "Dr. Sarah Johnson",
-        status: "Completed",
-      },
-      {
-        date: "10/28/2024",
-        time: "2:15 PM",
-        type: "Diabetes Consultation",
-        doctor: "Dr. Michael Chen",
-        status: "Completed",
-      },
-      {
-        date: "10/10/2024",
-        time: "9:00 AM",
-        type: "Hypertension Check",
-        doctor: "Dr. Edward Bailey",
-        status: "Completed",
-      },
-      {
-        date: "09/22/2024",
-        time: "11:20 AM",
-        type: "Sleep Study Review",
-        doctor: "Dr. Lisa Wong",
-        status: "Completed",
-      },
-    ],
-    documents: [
-      {
-        id: 1,
-        name: "Blood Pressure Prescription",
-        type: "Prescription",
-        doctor: "Dr. Edward Bailey",
-        date: "December 1, 2024",
-        time: "12:45 PM",
-        size: "245 KB",
-        format: "PDF",
-        description:
-          "Lisinopril 10mg daily prescription for hypertension management",
-        status: "Active",
-      },
-      {
-        id: 2,
-        name: "Lab Results - Complete Blood Count",
-        type: "Lab Report",
-        doctor: "Dr. Sarah Johnson",
-        date: "November 28, 2024",
-        time: "09:30 AM",
-        size: "1.2 MB",
-        format: "PDF",
-        description: "Complete blood count analysis with normal values",
-        status: "Reviewed",
-      },
-      {
-        id: 3,
-        name: "Chest X-Ray Report",
-        type: "Imaging Report",
-        doctor: "Dr. Michael Chen",
-        date: "November 25, 2024",
-        time: "02:15 PM",
-        size: "3.4 MB",
-        format: "PDF",
-        description:
-          "Chest X-ray showing clear lungs, no abnormalities detected",
-        status: "Reviewed",
-      },
-      {
-        id: 4,
-        name: "Diabetes Medication Prescription",
-        type: "Prescription",
-        doctor: "Dr. Edward Bailey",
-        date: "November 20, 2024",
-        time: "11:00 AM",
-        size: "198 KB",
-        format: "PDF",
-        description:
-          "Metformin 500mg twice daily for Type 2 diabetes management",
-        status: "Active",
-      },
-      {
-        id: 5,
-        name: "Cardiology Consultation Report",
-        type: "Consultation Report",
-        doctor: "Dr. Lisa Wong",
-        date: "November 15, 2024",
-        time: "03:30 PM",
-        size: "567 KB",
-        format: "PDF",
-        description: "Comprehensive cardiac evaluation and recommendations",
-        status: "Reviewed",
-      },
-      {
-        id: 6,
-        name: "Sleep Study Results",
-        type: "Study Report",
-        doctor: "Dr. Amanda Lee",
-        date: "November 10, 2024",
-        time: "08:00 AM",
-        size: "2.1 MB",
-        format: "PDF",
-        description: "Polysomnography results showing moderate sleep apnea",
-        status: "Reviewed",
-      },
-      {
-        id: 7,
-        name: "Physical Therapy Plan",
-        type: "Treatment Plan",
-        doctor: "Dr. Robert Kim",
-        date: "November 5, 2024",
-        time: "10:30 AM",
-        size: "324 KB",
-        format: "PDF",
-        description: "12-week physical therapy program for lower back pain",
-        status: "Active",
-      },
-      {
-        id: 8,
-        name: "Allergy Test Results",
-        type: "Lab Report",
-        doctor: "Dr. Sarah Johnson",
-        date: "October 28, 2024",
-        time: "01:45 PM",
-        size: "892 KB",
-        format: "PDF",
-        description:
-          "Comprehensive allergy panel showing reactions to peanuts and shellfish",
-        status: "Reviewed",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Annette Black",
-    address: "7529 E. Pecan St.",
-    avatar: "AB",
-    isActive: false,
-    age: 42,
-    gender: "Female",
-    phone: "(555) 123-4567",
-    email: "annette.black@email.com",
-    diseases: [
-      {
-        name: "Asthma",
-        severity: "Medium",
-        status: "Active",
-        diagnosedDate: "2015-06-20",
-      },
-      {
-        name: "Anxiety Disorder",
-        severity: "Medium",
-        status: "Active",
-        diagnosedDate: "2020-02-14",
-      },
-    ],
-    appointments: [
-      {
-        date: "11/28/2024",
-        time: "3:30 PM",
-        type: "Asthma Review",
-        doctor: "Dr. Robert Kim",
-        status: "Completed",
-      },
-    ],
-    documents: [
-      {
-        id: 1,
-        name: "Blood Pressure Prescription",
-        type: "Prescription",
-        doctor: "Dr. Edward Bailey",
-        date: "December 1, 2024",
-        time: "12:45 PM",
-        size: "245 KB",
-        format: "PDF",
-        description:
-          "Lisinopril 10mg daily prescription for hypertension management",
-        status: "Active",
-      },
-      {
-        id: 2,
-        name: "Lab Results - Complete Blood Count",
-        type: "Lab Report",
-        doctor: "Dr. Sarah Johnson",
-        date: "November 28, 2024",
-        time: "09:30 AM",
-        size: "1.2 MB",
-        format: "PDF",
-        description: "Complete blood count analysis with normal values",
-        status: "Reviewed",
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Guy Hawkins",
-    address: "775 Rolling Green Rd.",
-    avatar: "GH",
-    isActive: false,
-    age: 38,
-    gender: "Male",
-    phone: "(555) 987-6543",
-    email: "guy.hawkins@email.com",
-    diseases: [
-      {
-        name: "Lower Back Pain",
-        severity: "Medium",
-        status: "Active",
-        diagnosedDate: "2022-01-15",
-      },
-    ],
-    appointments: [
-      {
-        date: "12/05/2024",
-        time: "1:00 PM",
-        type: "Physical Therapy",
-        doctor: "Dr. Amanda Lee",
-        status: "Completed",
-      },
-    ],
-    documents: [
-      {
-        id: 1,
-        name: "Blood Pressure Prescription",
-        type: "Prescription",
-        doctor: "Dr. Edward Bailey",
-        date: "December 1, 2024",
-        time: "12:45 PM",
-        size: "245 KB",
-        format: "PDF",
-        description:
-          "Lisinopril 10mg daily prescription for hypertension management",
-        status: "Active",
-      },
-    ],
-  },
-];
+
 interface ReasonForVisit {
   appointment: AppointmentData;
   reason: string;
@@ -819,6 +523,53 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     // Update the state with grouped data
     setPatientData(groupedData);
   };
+
+  let result = Object.values(patientData).flatMap((patient) => {
+    // Safely extract prescriptions
+    return patient.previousAppointments.map((appointments) => {
+      const prescription = Array.isArray(appointments.prescription)
+        ? appointments.prescription
+        : [];
+
+      const document = Array.isArray(appointments.document)
+        ? appointments.document
+        : [];
+
+      return {
+        prescriptions: prescription.map((p) => ({
+          prescriptionId: p.prescriptionId || p._id || "",
+          vitalSign: p.vitalSign || {},
+          primaryDiagnosis: p.primaryDiagnosis || "",
+          symptoms: p.symptoms || "",
+          testandReport: p.testandReport || "",
+          medication: p.medication || [],
+          restrictions: p.restrictions || "",
+          followUpDate: p.followUpDate || null,
+          additionalNote: p.additionalNote || "",
+          createdAt: p.createdAt || null,
+        })),
+
+        // Documents
+        documents: document.map((d) => ({
+          documentId: d._id || "",
+          filename: d.filename || "",
+          originalName: d.originalName || "",
+          fileType: d.fileType || "",
+          fileSize: d.fileSize || 0,
+          url: d.url || "",
+          uploadedAt: d.uploadedAt || null,
+          category: d.category || "",
+        })),
+      };
+    });
+  });
+
+  console.log("result=>", result);
+
+  // // Safely extract documents
+  // const documents = Array.isArray(appointment.document)
+  //   ? appointment.document
+  //   : [];
 
   //Categorized appointments
   const categorizedAppointments = useMemo(() => {
@@ -1754,20 +1505,19 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                       {/* Documents List */}
                       <div className="space-y-4">
-                        {selectedPatient?.previousAppointments.map(
-                          (document, index) => (
-                            <div
-                              key={index}
-                              className="border border-gray-400 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start gap-4 flex-1">
-                                  {/* Document Icon */}
-                                  <div className="p-3 rounded-lg bg-blue-100">
-                                    {document.prescription && (
-                                      <Pill className="h-6 w-6 text-blue-600" />
-                                    )}
-                                    {/* {document.type === "Lab Report" && (
+                        {patientData?.previous?.map((document, index) => (
+                          <div
+                            key={index}
+                            className="border border-gray-400 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-4 flex-1">
+                                {/* Document Icon */}
+                                <div className="p-3 rounded-lg bg-blue-100">
+                                  {document.prescription && (
+                                    <Pill className="h-6 w-6 text-blue-600" />
+                                  )}
+                                  {/* {document.type === "Lab Report" && (
                                       <ClipboardList className="h-6 w-6 text-green-600" />
                                     )}
                                     {document.type === "Imaging Report" && (
@@ -1783,7 +1533,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     {document.type === "Treatment Plan" && (
                                       <FileText className="h-6 w-6 text-teal-600" />
                                     )} */}
-                                    {/* {![
+                                  {/* {![
                                       "Prescription",
                                       "Lab Report",
                                       "Imaging Report",
@@ -1793,89 +1543,88 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     ].includes(document.type) && (
                                       <FileText className="h-6 w-6 text-gray-600" />
                                     )} */}
-                                  </div>
-
-                                  {/* Document Details */}
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <h3 className="font-semibold text-lg">
-                                        {document.reasonForVisit}
-                                      </h3>
-                                      <Badge
-                                        variant={
-                                          document?.prescription
-                                            ? "default"
-                                            : "secondary"
-                                        }
-                                        className={
-                                          document?.prescription
-                                            ? "bg-green-100 text-green-800"
-                                            : "bg-gray-100 text-gray-800"
-                                        }
-                                      >
-                                        {document?.prescription
-                                          ? "Active"
-                                          : "Reviewed"}
-                                      </Badge>
-                                    </div>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
-                                      <div className="flex items-center gap-1">
-                                        <FileText className="h-4 w-4" />
-                                        <span>{document.type}</span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>
-                                          {new Date(
-                                            document.prescription.createdAt
-                                          ).toLocaleDateString()}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <Clock className="h-4 w-4" />
-                                        <span>
-                                          {formatInTimeZone(
-                                            document?.prescription?.createdAt,
-                                            "Etc/UTC",
-                                            "hh:mm a"
-                                          )}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <UserRoundPlus className="h-5 w-5" />
-                                        <span>{document?.doctorName}</span>
-                                      </div>
-                                    </div>
-                                    <p className="text-sm text-gray-700 mb-2">
-                                      <strong>Description:</strong>{" "}
-                                      {document?.prescription?.primaryDiagnosis}
-                                    </p>
-                                    <div className="flex items-center gap-4 text-xs text-gray-500">
-                                      <span>Size: {document.size}</span>
-                                      <span>Format: {document.format}</span>
-                                    </div>
-                                  </div>
                                 </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex flex-col  gap-2 ml-4 mt-6">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-xs bg-transparent border border-gray-400 bg-blue-100 hover:border-primary/50"
-                                  >
-                                    <Eye className="h-3 w-3 mr-1 text-blue-600" />
-                                    View
-                                  </Button>
-                                  <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
-                                    <Download className="h-3 w-3 mr-1" />
-                                    Download
-                                  </Button>
+                                {/* Document Details */}
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-semibold text-lg">
+                                      {document.reasonForVisit}
+                                    </h3>
+                                    <Badge
+                                      variant={
+                                        document?.prescription
+                                          ? "default"
+                                          : "secondary"
+                                      }
+                                      className={
+                                        document?.prescription
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-gray-100 text-gray-800"
+                                      }
+                                    >
+                                      {document?.prescription
+                                        ? "Active"
+                                        : "Reviewed"}
+                                    </Badge>
+                                  </div>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
+                                    <div className="flex items-center gap-1">
+                                      <FileText className="h-4 w-4" />
+                                      <span>{document.type}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4" />
+                                      <span>
+                                        {new Date(
+                                          document.prescription.createdAt
+                                        ).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4" />
+                                      <span>
+                                        {formatInTimeZone(
+                                          document?.prescription?.createdAt,
+                                          "Etc/UTC",
+                                          "hh:mm a"
+                                        )}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <UserRoundPlus className="h-5 w-5" />
+                                      <span>{document?.doctorName}</span>
+                                    </div>
+                                  </div>
+                                  <p className="text-sm text-gray-700 mb-2">
+                                    <strong>Description:</strong>{" "}
+                                    {document?.prescription?.primaryDiagnosis}
+                                  </p>
+                                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                                    <span>Size: {document.size}</span>
+                                    <span>Format: {document.format}</span>
+                                  </div>
                                 </div>
                               </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex flex-col  gap-2 ml-4 mt-6">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-transparent border border-gray-400 bg-blue-100 hover:border-primary/50"
+                                >
+                                  <Eye className="h-3 w-3 mr-1 text-blue-600" />
+                                  View
+                                </Button>
+                                <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
+                                  <Download className="h-3 w-3 mr-1" />
+                                  Download
+                                </Button>
+                              </div>
                             </div>
-                          )
-                        )}
+                          </div>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>

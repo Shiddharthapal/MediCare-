@@ -11,7 +11,7 @@ export const GET: APIRoute = async ({ params, request }: any) => {
     await connect();
 
     let doctordetails = await DoctorDetails.findOne({ userId: id });
-    // console.log("🧞‍♂️doctordetails --->", doctordetails);
+    console.log("🧞‍♂️doctordetails --->", doctordetails);
 
     return new Response(
       JSON.stringify({
