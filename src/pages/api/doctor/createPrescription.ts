@@ -13,7 +13,8 @@ export const POST: APIRoute = async ({ request }) => {
     console.log("🧞‍♂️  body --->", body);
 
     let { patientData, prescriptionData } = body;
-    let { doctorpatinetId, patientId, doctorId } = patientData;
+    let { doctorpatinetId, patientId, doctorId, doctorName, reasonForVisit } =
+      patientData;
     let {
       vitalSign,
       primaryDiagnosis,
@@ -46,8 +47,10 @@ export const POST: APIRoute = async ({ request }) => {
     const newPrescriptionPatient = {
       doctorpatinetId,
       patientId,
+      doctorName,
       doctorId,
       vitalSign,
+      reasonForVisit,
       primaryDiagnosis,
       testandReport,
       symptoms,
@@ -95,8 +98,10 @@ export const POST: APIRoute = async ({ request }) => {
     const newPrescriptionDoctor = {
       doctorpatinetId,
       patientId,
+      doctorName,
       doctorId,
       vitalSign,
+      reasonForVisit,
       primaryDiagnosis,
       testandReport,
       medication,

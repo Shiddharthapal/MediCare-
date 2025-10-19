@@ -22,7 +22,9 @@ interface Medication {
 }
 interface Prescription {
   doctorId: string;
+  doctorName: string;
   patientId: string;
+  reasonForVisit: string;
   doctorpatinetId: string;
   vitalSign: VitalSign;
   primaryDiagnosis: string;

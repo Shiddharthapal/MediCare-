@@ -59,6 +59,8 @@ interface Medication {
 }
 interface Prescription {
   vitalSign: VitalSign;
+  doctorName: string;
+  reasonForVisit: String;
   primaryDiagnosis: string;
   testandReport: string;
   medication: Medication[];
@@ -75,7 +77,6 @@ interface AppointmentData {
   doctorName: string;
   doctorSpecialist: string;
   doctorEmail: string;
-  doctorUserId: string;
   patientId: string;
   patientName: string;
   patientEmail: string;
@@ -97,7 +98,7 @@ interface AppointmentData {
   paymentMethod: string;
   specialRequests: string;
   prescription: Prescription;
-  document: FileUpload;
+  document: FileUpload[];
   createdAt: Date;
 }
 
@@ -168,7 +169,9 @@ const mockMedication: Medication = {
 };
 
 const mockPrescription: Prescription = {
+  doctorName: "",
   vitalSign: mockVitalsign,
+  reasonForVisit: "",
   primaryDiagnosis: "",
   testandReport: "",
   medication: [mockMedication],
@@ -185,7 +188,6 @@ const mockAppointmentData: AppointmentData = {
   doctorName: "",
   doctorSpecialist: "",
   doctorEmail: "",
-  doctorUserId: "",
   patientId: "",
   patientName: "",
   patientEmail: "",
@@ -207,7 +209,7 @@ const mockAppointmentData: AppointmentData = {
   paymentMethod: "",
   specialRequests: "",
   prescription: mockPrescription,
-  document: mockFileUpload,
+  document: mockFileUpload || [],
   createdAt: new Date(),
 };
 
@@ -425,8 +427,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     useState<PatientData>(mockPatientData);
   const [showPatientList, setShowPatientList] = useState(true);
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
-  const [appointmentData, setAppointmentData] =
-    useState<DoctorDetails>(mockDoctorDetails);
+  const [appointmentData, setAppointmentData] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   let doctor = useAppSelector((state) => state.auth.user);
 
@@ -499,7 +500,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
       // Filter upcoming appointments
       const today = new Date();
-      console.log("🧞‍♂️  today --->", today);
       groupedData[patientId].upcomingAppointments = groupedData[
         patientId
       ].appointments.filter((appointment) => {
@@ -519,52 +519,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       });
     });
 
-    console.log("=>", groupedData);
     // Update the state with grouped data
     setPatientData(groupedData);
   };
-
-  let result = Object.values(patientData).flatMap((patient) => {
-    // Safely extract prescriptions
-    return patient.previousAppointments.map((appointments) => {
-      const prescription = Array.isArray(appointments.prescription)
-        ? appointments.prescription
-        : [];
-
-      const document = Array.isArray(appointments.document)
-        ? appointments.document
-        : [];
-
-      return {
-        prescriptions: prescription.map((p) => ({
-          prescriptionId: p.prescriptionId || p._id || "",
-          vitalSign: p.vitalSign || {},
-          primaryDiagnosis: p.primaryDiagnosis || "",
-          symptoms: p.symptoms || "",
-          testandReport: p.testandReport || "",
-          medication: p.medication || [],
-          restrictions: p.restrictions || "",
-          followUpDate: p.followUpDate || null,
-          additionalNote: p.additionalNote || "",
-          createdAt: p.createdAt || null,
-        })),
-
-        // Documents
-        documents: document.map((d) => ({
-          documentId: d._id || "",
-          filename: d.filename || "",
-          originalName: d.originalName || "",
-          fileType: d.fileType || "",
-          fileSize: d.fileSize || 0,
-          url: d.url || "",
-          uploadedAt: d.uploadedAt || null,
-          category: d.category || "",
-        })),
-      };
-    });
-  });
-
-  console.log("result=>", result);
 
   // // Safely extract documents
   // const documents = Array.isArray(appointment.document)
@@ -594,7 +551,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       });
 
       let responseData = await response.json();
-      console.log("🧞‍♂️  responseData --->", responseData.doctordetails);
       groupAppointmentsByPatientId(responseData.doctordetails);
     };
     fetchData();
@@ -828,6 +784,51 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       return "AB";
     }
   };
+
+  let result = useMemo(() => {
+    if (!selectedPatient) {
+      return [];
+    }
+
+    // Safely extract prescriptions
+    return selectedPatient?.appointments.map((appointments) => {
+      const prescription = appointments.prescription;
+      console.log("🧞‍♂️  prescription --->", prescription);
+
+      const document = Array.isArray(appointments.document)
+        ? appointments.document
+        : [];
+
+      return {
+        prescriptions: prescription
+          ? {
+              prescriptionId: prescription.prescriptionId || "",
+              vitalSign: prescription.vitalSign || {},
+              primaryDiagnosis: prescription.primaryDiagnosis || "",
+              symptoms: prescription.symptoms || "",
+              testandReport: prescription.testandReport || "",
+              medication: prescription.medication || [],
+              restrictions: prescription.restrictions || "",
+              followUpDate: prescription.followUpDate || null,
+              additionalNote: prescription.additionalNote || "",
+              createdAt: prescription.createdAt || null,
+            }
+          : null,
+
+        // Documents
+        documents: document.map((d) => ({
+          documentId: d._id || "",
+          filename: d.filename || "",
+          originalName: d.originalName || "",
+          fileType: d.fileType || "",
+          fileSize: d.fileSize || 0,
+          url: d.url || "",
+          uploadedAt: d.uploadedAt || null,
+          category: d.category || "",
+        })),
+      };
+    });
+  }, [selectedPatient]);
 
   // useEffect(() => {
   //   let doctorId = doctor?._id;
@@ -1505,7 +1506,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                       {/* Documents List */}
                       <div className="space-y-4">
-                        {patientData?.previous?.map((document, index) => (
+                        {result?.map((document, index) => (
                           <div
                             key={index}
                             className="border border-gray-400 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
@@ -1514,7 +1515,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               <div className="flex items-start gap-4 flex-1">
                                 {/* Document Icon */}
                                 <div className="p-3 rounded-lg bg-blue-100">
-                                  {document.prescription && (
+                                  {document.prescriptions && (
                                     <Pill className="h-6 w-6 text-blue-600" />
                                   )}
                                   {/* {document.type === "Lab Report" && (
@@ -1549,35 +1550,37 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-2">
                                     <h3 className="font-semibold text-lg">
-                                      {document.reasonForVisit}
+                                      {document?.prescriptions?.reasonForVisit}
                                     </h3>
                                     <Badge
                                       variant={
-                                        document?.prescription
+                                        document?.prescriptions
                                           ? "default"
                                           : "secondary"
                                       }
                                       className={
-                                        document?.prescription
+                                        document?.prescriptions
                                           ? "bg-green-100 text-green-800"
                                           : "bg-gray-100 text-gray-800"
                                       }
                                     >
-                                      {document?.prescription
+                                      {document?.prescriptions
                                         ? "Active"
                                         : "Reviewed"}
                                     </Badge>
                                   </div>
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
+                                  <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                                     <div className="flex items-center gap-1">
                                       <FileText className="h-4 w-4" />
-                                      <span>{document.type}</span>
+                                      <span className="font-semibold">
+                                        Prescription
+                                      </span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                       <Calendar className="h-4 w-4" />
                                       <span>
                                         {new Date(
-                                          document.prescription.createdAt
+                                          document?.prescriptions?.createdAt
                                         ).toLocaleDateString()}
                                       </span>
                                     </div>
@@ -1585,7 +1588,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                       <Clock className="h-4 w-4" />
                                       <span>
                                         {formatInTimeZone(
-                                          document?.prescription?.createdAt,
+                                          document?.prescriptions?.createdAt,
                                           "Etc/UTC",
                                           "hh:mm a"
                                         )}
@@ -1593,17 +1596,15 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     </div>
                                     <div className="flex items-center gap-1">
                                       <UserRoundPlus className="h-5 w-5" />
-                                      <span>{document?.doctorName}</span>
+                                      <span>
+                                        {document?.prescriptions?.doctorName}
+                                      </span>
                                     </div>
                                   </div>
                                   <p className="text-sm text-gray-700 mb-2">
                                     <strong>Description:</strong>{" "}
-                                    {document?.prescription?.primaryDiagnosis}
+                                    {document?.prescriptions?.primaryDiagnosis}
                                   </p>
-                                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                                    <span>Size: {document.size}</span>
-                                    <span>Format: {document.format}</span>
-                                  </div>
                                 </div>
                               </div>
 

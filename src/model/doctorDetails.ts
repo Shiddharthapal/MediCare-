@@ -100,6 +100,9 @@ const PrescriptionSchema = new mongoose.Schema({
   doctorId: {
     type: String,
   },
+  doctorName: {
+    type: String,
+  },
   patientId: {
     type: String,
   },
@@ -108,6 +111,9 @@ const PrescriptionSchema = new mongoose.Schema({
   },
   vitalSign: {
     type: VitalSignSchema,
+  },
+  reasonForVisit: {
+    type: String,
   },
   primaryDiagnosis: {
     type: String,

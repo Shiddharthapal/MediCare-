@@ -36,8 +36,10 @@ interface Medication {
 }
 interface Prescription {
   doctorId: string;
+  doctorName: string;
   patientId: string;
   doctorpatinetId: string;
+  reasonForVisit: string;
   vitalSign: VitalSign;
   primaryDiagnosis: string;
   symptoms: string;
