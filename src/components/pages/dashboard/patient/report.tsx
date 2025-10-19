@@ -425,7 +425,7 @@ export default function Reports() {
         formData.append(`originalNames`, fileData.name);
       });
 
-      const response = await fetch("/api/user/upload", {
+      const response = await fetch("/api/user/uploadfromReport", {
         method: "POST",
         body: formData,
       });
