@@ -96,8 +96,6 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Extract fields
     const userId = formData.get("userId") as string;
-    const file = formData.get("files") as File;
-    const fileType = getFileTypeFromFilename(file.name);
     const category = formData.get("category") || "";
     const doctorName = formData.get("doctorName") || "";
     const files = formData.getAll("files") as File[];
@@ -151,29 +149,18 @@ export const POST: APIRoute = async ({ request }) => {
     //Not sure user upload single or multiple file, that's why use for loop
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      console.log("🧞‍♂️  file --->", file);
       const documentName = documentNames[i];
       const originalName = originalNames[i];
 
-      // Validate file type
-      const fileType = getFileTypeFromFilename(documentName);
-
       //Check fileType have or not
-      if (!fileType) {
+      if (!file.type) {
         uploadResults.push({
           filename: documentName,
           success: false,
           message: "Invalid file type",
         });
-        continue;
-      }
 
-      //Check fileType is valid or not
-      if (!isValidFileType(file.type)) {
-        uploadResults.push({
-          filename: documentName,
-          success: false,
-          message: `File type ${file.type} is not allowed`,
-        });
         continue;
       }
 
@@ -198,7 +185,7 @@ export const POST: APIRoute = async ({ request }) => {
       const uniqueFilename = generateUniqueFilename(documentName);
 
       // Construct destination path
-      let destinationPath = `${userId}/${fileType}`;
+      let destinationPath = `${userId}/${file.type}`;
       if (appointmentId) {
         destinationPath += `/${appointmentId}`;
       }
@@ -207,12 +194,13 @@ export const POST: APIRoute = async ({ request }) => {
       //Here use try-catch for unexpected error
       try {
         // Upload to Bunny CDN
-        await bunnyStorageService.uploadFile(
+        let response = await bunnyStorageService.uploadFile(
           destinationPath,
           buffer,
           file.type,
           checksum
         );
+        console.log("🧞‍♂️  response --->", response);
 
         // Construct public URL
         const publicUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${destinationPath}`;
