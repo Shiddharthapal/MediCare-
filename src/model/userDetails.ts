@@ -218,7 +218,7 @@ const PrescriptionSchema = new mongoose.Schema(
     patientId: {
       type: String,
     },
-    appointmentId: {
+    doctorpatinetId: {
       type: String,
     },
     vitalSign: {

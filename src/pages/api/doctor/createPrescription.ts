@@ -44,6 +44,9 @@ export const POST: APIRoute = async ({ request }) => {
     userdetails.appointments.status = "completed";
     userdetails.save();
     const newPrescriptionPatient = {
+      doctorpatinetId,
+      patientId,
+      doctorId,
       vitalSign,
       primaryDiagnosis,
       testandReport,
@@ -90,6 +93,9 @@ export const POST: APIRoute = async ({ request }) => {
     doctordetails.save();
 
     const newPrescriptionDoctor = {
+      doctorpatinetId,
+      patientId,
+      doctorId,
       vitalSign,
       primaryDiagnosis,
       testandReport,
