@@ -33,36 +33,6 @@ const ALLOWED_FILE_TYPES: { [key: string]: string } = {
 // Max file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-//Get file type from file extension
-function getFileTypeFromExtension(extension: string): string | null {
-  // Normalize extension (ensure it starts with a dot)
-  const normalizedExt = extension.startsWith(".")
-    ? extension.toLowerCase()
-    : `.${extension.toLowerCase()}`;
-
-  // Find the MIME type that matches this extension
-  for (const [mimeType, ext] of Object.entries(ALLOWED_FILE_TYPES)) {
-    if (ext === normalizedExt) {
-      return mimeType;
-    }
-  }
-  return null;
-}
-
-//Get file extension
-function extractExtension(filename: string): string {
-  const lastDot = filename.lastIndexOf(".");
-  if (lastDot === -1) return "";
-  return filename.substring(lastDot).toLowerCase();
-}
-
-//Get file type from file name
-function getFileTypeFromFilename(filename: string): string | null {
-  const extension = extractExtension(filename);
-  if (!extension) return null;
-  return getFileTypeFromExtension(extension);
-}
-
 // Helper function to generate unique filename
 function generateUniqueFilename(originalName: string): string {
   const timestamp = Date.now();
@@ -79,11 +49,6 @@ function calculateChecksum(buffer: Buffer): string {
   return crypto.createHash("sha256").update(buffer).digest("hex").toUpperCase();
 }
 
-// Helper function to validate file type
-function isValidFileType(mimeType: string): boolean {
-  return Object.keys(ALLOWED_FILE_TYPES).includes(mimeType);
-}
-
 //Post operation for upload file, document, report
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
@@ -98,11 +63,10 @@ export const POST: APIRoute = async ({ request }) => {
     // Extract fields
     const userId = formData.get("userId") as string;
     const doctorId = formData.get("doctorId") as string;
-    const file = formData.get("files") as File;
-    const fileType = getFileTypeFromFilename(file.name);
     const category = formData.get("category") || "";
     const doctorName = formData.get("doctorName") || "";
     const files = formData.getAll("files") as File[];
+    const appointmentId = formData.get("appointmentId") as string | null;
     const doctorpatinetId = formData.get("doctorpatinetId") as string | null;
     const useridwhup = formData.get("userIdWHUP") as string;
     const documentNames = formData.getAll("documentNames") as string[];
@@ -173,21 +137,8 @@ export const POST: APIRoute = async ({ request }) => {
       const documentName = documentNames[i];
       const originalName = originalNames[i];
 
-      // Validate file type
-      const fileType = getFileTypeFromFilename(documentName);
-
-      //Check fileType have or not
-      if (!fileType) {
-        uploadResults.push({
-          filename: documentName,
-          success: false,
-          message: "Invalid file type",
-        });
-        continue;
-      }
-
       //Check fileType is valid or not
-      if (!isValidFileType(file.type)) {
+      if (!file.type) {
         uploadResults.push({
           filename: documentName,
           success: false,
@@ -217,21 +168,22 @@ export const POST: APIRoute = async ({ request }) => {
       const uniqueFilename = generateUniqueFilename(documentName);
 
       // Construct destination path
-      let destinationPath = `${userId}/${fileType}`;
-      if (appointmentId) {
+      let destinationPath = `${userId}/${file.type}`;
+      if (doctorpatinetId) {
         destinationPath += `/${appointmentId}`;
       }
-      destinationPath += `/${uniqueFilename}`;
+      destinationPath += `/${appointmentId}`;
 
       //Here use try-catch for unexpected error
       try {
         // Upload to Bunny CDN
-        await bunnyStorageService.uploadFile(
+        let response = await bunnyStorageService.uploadFile(
           destinationPath,
           buffer,
           file.type,
           checksum
         );
+        console.log("🧞‍♂️  response --->", response);
 
         // Construct public URL
         const publicUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${destinationPath}`;
@@ -252,7 +204,7 @@ export const POST: APIRoute = async ({ request }) => {
           doctorName: doctorName,
           category: category,
           userIdWHUP: useridwhup,
-          appointmentId: appointmentId,
+          doctorpatinetId: doctorpatinetId,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -271,7 +223,7 @@ export const POST: APIRoute = async ({ request }) => {
           doctorName: doctorName,
           category: category,
           userIdWHUP: useridwhup,
-          appointmentId: appointmentId,
+          doctorpatinetId: doctorpatinetId,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -303,23 +255,22 @@ export const POST: APIRoute = async ({ request }) => {
     // Save all successfully uploaded files to DB
     if (uploadedFiles.length > 0) {
       await userDetails.findOneAndUpdate(
-        { userId: userId },
+        { userId: userId, doctorpatinetId: doctorpatinetId },
         {
-          $push: { "appointments.$[elem].document": { $each: uploadedFiles } },
+          $push: { "appoinments.$.document": { $each: uploadedFiles } },
         },
         {
-          arrayFilters: [{ "$elem.doctorpatinetId": doctorpatinetId }],
           new: true,
           runValidators: true,
         }
       );
+
       await doctorDetails.findOneAndUpdate(
-        { userId: doctorId },
+        { userId: doctorId, doctorpatinetId: doctorpatinetId },
         {
-          $push: { "appointments.$[elem].document": { $each: uploadedFiles } },
+          $push: { "appointments.$.document": { $each: uploadedFiles } },
         },
         {
-          arrayFilters: [{ "$elem.doctorpatinetId": doctorpatinetId }],
           new: true,
           runValidators: true,
         }
