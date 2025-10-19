@@ -4,7 +4,6 @@ import { bunnyStorageService } from "@/lib/bunny-cdn";
 import userDetails from "@/model/userDetails";
 import connect from "@/lib/connection";
 import crypto from "crypto";
-import doctorDetails from "@/model/doctorDetails";
 
 // Allowed file types with their MIME types
 const ALLOWED_FILE_TYPES: { [key: string]: string } = {
@@ -97,13 +96,12 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Extract fields
     const userId = formData.get("userId") as string;
-    const doctorId = formData.get("doctorId") as string;
     const file = formData.get("files") as File;
     const fileType = getFileTypeFromFilename(file.name);
     const category = formData.get("category") || "";
     const doctorName = formData.get("doctorName") || "";
     const files = formData.getAll("files") as File[];
-    const doctorpatinetId = formData.get("doctorpatinetId") as string | null;
+    const appointmentId = formData.get("appointmentId") as string | null;
     const useridwhup = formData.get("userIdWHUP") as string;
     const documentNames = formData.getAll("documentNames") as string[];
     const originalNames = formData.getAll("originalNames") as string[];
@@ -146,26 +144,9 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    //Check doctor are exsist in the db
-    let doctordetails = await doctorDetails.findOne({ userId: doctorId });
-    if (!doctordetails) {
-      return new Response(
-        JSON.stringify({
-          message: "Invalid doctor",
-        }),
-        {
-          status: 400,
-          headers,
-        }
-      );
-    }
-
     //Take temporary array for upload and store file, report, document
     const uploadedFiles = [];
     const uploadResults = [];
-
-    const uploadedSingleFiles = [];
-    const uploadSingleResults = [];
 
     //Not sure user upload single or multiple file, that's why use for loop
     for (let i = 0; i < files.length; i++) {
@@ -237,28 +218,7 @@ export const POST: APIRoute = async ({ request }) => {
         const publicUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${destinationPath}`;
 
         // Prepare upload data
-        const uploadfileforboth = {
-          patientId: userId,
-          doctorId: doctorId,
-          filename: uniqueFilename,
-          originalName: originalName,
-          documentName: documentName,
-          fileType: file.type,
-          fileSize: file.size,
-          path: destinationPath,
-          url: publicUrl,
-          checksum: checksum,
-          uploadedAt: new Date().toISOString(),
-          doctorName: doctorName,
-          category: category,
-          userIdWHUP: useridwhup,
-          appointmentId: appointmentId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        const uploadfileforsingle = {
-          patientId: userId,
+        const uploadfile = {
           filename: uniqueFilename,
           originalName: originalName,
           documentName: documentName,
@@ -277,15 +237,8 @@ export const POST: APIRoute = async ({ request }) => {
         };
 
         //Push the uploaddata to array for upload the data into db
-        uploadedFiles.push(uploadfileforboth);
+        uploadedFiles.push(uploadfile);
         uploadResults.push({
-          filename: documentName,
-          success: true,
-          url: publicUrl,
-        });
-
-        uploadedSingleFiles.push(uploadfileforsingle);
-        uploadSingleResults.push({
           filename: documentName,
           success: true,
           url: publicUrl,
@@ -305,32 +258,7 @@ export const POST: APIRoute = async ({ request }) => {
       await userDetails.findOneAndUpdate(
         { userId: userId },
         {
-          $push: { "appointments.$[elem].document": { $each: uploadedFiles } },
-        },
-        {
-          arrayFilters: [{ "$elem.doctorpatinetId": doctorpatinetId }],
-          new: true,
-          runValidators: true,
-        }
-      );
-      await doctorDetails.findOneAndUpdate(
-        { userId: doctorId },
-        {
-          $push: { "appointments.$[elem].document": { $each: uploadedFiles } },
-        },
-        {
-          arrayFilters: [{ "$elem.doctorpatinetId": doctorpatinetId }],
-          new: true,
-          runValidators: true,
-        }
-      );
-    }
-
-    if (uploadedSingleFiles.length > 0) {
-      await userDetails.findOneAndUpdate(
-        { userId: userId },
-        {
-          $push: { upload: { $each: uploadedSingleFiles } },
+          $push: { upload: { $each: uploadedFiles } },
         },
         {
           new: true,

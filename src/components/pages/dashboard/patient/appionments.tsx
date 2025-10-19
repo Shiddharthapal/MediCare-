@@ -437,8 +437,9 @@ export default function Appointments({
     try {
       // Create FormData to send files
       const formData = new FormData();
-      formData.append("appointmentId", selectedAppointment._id.toString());
+      formData.append("doctorpatinetId", selectedAppointment.doctorpatinetId);
       formData.append("doctorName", selectedAppointment.doctorName);
+      formData.append("doctorId", selectedAppointment.doctorUserId);
       formData.append("consultedType", selectedAppointment.consultedType);
       formData.append("userIdWHUP", selectedAppointment.doctorUserId);
       formData.append("userId", id || user?._id || "");

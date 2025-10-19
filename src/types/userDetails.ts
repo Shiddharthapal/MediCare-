@@ -74,6 +74,7 @@ interface PaymentMethods {
 interface FileUpload {
   _id: string;
   patientId: string;
+  doctorId?: string;
   filename: string;
   originalName: string;
   fileType: string;

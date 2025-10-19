@@ -34,6 +34,28 @@ interface Medication {
   startDate?: Date;
   endDate?: Date;
 }
+
+interface FileUpload {
+  _id: string;
+  patientId: string;
+  doctorId: string;
+  filename: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
+  userIdWHUP?: string;
+  appointmentId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface Prescription {
   doctorId: string;
   doctorName: string;
@@ -96,6 +118,7 @@ interface AppointmentData {
   paymentMethod: string;
   specialRequests: string;
   prescription: Prescription;
+  document: FileUpload[];
   createdAt: Date;
 }
 export interface DoctorDetails {

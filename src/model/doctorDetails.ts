@@ -96,6 +96,73 @@ const MedicationSchema = new mongoose.Schema({
     type: Date,
   },
 });
+
+const FileUploadSchema = new mongoose.Schema({
+  patientId: {
+    type: String,
+  },
+  filename: {
+    type: String,
+  },
+
+  doctorId: {
+    type: String,
+  },
+
+  originalName: {
+    type: String,
+  },
+
+  fileType: {
+    type: String,
+  },
+
+  fileSize: {
+    type: Number,
+  },
+
+  path: {
+    type: String,
+  },
+
+  url: {
+    type: String,
+  },
+
+  checksum: {
+    type: String,
+  },
+
+  uploadedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  doctorName: {
+    type: String,
+  },
+  category: {
+    type: String,
+  },
+  userIdWHUP: {
+    type: String,
+  },
+  appointmentId: {
+    type: String,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now(),
+  },
+});
+
 const PrescriptionSchema = new mongoose.Schema({
   doctorId: {
     type: String,
