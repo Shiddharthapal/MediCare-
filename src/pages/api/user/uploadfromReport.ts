@@ -5,62 +5,8 @@ import userDetails from "@/model/userDetails";
 import connect from "@/lib/connection";
 import crypto from "crypto";
 
-// Allowed file types with their MIME types
-const ALLOWED_FILE_TYPES: { [key: string]: string } = {
-  // Images
-  "image/jpeg": ".jpg",
-  "image/jpg": ".jpg",
-  "image/png": ".png",
-  "image/gif": ".gif",
-  "image/webp": ".webp",
-  "image/svg+xml": ".svg",
-
-  // Documents
-  "application/pdf": ".pdf",
-  "application/msword": ".doc",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-    ".docx",
-  "application/vnd.ms-excel": ".xls",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
-  "text/plain": ".txt",
-  "text/csv": ".csv",
-
-  // Medical Reports (DICOM)
-  "application/dicom": ".dcm",
-};
-
 // Max file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-//Get file type from file extension
-function getFileTypeFromExtension(extension: string): string | null {
-  // Normalize extension (ensure it starts with a dot)
-  const normalizedExt = extension.startsWith(".")
-    ? extension.toLowerCase()
-    : `.${extension.toLowerCase()}`;
-
-  // Find the MIME type that matches this extension
-  for (const [mimeType, ext] of Object.entries(ALLOWED_FILE_TYPES)) {
-    if (ext === normalizedExt) {
-      return mimeType;
-    }
-  }
-  return null;
-}
-
-//Get file extension
-function extractExtension(filename: string): string {
-  const lastDot = filename.lastIndexOf(".");
-  if (lastDot === -1) return "";
-  return filename.substring(lastDot).toLowerCase();
-}
-
-//Get file type from file name
-function getFileTypeFromFilename(filename: string): string | null {
-  const extension = extractExtension(filename);
-  if (!extension) return null;
-  return getFileTypeFromExtension(extension);
-}
 
 // Helper function to generate unique filename
 function generateUniqueFilename(originalName: string): string {
@@ -79,10 +25,6 @@ function calculateChecksum(buffer: Buffer): string {
 }
 
 // Helper function to validate file type
-function isValidFileType(mimeType: string): boolean {
-  return Object.keys(ALLOWED_FILE_TYPES).includes(mimeType);
-}
-
 //Post operation for upload file, document, report
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
@@ -92,7 +34,6 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Parse FormData
     const formData = await request.formData();
-    console.log("🧞‍♂️  formData --->", formData);
 
     // Extract fields
     const userId = formData.get("userId") as string;
@@ -149,7 +90,6 @@ export const POST: APIRoute = async ({ request }) => {
     //Not sure user upload single or multiple file, that's why use for loop
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      console.log("🧞‍♂️  file --->", file);
       const documentName = documentNames[i];
       const originalName = originalNames[i];
 
@@ -200,7 +140,6 @@ export const POST: APIRoute = async ({ request }) => {
           file.type,
           checksum
         );
-        console.log("🧞‍♂️  response --->", response);
 
         // Construct public URL
         const publicUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${destinationPath}`;
