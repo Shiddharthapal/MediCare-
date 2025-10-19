@@ -97,6 +97,7 @@ interface AppointmentData {
   paymentMethod: string;
   specialRequests: string;
   prescription: Prescription;
+  document: FileUpload;
   createdAt: Date;
 }
 
@@ -122,6 +123,25 @@ interface DoctorDetails {
   consultationModes: string[];
   createdAt: Date;
 }
+
+const mockFileUpload: FileUpload = {
+  _id: "",
+  filename: "",
+  originalName: "",
+  fileType: "",
+  fileSize: 0,
+  path: "",
+  url: "",
+  checksum: "",
+  uploadedAt: new Date(),
+  doctorName: "",
+  category: "",
+  userIdWHUP: "",
+  appointmentId: "",
+  deletedAt: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
 
 const mockVitalsign: VitalSign = {
   bloodPressure: " ",
@@ -186,6 +206,7 @@ const mockAppointmentData: AppointmentData = {
   paymentMethod: "",
   specialRequests: "",
   prescription: mockPrescription,
+  document: mockFileUpload,
   createdAt: new Date(),
 };
 
@@ -211,6 +232,25 @@ const mockDoctorDetails: DoctorDetails = {
   consultationModes: [],
   createdAt: new Date(),
 };
+
+interface FileUpload {
+  _id: string;
+  filename: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
+  userIdWHUP?: string;
+  appointmentId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // Mock data for patients
 const patients = [
@@ -675,6 +715,7 @@ interface PatientsPageProps {
   onNavigate: (page: string) => void;
 }
 
+//Starting portion of the function
 export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [selectedPatient, setSelectedPatient] =
     useState<PatientData>(mockPatientData);
@@ -683,11 +724,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [appointmentData, setAppointmentData] =
     useState<DoctorDetails>(mockDoctorDetails);
   const [activeTab, setActiveTab] = useState("overview");
-
   let doctor = useAppSelector((state) => state.auth.user);
 
+  //Group appointment by patientid
   const groupAppointmentsByPatientId = (responseData: DoctorDetails) => {
-    console.log("🧞‍♂️  responseData2 --->", responseData);
     if (!responseData.appointments || responseData.appointments.length === 0)
       return;
 
@@ -780,6 +820,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     setPatientData(groupedData);
   };
 
+  //Categorized appointments
   const categorizedAppointments = useMemo(() => {
     let appointmentdata = appointmentData.appointments;
     return categorizeAppointments(
@@ -820,6 +861,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
 
+  //Tunction to cancel appointment
   const handleCancelAppointment = async (appointment: any) => {
     let id = doctor?._id;
     try {
@@ -1016,17 +1058,15 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     }
   };
 
+  //Get function that return name initial of patient
   const getPatientInitials = (patientName: string) => {
-    console.log("🧞‍♂️  patientName --->", patientName);
     if (!patientName) return "AB";
 
     const cleanName = patientName.trim();
-
     if (!cleanName) return "AB";
 
     // Split the cleaned name and get first 2 words
     const words = cleanName.split(" ").filter((word) => word.length > 0);
-
     if (words.length >= 2) {
       // Get first letter of first 2 words
       return (words[0][0] + words[1][0]).toUpperCase();
@@ -1037,6 +1077,22 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       return "AB";
     }
   };
+
+  // useEffect(() => {
+  //   let doctorId = doctor?._id;
+  //   const fetchData = async () => {
+  //     let response = await fetch("/api/doctor/alldocumentofuser", {
+  //       method: "POST",
+  //       body: JSON.stringify({
+  //         doctorId,
+  //         patientId: selectedPatient?.patientInfo?.patientId,
+  //       }),
+  //     });
+  //     let result = await response.json();
+  //     console.log("🧞‍♂️  result --->", result);
+  //   };
+  //   fetchData;
+  // }, [activeTab === "documents" && selectedPatient]);
 
   return (
     <div className="flex h-screen bg-white">

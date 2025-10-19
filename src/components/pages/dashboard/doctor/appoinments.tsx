@@ -416,7 +416,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   };
 
   const handleCloseDocument = () => {
-    setShowPrescription(false);
+    setShowDocument(false);
     setSelectedPatient(null);
   };
 
