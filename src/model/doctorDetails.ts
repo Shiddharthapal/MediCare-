@@ -97,6 +97,15 @@ const MedicationSchema = new mongoose.Schema({
   },
 });
 const PrescriptionSchema = new mongoose.Schema({
+  doctorId: {
+    type: String,
+  },
+  patientId: {
+    type: String,
+  },
+  appointmentId: {
+    type: String,
+  },
   vitalSign: {
     type: VitalSignSchema,
   },

@@ -35,6 +35,9 @@ interface Medication {
   endDate?: Date;
 }
 interface Prescription {
+  doctorId: string;
+  patientId: string;
+  appointmentId: string;
   vitalSign: VitalSign;
   primaryDiagnosis: string;
   symptoms: string;

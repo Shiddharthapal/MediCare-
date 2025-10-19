@@ -124,6 +124,9 @@ const PaymentMethodsSchema = new mongoose.Schema(
 );
 
 const FileUploadSchema = new mongoose.Schema({
+  patientId: {
+    type: String,
+  },
   filename: {
     type: String,
   },
@@ -209,6 +212,15 @@ const HealthRecord = new mongoose.Schema({
 
 const PrescriptionSchema = new mongoose.Schema(
   {
+    doctorId: {
+      type: String,
+    },
+    patientId: {
+      type: String,
+    },
+    appointmentId: {
+      type: String,
+    },
     vitalSign: {
       type: VitalSignSchema,
     },
