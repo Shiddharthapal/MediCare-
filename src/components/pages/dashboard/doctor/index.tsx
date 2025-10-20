@@ -479,7 +479,9 @@ export default function DashboardPage() {
     appointments.forEach((appointment: AppointmentData) => {
       let date = appointment.appointmentDate;
       const monthIndex = new Date(date).getMonth();
+      console.log("🧞‍♂️  monthIndex --->", monthIndex);
       const monthname = monthNames[monthIndex];
+      console.log("🧞‍♂️  monthname --->", monthname);
       countappointment[monthname]++;
     });
 
@@ -495,14 +497,24 @@ export default function DashboardPage() {
       Other: 0,
     };
 
-    appointments.forEach((appointment: AppointmentData) => {
-      let gender = appointment.patientGender;
-      if (gender === "Male") {
-        countgender.Male++;
-      } else if (gender === "Female") {
-        countgender.Female++;
-      } else {
-        countgender.Other++;
+    let uniquePatientId = new Set(
+      appointments?.map((appointments) => appointments.patientId)
+    );
+
+    uniquePatientId.forEach((patientId) => {
+      let patientAppointment = appointments.find(
+        (appointment) => appointment.patientId === patientId
+      );
+
+      if (patientAppointment) {
+        let gender = patientAppointment.patientGender;
+        if (gender === "Male") {
+          countgender.Male++;
+        } else if (gender === "Female") {
+          countgender.Female++;
+        } else {
+          countgender.Other++;
+        }
       }
     });
 
@@ -510,7 +522,7 @@ export default function DashboardPage() {
   };
 
   //Count the number of appointment
-  const handleAppointmentCount = (appointments: AppointmentData[]) => {
+  const handleAppointmentCount = async (appointments: AppointmentData[]) => {
     if (!appointments) {
       throw new Error("No appointments are available now");
     }
@@ -559,9 +571,12 @@ export default function DashboardPage() {
       }
     };
     fetchData();
+  }, [doctor]);
+
+  useEffect(() => {
     handleGenderCountofPatient(doctorData.appointments);
     handleAppointmentCount(doctorData.appointments);
-  }, [doctor]);
+  }, [doctorData]);
 
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
@@ -743,7 +758,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
                 {/* Stats Cards */}
                 <div className="xl:col-span-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4  gap-4 mb-6">
                     {stats.map((stat, index) => (
                       <Card
                         key={index}
