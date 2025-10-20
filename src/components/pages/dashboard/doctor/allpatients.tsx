@@ -435,7 +435,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
     responseData.appointments.forEach((appointment: AppointmentData) => {
       const { patientId } = appointment;
-      //console.log("🧞‍♂️  appointment-group  --->", appointment);
 
       if (!groupedData[patientId]) {
         // Create new patient entry with first appointment
@@ -1221,73 +1220,112 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                     <CardContent>
                       <div className="space-y-4">
                         {selectedPatient?.reasonForVisit.map(
-                          (disease, index) => (
-                            <div
-                              key={index}
-                              className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50"
-                            >
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                  {getStatusIcon(disease.reason)}
-                                  <h3 className="font-semibold text-lg">
-                                    {disease.reason}
-                                  </h3>
+                          (disease, index) =>
+                            disease?.appointment?.prescription?.medication
+                              ?.length > 0 && (
+                              <div
+                                key={index}
+                                className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-3">
+                                    {getStatusIcon(disease.reason)}
+                                    <h3 className="font-semibold text-lg">
+                                      {disease.reason}
+                                    </h3>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge
+                                      className={getSeverityColor(
+                                        disease.reason
+                                      )}
+                                    >
+                                      {getSeverityLevel(disease.reason)}{" "}
+                                      Severity
+                                    </Badge>
+                                    <Badge
+                                      variant={(() => {
+                                        let followupdate =
+                                          disease?.appointment?.prescription
+                                            ?.medication.length > 0
+                                            ? disease?.appointment?.prescription
+                                                ?.followUpDate
+                                            : disease?.appointment
+                                                ?.appointmentDate;
+                                        const daysDiff = Math.ceil(
+                                          (new Date(
+                                            followupdate as string
+                                          ).getTime() -
+                                            new Date().getTime()) /
+                                            (24 * 60 * 60 * 1000)
+                                        );
+                                        return daysDiff >= 0
+                                          ? "destructive"
+                                          : "default";
+                                      })()}
+                                    >
+                                      {(() => {
+                                        let followupdate =
+                                          disease?.appointment?.prescription
+                                            ?.medication.length > 0
+                                            ? disease?.appointment?.prescription
+                                                ?.followUpDate
+                                            : disease?.appointment
+                                                ?.appointmentDate;
+                                        const daysDiff = Math.ceil(
+                                          (new Date(
+                                            followupdate as string
+                                          ).getTime() -
+                                            new Date().getTime()) /
+                                            (24 * 60 * 60 * 1000)
+                                        );
+                                        return daysDiff >= 0
+                                          ? "Active"
+                                          : "Completed";
+                                      })()}
+                                    </Badge>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge
-                                    className={getSeverityColor(disease.reason)}
-                                  >
-                                    {getSeverityLevel(disease.reason)} Severity
-                                  </Badge>
-                                  <Badge
-                                    variant={
-                                      new Date(
-                                        disease.appointment.prescription.followUpDate
-                                      ).toLocaleDateString() >=
-                                      new Date().toLocaleDateString()
-                                        ? "destructive"
-                                        : "secondary"
-                                    }
-                                  >
-                                    {new Date(
-                                      disease.appointment.prescription.followUpDate
-                                    ).toLocaleDateString() >=
-                                    new Date().toLocaleDateString()
-                                      ? "Active"
-                                      : "Completed"}
-                                  </Badge>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-gray-500">
+                                      Diagnosed Date
+                                    </p>
+                                    <p className="font-medium">
+                                      {new Date(
+                                        disease.appointment.prescription.createdAt
+                                      ).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                  <div className="pl-10">
+                                    <p className="text-gray-500">
+                                      Current Status
+                                    </p>
+                                    <p className="font-medium text-green-600">
+                                      {(() => {
+                                        let followupdate =
+                                          disease?.appointment?.prescription
+                                            ?.medication.length > 0
+                                            ? disease?.appointment?.prescription
+                                                ?.followUpDate
+                                            : disease?.appointment
+                                                ?.appointmentDate;
+                                        const daysDiff = Math.ceil(
+                                          (new Date(
+                                            followupdate as string
+                                          ).getTime() -
+                                            new Date().getTime()) /
+                                            (24 * 60 * 60 * 1000)
+                                        );
+                                        return daysDiff >= 0
+                                          ? "Active"
+                                          : "Completed";
+                                      })()}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                  <p className="text-gray-500">
-                                    Diagnosed Date
-                                  </p>
-                                  <p className="font-medium">
-                                    {new Date(
-                                      disease.appointment.prescription.createdAt
-                                    ).toLocaleDateString()}
-                                  </p>
-                                </div>
-                                <div className="pl-10">
-                                  <p className="text-gray-500">
-                                    Current Status
-                                  </p>
-                                  <p className="font-medium text-green-600">
-                                    {Math.ceil(
-                                      (new Date(
-                                        disease?.appointment?.prescription?.followUpDate
-                                      ) -
-                                        new Date()) /
-                                        (24 * 60 * 60 * 1000)
-                                    ) >= 0
-                                      ? "Active"
-                                      : "Completed"}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          )
+                            )
                         )}
                       </div>
                     </CardContent>
