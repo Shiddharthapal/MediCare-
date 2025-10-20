@@ -161,24 +161,28 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
       case "sm":
         return {
           height: 200,
+          width: 400,
           margin: { top: 10, right: 10, left: 10, bottom: 10 },
           fontSize: 10,
         };
       case "md":
         return {
           height: 250,
+          width: 500,
           margin: { top: 15, right: 20, left: 15, bottom: 15 },
           fontSize: 11,
         };
       case "lg":
         return {
           height: 300,
+          width: 600,
           margin: { top: 20, right: 30, left: 20, bottom: 20 },
           fontSize: 12,
         };
       default:
         return {
           height: 350,
+          width: 700,
           margin: { top: 25, right: 40, left: 25, bottom: 25 },
           fontSize: 13,
         };
@@ -226,16 +230,16 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
   console.log("🧞‍♂️  monthlyData --->", monthlyData);
 
   return (
-    <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+    <div className="grid gap-4 grid-cols-1">
       {/* Revenue and Diagnoses Trend */}
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>Revenue & Diagnoses Trend</CardTitle>
+      <Card className="lg:col-span-2 border border-pink-500">
+        <CardHeader className="bg-gradient-to-r py-2 from-purple-200 to-pink-200">
+          <CardTitle>Revenue & Appointment Trend</CardTitle>
           <CardDescription>
-            Monthly revenue and diagnosis count over the last 6 months
+            Monthly revenue and appointment count over the last 12 months
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="">
           <ChartContainer
             config={{
               revenue: {
@@ -247,7 +251,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                 color: "hsl(330, 81%, 60%)", // Red
               },
             }}
-            className="h-[250px] sm:h-[300px] lg:h-[350px]"
+            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-[800px]"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
@@ -282,7 +286,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
       </Card>
 
       {/* Diagnosis Types Distribution */}
-      <Card className="w-full">
+      <Card className="w-full lg:col-span-2 ">
         <CardHeader>
           <CardTitle>Diagnosis Types</CardTitle>
           <CardDescription>
@@ -344,7 +348,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
       </Card>
 
       {/* Patient Satisfaction */}
-      <Card className="w-full">
+      <Card className="w-full lg:col-span-2">
         <CardHeader>
           <CardTitle>Patient Satisfaction</CardTitle>
           <CardDescription>
