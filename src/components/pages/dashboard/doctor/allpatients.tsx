@@ -27,6 +27,14 @@ import {
   HelpCircle,
   Activity,
   Shield,
+  Phone,
+  Transgender,
+  ScanEye,
+  Mail,
+  Cake,
+  MapPinHouse,
+  BookUser,
+  Droplet,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 interface VitalSign {
@@ -957,7 +965,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   {/* Personal Information */}
                   <div className="mb-6 px-1">
                     <Card className="border border-gray-400">
-                      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200/60">
+                      <CardHeader className="bg-gradient-to-r from-blue-100 to-indigo-100 border-b border-gray-200/60">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <User className="h-5 w-5 text-blue-600" />
                           Personal Information
@@ -966,13 +974,22 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                           <div>
-                            <p className="text-sm text-gray-500">Full Name</p>
+                            <div className="flex flex-row gap-1">
+                              <User className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">Full Name</p>
+                            </div>
+
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientName}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">Patient ID</p>
+                            <div className="flex flex-row gap-1">
+                              <BookUser className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Patient ID
+                              </p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient.id.slice(
                                 selectedPatient.id.length - 10,
@@ -981,9 +998,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">
-                              Phone Number
-                            </p>
+                            <div className="flex flex-row gap-1">
+                              <Phone className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Phone Number
+                              </p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientPhone}
                             </p>
@@ -991,21 +1011,30 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                         </div>
                         <div className="grid grid-cols-3 gap-4">
                           <div>
-                            <p className="text-sm text-gray-500">Gender</p>
+                            <div className="flex flex-row gap-1">
+                              <Transgender className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">Gender</p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientGender}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">Age</p>
+                            <div className="flex flex-row gap-1">
+                              <ScanEye className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">Age</p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientAge} years
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">
-                              Email Address
-                            </p>
+                            <div className="flex flex-row gap-1">
+                              <Mail className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Email Address
+                              </p>
+                            </div>
                             <p className="font-medium text-blue-600">
                               {selectedPatient?.patientInfo?.patientEmail}
                             </p>
@@ -1013,9 +1042,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                         </div>
                         <div className="grid grid-cols-3 gap-4">
                           <div>
-                            <p className="text-sm text-gray-500">
-                              Date of Birth
-                            </p>
+                            <div className="flex flex-row gap-1">
+                              <Cake className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Date of Birth
+                              </p>
+                            </div>
                             <p className="font-medium">
                               {new Date(
                                 selectedPatient?.patientInfo?.patientBithofday
@@ -1023,13 +1055,23 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">Blood Type</p>
-                            <p className="font-medium">O+</p>
+                            <div className="flex flex-row gap-1">
+                              <Droplet className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Blood Type
+                              </p>
+                            </div>
+                            <p className="font-medium">
+                              {selectedPatient?.patientInfo?.patientBloodgroup}
+                            </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">
-                              Home Address
-                            </p>
+                            <div className="flex flex-row gap-1">
+                              <MapPinHouse className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Home Address
+                              </p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientAddress}
                             </p>
@@ -1055,7 +1097,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               <div
                                 key={index}
                                 className="flex items-center justify-between p-4 
-                                bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg"
+                                bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-l-4 border-pink-300"
                               >
                                 <div className="flex items-center gap-3">
                                   {getStatusIcon(values?.reason)}
@@ -1098,7 +1140,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                         {(selectedPatient?.upcomingAppointments).length > 0 ? (
                           selectedPatient?.upcomingAppointments.map(
                             (value, index) => (
-                              <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-300">
+                              <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border border-l-4 border-yellow-300">
                                 <div className="p-2 bg-yellow-200 rounded-lg">
                                   <Calendar className="h-5 w-5 text-yellow-600" />
                                 </div>
@@ -1167,8 +1209,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                         Last Appointment
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
+                    <CardContent className="">
+                      <div className="space-y-4 border border-l-4 border-green-500 rounded-lg">
                         {selectedPatient?.latestAppointment ? (
                           <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
                             <div className="p-2 bg-green-100 rounded-lg">
@@ -1178,18 +1220,21 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               <p className="font-medium">
                                 {
                                   selectedPatient?.latestAppointment
-                                    ?.reasonForVisit
+                                    ?.consultedType
                                 }
                               </p>
                               <p className="text-sm text-gray-500">
-                                Blood work - All values within normal range
+                                {
+                                  selectedPatient?.latestAppointment
+                                    ?.reasonForVisit
+                                }
                               </p>
                             </div>
-                            <p className="text-sm text-gray-500">
+                            <Badge className="text-sm text-gray-900 bg-green-600">
                               {new Date(
                                 selectedPatient?.latestAppointment?.appointmentDate
                               ).toLocaleDateString()}
-                            </p>
+                            </Badge>
                           </div>
                         ) : (
                           <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
