@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -27,15 +27,41 @@ import {
   Tooltip,
 } from "recharts";
 
+interface AppointmentData {
+  doctorpatinetId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorEmail: string;
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  patientAge: number;
+  patientAddress: string;
+  patientBloodgroup: string;
+  patientBithofday: Date;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  createdAt: Date;
+}
+
+interface MonthlyData {
+  month: string;
+  profit: number;
+  appointments: number;
+}
 // Sample data for medical analytics
-const revenueData = [
-  { month: "Jan", revenue: 8400, diagnoses: 145 },
-  { month: "Feb", revenue: 9200, diagnoses: 162 },
-  { month: "Mar", revenue: 8800, diagnoses: 138 },
-  { month: "Apr", revenue: 10200, diagnoses: 178 },
-  { month: "May", revenue: 11500, diagnoses: 195 },
-  { month: "Jun", revenue: 12400, diagnoses: 210 },
-];
 
 const diagnosisTypeData = [
   { type: "Respiratory", count: 245, percentage: 32 },
@@ -92,7 +118,14 @@ const CustomTooltipRating = ({
   return null;
 };
 
-export function ReportsCharts() {
+interface DoctorDetailstProps {
+  appointment: AppointmentData[] | undefined;
+  fees?: number;
+}
+
+export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
+  console.log("🧞‍♂️  fees --->", fees);
+  console.log("🧞‍♂️  appointment --->", appointment);
   const [screenSize, setScreenSize] = useState("lg");
 
   const getChartDimensions = () => {
@@ -154,6 +187,44 @@ export function ReportsCharts() {
 
   const { height, margin, fontSize } = getChartDimensionsRating();
 
+  const monthlyData = useMemo(() => {
+    // Group appointments by month
+    const monthlyMap = new Map<string, number>();
+
+    if (appointment && appointment.length > 0) {
+      appointment.forEach((apt) => {
+        const date = new Date(apt.createdAt);
+        const monthYear = `${date.toLocaleString("default", { month: "short" })} ${date.getFullYear()}`;
+
+        monthlyMap.set(monthYear, (monthlyMap.get(monthYear) || 0) + 1);
+      });
+    }
+
+    // Generate last 12 months
+    const allMonths: MonthlyData[] = [];
+    const currentDate = new Date();
+
+    for (let i = 11; i >= 0; i--) {
+      const monthDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - i,
+        1
+      );
+      const monthYear = `${monthDate.toLocaleString("default", { month: "short" })} ${monthDate.getFullYear()}`;
+      const appointmentCount = monthlyMap.get(monthYear) || 0;
+
+      allMonths.push({
+        month: monthYear,
+        appointments: appointmentCount,
+        profit: appointmentCount * fees,
+      });
+    }
+
+    return allMonths;
+  }, [appointment, fees]);
+
+  console.log("🧞‍♂️  monthlyData --->", monthlyData);
+
   return (
     <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
       {/* Revenue and Diagnoses Trend */}
@@ -180,7 +251,7 @@ export function ReportsCharts() {
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={revenueData}
+                data={monthlyData}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
@@ -191,7 +262,7 @@ export function ReportsCharts() {
                 <Line
                   yAxisId="left"
                   type="monotone"
-                  dataKey="revenue"
+                  dataKey="profit"
                   stroke="hsl(217, 91%, 60%)" // Green line
                   strokeWidth={2}
                   name="Revenue ($)"
@@ -199,7 +270,7 @@ export function ReportsCharts() {
                 <Line
                   yAxisId="right"
                   type="monotone"
-                  dataKey="diagnoses"
+                  dataKey="appointments"
                   stroke="hsl(330, 81%, 60%)" // Red line
                   strokeWidth={2}
                   name="Diagnoses"
