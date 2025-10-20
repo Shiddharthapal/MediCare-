@@ -765,8 +765,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           {/* Today's Appointments */}
           <TabsContent value="today" className="mt-6">
             <Card className="border border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="py-2 bg-gradient-to-r  from-green-100 to-emerald-100">
+                <CardTitle className="flex items-center text-2xl gap-2 font-semibold">
                   <Calendar className="h-5 w-5 text-[hsl(273,100%,60%)]" />
                   {`Today's Appointments - ${new Date().toISOString().split("T")}`}
                 </CardTitle>
@@ -1046,7 +1046,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           <TabsContent value="upcoming" className="mt-6">
             <div className="space-y-3">
               <Card className="border border-gray-400">
-                <CardHeader className="flex items-center gap-2 text-2xl pb-2">
+                <CardHeader className="flex items-center gap-2 text-2xl  font-semibold bg-gradient-to-r py-2 from-yellow-100 to-orange-100 pb-2">
                   <Clock className="h-6 w-6 text-blue-500" />
                   Upcoming Appointments
                 </CardHeader>
@@ -1136,7 +1136,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           {/* Previous Appointments */}
           <TabsContent value="previous" className="mt-6">
             <Card className="border border-gray-400">
-              <CardHeader>
+              <CardHeader className="bg-gradient-to-r py-2 from-purple-100 to-pink-100">
                 <CardTitle className="flex items-center gap-2 text-2xl">
                   <CheckCircle className="h-6 w-6 text-green-600" />
                   Previous Appointments

@@ -965,7 +965,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   {/* Personal Information */}
                   <div className="mb-6 px-1">
                     <Card className="border border-gray-400">
-                      <CardHeader className="bg-gradient-to-r from-blue-100 to-indigo-100 border-b border-gray-200/60">
+                      <CardHeader className="bg-gradient-to-r py-2 from-blue-100 to-indigo-100 border-b border-gray-200/60">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <User className="h-5 w-5 text-blue-600" />
                           Personal Information
@@ -1084,7 +1084,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   {/* Medical Summary and Active Conditions */}
                   <div className="mb-6 px-1">
                     <Card className="border border-gray-400">
-                      <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-200/60">
+                      <CardHeader className="bg-gradient-to-r py-2 from-purple-100 to-pink-100 border-b border-gray-200/60">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <Activity className="h-5 w-5 text-purple-600" />
                           Previous Conditions
@@ -1128,7 +1128,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                   {/* Upcoming Appointments */}
                   <Card className="mb-6 mx-1 border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50 border-b border-gray-200/60">
+                    <CardHeader className="bg-gradient-to-r py-2 from-yellow-100 to-orange-100 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-yellow-600" />
                         Upcoming Appointments
@@ -1203,7 +1203,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                   {/* Recent Activity */}
                   <Card className="mx-1 border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200/60">
+                    <CardHeader className="py-2 bg-gradient-to-r  from-green-100 to-emerald-100 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Clock className="h-5 w-5 text-green-600" />
                         Last Appointment
@@ -1257,8 +1257,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "history" && (
                 <div className="space-y-6 my-4 px-1">
                   <Card className="border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200/60">
-                      <CardTitle className="text-xl font-bold text-gray-900">
+                    <CardHeader className="bg-gradient-to-r from-indigo-100 to-purple-100 border-b border-gray-200/60">
+                      <CardTitle className="text-xl py-2 font-bold text-gray-900">
                         Medical History - All Conditions (Severity: High to Low)
                       </CardTitle>
                     </CardHeader>
@@ -1381,7 +1381,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "appointments" && (
                 <div className="space-y-6 my-2 px-1">
                   <Card className="border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-gray-200/60">
+                    <CardHeader className="bg-gradient-to-r py-2 from-blue-100 to-cyan-100 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-blue-600" />
                         Previous Appointments History
@@ -1477,7 +1477,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "documents" && (
                 <div className="space-y-6 my-2 px-1">
                   <Card className="border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-200/60">
+                    <CardHeader className="bg-gradient-to-r py-2 from-violet-100 to-purple-100 border-b border-gray-200/60">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <FileText className="h-5 w-5 text-violet-600" />
