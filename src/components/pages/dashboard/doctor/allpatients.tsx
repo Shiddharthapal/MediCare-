@@ -424,8 +424,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
   const [appointmentData, setAppointmentData] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
-  let doctor = useAppSelector((state) => state.auth.user);
 
+  let doctor = useAppSelector((state) => state.auth.user);
   //Group appointment by patientid
   const groupAppointmentsByPatientId = (responseData: DoctorDetails) => {
     if (!responseData.appointments || responseData.appointments.length === 0)
@@ -474,6 +474,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         // Add appointment to existing patient
         groupedData[patientId].appointments.push(appointment);
         groupedData[patientId].totalAppointments += 1;
+        groupedData[patientId].reasonForVisit.push({
+          appointment: appointment,
+          reason: appointment.reasonForVisit,
+          createdAt: appointment.createdAt,
+        });
 
         // Update latest appointment based on createdAt date
         if (
@@ -788,7 +793,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     // Safely extract prescriptions
     return selectedPatient?.appointments.map((appointments) => {
       const prescription = appointments.prescription;
-      console.log("🧞‍♂️  prescription --->", prescription);
+      console.log("🧞‍♂️  prescription --->", selectedPatient);
 
       const document = Array.isArray(appointments.document)
         ? appointments.document
@@ -824,22 +829,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       };
     });
   }, [selectedPatient]);
-
-  // useEffect(() => {
-  //   let doctorId = doctor?._id;
-  //   const fetchData = async () => {
-  //     let response = await fetch("/api/doctor/alldocumentofuser", {
-  //       method: "POST",
-  //       body: JSON.stringify({
-  //         doctorId,
-  //         patientId: selectedPatient?.patientInfo?.patientId,
-  //       }),
-  //     });
-  //     let result = await response.json();
-  //     console.log("🧞‍♂️  result --->", result);
-  //   };
-  //   fetchData;
-  // }, [activeTab === "documents" && selectedPatient]);
 
   return (
     <div className="flex h-screen bg-white">
@@ -1111,7 +1100,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                           selectedPatient?.upcomingAppointments.map(
                             (value, index) => (
                               <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-300">
-                                <div className="p-2 bg-yellow-100 rounded-lg">
+                                <div className="p-2 bg-yellow-200 rounded-lg">
                                   <Calendar className="h-5 w-5 text-yellow-600" />
                                 </div>
                                 <div className="flex-1">
@@ -1119,7 +1108,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     <h3 className="font-semibold">
                                       {value?.consultedType}
                                     </h3>
-                                    <Badge className="bg-yellow-100 text-yellow-800">
+                                    <Badge className="bg-yellow-200 text-yellow-800">
                                       Confirmed
                                     </Badge>
                                   </div>
@@ -1144,14 +1133,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="text-xs bg-yellow-300 hover:bg-yellow-500"
-                                  >
-                                    Reschedule
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-xs bg-transparent text-red-600 hover:text-red-700"
+                                    className="text-xs bg-transparent text-red-600 hover:bg-yellow-300 hover:text-red-600"
                                     onClick={() =>
                                       handleCancelAppointment(value)
                                     }
@@ -1294,11 +1276,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   <p className="font-medium text-green-600">
                                     {Math.ceil(
                                       (new Date(
-                                        disease.appointment.prescription.followUpDate
+                                        disease?.appointment?.prescription?.followUpDate
                                       ) -
                                         new Date()) /
                                         (24 * 60 * 60 * 1000)
-                                    ) > 0
+                                    ) >= 0
                                       ? "Active"
                                       : "Completed"}
                                   </p>
