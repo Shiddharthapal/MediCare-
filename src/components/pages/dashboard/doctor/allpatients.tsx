@@ -1412,9 +1412,16 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   </div>
                                   <Badge
                                     variant="secondary"
-                                    className="bg-green-100 text-green-800"
+                                    className="bg-green-200 text-green-800"
                                   >
-                                    {appointment?.status}
+                                    {appointment?.status &&
+                                      (appointment.status.charAt(0) ===
+                                      appointment.status.charAt(0).toUpperCase()
+                                        ? appointment.status
+                                        : appointment.status
+                                            .charAt(0)
+                                            .toUpperCase() +
+                                          appointment.status.slice(1))}
                                   </Badge>
                                 </div>
                                 <div className="grid grid-cols-3 gap-4 text-sm">
@@ -1433,7 +1440,16 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   <div className="pl-11">
                                     <p className="text-gray-500">Status</p>
                                     <p className="font-medium text-green-600">
-                                      {appointment.status}
+                                      {appointment?.status &&
+                                        (appointment.status.charAt(0) ===
+                                        appointment.status
+                                          .charAt(0)
+                                          .toUpperCase()
+                                          ? appointment.status
+                                          : appointment.status
+                                              .charAt(0)
+                                              .toUpperCase() +
+                                            appointment.status.slice(1))}
                                     </p>
                                   </div>
                                 </div>
