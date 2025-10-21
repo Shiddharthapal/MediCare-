@@ -81,10 +81,6 @@ interface SymptomFrequency {
   frequency: number;
 }
 
-interface MonthlyData {
-  month: string;
-  appointments: number;
-}
 interface TimeData {
   hour: string;
   appointments: number;
@@ -118,19 +114,6 @@ const riskAssessmentData = [
   { category: "Medium Risk", value: 25, fill: "#f97316" },
   { category: "High Risk", value: 10, fill: "#ea580c" },
 ];
-
-function getSeverityColor(severity: string) {
-  switch (severity.toLowerCase()) {
-    case "high":
-      return "text-red-600";
-    case "medium":
-      return "text-orange-600";
-    case "low":
-      return "text-green-600";
-    default:
-      return "text-gray-600";
-  }
-}
 
 export function MedicalCharts(
   data: { appointment: AppointmentData[] } | undefined
@@ -259,13 +242,13 @@ export function MedicalCharts(
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {/* Diagnosis Accuracy Trend */}
-      <Card className="col-span-2">
-        <CardHeader>
+      <Card className="lg:col-span-2 border border-pink-500">
+        <CardHeader className="bg-gradient-to-r py-2 from-purple-200 to-pink-200">
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
             Diagnosis Accuracy Trend
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-700">
             Monthly diagnosis accuracy rates and case volumes
           </CardDescription>
         </CardHeader>
@@ -360,13 +343,13 @@ export function MedicalCharts(
       </Card>
 
       {/* Symptom Frequency Analysis */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="border border-cyan-600">
+        <CardHeader className="bg-gradient-to-r py-2 from-cyan-600 to-blue-400 ">
+          <CardTitle className="flex items-center text-white gap-2">
             <AlertTriangle className="h-5 w-5" />
             Common Symptoms
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-white">
             Most frequently reported symptoms by patients
           </CardDescription>
         </CardHeader>
@@ -406,13 +389,13 @@ export function MedicalCharts(
       </Card>
 
       {/* Risk Assessment Distribution */}
-      <Card>
-        <CardHeader>
+      <Card className="border border-orange-400">
+        <CardHeader className="bg-gradient-to-r py-2 from-orange-300 to-amber-200">
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Patient Risk Assessment
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-700">
             Distribution of patients by risk categories
           </CardDescription>
         </CardHeader>
@@ -459,10 +442,12 @@ export function MedicalCharts(
       </Card>
 
       {/* Treatment Outcomes */}
-      <Card className="col-span-2">
-        <CardHeader>
-          <CardTitle>Treatment Outcome Analysis</CardTitle>
-          <CardDescription>
+      <Card className="col-span-2 border border-green-500">
+        <CardHeader className="bg-gradient-to-r py-2 from-green-800 to-blue-300">
+          <CardTitle className="text-white">
+            Treatment Outcome Analysis
+          </CardTitle>
+          <CardDescription className="text-white">
             Success rates across different treatment types
           </CardDescription>
         </CardHeader>
@@ -515,13 +500,13 @@ export function MedicalCharts(
       </Card>
 
       {/* Appointment Time Analysis */}
-      <Card className="col-span-2 mb-10">
-        <CardHeader>
+      <Card className="col-span-2 mb-10 border border-sky-400">
+        <CardHeader className="bg-gradient-to-r py-2 from-sky-300 to-blue-200">
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
             Appointment Time Analysis
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-700">
             Appointment frequency and average duration by hour
           </CardDescription>
         </CardHeader>
