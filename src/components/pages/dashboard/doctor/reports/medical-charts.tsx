@@ -1,5 +1,5 @@
 "use client";
-
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -29,6 +29,56 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Activity, Clock, Users, AlertTriangle } from "lucide-react";
 
+interface Prescription {
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  doctorpatinetId: string;
+  reasonForVisit: string;
+  primaryDiagnosis: string;
+  symptoms: string;
+  testandReport: string;
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+
+interface AppointmentData {
+  doctorpatinetId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorEmail: string;
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  patientAge: number;
+  patientAddress: string;
+  patientBloodgroup: string;
+  patientBithofday: Date;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  prescription: Prescription;
+  createdAt: Date;
+}
+
+interface SymptomFrequency {
+  symptoms: string;
+  frequency: number;
+}
 // Medical-specific chart data
 const diagnosisAccuracyData = [
   { month: "Jan", accuracy: 92.5, totalCases: 145 },
@@ -87,7 +137,53 @@ function getSeverityColor(severity: string) {
   }
 }
 
-export function MedicalCharts() {
+export function MedicalCharts(
+  data: { appointment: AppointmentData[] } | undefined
+) {
+  let appointmentdata = data?.appointment || [];
+  const consultedData = useMemo(() => {
+    // Object to track symptom frequencies
+    const symptomMap: Record<string, number> = {};
+
+    // Process each appointment
+    appointmentdata?.forEach((appointment) => {
+      // Check if prescription exists
+      if (!appointment.prescription) {
+        return;
+      }
+
+      // Get the actual symptoms text and trim whitespace
+      const symptoms = appointment?.prescription?.symptoms?.trim();
+
+      // Skip if symptoms don't exist or are empty
+      if (!symptoms || symptoms.length === 0) {
+        return;
+      }
+
+      // Increment the count for this symptom
+      if (symptomMap[symptoms]) {
+        symptomMap[symptoms]++;
+      } else {
+        symptomMap[symptoms] = 1;
+      }
+    });
+
+    // Convert the map to an array of SymptomFrequency objects
+    const symptomFrequencies: SymptomFrequency[] = Object.entries(
+      symptomMap
+    ).map(([symptoms, frequency]) => ({
+      symptoms,
+      frequency,
+    }));
+
+    // Sort by frequency in descending order and take top 10
+    const topSymptoms = symptomFrequencies
+      .sort((a, b) => b.frequency - a.frequency)
+      .slice(0, 10);
+
+    return topSymptoms;
+  }, [appointmentdata]);
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {/* Diagnosis Accuracy Trend */}
@@ -159,9 +255,9 @@ export function MedicalCharts() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {symptomFrequencyData.map((symptom, index) => (
+            {consultedData.map((symptom, index) => (
               <div
-                key={symptom.symptom}
+                key={symptom.symptoms}
                 className="flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
@@ -169,12 +265,12 @@ export function MedicalCharts() {
                     {index + 1}
                   </div>
                   <div>
-                    <div className="font-medium">{symptom.symptom}</div>
-                    <div
+                    <div className="font-medium">{symptom.symptoms}</div>
+                    {/* <div
                       className={`text-sm ${getSeverityColor(symptom.severity)}`}
                     >
                       {symptom.severity} Severity
-                    </div>
+                    </div> */}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

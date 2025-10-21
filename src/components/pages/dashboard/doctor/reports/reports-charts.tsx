@@ -69,14 +69,6 @@ interface PieChartData {
 }
 // Sample data for medical analytics
 
-const diagnosisTypeData = [
-  { type: "Respiratory", count: 245, percentage: 32 },
-  { type: "Cardiovascular", count: 189, percentage: 25 },
-  { type: "Neurological", count: 156, percentage: 20 },
-  { type: "Digestive", count: 98, percentage: 13 },
-  { type: "Other", count: 76, percentage: 10 },
-];
-
 const patientSatisfactionData = [
   { week: "Week 1", satisfaction: 4.2, responses: 45 },
   { week: "Week 2", satisfaction: 4.5, responses: 52 },
