@@ -316,12 +316,49 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={monthlyData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 5, right: 20, left: 20, bottom: 20 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
+                <XAxis
+                  dataKey="month"
+                  label={{
+                    value: "<- Month ->",
+                    position: "insideBottom",
+                    offset: -10,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "14px",
+                    },
+                  }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  label={{
+                    value: "<- Revenue$ ->",
+                    position: "insideLeft",
+                    angle: -90,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "16px",
+                    },
+                  }}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  label={{
+                    value: "<- Appointment->",
+                    position: "insideRight",
+                    angle: +90,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "14px",
+                    },
+                  }}
+                />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line
                   yAxisId="left"
@@ -408,10 +445,10 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
       </Card>
 
       {/* Patient Satisfaction */}
-      <Card className="w-full lg:col-span-2">
-        <CardHeader>
+      <Card className="w-full lg:col-span-2 border border-cyan-600">
+        <CardHeader className="bg-gradient-to-r py-2 from-cyan-700 to-blue-300">
           <CardTitle>Patient Satisfaction</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-white">
             Weekly patient satisfaction ratings (out of 5)
           </CardDescription>
         </CardHeader>
