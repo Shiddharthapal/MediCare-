@@ -218,7 +218,7 @@ export default function ReportsPage({ onNavigate }: SettingPageProps) {
           </TabsContent>
 
           <TabsContent value="patients" className="space-y-4">
-            <PatientAnalytics />
+            <PatientAnalytics appointment={doctordata?.appointments} />
           </TabsContent>
 
           <TabsContent value="financial" className="space-y-4">

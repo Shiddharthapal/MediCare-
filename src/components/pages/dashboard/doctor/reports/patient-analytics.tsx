@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -25,15 +26,40 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-// Sample patient analytics data
-const ageGroupData = [
-  { ageGroup: "18-25", count: 45, percentage: 12 },
-  { ageGroup: "26-35", count: 89, percentage: 24 },
-  { ageGroup: "36-45", count: 124, percentage: 33 },
-  { ageGroup: "46-55", count: 78, percentage: 21 },
-  { ageGroup: "56-65", count: 34, percentage: 9 },
-  { ageGroup: "65+", count: 12, percentage: 3 },
-];
+interface AppointmentData {
+  doctorpatinetId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorEmail: string;
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  patientAge: number;
+  patientAddress: string;
+  patientBloodgroup: string;
+  patientBithofday: Date;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  createdAt: Date;
+}
+
+interface AgeGroupData {
+  ageGroup: string;
+  count: number;
+  percentage: number;
+}
 
 const visitFrequencyData = [
   { month: "Jan", newPatients: 23, returningPatients: 67 },
@@ -52,7 +78,67 @@ const topConditions = [
   { condition: "Arthritis", count: 76, trend: "-2%" },
 ];
 
-export function PatientAnalytics() {
+export function PatientAnalytics(
+  data: { appointment: AppointmentData[] } | undefined
+) {
+  let appointmentData = data?.appointment;
+
+  const ageGroupData = useMemo(() => {
+    if (!appointmentData || appointmentData.length === 0) {
+      return [
+        { ageGroup: "18-25", count: 0, percentage: 0 },
+        { ageGroup: "26-35", count: 0, percentage: 0 },
+        { ageGroup: "36-45", count: 0, percentage: 0 },
+        { ageGroup: "46-55", count: 0, percentage: 0 },
+        { ageGroup: "56-65", count: 0, percentage: 0 },
+        { ageGroup: "65+", count: 0, percentage: 0 },
+      ];
+    }
+    const totalAppointments = appointmentData.length;
+    // Initialize age group counts
+    const ageGroups = {
+      "18-25": 0,
+      "26-35": 0,
+      "36-45": 0,
+      "46-55": 0,
+      "56-65": 0,
+      "65+": 0,
+    };
+
+    // Count appointments by age group
+    appointmentData.forEach((appointment) => {
+      const age = appointment.patientAge;
+
+      if (age >= 18 && age <= 25) {
+        ageGroups["18-25"]++;
+      } else if (age >= 26 && age <= 35) {
+        ageGroups["26-35"]++;
+      } else if (age >= 36 && age <= 45) {
+        ageGroups["36-45"]++;
+      } else if (age >= 46 && age <= 55) {
+        ageGroups["46-55"]++;
+      } else if (age >= 56 && age <= 65) {
+        ageGroups["56-65"]++;
+      } else if (age > 65) {
+        ageGroups["65+"]++;
+      }
+    });
+
+    // Convert to array with percentages
+    const agegroupData: AgeGroupData[] = Object.entries(ageGroups).map(
+      ([ageGroup, count]) => ({
+        ageGroup,
+        count,
+        percentage:
+          totalAppointments > 0
+            ? Math.round((count / totalAppointments) * 100)
+            : 0,
+      })
+    );
+
+    return agegroupData;
+  }, [appointmentData]);
+
   return (
     <div className=" my-4">
       {/* Age Group Distribution */}
@@ -80,18 +166,41 @@ export function PatientAnalytics() {
                 data={ageGroupData}
                 margin={{
                   top: 10,
-                  right: 10,
-                  left: 10,
-                  bottom: 10,
+                  right: 20,
+                  left: 20,
+                  bottom: 20,
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="ageGroup"
                   fontSize={12}
+                  label={{
+                    value: "Age",
+                    position: "insideBottom",
+                    offset: -8,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "14px",
+                    },
+                  }}
                   className="text-xs sm:text-sm"
                 />
-                <YAxis fontSize={12} className="text-xs sm:text-sm" />
+                <YAxis
+                  fontSize={12}
+                  label={{
+                    value: " Patient ",
+                    position: "insideLeft",
+                    angle: -90,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "16px",
+                    },
+                  }}
+                  className="text-xs sm:text-sm"
+                />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   dataKey="count"
