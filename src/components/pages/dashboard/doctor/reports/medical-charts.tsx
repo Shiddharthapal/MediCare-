@@ -25,6 +25,7 @@ import {
   RadialBarChart,
   RadialBar,
   Legend,
+  ComposedChart,
 } from "recharts";
 import { Progress } from "@/components/ui/progress";
 import { Activity, Clock, Users, AlertTriangle } from "lucide-react";
@@ -84,6 +85,11 @@ interface MonthlyData {
   month: string;
   appointments: number;
 }
+interface TimeData {
+  hour: string;
+  appointments: number;
+}
+
 // Medical-specific chart data
 const diagnosisAccuracyData = [
   { month: "Jan", accuracy: 92.5, totalCases: 14 },
@@ -111,19 +117,6 @@ const riskAssessmentData = [
   { category: "Low Risk", value: 65, fill: "#84cc16" },
   { category: "Medium Risk", value: 25, fill: "#f97316" },
   { category: "High Risk", value: 10, fill: "#ea580c" },
-];
-
-const appointmentTimeData = [
-  { hour: "08:00", appointments: 12, avgDuration: 18 },
-  { hour: "09:00", appointments: 15, avgDuration: 22 },
-  { hour: "10:00", appointments: 18, avgDuration: 20 },
-  { hour: "11:00", appointments: 14, avgDuration: 25 },
-  { hour: "12:00", appointments: 8, avgDuration: 15 },
-  { hour: "13:00", appointments: 6, avgDuration: 12 },
-  { hour: "14:00", appointments: 16, avgDuration: 19 },
-  { hour: "15:00", appointments: 19, avgDuration: 23 },
-  { hour: "16:00", appointments: 17, avgDuration: 21 },
-  { hour: "17:00", appointments: 13, avgDuration: 18 },
 ];
 
 function getSeverityColor(severity: string) {
@@ -227,6 +220,41 @@ export function MedicalCharts(
       totalCases: monthlyCounts[item.month] || 0,
     }));
   }, [appointmentdata]);
+
+  const appointmentTimeData = useMemo(() => {
+    const hourMap: Record<number, number> = {};
+    for (let hour = 9; hour <= 22; hour++) {
+      hourMap[hour] = 0;
+    }
+
+    // Count appointments by hour
+    appointmentdata.forEach((appointment) => {
+      const date = new Date(appointment.createdAt);
+      const hour = date.getHours();
+
+      // Only count if within operating hours (9 AM to 10 PM)
+      if (hour >= 9 && hour <= 22) {
+        hourMap[hour]++;
+      }
+    });
+
+    // Convert to array with AM/PM format
+    const timeData: TimeData[] = [];
+    for (let hour = 9; hour <= 22; hour++) {
+      const period = hour >= 12 ? "PM" : "AM";
+      const displayHour = hour > 12 ? hour - 12 : hour;
+      const hourString = `${displayHour}:00 ${period}`;
+
+      timeData.push({
+        hour: hourString,
+        appointments: hourMap[hour],
+      });
+    }
+
+    return timeData;
+  }, [appointmentdata]);
+
+  console.log("appointmentTimeData=>", appointmentTimeData);
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -454,7 +482,7 @@ export function MedicalCharts(
                 color: "hsl(330, 81%, 60%)",
               },
             }}
-            className="h-[300px]"
+            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-[700px]"
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={treatmentOutcomeData}>
@@ -487,7 +515,7 @@ export function MedicalCharts(
       </Card>
 
       {/* Appointment Time Analysis */}
-      <Card className="col-span-2">
+      <Card className="col-span-2 mb-10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
@@ -509,14 +537,42 @@ export function MedicalCharts(
                 color: "hsl(217, 91%, 60%)",
               },
             }}
-            className="h-[300px]"
+            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-[700px]"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={appointmentTimeData}>
+              <ComposedChart data={appointmentTimeData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="hour" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
+                <XAxis
+                  dataKey="hour"
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                  label={{
+                    value: "Time",
+                    position: "insideBottom",
+                    offset: -5,
+                    style: {
+                      textAnchor: "bottom",
+                      fill: "black",
+                      fontSize: "16px",
+                    },
+                  }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  label={{
+                    value: "Number of Appointments",
+                    position: "middle",
+                    angle: -90,
+                    offset: 0,
+                    dx: -20,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "16px",
+                    },
+                  }}
+                />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   yAxisId="left"
@@ -525,15 +581,7 @@ export function MedicalCharts(
                   name="Appointments"
                   opacity={0.7}
                 />
-                <Line
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="avgDuration"
-                  stroke="hsl(330, 81%, 60%)"
-                  strokeWidth={3}
-                  name="Avg Duration (min)"
-                />
-              </LineChart>
+              </ComposedChart>
             </ResponsiveContainer>
           </ChartContainer>
         </CardContent>
