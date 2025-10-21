@@ -297,16 +297,14 @@ export function PatientAnalytics(
   return (
     <div className=" my-4">
       {/* Age Group Distribution */}
-      <Card className="w-full shadow-sm hover:shadow-md transition-shadow duration-200 mb-6">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg sm:text-xl md:text-2xl">
-            Patient Age Distribution
-          </CardTitle>
-          <CardDescription className="text-sm sm:text-base">
+      <Card className="w-full border border-cyan-600 shadow-sm hover:shadow-md transition-shadow duration-200 mb-6">
+        <CardHeader className=" bg-gradient-to-r py-2 from-sky-600 to-blue-400 ">
+          <CardTitle className="text-white">Patient Age Distribution</CardTitle>
+          <CardDescription className="text-sm text-white">
             Breakdown of patients by age groups
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6">
+        <CardContent className="">
           <ChartContainer
             config={{
               count: {
@@ -369,12 +367,12 @@ export function PatientAnalytics(
         </CardContent>
       </Card>
       {/* New vs Returning Patients */}
-      <Card className="w-full shadow-sm hover:shadow-md transition-shadow duration-200 mb-6">
-        <CardHeader className="pb-3 sm:pb-4 md:pb-6">
+      <Card className="w-full border border-pink-500 shadow-sm hover:shadow-md transition-shadow duration-200 mb-6">
+        <CardHeader className="bg-gradient-to-r py-2 from-pink-400 to-purple-200">
           <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold">
             Patient Visit Patterns
           </CardTitle>
-          <CardDescription className="text-xs sm:text-sm md:text-base text-muted-foreground">
+          <CardDescription className="text-gray-700">
             New vs returning patients over time
           </CardDescription>
         </CardHeader>
@@ -473,10 +471,10 @@ export function PatientAnalytics(
       </Card>
 
       {/* Top Conditions */}
-      <Card className="col-span-2 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <CardHeader>
-          <CardTitle>Most Common Conditions</CardTitle>
-          <CardDescription>
+      <Card className="col-span-2 border border-cyan-600 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <CardHeader className="bg-gradient-to-r py-2 from-cyan-700 to-blue-600">
+          <CardTitle className="text-white">Most Common Conditions</CardTitle>
+          <CardDescription className="text-white">
             Top diagnosed conditions and their trends
           </CardDescription>
         </CardHeader>
