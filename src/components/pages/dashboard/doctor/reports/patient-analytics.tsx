@@ -61,14 +61,11 @@ interface AgeGroupData {
   percentage: number;
 }
 
-const visitFrequencyData = [
-  { month: "Jan", newPatients: 23, returningPatients: 67 },
-  { month: "Feb", newPatients: 31, returningPatients: 72 },
-  { month: "Mar", newPatients: 28, returningPatients: 69 },
-  { month: "Apr", newPatients: 35, returningPatients: 78 },
-  { month: "May", newPatients: 42, returningPatients: 85 },
-  { month: "Jun", newPatients: 38, returningPatients: 82 },
-];
+interface VisitFrequencyData {
+  month: string;
+  newPatients: number;
+  returningPatients: number;
+}
 
 const topConditions = [
   { condition: "Hypertension", count: 156, trend: "+12%" },
@@ -81,7 +78,7 @@ const topConditions = [
 export function PatientAnalytics(
   data: { appointment: AppointmentData[] } | undefined
 ) {
-  let appointmentData = data?.appointment;
+  const appointmentData = data?.appointment;
 
   const ageGroupData = useMemo(() => {
     if (!appointmentData || appointmentData.length === 0) {
@@ -137,6 +134,64 @@ export function PatientAnalytics(
     );
 
     return agegroupData;
+  }, [appointmentData]);
+
+  const visitFrequencyData = useMemo(() => {
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    // Initialize data for all 12 months
+    const monthlyData: Record<
+      string,
+      { newPatients: number; returningPatients: number }
+    > = {};
+    monthNames.forEach((month) => {
+      monthlyData[month] = { newPatients: 0, returningPatients: 0 };
+    });
+
+    // Count new and returning patients by month
+    appointmentData?.forEach((appointment) => {
+      const date = new Date(appointment.createdAt);
+      const monthShort = monthNames[date.getMonth()];
+
+      if (appointment.previousVisit?.toLowerCase() === "yes") {
+        monthlyData[monthShort].returningPatients++;
+      } else {
+        monthlyData[monthShort].newPatients++;
+      }
+    });
+
+    // Get current month index (0-11)
+    const currentMonthIndex = new Date().getMonth();
+
+    // Create ordered array starting from next month and ending with current month
+    const orderedMonths = [
+      ...monthNames.slice(currentMonthIndex + 1), // Months after current
+      ...monthNames.slice(0, currentMonthIndex + 1), // Months up to and including current
+    ];
+
+    // Convert to final array format
+    const visitFrequencyData: VisitFrequencyData[] = orderedMonths.map(
+      (month) => ({
+        month,
+        newPatients: monthlyData[month].newPatients,
+        returningPatients: monthlyData[month].returningPatients,
+      })
+    );
+
+    return visitFrequencyData;
   }, [appointmentData]);
 
   return (
@@ -244,7 +299,7 @@ export function PatientAnalytics(
                   top: 5,
                   right: window?.innerWidth < 640 ? 5 : 20,
                   left: window?.innerWidth < 640 ? 5 : 20,
-                  bottom: 5,
+                  bottom: 10,
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
@@ -258,6 +313,16 @@ export function PatientAnalytics(
                         : 14
                   }
                   tick={{ fontSize: window?.innerWidth < 640 ? 10 : 12 }}
+                  label={{
+                    value: "Month",
+                    position: "insideBottom",
+                    offset: -10,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "14px",
+                    },
+                  }}
                 />
                 <YAxis
                   fontSize={
@@ -267,14 +332,27 @@ export function PatientAnalytics(
                         ? 12
                         : 14
                   }
+                  label={{
+                    value: "Patients",
+                    position: "insideRight",
+                    angle: -90,
+                    offset: +40,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "16px",
+                    },
+                  }}
                   tick={{ fontSize: window?.innerWidth < 640 ? 10 : 12 }}
+                  allowDecimals={false}
+                  padding={{ top: 0, bottom: 0 }} // Changed: Remove padding
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line
                   type="monotone"
                   dataKey="newPatients"
                   stroke="hsl(217, 91%, 60%)"
-                  strokeWidth={window?.innerWidth < 640 ? 1.5 : 2}
+                  strokeWidth={window?.innerWidth < 640 ? 1 : 2}
                   name="New Patients"
                   dot={{ r: window?.innerWidth < 640 ? 3 : 4 }}
                   activeDot={{ r: window?.innerWidth < 640 ? 4 : 6 }}
@@ -283,7 +361,7 @@ export function PatientAnalytics(
                   type="monotone"
                   dataKey="returningPatients"
                   stroke="hsl(330, 81%, 60%)"
-                  strokeWidth={window?.innerWidth < 640 ? 1.5 : 2}
+                  strokeWidth={window?.innerWidth < 640 ? 1 : 2}
                   name="Returning Patients"
                   dot={{ r: window?.innerWidth < 640 ? 3 : 4 }}
                   activeDot={{ r: window?.innerWidth < 640 ? 4 : 6 }}

@@ -240,9 +240,9 @@ export function MedicalCharts(
   console.log("appointmentTimeData=>", appointmentTimeData);
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 grid-cols-2">
       {/* Diagnosis Accuracy Trend */}
-      <Card className="lg:col-span-2 border border-pink-500">
+      <Card className="md:col-span-2 border border-pink-500">
         <CardHeader className="bg-gradient-to-r py-2 from-purple-200 to-pink-200">
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
