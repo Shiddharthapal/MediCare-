@@ -61,6 +61,12 @@ interface MonthlyData {
   profit: number;
   appointments: number;
 }
+
+interface PieChartData {
+  type: string;
+  count: number;
+  percentage: number;
+}
 // Sample data for medical analytics
 
 const diagnosisTypeData = [
@@ -191,6 +197,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
 
   const { height, margin, fontSize } = getChartDimensionsRating();
 
+  //calculate revenue and appointment of last 12 month for graph
   const monthlyData = useMemo(() => {
     // Group appointments by month
     const monthlyMap = new Map<string, number>();
@@ -226,6 +233,59 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
 
     return allMonths;
   }, [appointment, fees]);
+
+  //calculated top 4 + other consulted type from appointment for pie chart
+  const consultedData = useMemo(() => {
+    const consultedTypeCount = new Map<string, number>();
+
+    appointment?.forEach((appointment) => {
+      const type = appointment.consultedType;
+      consultedTypeCount.set(type, (consultedTypeCount.get(type) || 0) + 1);
+    });
+
+    // Convert to array and sort by count (descending)
+    const sortedTypes = Array.from(consultedTypeCount.entries()).sort(
+      (a, b) => b[1] - a[1]
+    );
+
+    const totalAppointments = appointment?.length || 0;
+    const uniqueTypesCount = sortedTypes.length;
+
+    // If we have 4 or fewer unique types, show them all without "Others"
+    if (uniqueTypesCount <= 4) {
+      return sortedTypes.map(([type, count]) => ({
+        type,
+        count,
+        percentage: parseFloat(((count / totalAppointments) * 100).toFixed(2)),
+      }));
+    }
+
+    // If we have more than 4 unique types, show top 4 + "Others"
+    const top4 = sortedTypes.slice(0, 4);
+
+    // Calculate "Others" from remaining types
+    const othersCount = sortedTypes
+      .slice(4)
+      .reduce((sum, [_, count]) => sum + count, 0);
+
+    // Build result array
+    const result: PieChartData[] = top4.map(([type, count]) => ({
+      type,
+      count,
+      percentage: parseFloat(((count / totalAppointments) * 100).toFixed(2)),
+    }));
+
+    // Add "Others"
+    result.push({
+      type: "Others",
+      count: othersCount,
+      percentage: parseFloat(
+        ((othersCount / totalAppointments) * 100).toFixed(2)
+      ),
+    });
+
+    return result;
+  }, [appointment]);
 
   console.log("🧞‍♂️  monthlyData --->", monthlyData);
 
@@ -286,8 +346,8 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
       </Card>
 
       {/* Diagnosis Types Distribution */}
-      <Card className="w-full lg:col-span-2 ">
-        <CardHeader>
+      <Card className="w-full lg:col-span-2 border border-orange-400 ">
+        <CardHeader className="bg-gradient-to-r py-2 from-orange-300 to-amber-200">
           <CardTitle>Diagnosis Types</CardTitle>
           <CardDescription>
             Distribution of diagnosis categories this month
@@ -299,7 +359,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                 <Pie
-                  data={diagnosisTypeData}
+                  data={consultedData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -310,7 +370,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                   stroke="#fff"
                   strokeWidth={2}
                 >
-                  {diagnosisTypeData.map((entry, index) => (
+                  {consultedData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
@@ -332,7 +392,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                   : "grid-cols-3"
             }`}
           >
-            {diagnosisTypeData.map((entry, index) => (
+            {consultedData.map((entry, index) => (
               <div key={entry.type} className="flex items-center gap-2 text-sm">
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
