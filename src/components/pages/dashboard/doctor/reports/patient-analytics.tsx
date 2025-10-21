@@ -26,6 +26,34 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
+interface VitalSign {
+  bloodPressure?: string;
+  heartRate?: string;
+  temperature?: string;
+  weight?: string;
+  height?: string;
+  respiratoryRate?: string;
+  oxygenSaturation?: string;
+  bmi?: number;
+}
+
+interface Prescription {
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  doctorpatinetId: string;
+  reasonForVisit: string;
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  symptoms: string;
+  testandReport: string;
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+
 interface AppointmentData {
   doctorpatinetId: string;
   doctorName: string;
@@ -52,6 +80,7 @@ interface AppointmentData {
   emergencyPhone: string;
   paymentMethod: string;
   specialRequests: string;
+  prescription: Prescription;
   createdAt: Date;
 }
 
@@ -67,13 +96,11 @@ interface VisitFrequencyData {
   returningPatients: number;
 }
 
-const topConditions = [
-  { condition: "Hypertension", count: 156, trend: "+12%" },
-  { condition: "Diabetes Type 2", count: 134, trend: "+8%" },
-  { condition: "Anxiety Disorders", count: 98, trend: "+15%" },
-  { condition: "Migraine", count: 87, trend: "+5%" },
-  { condition: "Arthritis", count: 76, trend: "-2%" },
-];
+interface TopCondition {
+  condition: string;
+  count: number;
+  trend: string;
+}
 
 export function PatientAnalytics(
   data: { appointment: AppointmentData[] } | undefined
@@ -192,6 +219,79 @@ export function PatientAnalytics(
     );
 
     return visitFrequencyData;
+  }, [appointmentData]);
+
+  const topConditions = useMemo(() => {
+    // Get the first day of last month
+    const now = new Date();
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59
+    );
+
+    // Track total counts and last month counts for each condition
+    const conditionData: Record<string, { total: number; lastMonth: number }> =
+      {};
+
+    // Process each appointment
+    appointmentData?.forEach((appointment) => {
+      // Check if prescription exists and has symptoms
+      if (!appointment?.prescription) return;
+
+      const primaryDiagnosis =
+        appointment.prescription.primaryDiagnosis?.trim();
+      if (!primaryDiagnosis || primaryDiagnosis === "") return;
+
+      // Initialize condition if not exists
+      if (!conditionData[primaryDiagnosis]) {
+        conditionData[primaryDiagnosis] = { total: 0, lastMonth: 0 };
+      }
+
+      // Increment total count
+      conditionData[primaryDiagnosis].total++;
+
+      // Check if appointment was created in last month
+      const appointmentDate = new Date(appointment.createdAt);
+      if (
+        appointmentDate >= lastMonthStart &&
+        appointmentDate <= lastMonthEnd
+      ) {
+        conditionData[primaryDiagnosis].lastMonth++;
+      }
+    });
+
+    // Convert to array with trend calculation
+    const topConditions: TopCondition[] = Object.entries(conditionData).map(
+      ([condition, data]) => {
+        let trend = "0%";
+
+        if (data.lastMonth > 0 && data.total > 0) {
+          // Calculate percentage: (lastMonth / total) * 100
+          const trendPercentage = Math.round(
+            (data.lastMonth / data.total) * 100
+          );
+          trend = `+${trendPercentage}%`;
+        }
+
+        return {
+          condition,
+          count: data.total,
+          trend,
+        };
+      }
+    );
+
+    // Sort by count (descending) and take top 10
+    const sortedConditions = topConditions
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return sortedConditions;
   }, [appointmentData]);
 
   return (

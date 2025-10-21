@@ -15,17 +15,6 @@ import { MedicalCharts } from "./medical-charts";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "@/redux/hooks";
 
-interface VitalSign {
-  bloodPressure?: string;
-  heartRate?: string;
-  temperature?: string;
-  weight?: string;
-  height?: string;
-  respiratoryRate?: string;
-  oxygenSaturation?: string;
-  bmi?: number;
-}
-
 interface PaymentMethods {
   acceptCreditCards: boolean;
   acceptDebitCards: boolean;
@@ -39,6 +28,17 @@ interface PaymentMethods {
   rocketNumber?: string;
 }
 
+interface VitalSign {
+  bloodPressure?: string;
+  heartRate?: string;
+  temperature?: string;
+  weight?: string;
+  height?: string;
+  respiratoryRate?: string;
+  oxygenSaturation?: string;
+  bmi?: number;
+}
+
 interface Medication {
   id: string;
   medecineName: string;
@@ -50,6 +50,24 @@ interface Medication {
   route?: string[];
   startDate?: Date;
   endDate?: Date;
+}
+
+interface Prescription {
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  doctorpatinetId: string;
+  reasonForVisit: string;
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  symptoms: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
 }
 
 interface FileUpload {
@@ -73,23 +91,6 @@ interface FileUpload {
   updatedAt: Date;
 }
 
-interface Prescription {
-  doctorId: string;
-  doctorName: string;
-  patientId: string;
-  doctorpatinetId: string;
-  reasonForVisit: string;
-  vitalSign: VitalSign;
-  primaryDiagnosis: string;
-  symptoms: string;
-  testandReport: string;
-  medication: Medication[];
-  restrictions: string;
-  followUpDate: string;
-  additionalNote: string;
-  prescriptionId: string;
-  createdAt: Date;
-}
 interface PracticeSettingData {
   practiceName: string;
   specialty: string;
