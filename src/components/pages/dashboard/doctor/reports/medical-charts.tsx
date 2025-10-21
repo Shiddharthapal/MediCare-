@@ -79,23 +79,25 @@ interface SymptomFrequency {
   symptoms: string;
   frequency: number;
 }
+
+interface MonthlyData {
+  month: string;
+  appointments: number;
+}
 // Medical-specific chart data
 const diagnosisAccuracyData = [
-  { month: "Jan", accuracy: 92.5, totalCases: 145 },
-  { month: "Feb", accuracy: 94.2, totalCases: 162 },
-  { month: "Mar", accuracy: 91.8, totalCases: 138 },
-  { month: "Apr", accuracy: 95.1, totalCases: 178 },
-  { month: "May", accuracy: 93.7, totalCases: 195 },
-  { month: "Jun", accuracy: 96.3, totalCases: 210 },
-];
-
-const symptomFrequencyData = [
-  { symptom: "Chest Pain", frequency: 234, severity: "High" },
-  { symptom: "Headache", frequency: 189, severity: "Medium" },
-  { symptom: "Fatigue", frequency: 167, severity: "Medium" },
-  { symptom: "Shortness of Breath", frequency: 145, severity: "High" },
-  { symptom: "Nausea", frequency: 123, severity: "Low" },
-  { symptom: "Dizziness", frequency: 98, severity: "Medium" },
+  { month: "Jan", accuracy: 92.5, totalCases: 14 },
+  { month: "Feb", accuracy: 94.2, totalCases: 16 },
+  { month: "Mar", accuracy: 91.8, totalCases: 13 },
+  { month: "Apr", accuracy: 95.1, totalCases: 17 },
+  { month: "May", accuracy: 93.7, totalCases: 19 },
+  { month: "Jun", accuracy: 96.3, totalCases: 21 },
+  { month: "Jul", accuracy: 90.2, totalCases: 10 },
+  { month: "Aug", accuracy: 92.8, totalCases: 11 },
+  { month: "Sep", accuracy: 94.3, totalCases: 12 },
+  { month: "Oct", accuracy: 97.1, totalCases: 9 },
+  { month: "Nov", accuracy: 93.4, totalCases: 21 },
+  { month: "Dec", accuracy: 90.7, totalCases: 20 },
 ];
 
 const treatmentOutcomeData = [
@@ -141,21 +143,19 @@ export function MedicalCharts(
   data: { appointment: AppointmentData[] } | undefined
 ) {
   let appointmentdata = data?.appointment || [];
+
+  //for common Symptoms graph
   const consultedData = useMemo(() => {
-    // Object to track symptom frequencies
     const symptomMap: Record<string, number> = {};
 
     // Process each appointment
     appointmentdata?.forEach((appointment) => {
-      // Check if prescription exists
       if (!appointment.prescription) {
         return;
       }
 
       // Get the actual symptoms text and trim whitespace
       const symptoms = appointment?.prescription?.symptoms?.trim();
-
-      // Skip if symptoms don't exist or are empty
       if (!symptoms || symptoms.length === 0) {
         return;
       }
@@ -184,6 +184,50 @@ export function MedicalCharts(
     return topSymptoms;
   }, [appointmentdata]);
 
+  //For diagnosis Accuracy Trend
+  //calculate revenue and appointment of last 12 month for graph
+  const diagnosisAccuracyData = useMemo(() => {
+    const baseData = [
+      { month: "Jan", accuracy: 92.5 },
+      { month: "Feb", accuracy: 94.2 },
+      { month: "Mar", accuracy: 91.8 },
+      { month: "Apr", accuracy: 95.1 },
+      { month: "May", accuracy: 93.7 },
+      { month: "Jun", accuracy: 96.3 },
+      { month: "Jul", accuracy: 90.2 },
+      { month: "Aug", accuracy: 92.8 },
+      { month: "Sep", accuracy: 94.3 },
+      { month: "Oct", accuracy: 97.1 },
+      { month: "Nov", accuracy: 93.4 },
+      { month: "Dec", accuracy: 90.7 },
+    ];
+
+    // Get current month index (0-11)
+    const currentMonthIndex = new Date().getMonth();
+
+    // Reorder array to start from next month and end with current month
+    const reorderedData = [
+      ...baseData.slice(currentMonthIndex + 1), // Months after current
+      ...baseData.slice(0, currentMonthIndex + 1), // Months up to and including current
+    ];
+
+    // Count appointments by month
+    const monthlyCounts: Record<string, number> = {};
+
+    appointmentdata?.forEach((apt) => {
+      const monthShort = new Date(apt.createdAt).toLocaleString("default", {
+        month: "short",
+      });
+      monthlyCounts[monthShort] = (monthlyCounts[monthShort] || 0) + 1;
+    });
+
+    // Add totalCases to reordered data
+    return reorderedData.map((item) => ({
+      ...item,
+      totalCases: monthlyCounts[item.month] || 0,
+    }));
+  }, [appointmentdata]);
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {/* Diagnosis Accuracy Trend */}
@@ -209,14 +253,59 @@ export function MedicalCharts(
                 color: "hsl(330, 81%, 60%)",
               },
             }}
-            className="h-[300px]"
+            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-[800px]"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={diagnosisAccuracyData}>
+              <LineChart
+                data={diagnosisAccuracyData}
+                margin={{ top: 5, right: 20, left: 20, bottom: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis yAxisId="left" domain={[85, 100]} />
-                <YAxis yAxisId="right" orientation="right" />
+                <XAxis
+                  dataKey="month"
+                  label={{
+                    value: "<- Month ->",
+                    position: "insideBottom",
+                    offset: -10,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "14px",
+                    },
+                  }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  domain={[85, 100]}
+                  label={{
+                    value: "<- Accuracy ->",
+                    position: "middle",
+                    angle: -90,
+                    offset: 0,
+                    dx: -20,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "16px",
+                    },
+                  }}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  padding={{ top: 5, bottom: 0 }}
+                  label={{
+                    value: "<- Appointment->",
+                    position: "insideRight",
+                    angle: +90,
+                    offset: +20,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "16px",
+                    },
+                  }}
+                />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Area
                   yAxisId="left"
