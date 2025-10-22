@@ -282,7 +282,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
   console.log("🧞‍♂️  monthlyData --->", monthlyData);
 
   return (
-    <div className="grid gap-4 grid-cols-1">
+    <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
       {/* Revenue and Diagnoses Trend */}
       <Card className="lg:col-span-2 border border-pink-500">
         <CardHeader className="bg-gradient-to-r py-2 from-purple-200 to-pink-200">

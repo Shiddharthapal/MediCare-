@@ -11,7 +11,7 @@ interface SettingPageProps {
 
 export default function SettingsPage({ onNavigate }: SettingPageProps) {
   return (
-    <div className="flex-1 flex flex-col items-center overflow-hidden mx-8 w-full min-h-screen bg-gray-50">
+    <div className="flex-1 flex flex-col items-center overflow-hidden  mx-8 w-full min-h-screen bg-gray-50">
       <div className="w-full max-w-4xl py-8 space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Settings</h1>

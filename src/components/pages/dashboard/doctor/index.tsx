@@ -651,7 +651,7 @@ export default function DashboardPage() {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-3  z-50 lg:hidden hover:bg-gray-300"
+        className="fixed top-3 z-50 lg:hidden hover:bg-gray-300"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
         {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -659,13 +659,13 @@ export default function DashboardPage() {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 bg-white shadow-lg transform transition-all duration-300 ease-in-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } ${collapsed ? "md:w-16" : "md:w-64"} w-64`}
+        className={`fixed inset-y-0 left-0 z-40 bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } ${collapsed ? "w-16" : "w-64"}`}
       >
-        <div className="flex flex-col pt-16 h-full">
+        <div className="flex flex-col h-full">
           {/* Navigation */}
-          <nav className="flex-1 p-4 overflow-y-auto">
+          <nav className="flex-1 p-4 pt-20 overflow-y-auto">
             <ul className="space-y-2">
               {menuItems.map((item, index) => (
                 <li key={index}>
@@ -747,13 +747,11 @@ export default function DashboardPage() {
         />
       )}
 
-      <div
-        className={`container transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
-      >
+      <div className="flex-1 flex flex-col w-full lg:ml-64">
         {/* Main Content */}
         {currentPage === "dashboard" && (
-          <div className="flex-1 flex items-center mx-1 flex-col ">
-            <main className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 flex items-center mx-40 pt-5 flex-col ">
+            <main className="flex-1 overflow-y-auto p-6 w-full">
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
                 {/* Stats Cards */}
                 <div className="xl:col-span-4">
