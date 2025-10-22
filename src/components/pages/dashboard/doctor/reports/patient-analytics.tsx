@@ -312,7 +312,7 @@ export function PatientAnalytics(
                 color: "hsl(217, 91%, 60%)",
               },
             }}
-            className="h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] w-full"
+            className="h-[250px] sm:h-[280px] md:h-[280px]  w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -388,7 +388,7 @@ export function PatientAnalytics(
                 color: "hsl(330, 81%, 60%)",
               },
             }}
-            className="h-[200px] xs:h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] xl:h-[450px] w-full"
+            className="h-[200px] xs:h-[250px] sm:h-[280px] md:h-[280px]  w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
@@ -486,7 +486,10 @@ export function PatientAnalytics(
                 className="flex items-center justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium">
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-lg 
+                  bg-primary text-primary-foreground text-sm font-medium"
+                  >
                     {index + 1}
                   </div>
                   <div>

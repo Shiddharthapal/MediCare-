@@ -479,9 +479,7 @@ export default function DashboardPage() {
     appointments.forEach((appointment: AppointmentData) => {
       let date = appointment.appointmentDate;
       const monthIndex = new Date(date).getMonth();
-      console.log("🧞‍♂️  monthIndex --->", monthIndex);
       const monthname = monthNames[monthIndex];
-      console.log("🧞‍♂️  monthname --->", monthname);
       countappointment[monthname]++;
     });
 
@@ -581,7 +579,6 @@ export default function DashboardPage() {
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
   }, [categorizedAppointments.today]);
-  console.log("🧞‍♂️todayGrouped --->", todayGrouped);
 
   const checktimelimit = ([date, time]: [string, string]) => {
     const currentDate = new Date();
@@ -593,15 +590,15 @@ export default function DashboardPage() {
     }
 
     // Parse time range
-    const timeRange = time.split(" - "); // ["5:00 PM", "5:30 PM"]
-    const startTime = timeRange[0].trim();
-    const endTime = timeRange[1].trim();
+    const timeRange = time?.split(" - "); // ["5:00 PM", "5:30 PM"]
+    const startTime = timeRange[0]?.trim();
+    const endTime = timeRange[1]?.trim();
 
     // Convert times to Date objects for today
     const parseTimeToDate = (timeStr: any) => {
       const today = new Date();
-      const [time, period] = timeStr.split(" ");
-      const [hours, minutes] = time.split(":").map(Number);
+      const [time, period] = timeStr?.split(" ");
+      const [hours, minutes] = time?.split(":")?.map(Number);
 
       let hour24 = hours;
       if (period === "PM" && hours !== 12) hour24 += 12;
@@ -611,7 +608,9 @@ export default function DashboardPage() {
       return today;
     };
 
+    if (!startTime) return;
     const startDateTime = parseTimeToDate(startTime);
+    if (!endTime) return;
     const endDateTime = parseTimeToDate(endTime);
 
     // Check if current time is within the slot

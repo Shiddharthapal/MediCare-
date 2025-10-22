@@ -12,6 +12,7 @@ import { ReportsCharts } from "./reports-charts";
 import { DiagnosisTable } from "./diagnosis-table";
 import { PatientAnalytics } from "./patient-analytics";
 import { MedicalCharts } from "./medical-charts";
+import { FinancialCharts } from "./financial-charts";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -223,19 +224,10 @@ export default function ReportsPage({ onNavigate }: SettingPageProps) {
           </TabsContent>
 
           <TabsContent value="financial" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Financial Reports</CardTitle>
-                <CardDescription>
-                  Revenue analysis and financial performance metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  Financial reports coming soon...
-                </div>
-              </CardContent>
-            </Card>
+            <FinancialCharts
+              appointment={doctordata?.appointments}
+              fees={doctordata?.fees}
+            />
           </TabsContent>
         </Tabs>
       </div>

@@ -264,7 +264,7 @@ export function MedicalCharts(
                 color: "hsl(330, 81%, 60%)",
               },
             }}
-            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-[800px]"
+            className="h-[250px] sm:h-[280px]   w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
@@ -275,7 +275,7 @@ export function MedicalCharts(
                 <XAxis
                   dataKey="month"
                   label={{
-                    value: "<- Month ->",
+                    value: " Month ",
                     position: "insideBottom",
                     offset: -10,
                     style: {
@@ -289,7 +289,7 @@ export function MedicalCharts(
                   yAxisId="left"
                   domain={[85, 100]}
                   label={{
-                    value: "<- Accuracy ->",
+                    value: " Accuracy ",
                     position: "middle",
                     angle: -90,
                     offset: 0,
@@ -306,7 +306,7 @@ export function MedicalCharts(
                   orientation="right"
                   padding={{ top: 5, bottom: 0 }}
                   label={{
-                    value: "<- Appointment->",
+                    value: " Appointment",
                     position: "insideRight",
                     angle: +90,
                     offset: +20,
@@ -361,7 +361,10 @@ export function MedicalCharts(
                 className="flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium">
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary 
+                  text-primary-foreground text-sm font-medium"
+                  >
                     {index + 1}
                   </div>
                   <div>
@@ -467,7 +470,7 @@ export function MedicalCharts(
                 color: "hsl(330, 81%, 60%)",
               },
             }}
-            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-[700px]"
+            className="h-[250px] sm:h-[280px] md:h-[280px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={treatmentOutcomeData}>
@@ -522,7 +525,7 @@ export function MedicalCharts(
                 color: "hsl(217, 91%, 60%)",
               },
             }}
-            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-[700px]"
+            className="h-[250px] sm:h-[280px] md:h-[280px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={appointmentTimeData}>
