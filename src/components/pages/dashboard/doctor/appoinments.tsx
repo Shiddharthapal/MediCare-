@@ -259,7 +259,7 @@ const groupAppointmentsByDate = (
   }, {});
 };
 interface PatientsPageProps {
-  onNavigate: (page: string) => void;
+  onNavigate?: (page: string) => void;
 }
 
 export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {

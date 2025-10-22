@@ -35,6 +35,7 @@ import Patients from "./allpatients";
 import Setting from "./setting_doctor/index";
 import Reports from "./reports/index";
 import { useAppSelector } from "@/redux/hooks";
+import { useLocation } from "react-router-dom";
 
 interface AppointmentData {
   doctorName: string;
@@ -378,18 +379,19 @@ const groupAppointmentsByDate = (
 
 export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+  const file = location.state?.file;
   const [genderOfPatient, setGenderOfPatient] =
     useState<GenderCount>(mockGenderCount);
   const [appointmentNumberinMonth, setAppointmentNumberinMonth] =
     useState<AppointmentCount>(mockAppointmentCount);
-  const [currentPage, setCurrentPage] = useState("dashboard");
+  const [currentPage, setCurrentPage] = useState(file || "dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [doctorData, setDoctorData] =
     useState<DoctorDetails>(mockDoctorDetails);
 
   let doctor = useAppSelector((state) => state.auth.user);
   const id = doctor?._id;
-  console.log("🧞‍♂️  id --->", id);
   // console.log("🧞‍♂️doctor --->", doctor);
   const datagender = [
     { name: "Male", value: genderOfPatient?.Male || 0, color: "#3b82f6" },
