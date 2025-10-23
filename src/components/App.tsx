@@ -16,6 +16,7 @@ import ProfileofDoctor from "./pages/profile/profilefordoctor";
 import About from "./pages/about";
 import ScrollToTop from "./ScrollToTop";
 import ProtectedRoute from "./ProctedRoute";
+import ProtectedDashboard from "./protectDashboard";
 export default function App() {
   return (
     <Provider store={store}>
@@ -29,11 +30,46 @@ export default function App() {
               <Route path="/loginasDoctor" element={<LoginAsDoctor />} />
               <Route path="/registerasUser" element={<RegisterAsUser />} />
               <Route path="/registerasDoctor" element={<RegisterAsDoctor />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profilefordoctor" element={<ProfileofDoctor />} />
-              <Route path="/doctor" element={<DashboardofDoctor />} />
-              <Route path="/patient" element={<DashboardofPatient />} />
+              <Route
+                path="/services"
+                element={
+                  <ProtectedRoute>
+                    <Services />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profilefordoctor"
+                element={
+                  <ProtectedRoute>
+                    <ProfileofDoctor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor"
+                element={
+                  <ProtectedDashboard>
+                    <DashboardofDoctor />
+                  </ProtectedDashboard>
+                }
+              />
+              <Route
+                path="/patient"
+                element={
+                  <ProtectedDashboard>
+                    <DashboardofPatient />
+                  </ProtectedDashboard>
+                }
+              />
               <Route path="/about" element={<About />} />
             </Route>
           </Routes>

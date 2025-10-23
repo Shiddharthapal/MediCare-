@@ -20,6 +20,9 @@ const doctorSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minlength: [6, "Password must be at least 6 characters"],
   },
+  role: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -62,7 +62,8 @@ export default function Register() {
       }
       dispatch(
         loginSuccess({
-          _id: result.userId,
+          _id: result._id,
+          role: "user",
           email: data.email,
           token: result.token,
         })

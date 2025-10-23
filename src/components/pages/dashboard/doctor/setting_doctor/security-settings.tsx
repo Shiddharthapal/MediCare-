@@ -122,19 +122,15 @@ export function SecuritySettings() {
     }
   };
 
-  const handleSaveChanges = () => {
-    alert("Settings Saved Your security settings have been saved.");
-  };
-
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="space-y-3">
+      <Card className="border border-gray-400">
         <CardHeader>
           <CardTitle className="text-xl">Change Password</CardTitle>
           <CardDescription>Manage your password</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
+        <CardContent className="space-y-3">
+          <div className="space-y-1">
             <Label htmlFor="currentPassword">Current Password</Label>
             <div className="relative">
               <Input

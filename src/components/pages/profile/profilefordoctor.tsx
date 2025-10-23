@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Star,
   User,
@@ -119,6 +120,7 @@ export default function DoctorProfilePage() {
   const [doctor, setDoctor] = useState<Doctor>(mockDoctor);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDoctor, setEditedDoctor] = useState<Doctor>(mockDoctor);
+  const { toast } = useToast();
   const [language, setLanguage] = useState("");
   const [specializations, setSpecializations] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
@@ -232,24 +234,49 @@ export default function DoctorProfilePage() {
         },
         body: JSON.stringify({ editedDoctor, id, formData }),
       });
-      if (!response.ok) {
-        throw new Error(`Status: ${response.status}`);
-      }
 
       const responseData = await response.json();
-      console.log("🧞‍♂️responseData --->", responseData);
 
-      dispatch(updateProfileSuccess(doctor));
-      dispatch(setEditMode(false));
-      setHasProfile(true);
-      setDoctor(responseData?.doctordetails);
-      setIsEditing(false);
-    } catch (error) {
+      if (!response.ok) {
+        throw new Error(responseData.message || `Status: ${response.status}`);
+      }
+
+      const doctorProfile = responseData?.doctordetails;
+      if (!doctorProfile) {
+        throw new Error("No profile data received from server");
+      }
+
+      // Update Redux state with new profile data
       dispatch(
-        updateProfileFailure(
-          error instanceof Error ? error.message : "Failed to update profile"
-        )
+        updateProfileSuccess({
+          userData: responseData.user,
+          isNewProfile: true,
+          profileType: "doctor",
+        })
       );
+
+      // Update local state
+      setHasProfile(true);
+      setDoctor(doctorProfile);
+      setIsEditing(false);
+
+      toast({
+        title: "Success!",
+        description: "Doctor profile created successfully",
+      });
+
+      // Navigate to dashboard since profile is created
+      navigate("/doctor");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update profile";
+      dispatch(updateProfileFailure(errorMessage));
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     }
   };
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -27,23 +27,47 @@ import {
   Tooltip,
 } from "recharts";
 
-// Sample data for medical analytics
-const revenueData = [
-  { month: "Jan", revenue: 8400, diagnoses: 145 },
-  { month: "Feb", revenue: 9200, diagnoses: 162 },
-  { month: "Mar", revenue: 8800, diagnoses: 138 },
-  { month: "Apr", revenue: 10200, diagnoses: 178 },
-  { month: "May", revenue: 11500, diagnoses: 195 },
-  { month: "Jun", revenue: 12400, diagnoses: 210 },
-];
+interface AppointmentData {
+  doctorpatinetId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorEmail: string;
+  patientId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  patientGender: string;
+  patientAge: number;
+  patientAddress: string;
+  patientBloodgroup: string;
+  patientBithofday: Date;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  createdAt: Date;
+}
 
-const diagnosisTypeData = [
-  { type: "Respiratory", count: 245, percentage: 32 },
-  { type: "Cardiovascular", count: 189, percentage: 25 },
-  { type: "Neurological", count: 156, percentage: 20 },
-  { type: "Digestive", count: 98, percentage: 13 },
-  { type: "Other", count: 76, percentage: 10 },
-];
+interface MonthlyData {
+  month: string;
+  profit: number;
+  appointments: number;
+}
+
+interface PieChartData {
+  type: string;
+  count: number;
+  percentage: number;
+}
+// Sample data for medical analytics
 
 const patientSatisfactionData = [
   { week: "Week 1", satisfaction: 4.2, responses: 45 },
@@ -92,7 +116,12 @@ const CustomTooltipRating = ({
   return null;
 };
 
-export function ReportsCharts() {
+interface DoctorDetailstProps {
+  appointment: AppointmentData[] | undefined;
+  fees?: number;
+}
+
+export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
   const [screenSize, setScreenSize] = useState("lg");
 
   const getChartDimensions = () => {
@@ -128,24 +157,28 @@ export function ReportsCharts() {
       case "sm":
         return {
           height: 200,
+          width: 400,
           margin: { top: 10, right: 10, left: 10, bottom: 10 },
           fontSize: 10,
         };
       case "md":
         return {
           height: 250,
+          width: 500,
           margin: { top: 15, right: 20, left: 15, bottom: 15 },
           fontSize: 11,
         };
       case "lg":
         return {
           height: 300,
+          width: 600,
           margin: { top: 20, right: 30, left: 20, bottom: 20 },
           fontSize: 12,
         };
       default:
         return {
           height: 350,
+          width: 700,
           margin: { top: 25, right: 40, left: 25, bottom: 25 },
           fontSize: 13,
         };
@@ -154,17 +187,109 @@ export function ReportsCharts() {
 
   const { height, margin, fontSize } = getChartDimensionsRating();
 
+  //calculate revenue and appointment of last 12 month for graph
+  const monthlyData = useMemo(() => {
+    // Group appointments by month
+    const monthlyMap = new Map<string, number>();
+
+    if (appointment && appointment.length > 0) {
+      appointment.forEach((apt) => {
+        const date = new Date(apt.createdAt);
+        const monthYear = `${date.toLocaleString("default", { month: "short" })} ${date.getFullYear()}`;
+
+        monthlyMap.set(monthYear, (monthlyMap.get(monthYear) || 0) + 1);
+      });
+    }
+
+    // Generate last 12 months
+    const allMonths: MonthlyData[] = [];
+    const currentDate = new Date();
+
+    for (let i = 11; i >= 0; i--) {
+      const monthDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - i,
+        1
+      );
+      const monthYear = `${monthDate.toLocaleString("default", { month: "short" })} ${monthDate.getFullYear()}`;
+      const appointmentCount = monthlyMap.get(monthYear) || 0;
+
+      allMonths.push({
+        month: monthYear,
+        appointments: appointmentCount,
+        profit: appointmentCount * fees,
+      });
+    }
+
+    return allMonths;
+  }, [appointment, fees]);
+
+  //calculated top 4 + other consulted type from appointment for pie chart
+  const consultedData = useMemo(() => {
+    const consultedTypeCount = new Map<string, number>();
+
+    appointment?.forEach((appointment) => {
+      const type = appointment.consultedType;
+      consultedTypeCount.set(type, (consultedTypeCount.get(type) || 0) + 1);
+    });
+
+    // Convert to array and sort by count (descending)
+    const sortedTypes = Array.from(consultedTypeCount.entries()).sort(
+      (a, b) => b[1] - a[1]
+    );
+
+    const totalAppointments = appointment?.length || 0;
+    const uniqueTypesCount = sortedTypes.length;
+
+    // If we have 4 or fewer unique types, show them all without "Others"
+    if (uniqueTypesCount <= 4) {
+      return sortedTypes.map(([type, count]) => ({
+        type,
+        count,
+        percentage: parseFloat(((count / totalAppointments) * 100).toFixed(2)),
+      }));
+    }
+
+    // If we have more than 4 unique types, show top 4 + "Others"
+    const top4 = sortedTypes.slice(0, 4);
+
+    // Calculate "Others" from remaining types
+    const othersCount = sortedTypes
+      .slice(4)
+      .reduce((sum, [_, count]) => sum + count, 0);
+
+    // Build result array
+    const result: PieChartData[] = top4.map(([type, count]) => ({
+      type,
+      count,
+      percentage: parseFloat(((count / totalAppointments) * 100).toFixed(2)),
+    }));
+
+    // Add "Others"
+    result.push({
+      type: "Others",
+      count: othersCount,
+      percentage: parseFloat(
+        ((othersCount / totalAppointments) * 100).toFixed(2)
+      ),
+    });
+
+    return result;
+  }, [appointment]);
+
+  console.log("🧞‍♂️  monthlyData --->", monthlyData);
+
   return (
     <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
       {/* Revenue and Diagnoses Trend */}
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>Revenue & Diagnoses Trend</CardTitle>
+      <Card className="lg:col-span-2 border border-pink-500">
+        <CardHeader className="bg-gradient-to-r py-2 from-purple-200 to-pink-200">
+          <CardTitle>Revenue & Appointment Trend</CardTitle>
           <CardDescription>
-            Monthly revenue and diagnosis count over the last 6 months
+            Monthly revenue and appointment count over the last 12 months
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="">
           <ChartContainer
             config={{
               revenue: {
@@ -176,22 +301,59 @@ export function ReportsCharts() {
                 color: "hsl(330, 81%, 60%)", // Red
               },
             }}
-            className="h-[250px] sm:h-[300px] lg:h-[350px]"
+            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={revenueData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                data={monthlyData}
+                margin={{ top: 5, right: 20, left: 20, bottom: 20 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
+                <XAxis
+                  dataKey="month"
+                  label={{
+                    value: " Month ",
+                    position: "insideBottom",
+                    offset: -10,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "14px",
+                    },
+                  }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  label={{
+                    value: " Revenue$ ",
+                    position: "insideLeft",
+                    angle: -90,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "16px",
+                    },
+                  }}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  label={{
+                    value: " Appointment ",
+                    position: "insideRight",
+                    angle: +90,
+                    style: {
+                      textAnchor: "middle",
+                      fill: "black",
+                      fontSize: "14px",
+                    },
+                  }}
+                />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line
                   yAxisId="left"
                   type="monotone"
-                  dataKey="revenue"
+                  dataKey="profit"
                   stroke="hsl(217, 91%, 60%)" // Green line
                   strokeWidth={2}
                   name="Revenue ($)"
@@ -199,7 +361,7 @@ export function ReportsCharts() {
                 <Line
                   yAxisId="right"
                   type="monotone"
-                  dataKey="diagnoses"
+                  dataKey="appointments"
                   stroke="hsl(330, 81%, 60%)" // Red line
                   strokeWidth={2}
                   name="Diagnoses"
@@ -211,8 +373,8 @@ export function ReportsCharts() {
       </Card>
 
       {/* Diagnosis Types Distribution */}
-      <Card className="w-full">
-        <CardHeader>
+      <Card className="w-full lg:col-span-2 border border-orange-400 ">
+        <CardHeader className="bg-gradient-to-r py-2 from-orange-300 to-amber-200">
           <CardTitle>Diagnosis Types</CardTitle>
           <CardDescription>
             Distribution of diagnosis categories this month
@@ -224,7 +386,7 @@ export function ReportsCharts() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                 <Pie
-                  data={diagnosisTypeData}
+                  data={consultedData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -235,7 +397,7 @@ export function ReportsCharts() {
                   stroke="#fff"
                   strokeWidth={2}
                 >
-                  {diagnosisTypeData.map((entry, index) => (
+                  {consultedData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
@@ -257,7 +419,7 @@ export function ReportsCharts() {
                   : "grid-cols-3"
             }`}
           >
-            {diagnosisTypeData.map((entry, index) => (
+            {consultedData.map((entry, index) => (
               <div key={entry.type} className="flex items-center gap-2 text-sm">
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
@@ -273,10 +435,10 @@ export function ReportsCharts() {
       </Card>
 
       {/* Patient Satisfaction */}
-      <Card className="w-full">
-        <CardHeader>
+      <Card className="w-full lg:col-span-2 border border-cyan-600">
+        <CardHeader className="bg-gradient-to-r py-2 from-cyan-700 to-blue-300">
           <CardTitle>Patient Satisfaction</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-white">
             Weekly patient satisfaction ratings (out of 5)
           </CardDescription>
         </CardHeader>

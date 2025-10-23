@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, Shield, CreditCard, User } from "lucide-react";
 import GeneralSettings from "./general-setting";
@@ -20,23 +19,6 @@ export default function SettingPatient({
 }: {
   onNavigate?: (page: string) => void;
 }) {
-  const [activeTab, setActiveTab] = useState("general");
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "general":
-        return <GeneralSettings />;
-      case "notifications":
-        return <NotificationSettings />;
-      case "security":
-        return <SecuritySettings />;
-      case "billing":
-        return <BillingSettings />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="p-8">
       <div className="max-w-4xl mx-auto">
@@ -51,16 +33,16 @@ export default function SettingPatient({
         {/* Tabs */}
         <Tabs defaultValue="general" className="w-full space-y-6 ">
           <TabsList className="w-full grid grid-cols-4 gap-0 p-0 bg-gray-300 ">
-            <TabsTrigger value="general" className="flex-1 mx-10">
+            <TabsTrigger value="general" className="flex-1 ml-1">
               General
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex-1 mx-10">
+            <TabsTrigger value="notifications" className="flex-1 ">
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex-1 mx-10">
+            <TabsTrigger value="security" className="flex-1 ">
               Security
             </TabsTrigger>
-            <TabsTrigger value="billing" className="flex-1 mx-10">
+            <TabsTrigger value="billing" className="flex-1 mr-1">
               Billing
             </TabsTrigger>
           </TabsList>

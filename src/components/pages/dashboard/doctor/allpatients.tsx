@@ -27,6 +27,14 @@ import {
   HelpCircle,
   Activity,
   Shield,
+  Phone,
+  Transgender,
+  ScanEye,
+  Mail,
+  Cake,
+  MapPinHouse,
+  BookUser,
+  Droplet,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 interface VitalSign {
@@ -424,8 +432,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
   const [appointmentData, setAppointmentData] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
-  let doctor = useAppSelector((state) => state.auth.user);
 
+  let doctor = useAppSelector((state) => state.auth.user);
   //Group appointment by patientid
   const groupAppointmentsByPatientId = (responseData: DoctorDetails) => {
     if (!responseData.appointments || responseData.appointments.length === 0)
@@ -435,7 +443,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
     responseData.appointments.forEach((appointment: AppointmentData) => {
       const { patientId } = appointment;
-      //console.log("🧞‍♂️  appointment-group  --->", appointment);
 
       if (!groupedData[patientId]) {
         // Create new patient entry with first appointment
@@ -474,6 +481,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         // Add appointment to existing patient
         groupedData[patientId].appointments.push(appointment);
         groupedData[patientId].totalAppointments += 1;
+        groupedData[patientId].reasonForVisit.push({
+          appointment: appointment,
+          reason: appointment.reasonForVisit,
+          createdAt: appointment.createdAt,
+        });
 
         // Update latest appointment based on createdAt date
         if (
@@ -788,7 +800,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     // Safely extract prescriptions
     return selectedPatient?.appointments.map((appointments) => {
       const prescription = appointments.prescription;
-      console.log("🧞‍♂️  prescription --->", prescription);
+      console.log("🧞‍♂️  prescription --->", selectedPatient);
 
       const document = Array.isArray(appointments.document)
         ? appointments.document
@@ -825,30 +837,14 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     });
   }, [selectedPatient]);
 
-  // useEffect(() => {
-  //   let doctorId = doctor?._id;
-  //   const fetchData = async () => {
-  //     let response = await fetch("/api/doctor/alldocumentofuser", {
-  //       method: "POST",
-  //       body: JSON.stringify({
-  //         doctorId,
-  //         patientId: selectedPatient?.patientInfo?.patientId,
-  //       }),
-  //     });
-  //     let result = await response.json();
-  //     console.log("🧞‍♂️  result --->", result);
-  //   };
-  //   fetchData;
-  // }, [activeTab === "documents" && selectedPatient]);
-
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-white overflow-hidden">
       {/* Left Sidebar - Fixed */}
-      <aside className="w-min-44 border-r  bg-white overflow-y-auto">
+      <aside className="w-min-44 border-r bg-white ">
         {/* Patient List */}
         {showPatientList && (
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
+          <div className="p-2 overflow-y-auto">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-blue-500">
                 Patient Lists ({Object.entries(patientData).length})
               </h3>
@@ -860,7 +856,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {Object.entries(patientData).map(([id, patient]) => (
                 <div
                   key={id}
-                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                  className={`flex items-center gap-3 px-3 py-1 rounded-lg cursor-pointer transition-colors ${
                     selectedPatient?.id === id
                       ? "bg-blue-100 border border-blue-300"
                       : "hover:bg-gray-100"
@@ -892,16 +888,16 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between pt-6 pl-6 pr-6 pb-3 border-b border-gray-100 bg-white">
+        <header className="flex items-center justify-between pt-3 pl-3 pr-6 pb-3 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-4">
-            <Avatar className="w-12 h-12 ring-4 ring-blue-200">
+            <Avatar className="w-10 h-10 ring-4 ring-blue-200">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>
                 {getPatientInitials(selectedPatient?.patientInfo?.patientName)}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900">
                 {selectedPatient?.patientInfo?.patientName}
               </h2>
               <p className="text-sm text-gray-500">
@@ -916,7 +912,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         </header>
 
         {/* Tabs */}
-        <div className="grid grid-cols-4 md:gap-10 px-6 py-3 border-b border-gray-400 bg-white">
+        <div className="grid grid-cols-4 md:gap-10 px-6 py-1 border-b border-gray-400 bg-white">
           <button
             className={`pb-2 border-b-4 transition-colors font-semibold ${
               activeTab === "overview"
@@ -938,7 +934,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             Medical History
           </button>
           <button
-            className={`pb-2 border-b-4 font-semibold transition-colors ${
+            className={` border-b-4 font-semibold transition-colors ${
               activeTab === "appointments"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -965,11 +961,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             {/* Scrollable Content */}
             <main className="flex-1 w-full overflow-y-auto ">
               {activeTab === "overview" && (
-                <div className="py-6">
+                <div className="py-3">
                   {/* Personal Information */}
-                  <div className="mb-6 px-1">
+                  <div className="mb-4 px-1">
                     <Card className="border border-gray-400">
-                      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200/60">
+                      <CardHeader className="bg-gradient-to-r py-2 from-blue-100 to-indigo-100 border-b border-gray-200/60">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <User className="h-5 w-5 text-blue-600" />
                           Personal Information
@@ -978,13 +974,22 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                           <div>
-                            <p className="text-sm text-gray-500">Full Name</p>
+                            <div className="flex flex-row gap-1">
+                              <User className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">Full Name</p>
+                            </div>
+
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientName}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">Patient ID</p>
+                            <div className="flex flex-row gap-1">
+                              <BookUser className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Patient ID
+                              </p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient.id.slice(
                                 selectedPatient.id.length - 10,
@@ -993,9 +998,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">
-                              Phone Number
-                            </p>
+                            <div className="flex flex-row gap-1">
+                              <Phone className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Phone Number
+                              </p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientPhone}
                             </p>
@@ -1003,21 +1011,30 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                         </div>
                         <div className="grid grid-cols-3 gap-4">
                           <div>
-                            <p className="text-sm text-gray-500">Gender</p>
+                            <div className="flex flex-row gap-1">
+                              <Transgender className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">Gender</p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientGender}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">Age</p>
+                            <div className="flex flex-row gap-1">
+                              <ScanEye className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">Age</p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientAge} years
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">
-                              Email Address
-                            </p>
+                            <div className="flex flex-row gap-1">
+                              <Mail className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Email Address
+                              </p>
+                            </div>
                             <p className="font-medium text-blue-600">
                               {selectedPatient?.patientInfo?.patientEmail}
                             </p>
@@ -1025,9 +1042,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                         </div>
                         <div className="grid grid-cols-3 gap-4">
                           <div>
-                            <p className="text-sm text-gray-500">
-                              Date of Birth
-                            </p>
+                            <div className="flex flex-row gap-1">
+                              <Cake className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Date of Birth
+                              </p>
+                            </div>
                             <p className="font-medium">
                               {new Date(
                                 selectedPatient?.patientInfo?.patientBithofday
@@ -1035,13 +1055,23 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">Blood Type</p>
-                            <p className="font-medium">O+</p>
+                            <div className="flex flex-row gap-1">
+                              <Droplet className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Blood Type
+                              </p>
+                            </div>
+                            <p className="font-medium">
+                              {selectedPatient?.patientInfo?.patientBloodgroup}
+                            </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">
-                              Home Address
-                            </p>
+                            <div className="flex flex-row gap-1">
+                              <MapPinHouse className="h-4 w-4 text-gray-600" />
+                              <p className="text-sm text-gray-500">
+                                Home Address
+                              </p>
+                            </div>
                             <p className="font-medium">
                               {selectedPatient?.patientInfo?.patientAddress}
                             </p>
@@ -1052,22 +1082,22 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </div>
 
                   {/* Medical Summary and Active Conditions */}
-                  <div className="mb-6 px-1">
+                  <div className="mb-4 px-1">
                     <Card className="border border-gray-400">
-                      <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-200/60">
+                      <CardHeader className="bg-gradient-to-r py-2 from-purple-100 to-pink-100 border-b border-gray-200/60">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <Activity className="h-5 w-5 text-purple-600" />
                           Previous Conditions
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                           {selectedPatient?.reasonForVisit.map(
                             (values, index) => (
                               <div
                                 key={index}
                                 className="flex items-center justify-between p-4 
-                                bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg"
+                                bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-l-4 border-pink-300"
                               >
                                 <div className="flex items-center gap-3">
                                   {getStatusIcon(values?.reason)}
@@ -1097,21 +1127,21 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </div>
 
                   {/* Upcoming Appointments */}
-                  <Card className="mb-6 mx-1 border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50 border-b border-gray-200/60">
+                  <Card className="mb-4 mx-1 border-gray-400">
+                    <CardHeader className="bg-gradient-to-r py-2 from-yellow-100 to-orange-100 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-yellow-600" />
                         Upcoming Appointments
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
+                      <div className="space-y-2">
                         {/* Check if patient has upcoming appointments */}
                         {(selectedPatient?.upcomingAppointments).length > 0 ? (
                           selectedPatient?.upcomingAppointments.map(
                             (value, index) => (
-                              <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-300">
-                                <div className="p-2 bg-yellow-100 rounded-lg">
+                              <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border border-l-4 border-yellow-300">
+                                <div className="p-2 bg-yellow-200 rounded-lg">
                                   <Calendar className="h-5 w-5 text-yellow-600" />
                                 </div>
                                 <div className="flex-1">
@@ -1119,7 +1149,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     <h3 className="font-semibold">
                                       {value?.consultedType}
                                     </h3>
-                                    <Badge className="bg-yellow-100 text-yellow-800">
+                                    <Badge className="bg-yellow-200 text-yellow-800">
                                       Confirmed
                                     </Badge>
                                   </div>
@@ -1144,14 +1174,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="text-xs bg-yellow-300 hover:bg-yellow-500"
-                                  >
-                                    Reschedule
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-xs bg-transparent text-red-600 hover:text-red-700"
+                                    className="text-xs bg-transparent text-red-600 hover:bg-yellow-300 hover:text-red-600"
                                     onClick={() =>
                                       handleCancelAppointment(value)
                                     }
@@ -1180,14 +1203,14 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                   {/* Recent Activity */}
                   <Card className="mx-1 border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200/60">
+                    <CardHeader className="py-2 bg-gradient-to-r  from-green-100 to-emerald-100 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Clock className="h-5 w-5 text-green-600" />
                         Last Appointment
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
+                    <CardContent className="">
+                      <div className="space-y-2 border border-l-4 border-green-500 rounded-lg">
                         {selectedPatient?.latestAppointment ? (
                           <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
                             <div className="p-2 bg-green-100 rounded-lg">
@@ -1197,18 +1220,21 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                               <p className="font-medium">
                                 {
                                   selectedPatient?.latestAppointment
-                                    ?.reasonForVisit
+                                    ?.consultedType
                                 }
                               </p>
                               <p className="text-sm text-gray-500">
-                                Blood work - All values within normal range
+                                {
+                                  selectedPatient?.latestAppointment
+                                    ?.reasonForVisit
+                                }
                               </p>
                             </div>
-                            <p className="text-sm text-gray-500">
+                            <Badge className="text-sm text-gray-900 bg-green-600">
                               {new Date(
                                 selectedPatient?.latestAppointment?.appointmentDate
                               ).toLocaleDateString()}
-                            </p>
+                            </Badge>
                           </div>
                         ) : (
                           <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
@@ -1231,81 +1257,120 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "history" && (
                 <div className="space-y-6 my-4 px-1">
                   <Card className="border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200/60">
-                      <CardTitle className="text-xl font-bold text-gray-900">
+                    <CardHeader className="bg-gradient-to-r from-indigo-100 to-purple-100 border-b border-gray-200/60">
+                      <CardTitle className="text-xl py-2 font-bold text-gray-900">
                         Medical History - All Conditions (Severity: High to Low)
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         {selectedPatient?.reasonForVisit.map(
-                          (disease, index) => (
-                            <div
-                              key={index}
-                              className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50"
-                            >
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                  {getStatusIcon(disease.reason)}
-                                  <h3 className="font-semibold text-lg">
-                                    {disease.reason}
-                                  </h3>
+                          (disease, index) =>
+                            disease?.appointment?.prescription?.medication
+                              ?.length > 0 && (
+                              <div
+                                key={index}
+                                className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-3">
+                                    {getStatusIcon(disease.reason)}
+                                    <h3 className="font-semibold text-lg">
+                                      {disease.reason}
+                                    </h3>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge
+                                      className={getSeverityColor(
+                                        disease.reason
+                                      )}
+                                    >
+                                      {getSeverityLevel(disease.reason)}{" "}
+                                      Severity
+                                    </Badge>
+                                    <Badge
+                                      variant={(() => {
+                                        let followupdate =
+                                          disease?.appointment?.prescription
+                                            ?.medication.length > 0
+                                            ? disease?.appointment?.prescription
+                                                ?.followUpDate
+                                            : disease?.appointment
+                                                ?.appointmentDate;
+                                        const daysDiff = Math.ceil(
+                                          (new Date(
+                                            followupdate as string
+                                          ).getTime() -
+                                            new Date().getTime()) /
+                                            (24 * 60 * 60 * 1000)
+                                        );
+                                        return daysDiff >= 0
+                                          ? "destructive"
+                                          : "default";
+                                      })()}
+                                    >
+                                      {(() => {
+                                        let followupdate =
+                                          disease?.appointment?.prescription
+                                            ?.medication.length > 0
+                                            ? disease?.appointment?.prescription
+                                                ?.followUpDate
+                                            : disease?.appointment
+                                                ?.appointmentDate;
+                                        const daysDiff = Math.ceil(
+                                          (new Date(
+                                            followupdate as string
+                                          ).getTime() -
+                                            new Date().getTime()) /
+                                            (24 * 60 * 60 * 1000)
+                                        );
+                                        return daysDiff >= 0
+                                          ? "Active"
+                                          : "Completed";
+                                      })()}
+                                    </Badge>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge
-                                    className={getSeverityColor(disease.reason)}
-                                  >
-                                    {getSeverityLevel(disease.reason)} Severity
-                                  </Badge>
-                                  <Badge
-                                    variant={
-                                      new Date(
-                                        disease.appointment.prescription.followUpDate
-                                      ).toLocaleDateString() >=
-                                      new Date().toLocaleDateString()
-                                        ? "destructive"
-                                        : "secondary"
-                                    }
-                                  >
-                                    {new Date(
-                                      disease.appointment.prescription.followUpDate
-                                    ).toLocaleDateString() >=
-                                    new Date().toLocaleDateString()
-                                      ? "Active"
-                                      : "Completed"}
-                                  </Badge>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-gray-500">
+                                      Diagnosed Date
+                                    </p>
+                                    <p className="font-medium">
+                                      {new Date(
+                                        disease.appointment.prescription.createdAt
+                                      ).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                  <div className="pl-10">
+                                    <p className="text-gray-500">
+                                      Current Status
+                                    </p>
+                                    <p className="font-medium text-green-600">
+                                      {(() => {
+                                        let followupdate =
+                                          disease?.appointment?.prescription
+                                            ?.medication.length > 0
+                                            ? disease?.appointment?.prescription
+                                                ?.followUpDate
+                                            : disease?.appointment
+                                                ?.appointmentDate;
+                                        const daysDiff = Math.ceil(
+                                          (new Date(
+                                            followupdate as string
+                                          ).getTime() -
+                                            new Date().getTime()) /
+                                            (24 * 60 * 60 * 1000)
+                                        );
+                                        return daysDiff >= 0
+                                          ? "Active"
+                                          : "Completed";
+                                      })()}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                  <p className="text-gray-500">
-                                    Diagnosed Date
-                                  </p>
-                                  <p className="font-medium">
-                                    {new Date(
-                                      disease.appointment.prescription.createdAt
-                                    ).toLocaleDateString()}
-                                  </p>
-                                </div>
-                                <div className="pl-10">
-                                  <p className="text-gray-500">
-                                    Current Status
-                                  </p>
-                                  <p className="font-medium text-green-600">
-                                    {Math.ceil(
-                                      (new Date(
-                                        disease.appointment.prescription.followUpDate
-                                      ) -
-                                        new Date()) /
-                                        (24 * 60 * 60 * 1000)
-                                    ) > 0
-                                      ? "Active"
-                                      : "Completed"}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          )
+                            )
                         )}
                       </div>
                     </CardContent>
@@ -1316,7 +1381,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "appointments" && (
                 <div className="space-y-6 my-2 px-1">
                   <Card className="border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-gray-200/60">
+                    <CardHeader className="bg-gradient-to-r py-2 from-blue-100 to-cyan-100 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-blue-600" />
                         Previous Appointments History
@@ -1347,9 +1412,16 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   </div>
                                   <Badge
                                     variant="secondary"
-                                    className="bg-green-100 text-green-800"
+                                    className="bg-green-200 text-green-800"
                                   >
-                                    {appointment?.status}
+                                    {appointment?.status &&
+                                      (appointment.status.charAt(0) ===
+                                      appointment.status.charAt(0).toUpperCase()
+                                        ? appointment.status
+                                        : appointment.status
+                                            .charAt(0)
+                                            .toUpperCase() +
+                                          appointment.status.slice(1))}
                                   </Badge>
                                 </div>
                                 <div className="grid grid-cols-3 gap-4 text-sm">
@@ -1368,7 +1440,16 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   <div className="pl-11">
                                     <p className="text-gray-500">Status</p>
                                     <p className="font-medium text-green-600">
-                                      {appointment.status}
+                                      {appointment?.status &&
+                                        (appointment.status.charAt(0) ===
+                                        appointment.status
+                                          .charAt(0)
+                                          .toUpperCase()
+                                          ? appointment.status
+                                          : appointment.status
+                                              .charAt(0)
+                                              .toUpperCase() +
+                                            appointment.status.slice(1))}
                                     </p>
                                   </div>
                                 </div>
@@ -1396,7 +1477,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {activeTab === "documents" && (
                 <div className="space-y-6 my-2 px-1">
                   <Card className="border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-gray-200/60">
+                    <CardHeader className="bg-gradient-to-r py-2 from-violet-100 to-purple-100 border-b border-gray-200/60">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <FileText className="h-5 w-5 text-violet-600" />

@@ -6,9 +6,12 @@ import {
   User,
   Settings,
   LogOut,
+  X,
+  Menu,
 } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { logout } from "@/redux/slices/authSlice";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +20,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { useNavigate } from "react-router-dom";
 
 export default function Navigation() {
+  // Add state for mobile menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const token = useAppSelector((state) => state.auth.token);
   const authuser = JSON.parse(localStorage.getItem("authUser")) || "";
   const navigate = useNavigate();
@@ -32,10 +36,21 @@ export default function Navigation() {
     dispatch(logout());
     navigate("/");
   };
+
+  // Toggle mobile menu
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // Close mobile menu when a link is clicked
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <nav className="bg-white shadow-sm border-b print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14 lg:h-16">
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center pl-4">
@@ -95,22 +110,20 @@ export default function Navigation() {
           </div>
 
           {/* Mobile menu button */}
+          {/* Mobile menu button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleMobileMenu}
+              aria-label="Toggle menu"
+            >
               <span className="sr-only">Open main menu</span>
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
 
@@ -121,8 +134,8 @@ export default function Navigation() {
                 {/* Active Status Indicator */}
                 <div className="flex items-center space-x-2">
                   <div className="relative">
-                    <div className="w-3 h-3 bg-[hsl(201,96%,32%)] rounded-full animate-pulse"></div>
-                    <div className="absolute inset-0 w-3 h-3 bg-[hsl(201,96%,32%)] rounded-full animate-ping opacity-75"></div>
+                    <div className="w-3 h-3 bg-green-600 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-0 w-3 h-3 bg-green-600 rounded-full animate-ping opacity-75"></div>
                   </div>
                   <Badge
                     variant="outline"
@@ -135,52 +148,61 @@ export default function Navigation() {
                 </div>
 
                 {/* User Profile Dropdown */}
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Avatar
                       className=" flex items-center justify-center 
-                    w-8 h-8 broder-1 rounded-full text-white bg-[hsl(201,96%,32%)] hover:bg-cyan-700 hover:shadow-md hover:text-black"
+                    w-8 h-8 broder- rounded-full text-white bg-[hsl(201,96%,32%)] hover:bg-cyan-700 hover:shadow-md hover:text-black"
                     >
                       <ChevronDown className="h-4 w-4" />
                     </Avatar>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuSeparator />
-                    {authuser.role !== "doctor" && (
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 border border-gray-700"
+                  >
+                    <DropdownMenuItem asChild>
                       <Link
-                        to="/profile"
+                        to={
+                          authuser.role === "doctor"
+                            ? "/profilefordoctor"
+                            : "/profile"
+                        }
                         className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
                       >
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
-                    )}
-                    {authuser.role === "doctor" && (
-                      <Link
-                        to="/profilefordoctor"
-                        className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
-                      >
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Link>
-                    )}
-                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
-                      <Settings className="mr-2 h-4 w-4 " />
-                      Settings
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+
+                    {/* Settings Link */}
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to={authuser.role === "doctor" ? "/doctor" : "/patient"}
+                        state={{
+                          file:
+                            authuser.role === "doctor" ? "setting" : "settings",
+                          id: 123,
+                        }}
+                        className="flex flex-row 
+                      items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
+                      >
+                        <Settings className="mr-2 h-4 w-4 " />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer text-red-600 hover:bg-red-100"
+                      className="cursor-pointer text-red-600"
                       onClick={handleLogout}
                     >
-                      <LogOut className="mr-2 h-4 w-4" />
+                      <LogOut className="mr-2 h-4 w-4 text-black " />
                       Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             ) : (
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="flex items-center gap-2">
                     Login
@@ -206,40 +228,43 @@ export default function Navigation() {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
-        <div className="md:hidden">
+        <div className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"}`}>
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200 mt-2">
             <Link
               to="/"
-              className="text-gray-900 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium  transition-colors duration-300"
+              onClick={closeMobileMenu}
+              className="text-gray-900 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
             >
               Home
             </Link>
             <Link
               to="/services"
+              onClick={closeMobileMenu}
               className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
             >
               Services
             </Link>
-            {authuser.role === "user" && (
+            {authuser.role !== "doctor" && (
               <Link
-                to="/how-it-works"
+                to="/patient"
+                onClick={closeMobileMenu}
                 className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
               >
-                How It Works
+                Dashboard
               </Link>
             )}
-
             {authuser.role === "doctor" && (
               <Link
-                to="/appoinments"
+                to="/doctor"
+                onClick={closeMobileMenu}
                 className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
               >
-                Appoinments
+                Dashboard
               </Link>
             )}
             <Link
               to="/about"
+              onClick={closeMobileMenu}
               className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
             >
               About

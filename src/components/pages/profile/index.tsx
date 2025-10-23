@@ -32,6 +32,8 @@ import {
   updateProfileFailure,
 } from "@/redux/slices/profileSlice";
 
+import { loginSuccess } from "@/redux/slices/authSlice";
+
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CalendarIcon } from "lucide-react";
@@ -61,6 +63,7 @@ interface PatientDataErrors {
   email?: string;
   weight?: string;
   height?: string;
+  dateOfBirth?: string;
 }
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -95,7 +98,7 @@ export default function PatientProfileForm() {
   const [isEditing, setIsEditing] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
-  console.log("🧞‍♂️user --->", user);
+  const id = user?._id || null;
   const navigate = useNavigate();
 
   // Dummy data representing an existing patient
@@ -115,40 +118,6 @@ export default function PatientProfileForm() {
 
   // Update the initial formData state to use dummy data:
   const initialFormData = dummyPatientData;
-  const getUserId = async (): Promise<string | null> => {
-    // First try to get from user object
-    if (user?._id) {
-      return user._id;
-    }
-
-    // Fallback to token verification
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No auth token found");
-      }
-      let response = await fetch("/api/getId/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token }),
-      });
-      let userid = await response.json();
-      console.log("🧞‍♂️userid --->", userid);
-      //
-      if (!userid) {
-        throw new Error("Invalid token or no user ID");
-      }
-
-      return userid.userId;
-    } catch (error) {
-      console.error("Failed to get user ID:", error);
-      return null;
-    }
-  };
-  let id = user?._id || null;
-  console.log("🧞‍♂️id --->", id);
   useEffect(() => {
     if (user) {
       setFormData((prev) => ({
@@ -158,8 +127,6 @@ export default function PatientProfileForm() {
       }));
     }
     const fetchData = async () => {
-      id = id || (await getUserId());
-
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -182,59 +149,6 @@ export default function PatientProfileForm() {
     fetchData();
   }, [user]);
 
-  // const validateForm = (): boolean => {
-  //   const newErrors: PatientDataErrors = {};
-
-  //   // Required field validations
-  //   if (!formData.name.trim()) {
-  //     newErrors.name = "Name is required";
-  //   }
-
-  //   if (!formData.address.trim()) {
-  //     newErrors.address = "Address is required";
-  //   }
-
-  //   if (!formData.contactNumber.trim()) {
-  //     newErrors.contactNumber = "Contact number is required";
-  //   } else {
-  //     const cleanedNumber = formData.contactNumber.replace(/[^\d+]/g, "");
-  //     if (!/^\+?\d{10,15}$/.test(cleanedNumber)) {
-  //       newErrors.contactNumber = "Please enter a valid contact number";
-  //     }
-  //   }
-
-  //   if (!formData.age) {
-  //     newErrors.age = "Age is required";
-  //   } else {
-  //     const ageNum = Number(formData.age);
-  //     if (isNaN(ageNum)) {
-  //       newErrors.age = "Age must be a number";
-  //     } else if (ageNum <= 0) {
-  //       newErrors.age = "Age must be greater than 0";
-  //     } else if (ageNum > 150) {
-  //       newErrors.age = "Age cannot be greater than 150";
-  //     }
-  //   }
-
-  //   // Optional field validations
-  //   if (
-  //     formData.weight &&
-  //     (isNaN(Number(formData.weight)) || Number(formData.weight) <= 0)
-  //   ) {
-  //     newErrors.weight = "Please enter a valid weight";
-  //   }
-
-  //   if (
-  //     formData.height &&
-  //     (isNaN(Number(formData.height)) || Number(formData.height) <= 0)
-  //   ) {
-  //     newErrors.height = "Please enter a valid height";
-  //   }
-
-  //   setErrors(newErrors);
-  //   return Object.keys(newErrors).length === 0;
-  // };
-
   const handleInputChange = (field: keyof PatientData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
@@ -242,16 +156,15 @@ export default function PatientProfileForm() {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
+
   const handleClose = () => {
     navigate(-1);
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setIsLoading(true);
-    id = user?._id || (await getUserId());
-    console.log("🧞‍♂️id --->", id);
-    console.log("formData=>", formData);
     try {
       dispatch(updateProfileStart());
       const response = await fetch("/api/createProfile", {
@@ -263,7 +176,6 @@ export default function PatientProfileForm() {
       });
 
       const result = await response.json();
-      console.log("🧞‍♂️result --->", result);
 
       if (!response.ok) {
         if (result.errors) {
@@ -279,18 +191,33 @@ export default function PatientProfileForm() {
         return;
       }
 
-      // Success
-      dispatch(updateProfileSuccess(user));
-      dispatch(setEditMode(false));
-      setIsShowingSavedData(true);
-      setFormData(result?.userdetails);
-      setSavedPatientId(result?.userdetails?.userId);
-      setIsEditing(false);
+      // Update Redux state with new profile data and handle success
+      const profileData = result?.userdetails;
+      if (profileData) {
+        dispatch(
+          updateProfileSuccess({
+            userData: result.user,
+            isNewProfile: true,
+            profileType: "user",
+          })
+        );
 
-      toast({
-        title: "Success!",
-        description: `Patient profile created successfully`,
-      });
+        // Update local state
+        setIsShowingSavedData(true);
+        setFormData(profileData);
+        setSavedPatientId(profileData.userId);
+        setIsEditing(false);
+
+        toast({
+          title: "Success!",
+          description: "Patient profile created successfully",
+        });
+
+        // Redirect to dashboard immediately since profile state is updated
+        navigate("/patient");
+      } else {
+        throw new Error("Profile data not received from server");
+      }
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -468,6 +395,11 @@ export default function PatientProfileForm() {
                 <Label htmlFor="dateOfBirth">
                   Date of Birth <span className="text-red-500">*</span>
                 </Label>
+                {errors.dateOfBirth && (
+                  <p className="text-sm text-red-500">
+                    {String(errors.dateOfBirth)}
+                  </p>
+                )}
                 {isEditing ? (
                   <Popover>
                     <PopoverTrigger asChild>
@@ -682,7 +614,9 @@ export default function PatientProfileForm() {
                   </p>
                 )}
                 {errors.dateOfBirth && (
-                  <p className="text-sm text-red-500">{errors.dateOfBirth}</p>
+                  <p className="text-sm text-red-500">
+                    {String(errors.dateOfBirth)}
+                  </p>
                 )}
               </div>
 

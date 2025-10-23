@@ -114,7 +114,7 @@ export function GeneralSettings() {
   };
 
   return (
-    <div className="space-y-6 ">
+    <div className="space-y-3 ">
       <Card className=" bg-green-50 border-green-200 ">
         <CardHeader>
           <CardTitle className="text-green-800 text-xl">
@@ -174,7 +174,7 @@ export function GeneralSettings() {
               value={formData.preferences.language}
               onValueChange={(value) => updatePreferences("language", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border border-gray-400">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -190,7 +190,7 @@ export function GeneralSettings() {
               value={formData.preferences.timezone}
               onValueChange={(value) => updatePreferences("timezone", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border border-gray-400">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

@@ -107,7 +107,7 @@ export function BillingSettings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <Card className="border border-gray-400">
         <CardHeader>
           <CardTitle className="text-xl font-semibold flex items-center mb-0">
@@ -118,8 +118,8 @@ export function BillingSettings() {
             Manage accepted payment methods for your practice
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-3">
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-[hsl(210,92%,45%)] text-md">
@@ -189,7 +189,7 @@ export function BillingSettings() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="space-y-0.5">
               <Label className="text-base font-medium">
                 Mobile Banking Payments
@@ -199,7 +199,7 @@ export function BillingSettings() {
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-[hsl(334,84%,48%)] text-md">
@@ -234,7 +234,7 @@ export function BillingSettings() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-[hsl(5,65%,49%)] text-md">
@@ -268,7 +268,7 @@ export function BillingSettings() {
                 />
               </div>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-[hsl(296,62%,36%)] text-md">

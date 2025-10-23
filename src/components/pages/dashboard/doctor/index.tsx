@@ -35,6 +35,7 @@ import Patients from "./allpatients";
 import Setting from "./setting_doctor/index";
 import Reports from "./reports/index";
 import { useAppSelector } from "@/redux/hooks";
+import { useLocation } from "react-router-dom";
 
 interface AppointmentData {
   doctorName: string;
@@ -378,18 +379,19 @@ const groupAppointmentsByDate = (
 
 export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+  const file = location.state?.file;
   const [genderOfPatient, setGenderOfPatient] =
     useState<GenderCount>(mockGenderCount);
   const [appointmentNumberinMonth, setAppointmentNumberinMonth] =
     useState<AppointmentCount>(mockAppointmentCount);
-  const [currentPage, setCurrentPage] = useState("dashboard");
+  const [currentPage, setCurrentPage] = useState(file || "dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [doctorData, setDoctorData] =
     useState<DoctorDetails>(mockDoctorDetails);
 
   let doctor = useAppSelector((state) => state.auth.user);
   const id = doctor?._id;
-  console.log("🧞‍♂️  id --->", id);
   // console.log("🧞‍♂️doctor --->", doctor);
   const datagender = [
     { name: "Male", value: genderOfPatient?.Male || 0, color: "#3b82f6" },
@@ -495,14 +497,24 @@ export default function DashboardPage() {
       Other: 0,
     };
 
-    appointments.forEach((appointment: AppointmentData) => {
-      let gender = appointment.patientGender;
-      if (gender === "Male") {
-        countgender.Male++;
-      } else if (gender === "Female") {
-        countgender.Female++;
-      } else {
-        countgender.Other++;
+    let uniquePatientId = new Set(
+      appointments?.map((appointments) => appointments.patientId)
+    );
+
+    uniquePatientId.forEach((patientId) => {
+      let patientAppointment = appointments.find(
+        (appointment) => appointment.patientId === patientId
+      );
+
+      if (patientAppointment) {
+        let gender = patientAppointment.patientGender;
+        if (gender === "Male") {
+          countgender.Male++;
+        } else if (gender === "Female") {
+          countgender.Female++;
+        } else {
+          countgender.Other++;
+        }
       }
     });
 
@@ -510,7 +522,7 @@ export default function DashboardPage() {
   };
 
   //Count the number of appointment
-  const handleAppointmentCount = (appointments: AppointmentData[]) => {
+  const handleAppointmentCount = async (appointments: AppointmentData[]) => {
     if (!appointments) {
       throw new Error("No appointments are available now");
     }
@@ -559,14 +571,16 @@ export default function DashboardPage() {
       }
     };
     fetchData();
+  }, [doctor]);
+
+  useEffect(() => {
     handleGenderCountofPatient(doctorData.appointments);
     handleAppointmentCount(doctorData.appointments);
-  }, [doctor]);
+  }, [doctorData]);
 
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
   }, [categorizedAppointments.today]);
-  console.log("🧞‍♂️todayGrouped --->", todayGrouped);
 
   const checktimelimit = ([date, time]: [string, string]) => {
     const currentDate = new Date();
@@ -578,15 +592,15 @@ export default function DashboardPage() {
     }
 
     // Parse time range
-    const timeRange = time.split(" - "); // ["5:00 PM", "5:30 PM"]
-    const startTime = timeRange[0].trim();
-    const endTime = timeRange[1].trim();
+    const timeRange = time?.split(" - "); // ["5:00 PM", "5:30 PM"]
+    const startTime = timeRange[0]?.trim();
+    const endTime = timeRange[1]?.trim();
 
     // Convert times to Date objects for today
     const parseTimeToDate = (timeStr: any) => {
       const today = new Date();
-      const [time, period] = timeStr.split(" ");
-      const [hours, minutes] = time.split(":").map(Number);
+      const [time, period] = timeStr?.split(" ");
+      const [hours, minutes] = time?.split(":")?.map(Number);
 
       let hour24 = hours;
       if (period === "PM" && hours !== 12) hour24 += 12;
@@ -596,7 +610,9 @@ export default function DashboardPage() {
       return today;
     };
 
+    if (!startTime) return;
     const startDateTime = parseTimeToDate(startTime);
+    if (!endTime) return;
     const endDateTime = parseTimeToDate(endTime);
 
     // Check if current time is within the slot
@@ -633,7 +649,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile menu button */}
       <Button
         variant="ghost"
         size="icon"
@@ -647,9 +664,9 @@ export default function DashboardPage() {
       <div
         className={`fixed inset-y-0 left-0 z-40 bg-white shadow-lg transform transition-all duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } ${collapsed ? "md:w-16" : "md:w-64"} w-64`}
+        } ${collapsed ? "md:w-16" : "md:w-64"} w-full`}
       >
-        <div className="flex flex-col pt-16 h-full">
+        <div className="flex flex-col  pt-16 h-full">
           {/* Navigation */}
           <nav className="flex-1 p-4 overflow-y-auto">
             <ul className="space-y-2">
@@ -666,7 +683,10 @@ export default function DashboardPage() {
                         ? "bg-blue-600 text-white hover:bg-blue-700"
                         : "text-gray-700 hover:bg-gray-100"
                     }`}
-                    onClick={() => setCurrentPage(item.label.toLowerCase())}
+                    onClick={() => {
+                      setCurrentPage(item.label.toLowerCase());
+                      setSidebarOpen(false);
+                    }}
                   >
                     <item.icon
                       className={`h-5 w-5 ${collapsed ? "" : "mr-3"}`}
@@ -678,46 +698,48 @@ export default function DashboardPage() {
             </ul>
           </nav>
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="px-4 pb-2 pt-2 border-t border-gray-200">
             {!collapsed ? (
-              <div className="flex items-center space-x-3 mb-4">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                  <AvatarFallback>
-                    {getDoctorInitials(doctorData?.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {doctorData?.name}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {doctorData?.email || ""}
-                  </p>
+              <div className="mb-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                    <AvatarFallback className="bg-blue-100 text-blue-600">
+                      {getDoctorInitials(doctorData?.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {doctorData?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {doctorData?.email}
+                    </p>
+                  </div>
                 </div>
               </div>
             ) : (
               <div className="flex justify-center mb-4">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                  <AvatarFallback className="text-xs">
-                    {getDoctorInitials(doctorData?.name)}
-                  </AvatarFallback>
+                  <AvatarFallback className="text-xs">OJ</AvatarFallback>
                 </Avatar>
               </div>
             )}
+
             <Button
               variant="ghost"
-              className={`w-full justify-start text-gray-700 hover:bg-gray-100 ${collapsed ? "px-2" : "px-4"}`}
+              className={`w-full justify-start text-gray-700 hover:bg-gray-100 mb-2 ${collapsed ? "px-2" : "px-4"}`}
             >
               <LogOut className={`h-5 w-5 ${collapsed ? "" : "mr-3"}`} />
               {!collapsed && <span>Logout</span>}
             </Button>
+
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setCollapsed(!collapsed)}
-              className="w-full mt-2"
+              className="w-full hidden text-3xl pb-1 lg:flex border border-gray-700 hover:bg-blue-600 hover:text-white"
             >
               {collapsed ? "→" : "←"}
             </Button>
@@ -734,22 +756,22 @@ export default function DashboardPage() {
       )}
 
       <div
-        className={`container transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
+        className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
         {/* Main Content */}
         {currentPage === "dashboard" && (
-          <div className="flex-1 flex items-center mx-1 flex-col ">
-            <main className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 flex items-center mx-10 pt-5 flex-col ">
+            <main className="flex-1 overflow-y-auto px-6 pb-6 pt-2 w-full">
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
                 {/* Stats Cards */}
-                <div className="xl:col-span-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="xl:col-span-4 ">
+                  <div className="grid grid-cols-1 md:grid-cols-4  gap-4 mb-3">
                     {stats.map((stat, index) => (
                       <Card
                         key={index}
-                        className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
+                        className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
                       >
-                        <CardContent className="p-4">
+                        <CardContent className="px-4">
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm text-gray-600 mb-1">
@@ -763,9 +785,9 @@ export default function DashboardPage() {
                       </Card>
                     ))}
                   </div>
-                  <div className="pb-6">
-                    <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
-                      <CardContent className="p-6 text-center">
+                  <div className="pb-3">
+                    <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
+                      <CardContent className="px-6  text-center">
                         <Avatar className="h-20 w-20 mx-auto mb-4">
                           <AvatarImage src="/placeholder.svg?height=80&width=80" />
                           <AvatarFallback className="text-lg">
@@ -807,8 +829,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Charts */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-3">
+                    <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                       <CardHeader>
                         <div className="flex items-center justify-between gap-36">
                           <CardTitle>Appointments</CardTitle>
@@ -888,7 +910,7 @@ export default function DashboardPage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
+                    <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                       <CardHeader>
                         <CardTitle>Gender Distribution</CardTitle>
                       </CardHeader>
@@ -954,7 +976,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Today's Appointments */}
-                  <Card className="border-2 border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
+                  <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
                     <CardHeader>
                       <CardTitle>{"Today's Appointments"}</CardTitle>
                     </CardHeader>

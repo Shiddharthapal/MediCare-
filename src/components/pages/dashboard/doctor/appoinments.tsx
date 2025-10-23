@@ -259,7 +259,7 @@ const groupAppointmentsByDate = (
   }, {});
 };
 interface PatientsPageProps {
-  onNavigate: (page: string) => void;
+  onNavigate?: (page: string) => void;
 }
 
 export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
@@ -524,7 +524,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     isPrevious?: boolean;
   }) => (
     <Card className="mb-4  border border-gray-600 transition-all  hover:shadow-lg w-full max-w-full">
-      <CardContent className="p-4">
+      <CardContent className="px-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-start gap-4 flex-1">
             <Avatar className="w-12 h-12 ring-1">
@@ -659,9 +659,9 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   );
 
   return (
-    <div className="flex-1 flex flex-col mx-auto w-full max-w-7xl overflow-hidden min-h-screen bg-white">
+    <div className="flex-1 flex flex-col mx-auto px-10 pb-5 w-full max-w-7xl overflow-hidden min-h-screen bg-white">
       {/* Header */}
-      <header className="flex items-center justify-between p-6 bg-white border-b">
+      <header className="flex items-center justify-between px-6 pb-3 pt-4 bg-white ">
         <div className="flex flex-col md:flex-row justify-between gap-4 md:gap-8 w-full">
           <div className="relative border border-gray-400 rounded-md transition-all hover:border-primary/50 hover:shadow-lg flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-500 " />
@@ -687,11 +687,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       </header>
 
       {/* Main Content - Scrollable */}
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="flex-1 overflow-y-auto px-6 py-1">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
-            <CardContent className="p-4">
+            <CardContent className="px-4 ">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">
@@ -719,7 +719,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             </CardContent>
           </Card> */}
           <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
-            <CardContent className="p-4">
+            <CardContent className="px-4 ">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Upcoming (7 days)</p>
@@ -732,7 +732,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             </CardContent>
           </Card>
           <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
-            <CardContent className="p-4">
+            <CardContent className="px-4 ">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Completed</p>
@@ -763,10 +763,10 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           </TabsList>
 
           {/* Today's Appointments */}
-          <TabsContent value="today" className="mt-6">
+          <TabsContent value="today" className="mt-1">
             <Card className="border border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="py-2 bg-gradient-to-r  from-green-100 to-emerald-100">
+                <CardTitle className="flex items-center text-2xl gap-2 font-semibold">
                   <Calendar className="h-5 w-5 text-[hsl(273,100%,60%)]" />
                   {`Today's Appointments - ${new Date().toISOString().split("T")}`}
                 </CardTitle>
@@ -1043,10 +1043,10 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           {/* </TabsContent> */}
 
           {/* Upcoming Appointments */}
-          <TabsContent value="upcoming" className="mt-6">
+          <TabsContent value="upcoming" className="mt-1">
             <div className="space-y-3">
               <Card className="border border-gray-400">
-                <CardHeader className="flex items-center gap-2 text-2xl pb-2">
+                <CardHeader className="flex items-center gap-2 text-2xl  font-semibold bg-gradient-to-r py-2 from-yellow-100 to-orange-100 pb-2">
                   <Clock className="h-6 w-6 text-blue-500" />
                   Upcoming Appointments
                 </CardHeader>
@@ -1134,9 +1134,9 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           </TabsContent>
 
           {/* Previous Appointments */}
-          <TabsContent value="previous" className="mt-6">
+          <TabsContent value="previous" className="mt-1">
             <Card className="border border-gray-400">
-              <CardHeader>
+              <CardHeader className="bg-gradient-to-r py-2 from-purple-100 to-pink-100">
                 <CardTitle className="flex items-center gap-2 text-2xl">
                   <CheckCircle className="h-6 w-6 text-green-600" />
                   Previous Appointments

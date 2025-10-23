@@ -37,8 +37,11 @@ export const POST: APIRoute = async ({ request }) => {
       // Create new user
       const users = new User({
         email: email,
+        role: "user",
         password,
       });
+      users.email = email;
+      users.password = password;
 
       await users.save();
 
@@ -49,6 +52,19 @@ export const POST: APIRoute = async ({ request }) => {
           import.meta.env.PUBLIC_JWT_SECRET ||
           "your-secret-key",
         { expiresIn: "24h" }
+      );
+      let _id = users._id;
+      return new Response(
+        JSON.stringify({
+          _id,
+          user: "user",
+          token,
+          message: "Registration successful",
+        }),
+        {
+          status: 200,
+          headers,
+        }
       );
     } else {
       const existingDoctor = await Doctor.findOne({
@@ -70,6 +86,7 @@ export const POST: APIRoute = async ({ request }) => {
       //create new user
       const doctor = new Doctor({
         email: email,
+        user: "doctor",
         password,
         registrationNo,
       });
@@ -82,17 +99,20 @@ export const POST: APIRoute = async ({ request }) => {
           "your-secret-key",
         { expiresIn: "24h" }
       );
+      let _id = doctor._id;
+      return new Response(
+        JSON.stringify({
+          _id,
+          user: "doctor",
+          token,
+          message: "Registration successful",
+        }),
+        {
+          status: 200,
+          headers,
+        }
+      );
     }
-    return new Response(
-      JSON.stringify({
-        token,
-        message: "Registration successful",
-      }),
-      {
-        status: 200,
-        headers,
-      }
-    );
   } catch (error: any) {
     console.error("Registration error:", error);
     let errorMessage = "Internal server error";
