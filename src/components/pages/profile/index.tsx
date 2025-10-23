@@ -63,6 +63,7 @@ interface PatientDataErrors {
   email?: string;
   weight?: string;
   height?: string;
+  dateOfBirth?: string;
 }
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -190,22 +191,33 @@ export default function PatientProfileForm() {
         return;
       }
 
-      dispatch(
-        updateProfileSuccess({
-          userData: result.user,
-          isNewProfile: true,
-        })
-      );
-      dispatch(setEditMode(false));
-      setIsShowingSavedData(true);
-      setFormData(result?.userdetails);
-      setSavedPatientId(result?.userdetails?.userId);
-      setIsEditing(false);
+      // Update Redux state with new profile data and handle success
+      const profileData = result?.userdetails;
+      if (profileData) {
+        dispatch(
+          updateProfileSuccess({
+            userData: result.user,
+            isNewProfile: true,
+            profileType: "user",
+          })
+        );
 
-      toast({
-        title: "Success!",
-        description: `Patient profile created successfully`,
-      });
+        // Update local state
+        setIsShowingSavedData(true);
+        setFormData(profileData);
+        setSavedPatientId(profileData.userId);
+        setIsEditing(false);
+
+        toast({
+          title: "Success!",
+          description: "Patient profile created successfully",
+        });
+
+        // Redirect to dashboard immediately since profile state is updated
+        navigate("/patient");
+      } else {
+        throw new Error("Profile data not received from server");
+      }
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -383,6 +395,11 @@ export default function PatientProfileForm() {
                 <Label htmlFor="dateOfBirth">
                   Date of Birth <span className="text-red-500">*</span>
                 </Label>
+                {errors.dateOfBirth && (
+                  <p className="text-sm text-red-500">
+                    {String(errors.dateOfBirth)}
+                  </p>
+                )}
                 {isEditing ? (
                   <Popover>
                     <PopoverTrigger asChild>
@@ -597,7 +614,9 @@ export default function PatientProfileForm() {
                   </p>
                 )}
                 {errors.dateOfBirth && (
-                  <p className="text-sm text-red-500">{errors.dateOfBirth}</p>
+                  <p className="text-sm text-red-500">
+                    {String(errors.dateOfBirth)}
+                  </p>
                 )}
               </div>
 

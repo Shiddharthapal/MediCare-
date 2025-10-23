@@ -5,8 +5,12 @@ import type { UserDetails } from "@/types/userDetails";
 interface ProfileState {
   isEditing: boolean;
   isSaving: boolean;
+  isVerifying: boolean;
   error: string | null;
   lastUpdated: string | null;
+  lastVerified: string | null;
+  hasProfile: boolean;
+  profileType: "user" | "doctor" | null;
   profileCreated: boolean;
   successMessage: string | null;
 }
@@ -14,8 +18,12 @@ interface ProfileState {
 const initialState: ProfileState = {
   isEditing: false,
   isSaving: false,
+  isVerifying: false,
   error: null,
   lastUpdated: null,
+  lastVerified: null,
+  hasProfile: false,
+  profileType: null,
   profileCreated: false,
   successMessage: null,
 };
@@ -35,17 +43,20 @@ export const profileSlice = createSlice({
       action: PayloadAction<{
         userData: Partial<UserDetails>;
         isNewProfile?: boolean;
+        profileType?: "user" | "doctor";
       }>
     ) => {
-      const { isNewProfile } = action.payload;
+      const { isNewProfile, profileType } = action.payload;
 
       state.isSaving = false;
       state.error = null;
       state.lastUpdated = new Date().toISOString();
 
-      // Set appropriate success message
+      // Update profile status
       if (isNewProfile) {
         state.profileCreated = true;
+        state.hasProfile = true;
+        state.profileType = profileType || null;
         state.successMessage = "Profile created successfully!";
       } else {
         state.successMessage = "Profile updated successfully!";
@@ -75,6 +86,32 @@ export const profileSlice = createSlice({
     },
 
     resetProfileState: () => initialState,
+
+    verifyProfileStart: (state) => {
+      state.isVerifying = true;
+      state.error = null;
+    },
+
+    verifyProfileSuccess: (
+      state,
+      action: PayloadAction<{
+        hasProfile: boolean;
+        profileType: "user" | "doctor" | null;
+        profileData?: any;
+      }>
+    ) => {
+      state.isVerifying = false;
+      state.hasProfile = action.payload.hasProfile;
+      state.profileType = action.payload.profileType;
+      state.lastVerified = new Date().toISOString();
+      state.profileCreated = action.payload.hasProfile;
+      state.error = null;
+    },
+
+    verifyProfileFailure: (state, action: PayloadAction<string>) => {
+      state.isVerifying = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -85,6 +122,9 @@ export const {
   setEditMode,
   clearMessages,
   resetProfileState,
+  verifyProfileStart,
+  verifyProfileSuccess,
+  verifyProfileFailure,
 } = profileSlice.actions;
 
 export default profileSlice.reducer;

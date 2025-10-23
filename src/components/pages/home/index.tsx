@@ -46,7 +46,8 @@ export default function MedicationLandingPage() {
   console.log("🧞‍♂️  doctor --->", doctor);
   const role = doctor?.role || null;
   console.log("🧞‍♂️  role --->", role);
-  console.log("🧞‍♂️  profile --->", doctor?.acount);
+  let demo = useAppSelector((state) => state.profile.hasProfile);
+  console.log("🧞‍♂️  demo --->", demo);
   const services = [
     {
       id: "diagnosis" as const,

@@ -16,6 +16,7 @@ import ProfileofDoctor from "./pages/profile/profilefordoctor";
 import About from "./pages/about";
 import ScrollToTop from "./ScrollToTop";
 import ProtectedRoute from "./ProctedRoute";
+import ProtectedDashboard from "./protectDashboard";
 export default function App() {
   return (
     <Provider store={store}>
@@ -56,17 +57,17 @@ export default function App() {
               <Route
                 path="/doctor"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedDashboard>
                     <DashboardofDoctor />
-                  </ProtectedRoute>
+                  </ProtectedDashboard>
                 }
               />
               <Route
                 path="/patient"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedDashboard>
                     <DashboardofPatient />
-                  </ProtectedRoute>
+                  </ProtectedDashboard>
                 }
               />
               <Route path="/about" element={<About />} />
