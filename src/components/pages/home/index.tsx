@@ -198,7 +198,7 @@ export default function MedicationLandingPage() {
               </p>
             </div>
 
-            {role === "patient" ? (
+            {role !== "doctor" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Appointments */}
                 <Link to="/patient" state={{ file: "appointments", id: 123 }}>
@@ -300,8 +300,8 @@ export default function MedicationLandingPage() {
                     <CardContent>
                       <CardDescription className="text-base leading-relaxed">
                         Customize your experience with personalized preferences,
-                        notification settings, privacy controls, and account
-                        management options.
+                        notification settings, privacy controls, billing setting
+                        and account management options.
                       </CardDescription>
                     </CardContent>
                   </Card>
@@ -406,8 +406,8 @@ export default function MedicationLandingPage() {
                     <CardContent>
                       <CardDescription className="text-base leading-relaxed">
                         Customize your experience with personalized preferences,
-                        notification settings, privacy controls, and account
-                        management options.
+                        notification settings, privacy controls, billing setting
+                        and account management options.
                       </CardDescription>
                     </CardContent>
                   </Card>

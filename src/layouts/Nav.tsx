@@ -7,6 +7,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { logout } from "@/redux/slices/authSlice";
@@ -32,6 +33,7 @@ export default function Navigation() {
     dispatch(logout());
     navigate("/");
   };
+
   return (
     <nav className="bg-white shadow-sm border-b print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -121,8 +123,8 @@ export default function Navigation() {
                 {/* Active Status Indicator */}
                 <div className="flex items-center space-x-2">
                   <div className="relative">
-                    <div className="w-3 h-3 bg-[hsl(201,96%,32%)] rounded-full animate-pulse"></div>
-                    <div className="absolute inset-0 w-3 h-3 bg-[hsl(201,96%,32%)] rounded-full animate-ping opacity-75"></div>
+                    <div className="w-3 h-3 bg-green-600 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-0 w-3 h-3 bg-green-600 rounded-full animate-ping opacity-75"></div>
                   </div>
                   <Badge
                     variant="outline"
@@ -135,45 +137,54 @@ export default function Navigation() {
                 </div>
 
                 {/* User Profile Dropdown */}
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Avatar
                       className=" flex items-center justify-center 
-                    w-8 h-8 broder-1 rounded-full text-white bg-[hsl(201,96%,32%)] hover:bg-cyan-700 hover:shadow-md hover:text-black"
+                    w-8 h-8 broder- rounded-full text-white bg-[hsl(201,96%,32%)] hover:bg-cyan-700 hover:shadow-md hover:text-black"
                     >
                       <ChevronDown className="h-4 w-4" />
                     </Avatar>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuSeparator />
-                    {authuser.role !== "doctor" && (
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 border border-gray-700"
+                  >
+                    <DropdownMenuItem asChild>
                       <Link
-                        to="/profile"
+                        to={
+                          authuser.role === "doctor"
+                            ? "/profilefordoctor"
+                            : "/profile"
+                        }
                         className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
                       >
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
-                    )}
-                    {authuser.role === "doctor" && (
-                      <Link
-                        to="/profilefordoctor"
-                        className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
-                      >
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Link>
-                    )}
-                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
-                      <Settings className="mr-2 h-4 w-4 " />
-                      Settings
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+
+                    {/* Settings Link */}
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to={authuser.role === "doctor" ? "/doctor" : "/patient"}
+                        state={{
+                          file:
+                            authuser.role === "doctor" ? "setting" : "settings",
+                          id: 123,
+                        }}
+                        className="flex flex-row 
+                      items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
+                      >
+                        <Settings className="mr-2 h-4 w-4 " />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer text-red-600 hover:bg-red-100"
+                      className="cursor-pointer text-red-600"
                       onClick={handleLogout}
                     >
-                      <LogOut className="mr-2 h-4 w-4" />
+                      <LogOut className="mr-2 h-4 w-4 text-black " />
                       Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
