@@ -29,11 +29,46 @@ export default function App() {
               <Route path="/loginasDoctor" element={<LoginAsDoctor />} />
               <Route path="/registerasUser" element={<RegisterAsUser />} />
               <Route path="/registerasDoctor" element={<RegisterAsDoctor />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profilefordoctor" element={<ProfileofDoctor />} />
-              <Route path="/doctor" element={<DashboardofDoctor />} />
-              <Route path="/patient" element={<DashboardofPatient />} />
+              <Route
+                path="/services"
+                element={
+                  <ProtectedRoute>
+                    <Services />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profilefordoctor"
+                element={
+                  <ProtectedRoute>
+                    <ProfileofDoctor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor"
+                element={
+                  <ProtectedRoute>
+                    <DashboardofDoctor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/patient"
+                element={
+                  <ProtectedRoute>
+                    <DashboardofPatient />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/about" element={<About />} />
             </Route>
           </Routes>
