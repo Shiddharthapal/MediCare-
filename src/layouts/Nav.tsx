@@ -202,7 +202,7 @@ export default function Navigation() {
                 </DropdownMenu>
               </div>
             ) : (
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="flex items-center gap-2">
                     Login
