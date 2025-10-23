@@ -122,8 +122,6 @@ interface DoctorDetailstProps {
 }
 
 export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
-  console.log("🧞‍♂️  fees --->", fees);
-  console.log("🧞‍♂️  appointment --->", appointment);
   const [screenSize, setScreenSize] = useState("lg");
 
   const getChartDimensions = () => {
@@ -303,7 +301,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                 color: "hsl(330, 81%, 60%)", // Red
               },
             }}
-            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-[800px]"
+            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
@@ -314,7 +312,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                 <XAxis
                   dataKey="month"
                   label={{
-                    value: "<- Month ->",
+                    value: " Month ",
                     position: "insideBottom",
                     offset: -10,
                     style: {
@@ -327,7 +325,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                 <YAxis
                   yAxisId="left"
                   label={{
-                    value: "<- Revenue$ ->",
+                    value: " Revenue$ ",
                     position: "insideLeft",
                     angle: -90,
                     style: {
@@ -341,7 +339,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                   yAxisId="right"
                   orientation="right"
                   label={{
-                    value: "<- Appointment->",
+                    value: " Appointment ",
                     position: "insideRight",
                     angle: +90,
                     style: {

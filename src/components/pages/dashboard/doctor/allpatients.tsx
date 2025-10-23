@@ -838,13 +838,13 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   }, [selectedPatient]);
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-white overflow-hidden">
       {/* Left Sidebar - Fixed */}
-      <aside className="w-min-44 border-r  bg-white overflow-y-auto">
+      <aside className="w-min-44 border-r bg-white ">
         {/* Patient List */}
         {showPatientList && (
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
+          <div className="p-2 overflow-y-auto">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-blue-500">
                 Patient Lists ({Object.entries(patientData).length})
               </h3>
@@ -856,7 +856,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               {Object.entries(patientData).map(([id, patient]) => (
                 <div
                   key={id}
-                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                  className={`flex items-center gap-3 px-3 py-1 rounded-lg cursor-pointer transition-colors ${
                     selectedPatient?.id === id
                       ? "bg-blue-100 border border-blue-300"
                       : "hover:bg-gray-100"
@@ -888,16 +888,16 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between pt-6 pl-6 pr-6 pb-3 border-b border-gray-100 bg-white">
+        <header className="flex items-center justify-between pt-3 pl-3 pr-6 pb-3 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-4">
-            <Avatar className="w-12 h-12 ring-4 ring-blue-200">
+            <Avatar className="w-10 h-10 ring-4 ring-blue-200">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>
                 {getPatientInitials(selectedPatient?.patientInfo?.patientName)}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900">
                 {selectedPatient?.patientInfo?.patientName}
               </h2>
               <p className="text-sm text-gray-500">
@@ -912,7 +912,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         </header>
 
         {/* Tabs */}
-        <div className="grid grid-cols-4 md:gap-10 px-6 py-3 border-b border-gray-400 bg-white">
+        <div className="grid grid-cols-4 md:gap-10 px-6 py-1 border-b border-gray-400 bg-white">
           <button
             className={`pb-2 border-b-4 transition-colors font-semibold ${
               activeTab === "overview"
@@ -934,7 +934,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             Medical History
           </button>
           <button
-            className={`pb-2 border-b-4 font-semibold transition-colors ${
+            className={` border-b-4 font-semibold transition-colors ${
               activeTab === "appointments"
                 ? "border-blue-500 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -961,9 +961,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             {/* Scrollable Content */}
             <main className="flex-1 w-full overflow-y-auto ">
               {activeTab === "overview" && (
-                <div className="py-6">
+                <div className="py-3">
                   {/* Personal Information */}
-                  <div className="mb-6 px-1">
+                  <div className="mb-4 px-1">
                     <Card className="border border-gray-400">
                       <CardHeader className="bg-gradient-to-r py-2 from-blue-100 to-indigo-100 border-b border-gray-200/60">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -1082,7 +1082,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </div>
 
                   {/* Medical Summary and Active Conditions */}
-                  <div className="mb-6 px-1">
+                  <div className="mb-4 px-1">
                     <Card className="border border-gray-400">
                       <CardHeader className="bg-gradient-to-r py-2 from-purple-100 to-pink-100 border-b border-gray-200/60">
                         <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -1091,7 +1091,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                           {selectedPatient?.reasonForVisit.map(
                             (values, index) => (
                               <div
@@ -1127,7 +1127,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   </div>
 
                   {/* Upcoming Appointments */}
-                  <Card className="mb-6 mx-1 border-gray-400">
+                  <Card className="mb-4 mx-1 border-gray-400">
                     <CardHeader className="bg-gradient-to-r py-2 from-yellow-100 to-orange-100 border-b border-gray-200/60">
                       <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-yellow-600" />
@@ -1135,7 +1135,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
+                      <div className="space-y-2">
                         {/* Check if patient has upcoming appointments */}
                         {(selectedPatient?.upcomingAppointments).length > 0 ? (
                           selectedPatient?.upcomingAppointments.map(
@@ -1210,7 +1210,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="">
-                      <div className="space-y-4 border border-l-4 border-green-500 rounded-lg">
+                      <div className="space-y-2 border border-l-4 border-green-500 rounded-lg">
                         {selectedPatient?.latestAppointment ? (
                           <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
                             <div className="p-2 bg-green-100 rounded-lg">
