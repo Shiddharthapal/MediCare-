@@ -152,7 +152,7 @@ export default function MedicationLandingPage() {
                   management.
                 </p>
                 <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col md:flex-row  items-center justify-center lg:justify-start  gap-4">
                     <Button
                       size="lg"
                       className="bg-[hsl(201,96%,32%)] hover:border-primary/50 hover:shadow-lg hover:text-black"
@@ -168,7 +168,7 @@ export default function MedicationLandingPage() {
                     </Button>
                   </div>
                 </div>
-                <div className="mt-8 flex items-center justify-center lg:justify-start space-x-6">
+                <div className="mt-8 flex  items-center justify-center lg:justify-start space-x-6">
                   <div className="flex items-center">
                     <Star className="h-5 w-5 text-yellow-400 fill-current" />
                     <Star className="h-5 w-5 text-yellow-400 fill-current" />
