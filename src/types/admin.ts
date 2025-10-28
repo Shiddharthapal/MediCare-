@@ -4,6 +4,6 @@ export interface Admin {
   name: string;
   adminId: Number;
   role: String;
-  passward: String;
+  password: String;
   createdAt: Date;
 }
