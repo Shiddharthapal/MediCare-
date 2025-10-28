@@ -1,9 +1,5 @@
-export interface Admin {
+export interface Doctor {
   _id: String;
-  email: String;
-  name: string;
-  adminId: Number;
-  role: String;
-  password: String;
+  Id: string; // must have '@' as the last charecter of adminId
   createdAt: Date;
 }

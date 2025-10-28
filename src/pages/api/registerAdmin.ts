@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import connect from "@/lib/connection";
 import jwt from "jsonwebtoken";
+import adminDetails from "@/model/adminDetails";
 import Admin from "@/model/admin";
 
 export const POST: APIRoute = async ({ request }) => {
@@ -12,11 +13,6 @@ export const POST: APIRoute = async ({ request }) => {
     const body = await request.json();
 
     const { email, adminId, name, password } = body;
-    // Connect to database
-    await connect();
-
-    let token = null;
-    // Check if user already exists
     if (!adminId) {
       return new Response(
         JSON.stringify({
@@ -28,7 +24,31 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
-    const existingUser = await Admin.findOne({
+
+    // Connect to database
+    await connect();
+
+    //check adminId is valid or not
+    const adminExistence = await Admin.findOne({
+      Id: adminId,
+    });
+
+    if (!adminExistence) {
+      return new Response(
+        JSON.stringify({
+          message: "Invalid adminId",
+        }),
+        {
+          status: 404,
+          headers,
+        }
+      );
+    }
+
+    let token = null;
+
+    // Check  admin already exists or not
+    const existingUser = await adminDetails.findOne({
       adminId: adminId,
     });
 
@@ -45,7 +65,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Create new user
-    const admin = new Admin({
+    const admin = new adminDetails({
       email: email,
       name: name,
       adminId: adminId,
@@ -59,7 +79,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Generate JWT token
     token = jwt.sign(
-      { IdOfAdmin: admin._id },
+      { IdOfAdmin: admin.adminId },
       import.meta.env.JWT_SECRET ||
         import.meta.env.PUBLIC_JWT_SECRET ||
         "your-secret-key",
