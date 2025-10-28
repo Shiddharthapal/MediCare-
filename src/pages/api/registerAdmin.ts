@@ -85,7 +85,7 @@ export const POST: APIRoute = async ({ request }) => {
         "your-secret-key",
       { expiresIn: "24h" }
     );
-    let _id = admin._id;
+    let _id = admin.adminId;
     return new Response(
       JSON.stringify({
         _id,
