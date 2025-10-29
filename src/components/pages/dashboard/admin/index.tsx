@@ -27,13 +27,13 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Appointments from "./appointments";
 import Doctors from "./doctor";
 import Patients from "./patients";
 import Setting from "./settings";
 import Records from "./records";
-import Tables from "./tables";
 
 interface Prescription {
   reasonForVisit: string;
@@ -167,6 +167,7 @@ export default function Dashboard() {
   const [adminData, setAdminData] = useState<AdminDetails[]>([]);
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
   const [doctorData, setDoctorData] = useState<DoctorDetails[]>([]);
+  const [randomDoctors, setRandomDoctors] = useState<DoctorDetails[]>([]);
 
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
@@ -404,6 +405,26 @@ export default function Dashboard() {
     return hospitalSurveyData;
   }, [patientData]);
 
+  const fisherYatesShuffle = <T,>(array: T[]): T[] => {
+    const shuffled = [...array]; // Create a copy to avoid mutating original
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
+    }
+
+    return shuffled;
+  };
+
+  useEffect(() => {
+    // When doctorData changes, shuffle and get first 7
+    if (doctorData.length > 0) {
+      const shuffled = fisherYatesShuffle(doctorData);
+      const firstSeven = shuffled.slice(0, 7);
+      setRandomDoctors(firstSeven);
+    }
+  }, [doctorData]);
+
   //findout the initials of admin from their name
   const getAdminInitials = (patientName: string) => {
     if (!patientName) return "AB";
@@ -443,6 +464,29 @@ export default function Dashboard() {
       return words[0].substring(0, 2).toUpperCase();
     } else {
       return "AB";
+    }
+  };
+
+  //Get intial of doctor
+  const getDoctorInitials = (doctorName: string) => {
+    if (!doctorName) return "DR";
+
+    // Remove DR/Dr prefix and clean the name
+    const cleanName = doctorName
+      .replace(/^(DR\.?|Dr\.?)\s*/i, "") // Remove DR/Dr at the beginning
+      .trim();
+    if (!cleanName) return "DR";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "DR";
     }
   };
 
@@ -557,270 +601,265 @@ export default function Dashboard() {
         className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
         {currentPage === "dashboard" && (
-          <main className="h-screen   p-6 lg:p-6 pt-16 lg:pt-6">
-            <div className="max-w-6xl mx-auto space-y-6">
-              {/* Header */}
-              <div className="space-y-1">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  Welcome {adminData?.name},
-                </h1>
-              </div>
-              <div className=" pb-16 space-y-6">
-                {/* add stat card */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {stats.map((stat, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-white rounded-lg p-6 shadow-sm border border-slate-200"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className={`${stat.color} p-3 rounded-lg`}>
-                          <stat.icon className={`${stat.iconColor} w-6 h-6`} />
-                        </div>
+          <div className="flex-1 flex items-center mx-10 pt-5 flex-col ">
+            <main className="flex-1 overflow-y-auto px-6 pb-6 pt-2 w-full">
+              <div className="max-w-6xl mx-auto space-y-6">
+                {/* Header */}
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-semibold text-gray-900">
+                    Welcome {adminData?.name},
+                  </h1>
+                </div>
+                <div className=" pb-16 space-y-6">
+                  {/* add stat card */}
+                  <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-5 gap-4">
+                    {stats.map((stat, idx) => (
+                      <Card
+                        key={idx}
+                        className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
+                      >
+                        <CardContent className="px-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-gray-600 mb-1">
+                                {stat.label}
+                              </p>
+                              <p className="text-2xl font-bold">{stat.value}</p>
+                            </div>
+                            <div className={`${stat.color} p-3 rounded-lg`}>
+                              <stat.icon
+                                className={`${stat.iconColor} w-6 h-6`}
+                              />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {/*add chart  */}
+                  <div className="bg-white rounded-lg p-6 shadow-sm border border-slate-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        Medicare Survey
+                      </h3>
+                      <button className="text-slate-500 hover:text-slate-700 text-sm">
+                        10 - 16 Apr-2023 ▼
+                      </button>
+                    </div>
+                    <div className="flex gap-4 mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                        <span className="text-sm text-slate-600">
+                          New Patients
+                        </span>
                       </div>
-                      <p className="text-slate-600 text-sm mb-1">
-                        {stat.label}
-                      </p>
-                      <p className="text-2xl font-bold text-slate-900 mb-3">
-                        {stat?.value}
-                      </p>
-                      <ResponsiveContainer width="100%" height={40}>
-                        <LineChart data={chartData}>
-                          <Line
-                            type="monotone"
-                            dataKey="value"
-                            stroke="#3b82f6"
-                            dot={false}
-                            strokeWidth={2}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-blue-400"></div>
+                        <span className="text-sm text-slate-600">
+                          Old Patients
+                        </span>
+                      </div>
                     </div>
-                  ))}
-                </div>
-
-                {/*add chart  */}
-                <div className="bg-white rounded-lg p-6 shadow-sm border border-slate-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-slate-900">
-                      Medicare Survey
-                    </h3>
-                    <button className="text-slate-500 hover:text-slate-700 text-sm">
-                      10 - 16 Apr-2023 ▼
-                    </button>
-                  </div>
-                  <div className="flex gap-4 mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                      <span className="text-sm text-slate-600">
-                        New Patients
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-                      <span className="text-sm text-slate-600">
-                        Old Patients
-                      </span>
-                    </div>
-                  </div>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart
-                      data={hospitalSurveyData}
-                      margin={{
-                        top: 10,
-                        right: 20,
-                        left: 10,
-                        bottom: 20,
-                      }}
-                    >
-                      <XAxis
-                        dataKey="date"
-                        stroke="#94a3b8"
-                        label={{
-                          value: "Month",
-                          position: "insideBottom",
-                          offset: -10,
-                          style: {
-                            textAnchor: "middle",
-                            fill: "black",
-                            fontSize: "14px",
-                          },
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart
+                        data={hospitalSurveyData}
+                        margin={{
+                          top: 10,
+                          right: 20,
+                          left: 10,
+                          bottom: 20,
                         }}
-                      />
-                      <YAxis
-                        stroke="#94a3b8"
-                        allowDecimals={false}
-                        label={{
-                          value: " Patient ",
-                          position: "insideLeft",
-                          angle: -90,
-                          style: {
-                            textAnchor: "middle",
-                            fill: "black",
-                            fontSize: "16px",
-                          },
-                        }}
-                      />
-                      <Tooltip />
-                      <Line
-                        type="monotone"
-                        dataKey="newPatients"
-                        stroke="#f87171"
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="oldPatients"
-                        stroke="#60a5fa"
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-slate-900">
-                        Booked Appointment
-                      </h3>
-                      <button className="text-slate-400 hover:text-slate-600">
-                        <MoreVertical size={20} />
-                      </button>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-slate-200 bg-slate-50">
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
-                              Assigned Doctor
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
-                              Patient Name
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
-                              Date
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
-                              Diseases
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {getTop7Appointments?.map((apt, idx) => (
-                            <tr
-                              key={idx}
-                              className="border-b border-slate-200 hover:bg-slate-50"
-                            >
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                  <Avatar className="h-10 w-10">
-                                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                                    <AvatarFallback className="bg-blue-100 text-blue-600">
-                                      {getPatientInitials(apt?.patientName)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-sm font-medium text-slate-900">
-                                    {apt.doctorName}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-slate-600">
-                                {apt.patientName}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-slate-600">
-                                {apt.appointmentDate}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-slate-600">
-                                {apt.symptoms}
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-2">
-                                  <button className="text-slate-400 hover:text-slate-600">
-                                    <Edit2 size={16} />
-                                  </button>
-                                  <button className="text-slate-400 hover:text-red-600">
-                                    <Trash2 size={16} />
-                                  </button>
-                                </div>
-                              </td>
+                      >
+                        <XAxis
+                          dataKey="date"
+                          stroke="#94a3b8"
+                          label={{
+                            value: "Month",
+                            position: "insideBottom",
+                            offset: -10,
+                            style: {
+                              textAnchor: "middle",
+                              fill: "black",
+                              fontSize: "14px",
+                            },
+                          }}
+                        />
+                        <YAxis
+                          stroke="#94a3b8"
+                          allowDecimals={false}
+                          label={{
+                            value: " Patient ",
+                            position: "insideLeft",
+                            angle: -90,
+                            style: {
+                              textAnchor: "middle",
+                              fill: "black",
+                              fontSize: "16px",
+                            },
+                          }}
+                        />
+                        <Tooltip />
+                        <Line
+                          type="monotone"
+                          dataKey="newPatients"
+                          stroke="#f87171"
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="oldPatients"
+                          stroke="#60a5fa"
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="grid grid-cols-1 space-y-6 ">
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-700 overflow-hidden">
+                      <div className="p-6 border-b border-slate-200 flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-slate-900">
+                          Booked Appointment
+                        </h3>
+                        <button className="text-slate-400 hover:text-slate-600">
+                          <MoreVertical size={20} />
+                        </button>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-slate-200 bg-slate-50">
+                              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                                Assigned Doctor
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                                Patient Name
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                                Date
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                                Diseases
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                                Actions
+                              </th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-slate-900">
-                        Doctors List
-                      </h3>
-                      <button className="text-slate-400 hover:text-slate-600">
-                        <MoreVertical size={20} />
-                      </button>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-slate-200 bg-slate-50">
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
-                              Doctor Name
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
-                              Status
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {/* {doctorsList.map((doctor, idx) => (
-                            <tr
-                              key={idx}
-                              className="border-b border-slate-200 hover:bg-slate-50"
-                            >
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                  <span className="text-xl">
-                                    {doctor.avatar}
-                                  </span>
-                                  <div>
-                                    <p className="text-sm font-medium text-slate-900">
-                                      {doctor.name}
-                                    </p>
-                                    <p className="text-xs text-slate-500">
-                                      {doctor.specialty}
-                                    </p>
+                          </thead>
+                          <tbody>
+                            {getTop7Appointments?.map((apt, idx) => (
+                              <tr
+                                key={idx}
+                                className="border-b border-slate-200 hover:bg-slate-50"
+                              >
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-10 w-10">
+                                      <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                                      <AvatarFallback className="bg-blue-100 text-blue-600">
+                                        {getPatientInitials(apt?.patientName)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-sm font-medium text-slate-900">
+                                      {apt.doctorName}
+                                    </span>
                                   </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className={`w-2 h-2 rounded-full ${
-                                      doctor.status === "Available"
-                                        ? "bg-green-500"
-                                        : "bg-red-500"
-                                    }`}
-                                  ></span>
-                                  <span className="text-sm text-slate-600">
-                                    {doctor.status}
-                                  </span>
-                                </div>
-                              </td>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-slate-600">
+                                  {apt.patientName}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-slate-600">
+                                  {apt.appointmentDate}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-slate-600">
+                                  {apt.symptoms}
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-2">
+                                    <button className="text-slate-400 hover:text-slate-600">
+                                      <Edit2 size={16} />
+                                    </button>
+                                    <button className="text-slate-400 hover:text-red-600">
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-700 overflow-hidden">
+                      <div className="p-6 border-b border-slate-200 flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-slate-900">
+                          Doctors List
+                        </h3>
+                        <button className="text-slate-400 hover:text-slate-600">
+                          <MoreVertical size={20} />
+                        </button>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-slate-200 bg-slate-50">
+                              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                                Doctor Name
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                                Status
+                              </th>
                             </tr>
-                          ))} */}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {randomDoctors.map((doctor, idx) => (
+                              <tr
+                                key={idx}
+                                className="border-b border-slate-200 hover:bg-slate-50"
+                              >
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-10 w-10">
+                                      <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                                      <AvatarFallback className="bg-blue-100 text-blue-600">
+                                        {getDoctorInitials(doctor?.name)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="text-sm font-medium text-slate-900">
+                                        {doctor.name}
+                                      </p>
+                                      <p className="text-xs text-slate-500">
+                                        {doctor.specialist}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className="w-2 h-2 rounded-full 
+                                      Available bg-green-500"
+                                    ></span>
+                                    <span className="text-sm text-slate-600">
+                                      Active
+                                    </span>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </main>
+            </main>
+          </div>
         )}
         {currentPage === "appointments" && (
           <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
