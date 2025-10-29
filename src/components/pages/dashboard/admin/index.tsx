@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { useAppSelector } from "@/redux/hooks";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -9,12 +10,8 @@ import {
   X,
   User,
   Menu,
-  FileText,
-  Clipboard,
-  Ambulance,
   Settings,
   LogOut,
-  Plus,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Appointments from "./appointments";
@@ -56,9 +53,53 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(file || "dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [adminData, setAdminData] = useState<AdminDetails[]>([]);
+  const admin = useAppSelector((state) => state.auth.user);
+  const id = admin?._id;
 
+  //fetch the data of admin
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let response = await fetch(`/api/admin/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        let admindata = await response.json();
+        setAdminData(admindata?.admindetails);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, [admin]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let response = await fetch(`/api/admin/fetchdata`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        let result = await response.json();
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+
+    // Then fetch every 30 seconds
+    const interval = setInterval(fetchData, 30000);
+
+    // Cleanup: clear interval when component unmounts
+    return () => clearInterval(interval);
+  }, [admin]);
+
+  //findout the initials of admin from their name
   const getAdminInitials = (patientName: string) => {
     if (!patientName) return "AB";
 
