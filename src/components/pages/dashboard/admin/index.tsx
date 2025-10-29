@@ -11,7 +11,9 @@ import {
   Menu,
   Settings,
   LogOut,
-  TrendingUp,
+  Edit2,
+  Trash2,
+  MoreVertical,
   Zap,
 } from "lucide-react";
 import {
@@ -45,6 +47,8 @@ interface AppointmentData {
   doctorpatinetId: string;
   hospital: string;
   appointmentDate: string;
+  patientName: string;
+  doctorName: string;
   appointmentTime: string;
   status: string;
   consultationType: string;
@@ -122,6 +126,14 @@ interface HospitalSurveyData {
   oldPatients: number;
 }
 
+interface GroupedAppointments {
+  [date: string]: {
+    appointments: AppointmentData[];
+    status: string;
+    dayLabel: string;
+  };
+}
+
 const chartData = [
   { value: 30 },
   { value: 40 },
@@ -155,6 +167,7 @@ export default function Dashboard() {
   const [adminData, setAdminData] = useState<AdminDetails[]>([]);
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
   const [doctorData, setDoctorData] = useState<DoctorDetails[]>([]);
+
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
 
@@ -183,7 +196,7 @@ export default function Dashboard() {
     {
       icon: Zap,
       label: "New Doctors",
-      value: 0,
+      value: countNewDoctor,
       color: "bg-blue-100",
       iconColor: "text-blue-500",
     },
@@ -291,6 +304,36 @@ export default function Dashboard() {
     setCountNewDoctor(currentMonthNewDoctors);
   }, [currentMonthNewDoctors]);
 
+  // Get all appointments from all patients
+  const allAppointments = useMemo(() => {
+    return patientData.flatMap((patient) => patient.appointments || []);
+  }, [patientData]);
+
+  const getTop7Appointments = useMemo(() => {
+    if (!allAppointments || allAppointments.length === 0) return [];
+
+    // Sort appointments by date and time
+    const sortedAppointments = [...allAppointments].sort((a, b) => {
+      const dateA = new Date(`${a.appointmentDate} ${a.appointmentTime}`);
+      const dateB = new Date(`${b.appointmentDate} ${b.appointmentTime}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    // Filter appointments from today onwards
+    const today = new Date();
+    const formattedDate = today.toISOString().split("T")[0];
+
+    const upcomingAppointments = sortedAppointments.filter((appointment) => {
+      const appointmentDateTime = new Date(
+        `${appointment.appointmentDate}`
+      ).toISOString();
+      return appointmentDateTime >= formattedDate;
+    });
+
+    // Return top 7 appointments
+    return upcomingAppointments.slice(0, 7);
+  }, [allAppointments]);
+
   //findout new and old patient
   const hospitalSurveyData = useMemo(() => {
     const monthNames = [
@@ -360,10 +403,30 @@ export default function Dashboard() {
 
     return hospitalSurveyData;
   }, [patientData]);
-  console.log("data=>>", hospitalSurveyData);
 
   //findout the initials of admin from their name
   const getAdminInitials = (patientName: string) => {
+    if (!patientName) return "AB";
+
+    const cleanName = patientName.trim();
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
+  };
+
+  //Get patient initial
+  const getPatientInitials = (patientName: string) => {
     if (!patientName) return "AB";
 
     const cleanName = patientName.trim();
@@ -616,7 +679,145 @@ export default function Dashboard() {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <Tables />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="p-6 border-b border-slate-200 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        Booked Appointment
+                      </h3>
+                      <button className="text-slate-400 hover:text-slate-600">
+                        <MoreVertical size={20} />
+                      </button>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-slate-200 bg-slate-50">
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                              Assigned Doctor
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                              Patient Name
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                              Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                              Diseases
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {getTop7Appointments?.map((apt, idx) => (
+                            <tr
+                              key={idx}
+                              className="border-b border-slate-200 hover:bg-slate-50"
+                            >
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-10 w-10">
+                                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                                    <AvatarFallback className="bg-blue-100 text-blue-600">
+                                      {getPatientInitials(apt?.patientName)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-sm font-medium text-slate-900">
+                                    {apt.doctorName}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-600">
+                                {apt.patientName}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-600">
+                                {apt.appointmentDate}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-600">
+                                {apt.symptoms}
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                  <button className="text-slate-400 hover:text-slate-600">
+                                    <Edit2 size={16} />
+                                  </button>
+                                  <button className="text-slate-400 hover:text-red-600">
+                                    <Trash2 size={16} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="p-6 border-b border-slate-200 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        Doctors List
+                      </h3>
+                      <button className="text-slate-400 hover:text-slate-600">
+                        <MoreVertical size={20} />
+                      </button>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-slate-200 bg-slate-50">
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                              Doctor Name
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
+                              Status
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {/* {doctorsList.map((doctor, idx) => (
+                            <tr
+                              key={idx}
+                              className="border-b border-slate-200 hover:bg-slate-50"
+                            >
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xl">
+                                    {doctor.avatar}
+                                  </span>
+                                  <div>
+                                    <p className="text-sm font-medium text-slate-900">
+                                      {doctor.name}
+                                    </p>
+                                    <p className="text-xs text-slate-500">
+                                      {doctor.specialty}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`w-2 h-2 rounded-full ${
+                                      doctor.status === "Available"
+                                        ? "bg-green-500"
+                                        : "bg-red-500"
+                                    }`}
+                                  ></span>
+                                  <span className="text-sm text-slate-600">
+                                    {doctor.status}
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          ))} */}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </main>
