@@ -9,22 +9,12 @@ export const GET: APIRoute = async ({ request }) => {
   };
 
   try {
-    const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get("page") || "1");
-    const limit = parseInt(url.searchParams.get("limit") || "20");
-
     await connect();
 
-    // Calculate skip value
-    const skip = (page - 1) * limit;
-
     // Fetch doctors with pagination
-    const doctordetails = await DoctorDetails.find()
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    const doctordetails = await DoctorDetails.find();
 
-    const userdetails = await userDetails.find().skip(skip).limit(limit).lean();
+    const userdetails = await userDetails.find();
 
     // Get total count for reference
     const totalCountOfDoctor = await DoctorDetails.countDocuments();
@@ -33,16 +23,9 @@ export const GET: APIRoute = async ({ request }) => {
     return new Response(
       JSON.stringify({
         doctordetails,
-        userdetails, // Added this line
-        pagination: {
-          currentPage: page,
-          totalPagesOfDoctor: Math.ceil(totalCountOfDoctor / limit),
-          totalpagesofPatient: Math.ceil(totalCountOfPatient / limit),
-          totalCountOfDoctor,
-          totalCountOfPatient, // Added this
-          hasMoreDoctors: skip + doctordetails.length < totalCountOfDoctor,
-          hasMorePatients: skip + userdetails.length < totalCountOfPatient, // Added this
-        },
+        totalCountOfDoctor,
+        userdetails,
+        totalCountOfPatient,
       }),
       { status: 200, headers }
     );

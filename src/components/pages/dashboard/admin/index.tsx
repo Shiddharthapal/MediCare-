@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,16 +11,75 @@ import {
   Menu,
   Settings,
   LogOut,
+  TrendingUp,
+  Zap,
 } from "lucide-react";
+import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Appointments from "./appointments";
 import Doctors from "./doctor";
 import Patients from "./patients";
 import Setting from "./settings";
 import Records from "./records";
-import StatCards from "./stat-cards";
 import Charts from "./charts";
 import Tables from "./tables";
+
+interface Prescription {
+  reasonForVisit: string;
+  primaryDiagnosis: string;
+  symptoms: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+
+interface AppointmentData {
+  doctorpatinetId: string;
+  hospital: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  prescription: Prescription;
+  createdAt: Date;
+}
+
+interface UserDetails {
+  _id: string;
+  userId: string;
+  email: string;
+  name: string;
+  fatherName?: string;
+  address: string;
+  dateOfBirth: Date;
+  contactNumber: string;
+  age: number;
+  gender: string;
+  bloodGroup: string;
+  appoinments: AppointmentData[];
+  lastTreatmentDate?: Date;
+  createdAt: Date;
+}
+interface DoctorDetails {
+  _id: string;
+  userId: string;
+  name: string;
+  email: string;
+  contact: string;
+  gender: string;
+  registrationNo: string;
+  specialist: string;
+  specializations: string[];
+  hospital: string;
+  fees: number;
+  rating?: number;
+  experience: string;
+  education: string;
+  degree: string;
+  createdAt: Date;
+}
 
 interface AdminDetails {
   _id: String;
@@ -36,6 +94,26 @@ const mockAdminData: AdminDetails = {
   name: "",
   role: "",
 };
+
+interface StatData {
+  icon: React.ForwardRefExoticComponent<
+    Omit<any, "ref"> & React.RefAttributes<SVGSVGElement>
+  >;
+  label: string;
+  value: number;
+  color: string;
+  iconColor: string;
+}
+
+const chartData = [
+  { value: 30 },
+  { value: 40 },
+  { value: 35 },
+  { value: 50 },
+  { value: 45 },
+  { value: 60 },
+  { value: 55 },
+];
 
 const menuItems = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
@@ -53,9 +131,53 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(file || "dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [countDoctor, setCountDoctor] = useState(Number || 0);
+  const [countPatient, setCountPatient] = useState(Number || 0);
+  const [countNewDoctor, setCountNewDoctor] = useState(Number || 0);
+  const [countNewPatient, setCountNewPatient] = useState(Number || 0);
   const [adminData, setAdminData] = useState<AdminDetails[]>([]);
+  const [patientData, setPatientData] = useState<UserDetails[]>([]);
+  const [doctorData, setDoctorData] = useState<DoctorDetails[]>([]);
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
+
+  const stats: StatData[] = [
+    {
+      icon: Calendar,
+      label: "Appointments",
+      value: 0,
+      color: "bg-red-100",
+      iconColor: "text-red-500",
+    },
+    {
+      icon: Users,
+      label: "Doctors",
+      value: countDoctor,
+      color: "bg-orange-100",
+      iconColor: "text-orange-500",
+    },
+    {
+      icon: Users,
+      label: "Patients",
+      value: countPatient,
+      color: "bg-teal-100",
+      iconColor: "text-teal-500",
+    },
+    {
+      icon: Zap,
+      label: "New Doctors",
+      value: 0,
+      color: "bg-blue-100",
+      iconColor: "text-blue-500",
+    },
+    {
+      icon: Zap,
+      label: "New Patients",
+      value: countNewPatient,
+      color: "bg-blue-100",
+      iconColor: "text-blue-500",
+    },
+  ];
 
   //fetch the data of admin
   useEffect(() => {
@@ -76,6 +198,7 @@ export default function Dashboard() {
     fetchData();
   }, [admin]);
 
+  //fetch data of patient and doctor
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -85,7 +208,15 @@ export default function Dashboard() {
             "Content-Type": "application/json",
           },
         });
+
+        if (!response.ok) {
+          console.error("Not fetch patient and doctor details successfully");
+        }
         let result = await response.json();
+        setCountDoctor(result.totalCountOfDoctor);
+        setCountPatient(result.totalCountOfPatient);
+        setPatientData(result.userdetails);
+        setDoctorData(result.doctordetails);
       } catch (err) {
         console.log(err);
       }
@@ -93,11 +224,55 @@ export default function Dashboard() {
     fetchData();
 
     // Then fetch every 30 seconds
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(fetchData, 60000);
 
     // Cleanup: clear interval when component unmounts
     return () => clearInterval(interval);
   }, [admin]);
+
+  //Calculate new patient
+  const currentMonthNewPatients = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    const count =
+      patientData?.filter((patient) => {
+        const patientcreatedate = new Date(patient.createdAt);
+        const isCurrentMonth =
+          patientcreatedate.getMonth() === currentMonth &&
+          patientcreatedate.getFullYear() === currentYear;
+
+        return isCurrentMonth;
+      }).length || 0;
+
+    return count;
+  }, [patientData]);
+
+  useEffect(() => {
+    setCountNewPatient(currentMonthNewPatients);
+  }, [currentMonthNewPatients]);
+
+  //Calculate new doctor
+  const currentMonthNewDoctors = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    const count =
+      doctorData?.filter((doctor) => {
+        const doctorcreatedate = new Date(doctor.createdAt);
+        const isCurrentMonth =
+          doctorcreatedate.getMonth() === currentMonth &&
+          doctorcreatedate.getFullYear() === currentYear;
+
+        return isCurrentMonth;
+      }).length || 0;
+
+    return count;
+  }, [doctorData]);
+
+  useEffect(() => {
+    setCountNewDoctor(currentMonthNewDoctors);
+  }, [currentMonthNewDoctors]);
 
   //findout the initials of admin from their name
   const getAdminInitials = (patientName: string) => {
@@ -240,7 +415,38 @@ export default function Dashboard() {
                 </h1>
               </div>
               <div className=" pb-16 space-y-6">
-                <StatCards />
+                {/* add stat card */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {stats.map((stat, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white rounded-lg p-6 shadow-sm border border-slate-200"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`${stat.color} p-3 rounded-lg`}>
+                          <stat.icon className={`${stat.iconColor} w-6 h-6`} />
+                        </div>
+                      </div>
+                      <p className="text-slate-600 text-sm mb-1">
+                        {stat.label}
+                      </p>
+                      <p className="text-2xl font-bold text-slate-900 mb-3">
+                        {stat?.value}
+                      </p>
+                      <ResponsiveContainer width="100%" height={40}>
+                        <LineChart data={chartData}>
+                          <Line
+                            type="monotone"
+                            dataKey="value"
+                            stroke="#3b82f6"
+                            dot={false}
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ))}
+                </div>
                 <Charts />
                 <Tables />
               </div>
