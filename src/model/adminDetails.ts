@@ -15,7 +15,7 @@ const adminDetailsSchema = new mongoose.Schema({
     required: true,
   },
   adminId: {
-    type: Number,
+    type: String,
     required: [true, "Please provide a admin id"],
     unique: true,
   },

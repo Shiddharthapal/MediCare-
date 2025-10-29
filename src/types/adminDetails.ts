@@ -2,7 +2,7 @@ export interface Admin {
   _id: String;
   email: String;
   name: string;
-  adminId: Number;
+  adminId: string;
   role: String;
   password: String;
   createdAt: Date;

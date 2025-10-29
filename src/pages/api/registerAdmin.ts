@@ -11,6 +11,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const body = await request.json();
+    console.log("🧞‍♂️  body --->", body);
 
     const { email, adminId, name, password } = body;
     if (!adminId) {
@@ -33,6 +34,15 @@ export const POST: APIRoute = async ({ request }) => {
       Id: adminId,
     });
 
+    // Have a option to add admin registered
+    // if (!adminExistence) {
+    //   const idofadmin = new Admin({
+    //     Id: adminId,
+    //   });
+
+    //   await idofadmin.save();
+    // }
+
     if (!adminExistence) {
       return new Response(
         JSON.stringify({
@@ -51,6 +61,7 @@ export const POST: APIRoute = async ({ request }) => {
     const existingUser = await adminDetails.findOne({
       adminId: adminId,
     });
+    console.log("🧞‍♂️  existingUser --->", existingUser);
 
     if (existingUser) {
       return new Response(

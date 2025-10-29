@@ -136,7 +136,7 @@ export default function Register() {
                 </label>
                 <Input
                   id="adminId"
-                  type="number"
+                  type="string"
                   className="bordar border-gray-900 shadow-md"
                   {...register("adminId", {
                     required: "Admin Id is require",

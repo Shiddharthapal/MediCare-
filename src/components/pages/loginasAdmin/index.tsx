@@ -88,7 +88,7 @@ export default function Login() {
                   id="adminId"
                   type="adminId"
                   placeholder=""
-                  className="bordar-2 border-black shadow-md"
+                  className="border border-gray-900 shadow-md"
                   {...register("adminId", {
                     required: "Admin Id is required",
                     minLength: {
@@ -117,7 +117,7 @@ export default function Login() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  className="bordar-2 border-black shadow-md"
+                  className="border border-gray-900 shadow-md"
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
