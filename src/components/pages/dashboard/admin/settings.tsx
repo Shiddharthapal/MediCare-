@@ -3,7 +3,11 @@
 import { Save, Bell, Lock, User, Shield } from "lucide-react";
 import { useState } from "react";
 
-export default function Settings() {
+export default function Settings({
+  onNavigate,
+}: {
+  onNavigate?: (page: string) => void;
+}) {
   const [settings, setSettings] = useState({
     hospitalName: "ICarePro Hospital",
     email: "admin@icarepro.com",

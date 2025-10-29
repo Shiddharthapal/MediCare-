@@ -6,9 +6,9 @@ import {
   LayoutDashboard,
   Calendar,
   Users,
-  UserCheck,
+  X,
   User,
-  DoorOpen,
+  Menu,
   FileText,
   Clipboard,
   Ambulance,
@@ -25,6 +25,20 @@ import Records from "./records";
 import StatCards from "./stat-cards";
 import Charts from "./charts";
 import Tables from "./tables";
+
+interface AdminDetails {
+  _id: String;
+  email: String;
+  name: string;
+  role: String;
+}
+
+const mockAdminData: AdminDetails = {
+  _id: "",
+  email: "",
+  name: "",
+  role: "",
+};
 
 const menuItems = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
@@ -67,6 +81,17 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen bg-background">
+      {/* Mobile menu button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="fixed top-3  z-50 lg:hidden hover:bg-gray-300"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </Button>
+
+      {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 z-40 bg-white shadow-lg transform transition-all duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
@@ -153,32 +178,28 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
       <div
         className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
         {currentPage === "dashboard" && (
-          <main className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <main className="h-screen   p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto space-y-6">
               {/* Header */}
               <div className="space-y-1">
                 <h1 className="text-2xl font-semibold text-gray-900">
-                  Welcome {patientData?.name},
+                  Welcome {adminData?.name},
                 </h1>
-                <p className="text-gray-600">
-                  {patientData?.appoinments?.length > 0 ? (
-                    " "
-                  ) : (
-                    <p>You have got no appointments for today</p>
-                  )}
-                </p>
               </div>
-              <div className="p-6 space-y-6">
+              <div className=" pb-16 space-y-6">
                 <StatCards />
                 <Charts />
                 <Tables />
@@ -197,7 +218,7 @@ export default function Dashboard() {
         {currentPage === "doctors" && (
           <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
-              <Doctors />
+              <Doctors onNavigate={setCurrentPage} />
             </div>
           </div>
         )}

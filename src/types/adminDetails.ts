@@ -1,4 +1,4 @@
-export interface Admin {
+export interface AdminDetails {
   _id: String;
   email: String;
   name: string;

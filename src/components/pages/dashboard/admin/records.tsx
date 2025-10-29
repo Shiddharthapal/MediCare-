@@ -42,7 +42,11 @@ const recordsData = [
   },
 ];
 
-export default function Records() {
+export default function Records({
+  onNavigate,
+}: {
+  onNavigate?: (page: string) => void;
+}) {
   const [records, setRecords] = useState(recordsData);
 
   return (

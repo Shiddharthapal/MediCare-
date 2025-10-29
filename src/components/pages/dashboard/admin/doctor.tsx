@@ -51,7 +51,11 @@ const doctorsData = [
   },
 ];
 
-export default function Doctors() {
+export default function Doctors({
+  onNavigate,
+}: {
+  onNavigate?: (page: string) => void;
+}) {
   const [doctors, setDoctors] = useState(doctorsData);
 
   return (

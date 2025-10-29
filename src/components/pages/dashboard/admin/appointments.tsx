@@ -51,7 +51,11 @@ const appointmentsData = [
   },
 ];
 
-export default function Appointments() {
+export default function Appointments({
+  onNavigate,
+}: {
+  onNavigate?: (page: string) => void;
+}) {
   const [appointments, setAppointments] = useState(appointmentsData);
 
   return (
