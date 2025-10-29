@@ -134,7 +134,7 @@ export interface UserDetails {
   bloodGroup: string;
   weight: number;
   height?: number;
-  appoinments: AppointmentData[];
+  appointments: AppointmentData[];
   payment: PaymentMethods;
   upload: FileUpload[];
   healthRecord: HealthRecord[];

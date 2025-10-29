@@ -14,14 +14,23 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Appointments from "./appointments";
 import Doctors from "./doctor";
 import Patients from "./patients";
 import Setting from "./settings";
 import Records from "./records";
-import Charts from "./charts";
 import Tables from "./tables";
 
 interface Prescription {
@@ -41,6 +50,7 @@ interface AppointmentData {
   consultationType: string;
   consultedType: string;
   reasonForVisit: string;
+  previousVisit: string;
   symptoms: string;
   prescription: Prescription;
   createdAt: Date;
@@ -58,10 +68,11 @@ interface UserDetails {
   age: number;
   gender: string;
   bloodGroup: string;
-  appoinments: AppointmentData[];
+  appointments: AppointmentData[];
   lastTreatmentDate?: Date;
   createdAt: Date;
 }
+
 interface DoctorDetails {
   _id: string;
   userId: string;
@@ -103,6 +114,12 @@ interface StatData {
   value: number;
   color: string;
   iconColor: string;
+}
+
+interface HospitalSurveyData {
+  date: string;
+  newPatients: number;
+  oldPatients: number;
 }
 
 const chartData = [
@@ -273,6 +290,77 @@ export default function Dashboard() {
   useEffect(() => {
     setCountNewDoctor(currentMonthNewDoctors);
   }, [currentMonthNewDoctors]);
+
+  //findout new and old patient
+  const hospitalSurveyData = useMemo(() => {
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    // Initialize data for all 12 months
+    const monthlyData: Record<
+      string,
+      { newPatients: number; oldPatients: number }
+    > = {};
+
+    monthNames.forEach((month) => {
+      monthlyData[month] = {
+        newPatients: 0,
+        oldPatients: 0,
+      };
+    });
+
+    // Process each patient's appointments
+    patientData?.forEach((patient) => {
+      patient.appointments?.forEach((appointment) => {
+        const appointmentDate = new Date(appointment.createdAt);
+        const monthShort = monthNames[appointmentDate.getMonth()];
+        if (!monthShort) return;
+        // Check if it's a new or old patient based on previousVisit
+        if (appointment.previousVisit?.toLowerCase() === "yes") {
+          // Old patient - increment counter
+          monthlyData[monthShort].oldPatients += 1;
+        } else {
+          // New patient - increment counter
+          monthlyData[monthShort].newPatients++;
+        }
+      });
+    });
+
+    // Get current month index (0-11)
+    const currentMonthIndex = new Date().getMonth();
+
+    // Create ordered array: next month to current month (left to right)
+    const orderedMonths = [
+      ...monthNames.slice(currentMonthIndex + 1), // Months after current
+      ...monthNames.slice(0, currentMonthIndex + 1), // Months up to and including current
+    ];
+
+    // Convert to final array format
+    const hospitalSurveyData: HospitalSurveyData[] = orderedMonths.map(
+      (month) => {
+        return {
+          date: month,
+          newPatients: monthlyData[month].newPatients,
+          oldPatients: monthlyData[month].oldPatients,
+        };
+      }
+    );
+
+    return hospitalSurveyData;
+  }, [patientData]);
+  console.log("data=>>", hospitalSurveyData);
 
   //findout the initials of admin from their name
   const getAdminInitials = (patientName: string) => {
@@ -447,7 +535,54 @@ export default function Dashboard() {
                     </div>
                   ))}
                 </div>
-                <Charts />
+
+                {/*add chart  */}
+                <div className="bg-white rounded-lg p-6 shadow-sm border border-slate-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      Medicare Survey
+                    </h3>
+                    <button className="text-slate-500 hover:text-slate-700 text-sm">
+                      10 - 16 Apr-2023 ▼
+                    </button>
+                  </div>
+                  <div className="flex gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                      <span className="text-sm text-slate-600">
+                        New Patients
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-400"></div>
+                      <span className="text-sm text-slate-600">
+                        Old Patients
+                      </span>
+                    </div>
+                  </div>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={hospitalSurveyData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="date" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="newPatients"
+                        stroke="#f87171"
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="oldPatients"
+                        stroke="#60a5fa"
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
                 <Tables />
               </div>
             </div>
