@@ -44,9 +44,9 @@ const menuItems = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
   { id: "appointments", icon: Calendar, label: "Appointments", active: false },
   { id: "doctors", icon: Users, label: "Doctors", active: false },
-  { id: "settings", icon: Settings, label: "Settings", active: false },
   { id: "patients", icon: User, label: "Patients", active: false },
   { id: "records", icon: User, label: "Records", active: false },
+  { id: "settings", icon: Settings, label: "Settings", active: false },
 ];
 
 export default function Dashboard() {
@@ -129,8 +129,7 @@ export default function Dashboard() {
             </ul>
           </nav>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="px-4 pb-2 pt-2 border-t border-gray-200">
             {!collapsed ? (
               <div className="mb-4">
                 <div className="flex items-center gap-3">
@@ -171,7 +170,7 @@ export default function Dashboard() {
               variant="ghost"
               size="sm"
               onClick={() => setCollapsed(!collapsed)}
-              className="w-full hidden lg:flex"
+              className="w-full hidden text-3xl pb-1 lg:flex border border-gray-700 hover:bg-blue-600 hover:text-white"
             >
               {collapsed ? "→" : "←"}
             </Button>
