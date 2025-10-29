@@ -560,11 +560,44 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={hospitalSurveyData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="date" stroke="#94a3b8" />
-                      <YAxis stroke="#94a3b8" />
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart
+                      data={hospitalSurveyData}
+                      margin={{
+                        top: 10,
+                        right: 20,
+                        left: 10,
+                        bottom: 20,
+                      }}
+                    >
+                      <XAxis
+                        dataKey="date"
+                        stroke="#94a3b8"
+                        label={{
+                          value: "Month",
+                          position: "insideBottom",
+                          offset: -10,
+                          style: {
+                            textAnchor: "middle",
+                            fill: "black",
+                            fontSize: "14px",
+                          },
+                        }}
+                      />
+                      <YAxis
+                        stroke="#94a3b8"
+                        allowDecimals={false}
+                        label={{
+                          value: " Patient ",
+                          position: "insideLeft",
+                          angle: -90,
+                          style: {
+                            textAnchor: "middle",
+                            fill: "black",
+                            fontSize: "16px",
+                          },
+                        }}
+                      />
                       <Tooltip />
                       <Line
                         type="monotone"
