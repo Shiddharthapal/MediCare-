@@ -18,7 +18,7 @@ interface RegisterFormData {
   role: string;
 }
 
-export function RegisterForm() {
+export default function Register() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
@@ -81,21 +81,24 @@ export function RegisterForm() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Card className="w-[350px]">
+        <Card className="w-[500px]">
           <CardHeader>
-            <CardTitle className="text-2xl text-center">Register</CardTitle>
+            <CardTitle className="text-2xl text-center text-gray-800">
+              Registration As Admin
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {/* Email Field */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-gray-700">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
-                    className="bordar-2 border-black shadow-md"
-                    placeholder="medicare+@aidoctor.com"
+                    className="bordar border-gray-900 shadow-md"
                     {...register("email", {
                       required: "Email is required",
                       pattern: {
@@ -109,11 +112,13 @@ export function RegisterForm() {
 
               {/* Name Field */}
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name" className="text-gray-700">
+                  Full Name
+                </Label>
                 <Input
                   id="name"
                   type="name"
-                  className="bordar-2 border-black shadow-md"
+                  className="border border-gray-900 shadow-md"
                   placeholder="John Doe"
                   {...register("name", {
                     required: "Name is required",
@@ -125,15 +130,14 @@ export function RegisterForm() {
               <div className="space-y-2">
                 <label
                   htmlFor="adminId"
-                  className="text-sm font-medium text-foreground"
+                  className="text-sm font-medium text-foreground text-gray-700"
                 >
                   Admin ID
                 </label>
                 <Input
                   id="adminId"
                   type="number"
-                  className="bordar-2 border-black shadow-md"
-                  placeholder="0123456..."
+                  className="bordar border-gray-900 shadow-md"
                   {...register("adminId", {
                     required: "Admin Id is require",
                     minLength: {
@@ -152,7 +156,7 @@ export function RegisterForm() {
               <div className="space-y-2">
                 <label
                   htmlFor="role"
-                  className="text-sm font-medium text-foreground"
+                  className="text-sm font-medium text-foreground text-gray-700"
                 >
                   Role
                 </label>
@@ -161,9 +165,10 @@ export function RegisterForm() {
                   {...register("role", {
                     required: "Admin is require",
                   })}
-                  className={`w-full px-3 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
-                    errors.role ? "border-destructive" : "border-input"
-                  }`}
+                  className={`w-full px-3 py-2 border border-gray-900 rounded-md bg-background text-foreground 
+                    focus:outline-none focus:ring-2 focus:ring-primary  ${
+                      errors.role ? "border-destructive" : "border-input"
+                    }`}
                 >
                   <option value="admin">Admin</option>
                   <option value="moderator">Moderator</option>
@@ -172,11 +177,13 @@ export function RegisterForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-gray-700">
+                  Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="password"
-                    className="bordar-2 border-black shadow-md"
+                    className="bordar-2 border-gray-900 shadow-md"
                     type={showPassword ? "text" : "password"}
                     {...register("password", {
                       required: "Password is required",
@@ -208,12 +215,14 @@ export function RegisterForm() {
 
               {/* Confirm Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-gray-700">
+                  Confirm Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    className="bordar-2 border-black shadow-md"
+                    className="bordar-2 border-gray-900 shadow-md"
                     {...register("confirmPassword", {
                       required: "Please confirm your password",
                       validate: (value) =>
@@ -252,7 +261,7 @@ export function RegisterForm() {
               {/* Login Link */}
               <div className="text-center text-sm">
                 <Link
-                  to="/loginasDoctor"
+                  to="/loginasAdmin"
                   className="text-primary hover:underline"
                 >
                   Already have an account? Login

@@ -71,15 +71,19 @@ export default function Login() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-200">
-      <Card className="w-[350px] shadow-lg">
+      <Card className="w-[500px] shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Login as Admin</CardTitle>
+          <CardTitle className="text-2xl text-center text-gray-800">
+            Login as Admin
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <>
-                <Label htmlFor="email">Admin Id</Label>
+                <Label htmlFor="email" className="text-gray-700">
+                  Admin Id
+                </Label>
                 <Input
                   id="adminId"
                   type="adminId"
@@ -106,7 +110,9 @@ export default function Login() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-gray-700">
+                Password
+              </Label>
               <div className="relative">
                 <Input
                   id="password"

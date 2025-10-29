@@ -6,8 +6,10 @@ import Home from "./pages/home";
 import Layout from "../layouts/Layout";
 import LoginAsUser from "./pages/loginasUser";
 import LoginAsDoctor from "./pages/loginasdoctor";
+import LoginAsAdmin from "./pages/loginasAdmin";
 import RegisterAsUser from "./pages/registerasUser";
 import RegisterAsDoctor from "./pages/registerasDoctor";
+import RegisterAsAdmin from "./pages/registerasAdmin";
 import Services from "./pages/services";
 import Profile from "./pages/profile";
 import DashboardofDoctor from "./pages/dashboard/doctor";
@@ -28,8 +30,10 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/loginasUser" element={<LoginAsUser />} />
               <Route path="/loginasDoctor" element={<LoginAsDoctor />} />
+              <Route path="/loginasAdmin" element={<LoginAsAdmin />} />
               <Route path="/registerasUser" element={<RegisterAsUser />} />
               <Route path="/registerasDoctor" element={<RegisterAsDoctor />} />
+              <Route path="/registerasAdmin" element={<RegisterAsAdmin />} />
               <Route
                 path="/services"
                 element={
