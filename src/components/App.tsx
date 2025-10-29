@@ -14,6 +14,7 @@ import Services from "./pages/services";
 import Profile from "./pages/profile";
 import DashboardofDoctor from "./pages/dashboard/doctor";
 import DashboardofPatient from "./pages/dashboard/patient";
+import DashboardofAdmin from "./pages/dashboard/admin";
 import ProfileofDoctor from "./pages/profile/profilefordoctor";
 import About from "./pages/about";
 import ScrollToTop from "./ScrollToTop";
@@ -74,6 +75,7 @@ export default function App() {
                   </ProtectedDashboard>
                 }
               />
+              <Route path="/admin" element={<DashboardofAdmin />} />
               <Route path="/about" element={<About />} />
             </Route>
           </Routes>

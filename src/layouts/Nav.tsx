@@ -48,6 +48,7 @@ export default function Navigation() {
   };
 
   const isAdmin = authuser.role === "admin";
+  console.log("🧞‍♂️  isAdmin --->", isAdmin);
   const isDoctor = authuser.role === "doctor";
 
   return (
@@ -67,72 +68,79 @@ export default function Navigation() {
           </div>
 
           {/* Navigation Links */}
-          {!isAdmin && (
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-8">
-                <Link
-                  to="/"
-                  className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
-                >
-                  Home
-                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
-                </Link>
-                <Link
-                  to="/services"
-                  className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
-                >
-                  Services
-                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
-                </Link>
 
-                {authuser.role !== "doctor" && (
-                  <Link
-                    to="/patient"
-                    className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
-                  >
-                    Dashboard
-                    <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
-                  </Link>
-                )}
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-8">
+              <Link
+                to="/"
+                className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
+              >
+                Home
+                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
+              </Link>
+              <Link
+                to="/services"
+                className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
+              >
+                Services
+                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
+              </Link>
 
-                {authuser.role === "doctor" && (
-                  <Link
-                    to="/doctor"
-                    className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
-                  >
-                    Dashboard
-                    <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
-                  </Link>
-                )}
+              {!isAdmin && !isDoctor && (
                 <Link
-                  to="/about"
+                  to="/patient"
                   className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
                 >
-                  About
+                  Dashboard
                   <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
                 </Link>
-              </div>
+              )}
+
+              {authuser.role === "doctor" && (
+                <Link
+                  to="/doctor"
+                  className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
+                >
+                  Dashboard
+                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={closeMobileMenu}
+                  className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
+                >
+                  Dashboard
+                </Link>
+              )}
+              <Link
+                to="/about"
+                className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
+              >
+                About
+                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
+              </Link>
             </div>
-          )}
+          </div>
 
           {/* Mobile menu button */}
-          {!isAdmin && (
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleMobileMenu}
-                aria-label="Toggle menu"
-              >
-                <span className="sr-only">Open main menu</span>
-                {isMobileMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
-              </Button>
-            </div>
-          )}
+
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleMobileMenu}
+              aria-label="Toggle menu"
+            >
+              <span className="sr-only">Open main menu</span>
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
 
           {/* Login Dropdown */}
           <div className="flex items-center">
@@ -277,7 +285,7 @@ export default function Navigation() {
             >
               Services
             </Link>
-            {authuser.role !== "doctor" && (
+            {!isAdmin && !isDoctor && (
               <Link
                 to="/patient"
                 onClick={closeMobileMenu}
@@ -289,6 +297,15 @@ export default function Navigation() {
             {authuser.role === "doctor" && (
               <Link
                 to="/doctor"
+                onClick={closeMobileMenu}
+                className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
+              >
+                Dashboard
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                to="/admin"
                 onClick={closeMobileMenu}
                 className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
               >
