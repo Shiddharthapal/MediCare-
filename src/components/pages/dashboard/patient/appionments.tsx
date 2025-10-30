@@ -502,6 +502,7 @@ export default function Appointments({
     setSelectedAppointment(appointmentWithStatus);
     setShowDetailsModal(true);
   };
+
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);

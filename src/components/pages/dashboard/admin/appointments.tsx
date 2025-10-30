@@ -481,14 +481,11 @@ export default function Appointments({
     }
   };
 
-  const handleViewDetails = (appointment: appointmentdata, status: string) => {
-    let appointmentWithStatus = {
-      ...appointment,
-      status: status,
-    };
-    setSelectedAppointment(appointmentWithStatus);
+  const handleViewDetails = (appointment: appointmentdata) => {
+    setSelectedAppointment(appointment);
     setShowDetailsModal(true);
   };
+
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);
@@ -971,9 +968,7 @@ export default function Appointments({
                                 <Button
                                   className="bg-pink-500 hover:bg-pink-600 text-white"
                                   onClick={() => {
-                                    handleJoinSession(appointment);
-
-                                    setIsActionsModalOpen(false);
+                                    handleJoinSession(apt);
                                   }}
                                 >
                                   <Video className="h-4 w-4 mr-2" />
@@ -984,9 +979,7 @@ export default function Appointments({
                                   variant="outline"
                                   className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
                                   onClick={() => {
-                                    handleViewReports(appointment);
-
-                                    setIsActionsModalOpen(false);
+                                    handleViewReports(apt);
                                   }}
                                 >
                                   <Upload className="h-4 w-4 mr-2" />
@@ -997,9 +990,7 @@ export default function Appointments({
                                   variant="outline"
                                   className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
                                   onClick={() => {
-                                    handleViewPrescription(appointment);
-
-                                    setIsActionsModalOpen(false);
+                                    handleViewPrescription(apt);
                                   }}
                                 >
                                   <FileText className="h-4 w-4 mr-2" />
@@ -1010,9 +1001,7 @@ export default function Appointments({
                                   variant="outline"
                                   className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
                                   onClick={() => {
-                                    handleViewDetails(appointment, status);
-
-                                    setIsActionsModalOpen(false);
+                                    handleViewDetails(apt);
                                   }}
                                 >
                                   <Info className="h-4 w-4 mr-2" />
@@ -1124,9 +1113,7 @@ export default function Appointments({
                             <Button
                               variant="outline"
                               className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                              onClick={() =>
-                                handleViewDetails(appointment, status)
-                              }
+                              onClick={() => handleViewDetails(appointment)}
                             >
                               <Info className="h-4 w-4 mr-2" />
                               See Details
@@ -1151,6 +1138,349 @@ export default function Appointments({
               No appointment data available
             </div>
           )}
+        </div>
+      )}
+
+      {showDetailsModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Appointment Details - {selectedAppointment.reasonForVisit}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDetailsModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600">
+                  {selectedAppointment.doctorName} •{" "}
+                  {formatDate(selectedAppointment.appointmentDate)}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Patient Information
+                  </h3>
+                  <p>
+                    <strong>Name:</strong> {selectedAppointment.patientName}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {selectedAppointment.patientEmail}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> {selectedAppointment.patientPhone}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Appointment Specifics
+                  </h3>
+                  <p>
+                    <strong>Date:</strong> {selectedAppointment.appointmentDate}
+                  </p>
+                  <p>
+                    <strong>Time:</strong> {selectedAppointment.appointmentTime}
+                  </p>
+                  <p>
+                    <strong>Consultation Type:</strong>{" "}
+                    {selectedAppointment.consultedType}
+                  </p>
+                  <p>
+                    <strong>Mode:</strong>{" "}
+                    {selectedAppointment.consultationType}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {selectedAppointment.status}
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Medical Details
+                  </h3>
+                  <p>
+                    <strong>Reason for Visit:</strong>{" "}
+                    {selectedAppointment.reasonForVisit}
+                  </p>
+                  <p>
+                    <strong>Symptoms:</strong> {selectedAppointment.symptoms}
+                  </p>
+                  <p>
+                    <strong>Previous Visit:</strong>{" "}
+                    {selectedAppointment.previousVisit}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Emergency Contact
+                  </h3>
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {selectedAppointment.emergencyContact}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> {selectedAppointment.emergencyPhone}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Other Information
+                  </h3>
+                  <p>
+                    <strong>Payment Method:</strong>{" "}
+                    {selectedAppointment.paymentMethod}
+                  </p>
+                  <p>
+                    <strong>Special Requests:</strong>{" "}
+                    {selectedAppointment.specialRequests}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prescription Modal */}
+      {showPrescriptionModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Prescription - {selectedAppointment.consultedType}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowPrescriptionModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-sm text-gray-600">
+                  {selectedAppointment.doctorName} •{" "}
+                  {formatDate(selectedAppointment.appointmentDate)}
+                </p>
+              </div>
+
+              {selectedAppointment.status === "completed" &&
+              prescriptionsData[selectedAppointment._id] ? (
+                <div className="space-y-4">
+                  {prescriptionsData[selectedAppointment._id].map(
+                    (prescription: any) => (
+                      <Card
+                        key={prescription.id}
+                        className="border-l-4 border-l-blue-500"
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-semibold text-gray-900">
+                              {prescription.medication}
+                            </h3>
+                            <Badge variant="outline">
+                              {prescription.dosage}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1 text-sm text-gray-600">
+                            <p>
+                              <strong>Frequency:</strong>{" "}
+                              {prescription.frequency}
+                            </p>
+                            <p>
+                              <strong>Duration:</strong> {prescription.duration}
+                            </p>
+                            <p>
+                              <strong>Instructions:</strong>{" "}
+                              {prescription.instructions}
+                            </p>
+                            <p>
+                              <strong>Prescribed:</strong>{" "}
+                              {prescription.prescribedDate}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Prescription Available
+                  </h3>
+                  <p className="text-gray-600">
+                    {selectedAppointment.status === "completed"
+                      ? "No prescription was provided for this appointment."
+                      : "Prescription will be available after the appointment is completed."}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reports Modal add */}
+      {showReportsModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Reports - {selectedAppointment.consultedType}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowReportsModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-sm text-gray-600">
+                  {selectedAppointment.doctorName} •{" "}
+                  {formatDate(selectedAppointment.appointmentDate)}
+                </p>
+              </div>
+
+              {/* Upload Section for Upcoming Appointments */}
+              {selectedAppointment.status !== "completed" && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">
+                    Upload Reports
+                  </h3>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600 mb-2">
+                      Upload medical reports, lab results, or other documents
+                      for your doctor
+                    </p>
+                    <p className="text-xs text-gray-500 mb-4">
+                      Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB per
+                      file)
+                    </p>
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      onChange={(e) =>
+                        e.target.files &&
+                        handleFileUpload(
+                          selectedAppointment._id,
+                          e.target.files
+                        )
+                      }
+                      className="hidden"
+                      id={`file-upload-${selectedAppointment._id}`}
+                    />
+                    <label
+                      htmlFor={`file-upload-${selectedAppointment._id}`}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
+                    >
+                      Choose Files
+                    </label>
+                  </div>
+
+                  {/* Show uploaded files with preview */}
+                  {uploadedFiles.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">
+                        Uploaded Files ({uploadedFiles.length}):
+                      </h4>
+                      <div className="space-y-3">
+                        {uploadedFiles.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                          >
+                            {/* File preview or icon */}
+                            <div className="flex-shrink-0">
+                              {file.preview ? (
+                                <img
+                                  src={file.preview || "/placeholder.svg"}
+                                  alt={file.name}
+                                  className="w-16 h-16 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                                  {getFileIcon(file)}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* File details */}
+                            <div className="flex-1 min-w-0 space-y-2">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Document Name
+                                </label>
+                                <Input
+                                  type="text"
+                                  value={file.documentName}
+                                  onChange={(e) =>
+                                    handleDocumentNameChange(
+                                      index,
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Enter document name"
+                                  className="w-full border-2 transition-all hover:border-primary/50 hover:shadow-lg"
+                                />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">
+                                  File: {file.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB •{" "}
+                                  {file.type || "Unknown type"}•{" "}
+                                  {new Date().toISOString().split("T")[0]}•{" "}
+                                  {new Date().toLocaleTimeString("en-US", {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Remove button */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveFile(index)}
+                              className="flex-shrink-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        onClick={handleSaveDocuments}
+                        className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                        disabled={isUploading}
+                      >
+                        {isUploading ? "Uploading..." : "Save Documents"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
