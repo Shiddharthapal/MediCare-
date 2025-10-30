@@ -36,25 +36,25 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     // Have a option to add admin registered
-    // if (!adminExistence) {
-    //   const idofadmin = new Admin({
-    //     Id: adminId,
-    //   });
-
-    //   await idofadmin.save();
-    // }
-
     if (!adminExistence) {
-      return new Response(
-        JSON.stringify({
-          message: "Invalid adminId",
-        }),
-        {
-          status: 404,
-          headers,
-        }
-      );
+      const idofadmin = new Admin({
+        Id: adminId,
+      });
+
+      await idofadmin.save();
     }
+
+    // if (!adminExistence) {
+    //   return new Response(
+    //     JSON.stringify({
+    //       message: "Invalid adminId",
+    //     }),
+    //     {
+    //       status: 404,
+    //       headers,
+    //     }
+    //   );
+    // }
 
     let token = null;
 

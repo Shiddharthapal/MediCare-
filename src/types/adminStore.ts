@@ -234,7 +234,8 @@ interface UserDetails {
   lastTreatmentDate?: Date;
   createdAt: Date;
 }
-interface User {
+interface UserRegister {
+  _id: string;
   userId: string;
   email: string;
   role: string;
@@ -242,7 +243,8 @@ interface User {
   createdAt: Date;
 }
 
-interface Doctor {
+interface DoctorRegister {
+  _id: string;
   userId: string;
   email: String;
   registrationNo: Number;
@@ -256,8 +258,8 @@ export interface AdminStore {
   email: String;
   name: string;
   adminId: string;
-  doctorRegister: Doctor[];
-  patientRegister: User[];
+  doctorRegister: DoctorRegister[];
+  patientRegister: UserRegister[];
   doctorDetails: DoctorDetails[];
   patientDetails: UserDetails[];
   createdAt: Date;

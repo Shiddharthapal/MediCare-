@@ -728,12 +728,13 @@ const userDetailsSchema = new mongoose.Schema({
   },
 });
 
-const userSchema = new mongoose.Schema({
+const UserRegisterSchema = new mongoose.Schema({
   userId: {
     type: String,
   },
   email: {
     type: String,
+    required: true,
   },
 
   role: {
@@ -748,12 +749,13 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const doctorSchema = new mongoose.Schema({
+const DoctorRegisterSchema = new mongoose.Schema({
   userId: {
     type: String,
   },
   email: {
     type: String,
+    required: true,
   },
   registrationNo: {
     type: Number,
@@ -786,11 +788,11 @@ const adminStoreSchema = new mongoose.Schema({
     unique: true,
   },
   doctorRegister: {
-    type: [doctorSchema],
+    type: [DoctorRegisterSchema],
     default: [],
   },
   patientRegister: {
-    type: [userSchema],
+    type: [UserRegisterSchema],
     default: [],
   },
   doctorDetails: {
