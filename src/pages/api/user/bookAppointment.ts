@@ -2,13 +2,13 @@ import type { APIRoute } from "astro";
 import connect from "@/lib/connection";
 import userDetails from "@/model/userDetails";
 import doctorDetails from "@/model/doctorDetails";
+import adminStore from "@/model/adminStore";
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
     "Content-Type": "application/json",
   };
   try {
     const body = await request.json();
-    console.log("🧞‍♂️body --->", body);
     const { formData, doctor, id } = body;
     const {
       appointmentDate,
@@ -23,7 +23,6 @@ export const POST: APIRoute = async ({ request }) => {
       paymentMethod,
       specialRequests,
     } = formData;
-    console.log("🧞‍♂️formData --->", formData);
 
     const { userId, name, specialist, gender } = doctor;
 
@@ -69,8 +68,6 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     const doctordetails = await doctorDetails.findOne({ userId: userId });
-    console.log("🧞‍♂️  doctordetails --->", doctordetails);
-    console.log("🧞‍♂️userdetails --->", userdetails);
 
     if (userdetails) {
       const newbookAppoinmentsDetails = {
@@ -99,7 +96,6 @@ export const POST: APIRoute = async ({ request }) => {
         prescription: {},
         createdAt: new Date(),
       };
-      console.log("newbookAppoinmentsDetails --->", newbookAppoinmentsDetails);
 
       const updatedUser = await userDetails.findByIdAndUpdate(
         userdetails._id,
@@ -111,7 +107,6 @@ export const POST: APIRoute = async ({ request }) => {
           runValidators: true,
         }
       );
-      console.log("🧞‍♂️  updatedUser --->", updatedUser);
 
       if (!doctordetails) {
         return new Response(
@@ -162,6 +157,119 @@ export const POST: APIRoute = async ({ request }) => {
         {
           new: true,
           runValidators: true,
+        }
+      );
+
+      //store the data to adminStore.patientDetails
+      await adminStore.updateMany(
+        {}, // Empty filter = update all admin documents
+        {
+          $push: {
+            "patientDetails.appointments": {
+              doctorpatinetId: uniqueId,
+              doctorUserId: doctor.userId,
+              doctorName: name,
+              doctorSpecialist: specialist,
+              doctorGender: gender,
+              doctorEmail: doctordetails?.email,
+              hospital: doctordetails?.hospital,
+              patientId: userdetails.userId,
+              patientName: userdetails?.name,
+              patientEmail: userdetails?.email || "",
+              patientPhone: userdetails?.contactNumber,
+              appointmentDate,
+              appointmentTime,
+              consultationType,
+              consultedType,
+              reasonForVisit,
+              symptoms,
+              previousVisit,
+              emergencyContact,
+              emergencyPhone,
+              paymentMethod,
+              specialRequests,
+              prescription: {},
+              createdAt: new Date(),
+            },
+          },
+        }
+      );
+
+      //store the data to adminStore.doctorDetails
+      await adminStore.updateMany(
+        {}, // Empty filter = update all admin documents
+        {
+          $push: {
+            "doctorDetails.appointments": {
+              doctorpatinetId: uniqueId,
+              doctorName: name,
+              doctorUserId: userId,
+              doctorSpecialist: specialist,
+              doctorEmail: "",
+              patientId: userdetails.userId,
+              patientName: userdetails.name,
+              patientEmail: userdetails.email || "",
+              patientPhone: userdetails.contactNumber,
+              patientGender: userdetails?.gender,
+              patientAge: userdetails?.age,
+              patientAddress: userdetails?.address,
+              patientBloodgroup: userdetails?.bloodGroup,
+              patientBithofday: userdetails?.dateOfBirth,
+              appointmentDate,
+              appointmentTime,
+              consultationType,
+              consultedType,
+              reasonForVisit,
+              symptoms,
+              previousVisit,
+              emergencyContact,
+              emergencyPhone,
+              paymentMethod,
+              specialRequests,
+              prescription: {},
+              createdAt: new Date(),
+            },
+          },
+        }
+      );
+
+      //store the appointment data to adminstore appointment
+      await adminStore.updateMany(
+        {}, // Empty filter = update all admin documents
+        {
+          $push: {
+            appointment: {
+              doctorpatinetId: uniqueId,
+              doctorUserId: doctor.userId,
+              doctorName: name,
+              doctorSpecialist: specialist,
+              doctorGender: gender,
+              doctorEmail: doctordetails?.email,
+              hospital: doctordetails?.hospital,
+              patientId: userdetails.userId,
+              patientName: userdetails?.name,
+              patientEmail: userdetails?.email || "",
+              patientPhone: userdetails?.contactNumber,
+              patientGender: userdetails?.gender,
+              patientAge: userdetails?.age,
+              patientAddress: userdetails?.address,
+              patientBloodgroup: userdetails?.bloodGroup,
+              patientBithofday: userdetails?.dateOfBirth,
+              appointmentDate,
+              appointmentTime,
+              consultationType,
+              consultedType,
+              reasonForVisit,
+              symptoms,
+              previousVisit,
+              emergencyContact,
+              emergencyPhone,
+              paymentMethod,
+              specialRequests,
+              prescription: {},
+              createdAt: new Date(),
+            },
+          },
         }
       );
 
