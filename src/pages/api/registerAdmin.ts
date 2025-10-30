@@ -3,6 +3,7 @@ import connect from "@/lib/connection";
 import jwt from "jsonwebtoken";
 import adminDetails from "@/model/adminDetails";
 import Admin from "@/model/admin";
+import adminStore from "@/model/adminStore";
 
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
@@ -61,12 +62,29 @@ export const POST: APIRoute = async ({ request }) => {
     const existingUser = await adminDetails.findOne({
       adminId: adminId,
     });
+
+    const existingUserdata = await adminStore.findOne({
+      adminId: adminId,
+    });
+
     console.log("🧞‍♂️  existingUser --->", existingUser);
 
     if (existingUser) {
       return new Response(
         JSON.stringify({
           message: "User already register",
+        }),
+        {
+          status: 400,
+          headers,
+        }
+      );
+    }
+
+    if (existingUserdata) {
+      return new Response(
+        JSON.stringify({
+          message: "User data already store",
         }),
         {
           status: 400,
@@ -87,6 +105,14 @@ export const POST: APIRoute = async ({ request }) => {
     admin.password = password;
 
     await admin.save();
+
+    const admindata = new adminStore({
+      email: email,
+      name: name,
+      adminId: adminId,
+    });
+
+    await admindata.save();
 
     // Generate JWT token
     token = jwt.sign(

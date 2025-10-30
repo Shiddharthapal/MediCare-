@@ -750,7 +750,10 @@ const adminStoreSchema = new mongoose.Schema({
     type: [userDetailsSchema],
     default: [],
   },
-  createdAt: Date,
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 export default mongoose.models.AdminStore ||
