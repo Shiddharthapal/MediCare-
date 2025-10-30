@@ -442,19 +442,16 @@ export default function Appointments({
   };
 
   //Cancel the appointment
-  const handleCancelAppointment = async (appointmentId: number) => {
-    console.log(`Cancelling appointment ${appointmentId}`);
-    let id = user?._id;
+  const handleCancelAppointment = async (appointment: AppointmentData) => {
     let appointmentDeleteResponse = await fetch(
-      "./api/user/deleteAppointment",
+      "./api/admin/deleteAppointment",
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          appointmentId: appointmentId,
-          userId: id,
+          appointment,
         }),
       }
     );
@@ -949,9 +946,7 @@ export default function Appointments({
                                   variant="outline"
                                   className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
                                   onClick={() => {
-                                    handleCancelAppointment(appointment._id);
-
-                                    setIsActionsModalOpen(false);
+                                    handleCancelAppointment(apt);
                                   }}
                                 >
                                   Cancel
@@ -961,9 +956,7 @@ export default function Appointments({
                                   variant="outline"
                                   className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
                                   onClick={() => {
-                                    handleRescheduleAppointment(appointment);
-
-                                    setIsActionsModalOpen(false);
+                                    handleRescheduleAppointment(apt);
                                   }}
                                 >
                                   Reschedule
@@ -1371,7 +1364,8 @@ export default function Appointments({
 
               <div className="mb-6">
                 <p className="text-sm text-gray-600">
-                  {selectedAppointment.doctorName} •{" "}
+                  {selectedAppointment.doctorName} •
+                  {selectedAppointment.patientName}•{" "}
                   {formatDate(selectedAppointment.appointmentDate)}
                 </p>
               </div>
@@ -1382,40 +1376,9 @@ export default function Appointments({
                   <h3 className="text-lg font-medium text-gray-900 mb-3">
                     Upload Reports
                   </h3>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 mb-2">
-                      Upload medical reports, lab results, or other documents
-                      for your doctor
-                    </p>
-                    <p className="text-xs text-gray-500 mb-4">
-                      Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB per
-                      file)
-                    </p>
-                    <input
-                      type="file"
-                      multiple
-                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                      onChange={(e) =>
-                        e.target.files &&
-                        handleFileUpload(
-                          selectedAppointment._id,
-                          e.target.files
-                        )
-                      }
-                      className="hidden"
-                      id={`file-upload-${selectedAppointment._id}`}
-                    />
-                    <label
-                      htmlFor={`file-upload-${selectedAppointment._id}`}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
-                    >
-                      Choose Files
-                    </label>
-                  </div>
 
                   {/* Show uploaded files with preview */}
-                  {uploadedFiles.length > 0 && (
+                  {uploadedFiles.length > 0 ? (
                     <div className="mt-4">
                       <h4 className="text-sm font-medium text-gray-900 mb-3">
                         Uploaded Files ({uploadedFiles.length}):
@@ -1440,62 +1403,26 @@ export default function Appointments({
                                 </div>
                               )}
                             </div>
-
-                            {/* File details */}
-                            <div className="flex-1 min-w-0 space-y-2">
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  Document Name
-                                </label>
-                                <Input
-                                  type="text"
-                                  value={file.documentName}
-                                  onChange={(e) =>
-                                    handleDocumentNameChange(
-                                      index,
-                                      e.target.value
-                                    )
-                                  }
-                                  placeholder="Enter document name"
-                                  className="w-full border-2 transition-all hover:border-primary/50 hover:shadow-lg"
-                                />
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500">
-                                  File: {file.name}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {(file.size / 1024 / 1024).toFixed(2)} MB •{" "}
-                                  {file.type || "Unknown type"}•{" "}
-                                  {new Date().toISOString().split("T")[0]}•{" "}
-                                  {new Date().toLocaleTimeString("en-US", {
-                                    hour: "numeric",
-                                    minute: "2-digit",
-                                    hour12: true,
-                                  })}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Remove button */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleRemoveFile(index)}
-                              className="flex-shrink-0"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
                           </div>
                         ))}
                       </div>
                       <Button
-                        onClick={handleSaveDocuments}
                         className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
                         disabled={isUploading}
                       >
                         {isUploading ? "Uploading..." : "Save Documents"}
                       </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No File Available
+                      </h3>
+                      <p className="text-gray-600">
+                        No file, reports, document was uploaded for this
+                        appointment.
+                      </p>
                     </div>
                   )}
                 </div>

@@ -290,6 +290,9 @@ const appointmentDataSchema = new mongoose.Schema(
     hospital: {
       type: String,
     },
+    patientId: {
+      type: String,
+    },
     patientName: {
       type: String,
     },

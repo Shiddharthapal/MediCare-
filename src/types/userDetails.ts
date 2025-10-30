@@ -101,6 +101,7 @@ interface AppointmentData {
   doctorEmail: string;
   hospital: string;
   patientName: string;
+  patientId: string;
   patientEmail: string;
   patientPhone: string;
   appointmentDate: string;
