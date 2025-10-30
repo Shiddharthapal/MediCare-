@@ -736,9 +736,11 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
 
-  user: {
+  role: {
     type: String,
-    default: "user",
+  },
+  status: {
+    type: String,
   },
   createdAt: {
     type: Date,
@@ -756,9 +758,11 @@ const doctorSchema = new mongoose.Schema({
   registrationNo: {
     type: Number,
   },
-  user: {
+  role: {
     type: String,
-    default: "doctor",
+  },
+  status: {
+    type: String,
   },
   createdAt: {
     type: Date,
@@ -783,9 +787,11 @@ const adminStoreSchema = new mongoose.Schema({
   },
   doctorRegister: {
     type: [doctorSchema],
+    default: [],
   },
   patientRegister: {
     type: [userSchema],
+    default: [],
   },
   doctorDetails: {
     type: [doctorDetailsSchema],

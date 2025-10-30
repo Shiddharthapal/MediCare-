@@ -238,6 +238,7 @@ interface User {
   userId: string;
   email: string;
   role: string;
+  status: string;
   createdAt: Date;
 }
 
@@ -245,6 +246,7 @@ interface Doctor {
   userId: string;
   email: String;
   registrationNo: Number;
+  status: string;
   role: String;
   createdAt: Date;
 }

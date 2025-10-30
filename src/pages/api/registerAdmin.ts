@@ -67,8 +67,6 @@ export const POST: APIRoute = async ({ request }) => {
       adminId: adminId,
     });
 
-    console.log("🧞‍♂️  existingUser --->", existingUser);
-
     if (existingUser) {
       return new Response(
         JSON.stringify({
