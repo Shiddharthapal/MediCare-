@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import connect from "@/lib/connection";
 import UserDetails from "@/model/userDetails";
 import User from "@/model/user";
+import adminStore from "@/model/adminStore";
 
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
@@ -9,7 +10,6 @@ export const POST: APIRoute = async ({ request }) => {
   };
   try {
     const body = await request.json();
-    console.log("🧞‍♂️body --->", body);
     const { formData, id } = body;
     const {
       name,
@@ -73,6 +73,29 @@ export const POST: APIRoute = async ({ request }) => {
       });
 
       await userdetails.save();
+      await adminStore.updateMany(
+        {}, // Empty filter = update all admin documents
+        {
+          $push: {
+            patientDetails: {
+              userId: id,
+              email: userdata?.email,
+              name,
+              fatherName,
+              address,
+              dateOfBirth,
+              contactNumber,
+              age,
+              gender,
+              bloodGroup,
+              weight,
+              height,
+              status: "active",
+              createdAt: new Date(),
+            },
+          },
+        }
+      );
     } else {
       userdetails.name = name || userdetails.name;
       userdetails.email = userdata?.email || userdetails.email;
@@ -87,6 +110,30 @@ export const POST: APIRoute = async ({ request }) => {
       userdetails.height = height || userdetails.height;
 
       await userdetails.save();
+
+      await adminStore.updateMany(
+        {}, // Empty filter = update all admin documents
+        {
+          $push: {
+            patientDetails: {
+              userId: id,
+              email: userdata?.email,
+              name: name || userdetails.name,
+              fatherName: fatherName || userdetails.fatherName,
+              address: address || userdetails.address,
+              dateOfBirth: dateOfBirth || userdetails.dateOfBirth,
+              contactNumber: contactNumber || userdetails.contactNumber,
+              age: age || userdetails.age,
+              gender: gender || userdetails.gender,
+              bloodGroup: bloodGroup || userdetails.bloodGroup,
+              weight: weight || userdetails.weight,
+              height: height || userdetails.height,
+              status: "active",
+              createdAt: new Date(),
+            },
+          },
+        }
+      );
     }
 
     //console.log("=>", userdetails);

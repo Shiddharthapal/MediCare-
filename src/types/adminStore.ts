@@ -186,6 +186,53 @@ interface AppointmentData {
   createdAt: Date;
 }
 
+interface Appointment {
+  _id?: string;
+
+  // Doctor Information
+  doctorpatinetId?: string;
+  doctorUserId?: string;
+  doctorName?: string;
+  doctorSpecialist?: string;
+  doctorGender?: string;
+  doctorEmail?: string;
+  hospital?: string;
+
+  // Patient Information
+  patientId?: string;
+  patientName: string;
+  patientEmail?: string;
+  patientPhone: string;
+  patientGender?: string;
+  patientAge?: number;
+  patientAddress?: string;
+  patientBloodgroup?: string;
+  patientBithofday?: Date;
+
+  // Appointment Details
+  appointmentDate: string;
+  appointmentTime: string;
+  status?: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit?: string;
+  symptoms: string;
+  previousVisit: string;
+
+  // Emergency Contact
+  emergencyContact?: string;
+  emergencyPhone?: string;
+
+  // Payment & Additional
+  paymentMethod: string;
+  specialRequests?: string;
+
+  // Medical Records
+  prescription?: Prescription;
+  document?: FileUpload[];
+  // Timestamp
+  createdAt?: Date;
+}
 interface DoctorDetails {
   _id: string;
   userId: string;
@@ -210,6 +257,7 @@ interface DoctorDetails {
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
   prescription?: Prescription;
+  status?: string;
   createdAt: Date;
 }
 
@@ -232,6 +280,7 @@ interface UserDetails {
   upload: FileUpload[];
   healthRecord: HealthRecord[];
   lastTreatmentDate?: Date;
+  status?: string;
   createdAt: Date;
 }
 interface UserRegister {
@@ -262,5 +311,6 @@ export interface AdminStore {
   patientRegister: UserRegister[];
   doctorDetails: DoctorDetails[];
   patientDetails: UserDetails[];
+  appointment: Appointment[];
   createdAt: Date;
 }
