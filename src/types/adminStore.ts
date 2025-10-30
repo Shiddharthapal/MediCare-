@@ -235,14 +235,14 @@ interface UserDetails {
   createdAt: Date;
 }
 interface User {
-  _id: string;
+  userId: string;
   email: string;
   role: string;
   createdAt: Date;
 }
 
 interface Doctor {
-  _id: String;
+  userId: string;
   email: String;
   registrationNo: Number;
   role: String;

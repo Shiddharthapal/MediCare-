@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { string } from "astro:schema";
 const VitalSignSchema = new mongoose.Schema({
   bloodPressure: {
     type: String,
@@ -727,6 +728,44 @@ const userDetailsSchema = new mongoose.Schema({
   },
 });
 
+const userSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+  },
+  email: {
+    type: String,
+  },
+
+  user: {
+    type: String,
+    default: "user",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const doctorSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+  },
+  email: {
+    type: String,
+  },
+  registrationNo: {
+    type: Number,
+  },
+  user: {
+    type: String,
+    default: "doctor",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const adminStoreSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -741,6 +780,12 @@ const adminStoreSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide a admin id"],
     unique: true,
+  },
+  doctorRegister: {
+    type: [doctorSchema],
+  },
+  patientRegister: {
+    type: [userSchema],
   },
   doctorDetails: {
     type: [doctorDetailsSchema],
