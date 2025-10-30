@@ -245,21 +245,30 @@ export default function Navigation() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Users className="mr-2 h-4 w-4" />
-                    <Link to="/loginasUser" className="text-gray-900">
-                      <p>Patient</p>
+                  <DropdownMenuItem className="cursor-pointer" asChild>
+                    <Link
+                      to="/loginasUser"
+                      className="flex items-center text-gray-900"
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>Patient</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer">
-                    <Shield className="mr-2 h-4 w-4" />
-                    <Link to="/loginasDoctor">
-                      <p>Doctor</p>
+                    <Link
+                      to="/loginasDoctor"
+                      className="flex items-center text-gray-900"
+                    >
+                      <Shield className="mr-4 h-4 w-4" />
+                      <span>Doctor</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer">
-                    <Users className="mr-2 h-4 w-4" />
-                    <Link to="/loginasAdmin" className="text-gray-900">
+                    <Link
+                      to="/loginasAdmin"
+                      className="flex items-center text-gray-900"
+                    >
+                      <Users className="mr-4 h-4 w-4" />
                       <p>Admin</p>
                     </Link>
                   </DropdownMenuItem>

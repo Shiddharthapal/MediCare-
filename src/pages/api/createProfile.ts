@@ -73,6 +73,8 @@ export const POST: APIRoute = async ({ request }) => {
       });
 
       await userdetails.save();
+
+      //store patientdetails/userdetailasa to admin when user create profile
       await adminStore.updateMany(
         {}, // Empty filter = update all admin documents
         {
@@ -111,6 +113,7 @@ export const POST: APIRoute = async ({ request }) => {
 
       await userdetails.save();
 
+      //store patientdetails/userdetailasa to admin when user edit profile details
       await adminStore.updateMany(
         {}, // Empty filter = update all admin documents
         {
