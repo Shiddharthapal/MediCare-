@@ -48,7 +48,6 @@ export default function Navigation() {
   };
 
   const isAdmin = authuser.role === "admin";
-  console.log("🧞‍♂️  isAdmin --->", isAdmin);
   const isDoctor = authuser.role === "doctor";
 
   return (

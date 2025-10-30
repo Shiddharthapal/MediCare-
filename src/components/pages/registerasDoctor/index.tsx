@@ -60,11 +60,10 @@ export default function Register() {
       }
       dispatch(
         loginSuccess({
-          _id: result.userId,
+          _id: result._id,
           email: data.email,
           token: result.token,
           role: "doctor",
-          createdAt: result.createdAt || new Date().toISOString(),
         })
       );
 
