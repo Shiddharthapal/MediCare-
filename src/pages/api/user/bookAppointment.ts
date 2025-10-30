@@ -127,6 +127,7 @@ export const POST: APIRoute = async ({ request }) => {
       const newbookAppoinmentsDataforDoctor = {
         doctorpatinetId: uniqueId,
         doctorName: name,
+        doctorUserId: userId,
         doctorSpecialist: specialist,
         doctorEmail: "",
         patientId: userdetails.userId,
@@ -152,10 +153,7 @@ export const POST: APIRoute = async ({ request }) => {
         prescription: {},
         createdAt: new Date(),
       };
-      console.log(
-        "🧞‍♂️newbookAppoinmentsDataforDoctor --->",
-        newbookAppoinmentsDataforDoctor
-      );
+
       const updateDoctor = await doctorDetails.findByIdAndUpdate(
         doctordetails._id,
         {

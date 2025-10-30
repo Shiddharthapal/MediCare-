@@ -95,6 +95,7 @@ interface AppointmentData {
   doctorpatinetId: string;
   doctorName: string;
   doctorSpecialist: string;
+  doctorUserId: string;
   doctorEmail: string;
   patientId: string;
   patientName: string;

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import bcrypt from "bcryptjs";
 const VitalSignSchema = new mongoose.Schema({
   bloodPressure: {
     type: String,
@@ -64,6 +64,31 @@ const PaymentMethods = new mongoose.Schema({
   },
   rocketNumber: {
     type: String,
+  },
+});
+
+const HealthRecord = new mongoose.Schema({
+  weight: {
+    type: String,
+  },
+  bloodPressure: {
+    type: String,
+  },
+  heartRate: {
+    type: String,
+  },
+  date: {
+    type: String,
+  },
+  temperature: {
+    type: String,
+  },
+  notes: {
+    type: String,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
   },
 });
 
@@ -212,7 +237,6 @@ const PrescriptionSchema = new mongoose.Schema({
     default: Date.now(),
   },
 });
-
 const practiceSettingData = new mongoose.Schema({
   practiceName: {
     type: String,
@@ -256,7 +280,6 @@ const practiceSettingData = new mongoose.Schema({
     },
   },
 });
-
 const AppointmentSlotSchema = new mongoose.Schema(
   {
     enabled: {
@@ -275,7 +298,70 @@ const AppointmentSlotSchema = new mongoose.Schema(
   { _id: false } // Disable _id for subdocuments
 );
 
-const appointmentDataSchema = new mongoose.Schema(
+const CardMethodSchema = new mongoose.Schema(
+  {
+    cardholderName: {
+      type: String,
+    },
+    type: {
+      type: String,
+    },
+    cardNumber: {
+      type: String,
+    },
+    expiryMonth: {
+      type: String,
+    },
+    expiryYear: {
+      type: String,
+    },
+    cvv: {
+      type: String,
+    },
+    isPrimary: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: true }
+);
+
+// Mobile Banking Method Sub-Schema
+const MobileBankingMethodSchema = new mongoose.Schema(
+  {
+    provider: {
+      type: String,
+    },
+    mobileNumber: {
+      type: String,
+    },
+    accountName: {
+      type: String,
+    },
+    isPrimary: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: true }
+);
+const PaymentMethodsSchema = new mongoose.Schema(
+  {
+    cardMethods: {
+      type: [CardMethodSchema],
+      default: [],
+    },
+    mobileBankingMethods: {
+      type: [MobileBankingMethodSchema],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const AppointmentDataDoctorSchema = new mongoose.Schema(
   {
     doctorpatinetId: {
       type: String,
@@ -376,7 +462,100 @@ const appointmentDataSchema = new mongoose.Schema(
   { _id: true }
 );
 
-// This will auto-generate _id for each appointment
+const appointmentDataSchema = new mongoose.Schema(
+  {
+    doctorpatinetId: {
+      type: String,
+    },
+    doctorUserId: {
+      type: String,
+    },
+    doctorName: {
+      type: String,
+    },
+    doctorSpecialist: {
+      type: String,
+    },
+    doctorGender: {
+      type: String,
+    },
+    doctorEmail: {
+      type: String,
+    },
+    hospital: {
+      type: String,
+    },
+    patientId: {
+      type: String,
+    },
+    patientName: {
+      type: String,
+    },
+    patientEmail: {
+      type: String,
+    },
+    patientPhone: {
+      type: String,
+    },
+    appointmentDate: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    appointmentTime: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    status: {
+      type: String,
+      default: "pending",
+    },
+    consultationType: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    consultedType: {
+      type: String,
+      required: true,
+    },
+    reasonForVisit: {
+      type: String,
+    },
+    symptoms: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    previousVisit: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    emergencyContact: {
+      type: String,
+    },
+    emergencyPhone: {
+      type: String,
+    },
+    paymentMethod: {
+      type: String,
+      required: true, // Fixed: was 'require'
+    },
+    specialRequests: {
+      type: String,
+    },
+    prescription: {
+      type: PrescriptionSchema,
+      default: {},
+    },
+    document: {
+      type: [FileUploadSchema],
+      default: [],
+    },
+    createdAt: {
+      type: Date,
+    },
+  },
+  { _id: true }
+);
+
 const doctorDetailsSchema = new mongoose.Schema({
   userId: {
     type: String,
@@ -452,19 +631,9 @@ const doctorDetailsSchema = new mongoose.Schema({
   availableSlots: {
     type: Map,
     of: AppointmentSlotSchema,
-    default: () =>
-      new Map([
-        ["Monday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Tuesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Wednesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Thursday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Friday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Saturday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Sunday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-      ]),
   },
   appointments: {
-    type: [appointmentDataSchema],
+    type: [AppointmentDataDoctorSchema],
     default: [],
   },
   consultationModes: {
@@ -492,7 +661,97 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
 });
 
-const doctorDetails =
-  mongoose.models.DoctorDetails ||
-  mongoose.model("DoctorDetails", doctorDetailsSchema);
-export default doctorDetails;
+const userDetailsSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+  },
+  email: {
+    type: String,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  fatherName: {
+    type: String,
+  },
+  address: {
+    type: String,
+    required: true,
+  },
+  dateOfBirth: {
+    type: Date,
+  },
+  contactNumber: {
+    type: String,
+    required: true,
+  },
+  age: {
+    type: Number,
+    required: true,
+  },
+  gender: {
+    type: String,
+  },
+  bloodGroup: {
+    type: String,
+  },
+  weight: {
+    type: Number,
+  },
+  height: {
+    type: Number,
+  },
+  appointments: {
+    type: [appointmentDataSchema], // Changed from [String] to [appointmentDataSchema]
+    default: [], // Optional: set default empty array
+  },
+  payment: {
+    type: PaymentMethodsSchema,
+  },
+  upload: {
+    type: [FileUploadSchema],
+    default: [],
+  },
+  healthRecord: {
+    type: [HealthRecord],
+    default: [],
+  },
+  lastTreatmentDate: {
+    type: Date,
+    default: Date.now,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const adminStoreSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: [true, "Please provide an email"],
+    unique: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  adminId: {
+    type: String,
+    required: [true, "Please provide a admin id"],
+    unique: true,
+  },
+  doctorDetails: {
+    type: [doctorDetailsSchema],
+    default: [],
+  },
+  patientDetails: {
+    type: [userDetailsSchema],
+    default: [],
+  },
+  createdAt: Date,
+});
+
+export default mongoose.models.AdminStore ||
+  mongoose.model("AdminStore", adminStoreSchema);
