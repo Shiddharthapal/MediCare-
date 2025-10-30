@@ -159,7 +159,7 @@ export default function Dashboard() {
   const file = location.state?.file;
   const [currentPage, setCurrentPage] = useState(file || "dashboard");
   const [collapsed, setCollapsed] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [countAppointment, setCountAppointment] = useState(Number || 0);
   const [countDoctor, setCountDoctor] = useState(Number || 0);
   const [countPatient, setCountPatient] = useState(Number || 0);
   const [countNewDoctor, setCountNewDoctor] = useState(Number || 0);
@@ -176,7 +176,7 @@ export default function Dashboard() {
     {
       icon: Calendar,
       label: "Appointments",
-      value: 0,
+      value: countAppointment,
       color: "bg-red-100",
       iconColor: "text-red-500",
     },
@@ -309,6 +309,10 @@ export default function Dashboard() {
   const allAppointments = useMemo(() => {
     return patientData.flatMap((patient) => patient.appointments || []);
   }, [patientData]);
+
+  useEffect(() => {
+    setCountAppointment(allAppointments.length);
+  }, [allAppointments]);
 
   const getTop7Appointments = useMemo(() => {
     if (!allAppointments || allAppointments.length === 0) return [];
