@@ -75,6 +75,7 @@ export const POST: APIRoute = async ({ request }) => {
           "your-secret-key",
         { expiresIn: "24h" }
       );
+
       let _id = users._id;
       return new Response(
         JSON.stringify({
@@ -110,7 +111,7 @@ export const POST: APIRoute = async ({ request }) => {
         email: email,
         user: "doctor",
         password,
-        registrationNo,
+        registrationNo: registrationNo,
       });
       await doctor.save();
 
