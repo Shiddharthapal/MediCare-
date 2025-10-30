@@ -114,14 +114,19 @@ interface appointmentdata {
 
 interface AppointmentData {
   _id: string;
+  doctorpatinetId: string;
   doctorUserId: string;
   doctorName: string;
   doctorSpecialist: string;
+  doctorGender: string;
+  doctorEmail: string;
+  hospital: string;
   patientName: string;
   patientEmail: string;
   patientPhone: string;
   appointmentDate: string;
   appointmentTime: string;
+  status: string;
   consultationType: string;
   consultedType: string;
   reasonForVisit: string;
@@ -132,8 +137,7 @@ interface AppointmentData {
   paymentMethod: string;
   specialRequests: string;
   prescription: Prescription;
-  status: string;
-  meetLink?: string;
+  createdAt: Date;
 }
 
 interface UserDetails {
@@ -324,7 +328,7 @@ export default function Appointments({
     appointmentdata[]
   > | null>(null);
   const [selectedAppointment, setSelectedAppointment] =
-    useState<appointmentdata | null>(null);
+    useState<AppointmentData | null>(null);
 
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
@@ -1159,7 +1163,6 @@ export default function Appointments({
               </div>
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
-                  {selectedAppointment.doctorName} •{" "}
                   {formatDate(selectedAppointment.appointmentDate)}
                 </p>
               </div>
@@ -1176,6 +1179,24 @@ export default function Appointments({
                   </p>
                   <p>
                     <strong>Phone:</strong> {selectedAppointment.patientPhone}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Doctor Information
+                  </h3>
+                  <p>
+                    <strong>Name:</strong> {selectedAppointment.doctorName}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {selectedAppointment.doctorEmail}
+                  </p>
+                  <p>
+                    <strong>Specialist:</strong>{" "}
+                    {selectedAppointment.doctorSpecialist}
+                  </p>
+                  <p>
+                    <strong>Hospital:</strong> {selectedAppointment.hospital}
                   </p>
                 </div>
                 <div>
