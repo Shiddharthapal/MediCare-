@@ -23,6 +23,7 @@ export const POST: APIRoute = async ({ request }) => {
       paymentMethod,
       specialRequests,
     } = formData;
+    console.log("🧞‍♂️  formData --->", formData);
 
     const { userId, name, specialist, gender } = doctor;
 
@@ -161,11 +162,11 @@ export const POST: APIRoute = async ({ request }) => {
       );
 
       //store the data to adminStore.patientDetails
-      await adminStore.updateMany(
-        {}, // Empty filter = update all admin documents
+      await adminStore.updateOne(
+        { "patientDetails.userId": userdetails?.userId }, // Empty filter = update all admin documents
         {
           $push: {
-            "patientDetails.appointments": {
+            "patientDetails.$[patient].appointments": {
               doctorpatinetId: uniqueId,
               doctorUserId: doctor.userId,
               doctorName: name,
@@ -192,15 +193,20 @@ export const POST: APIRoute = async ({ request }) => {
               createdAt: new Date(),
             },
           },
+        },
+        {
+          arrayFilters: [
+            { "patient.userId": userdetails.userId }, // Match all patients with this ID
+          ],
         }
       );
 
       //store the data to adminStore.doctorDetails
-      await adminStore.updateMany(
-        {}, // Empty filter = update all admin documents
+      await adminStore.updateOne(
+        { "doctorDetails.userId": doctordetails.userId }, // Empty filter = update all admin documents
         {
           $push: {
-            "doctorDetails.appointments": {
+            "doctorDetails.$[doctor].appointments": {
               doctorpatinetId: uniqueId,
               doctorName: name,
               doctorUserId: userId,
@@ -230,6 +236,11 @@ export const POST: APIRoute = async ({ request }) => {
               createdAt: new Date(),
             },
           },
+        },
+        {
+          arrayFilters: [
+            { "doctor.userId": doctordetails.userId }, // Match all patients with this ID
+          ],
         }
       );
 
