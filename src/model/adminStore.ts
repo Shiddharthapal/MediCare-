@@ -935,6 +935,14 @@ const adminStoreSchema = new mongoose.Schema({
     type: [AdminAppointmentSchema],
     default: [],
   },
+  upload: {
+    type: [FileUploadSchema],
+    default: [],
+  },
+  healthRecord: {
+    type: [HealthRecord],
+    default: [],
+  },
   createdAt: {
     type: Date,
     default: Date.now,

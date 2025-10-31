@@ -312,5 +312,7 @@ export interface AdminStore {
   doctorDetails: DoctorDetails[];
   patientDetails: UserDetails[];
   appointment: Appointment[];
+  upload: FileUpload[];
+  healthRecord: HealthRecord[];
   createdAt: Date;
 }
