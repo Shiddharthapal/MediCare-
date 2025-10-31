@@ -105,7 +105,7 @@ export const POST: APIRoute = async ({ request }) => {
       { "patientDetails.userId": existingUser?.userId }, // Empty filter = update all admin documents
       {
         $push: {
-          "patientDetails.healthRecord": {
+          "patientDetails.$[patient].healthRecord": {
             weight: formData.weight,
             bloodPressure: formData.bloodPressure,
             heartRate: formData.heartRate,
@@ -115,6 +115,11 @@ export const POST: APIRoute = async ({ request }) => {
             createdAt: new Date(),
           },
         },
+      },
+      {
+        arrayFilters: [
+          { "patient.userId": existingUser.userId }, // Match all patients with this ID
+        ],
       }
     );
 
