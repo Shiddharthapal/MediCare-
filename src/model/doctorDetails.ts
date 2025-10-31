@@ -135,7 +135,13 @@ const FileUploadSchema = new mongoose.Schema({
 
   uploadedAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
   doctorName: {
     type: String,
@@ -155,11 +161,24 @@ const FileUploadSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
+
   updatedAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 
@@ -209,7 +228,13 @@ const PrescriptionSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 
@@ -371,6 +396,13 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
+      default: () => {
+        // Bangladesh is UTC+6
+        const now = new Date();
+        const offset = 6 * 60; // 6 hours in minutes
+        const localTime = new Date(now.getTime() + offset * 60 * 1000);
+        return localTime;
+      },
     },
   },
   { _id: true }
@@ -488,7 +520,13 @@ const doctorDetailsSchema = new mongoose.Schema({
 
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 

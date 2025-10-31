@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import { string } from "astro:schema";
 const VitalSignSchema = new mongoose.Schema({
   bloodPressure: {
     type: String,
@@ -89,7 +87,13 @@ const HealthRecord = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 
@@ -161,7 +165,13 @@ const FileUploadSchema = new mongoose.Schema({
 
   uploadedAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
   doctorName: {
     type: String,
@@ -181,11 +191,24 @@ const FileUploadSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
+
   updatedAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 
@@ -235,7 +258,13 @@ const PrescriptionSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 const practiceSettingData = new mongoose.Schema({
@@ -458,6 +487,13 @@ const AppointmentDataDoctorSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
+      default: () => {
+        // Bangladesh is UTC+6
+        const now = new Date();
+        const offset = 6 * 60; // 6 hours in minutes
+        const localTime = new Date(now.getTime() + offset * 60 * 1000);
+        return localTime;
+      },
     },
   },
   { _id: true }
@@ -552,6 +588,13 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
+      default: () => {
+        // Bangladesh is UTC+6
+        const now = new Date();
+        const offset = 6 * 60; // 6 hours in minutes
+        const localTime = new Date(now.getTime() + offset * 60 * 1000);
+        return localTime;
+      },
     },
   },
   { _id: true }
@@ -674,6 +717,13 @@ const AdminAppointmentSchema = new mongoose.Schema(
     // Timestamp
     createdAt: {
       type: Date,
+      default: () => {
+        // Bangladesh is UTC+6
+        const now = new Date();
+        const offset = 6 * 60; // 6 hours in minutes
+        const localTime = new Date(now.getTime() + offset * 60 * 1000);
+        return localTime;
+      },
     },
   },
   { _id: true }
@@ -742,6 +792,13 @@ const RescheduleAppointmentSchema = new mongoose.Schema(
     prevcreatedAt: { type: Date },
     createdAt: {
       type: Date,
+      default: () => {
+        // Bangladesh is UTC+6
+        const now = new Date();
+        const offset = 6 * 60; // 6 hours in minutes
+        const localTime = new Date(now.getTime() + offset * 60 * 1000);
+        return localTime;
+      },
     },
   },
   {
@@ -854,7 +911,13 @@ const doctorDetailsSchema = new mongoose.Schema({
 
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 
@@ -916,14 +979,26 @@ const userDetailsSchema = new mongoose.Schema({
   },
   lastTreatmentDate: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
   status: {
     type: String,
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 
@@ -944,7 +1019,13 @@ const UserRegisterSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 
@@ -967,7 +1048,13 @@ const DoctorRegisterSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 
@@ -1020,7 +1107,13 @@ const adminStoreSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Bangladesh is UTC+6
+      const now = new Date();
+      const offset = 6 * 60; // 6 hours in minutes
+      const localTime = new Date(now.getTime() + offset * 60 * 1000);
+      return localTime;
+    },
   },
 });
 
