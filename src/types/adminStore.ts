@@ -233,6 +233,66 @@ interface Appointment {
   // Timestamp
   createdAt?: Date;
 }
+
+interface RescheduleAppointment {
+  _id?: string;
+
+  // Doctor Information
+  doctorpatinetId?: string;
+  doctorUserId?: string;
+  doctorName?: string;
+  doctorSpecialist?: string;
+  doctorGender?: string;
+  doctorEmail?: string;
+  hospital?: string;
+
+  // Patient Information
+  patientId?: string;
+  patientName: string;
+  patientEmail?: string;
+  patientPhone: string;
+  patientGender?: string;
+  patientAge?: number;
+  patientAddress?: string;
+  patientBloodgroup?: string;
+  patientBithofday?: Date;
+
+  // Appointment Details
+  appointmentDate: string;
+  prevappointmentDate?: string;
+  appointmentTime: string;
+  prevappointmentTime?: string;
+  status?: string;
+  consultationType: string;
+  prevconsultationType?: string;
+  consultedType: string;
+  prevconsultedType?: string;
+  reasonForVisit: string;
+  prevreasonForVisit?: string;
+  symptoms: string;
+  prevsymptoms?: string;
+  previousVisit: string;
+
+  // Emergency Contact
+  emergencyContact?: string;
+  prevemergencyContact?: string;
+  emergencyPhone?: string;
+  prevemergencyPhone?: string;
+
+  // Payment & Additional
+  paymentMethod: string;
+  prevpaymentMethod?: string;
+  specialRequests?: string;
+  prevspecialRequests?: string;
+
+  // Medical Records
+  prescription?: Prescription;
+  document?: FileUpload[];
+  // Timestamp
+  prevcreatedAt?: Date;
+  createdAt?: Date;
+}
+
 interface DoctorDetails {
   _id: string;
   userId: string;
@@ -312,6 +372,7 @@ export interface AdminStore {
   doctorDetails: DoctorDetails[];
   patientDetails: UserDetails[];
   appointment: Appointment[];
+  rescheduleAppointment: RescheduleAppointment[];
   upload: FileUpload[];
   healthRecord: HealthRecord[];
   createdAt: Date;

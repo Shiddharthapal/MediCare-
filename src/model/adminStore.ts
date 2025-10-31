@@ -679,6 +679,77 @@ const AdminAppointmentSchema = new mongoose.Schema(
   { _id: true }
 );
 
+const RescheduleAppointmentSchema = new mongoose.Schema(
+  {
+    // Doctor Information
+    doctorpatinetId: {
+      type: String,
+    },
+    doctorUserId: { type: String },
+    doctorName: { type: String },
+    doctorSpecialist: { type: String },
+    doctorGender: { type: String },
+    doctorEmail: { type: String },
+    hospital: { type: String },
+
+    // Patient Information
+    patientId: { type: String },
+    patientName: { type: String },
+    patientEmail: { type: String },
+    patientPhone: { type: String },
+    patientGender: { type: String },
+    patientAge: { type: Number },
+    patientAddress: { type: String },
+    patientBloodgroup: { type: String },
+    patientBithofday: { type: Date },
+
+    // Appointment Details
+    appointmentDate: { type: String },
+    prevappointmentDate: { type: String },
+    appointmentTime: { type: String },
+    prevappointmentTime: { type: String },
+    status: {
+      type: String,
+      default: "pending",
+    },
+    consultationType: { type: String },
+    prevconsultationType: { type: String },
+    consultedType: { type: String },
+    prevconsultedType: { type: String },
+    reasonForVisit: { type: String },
+    prevreasonForVisit: { type: String },
+    symptoms: { type: String },
+    prevsymptoms: { type: String },
+    previousVisit: { type: String },
+
+    // Emergency Contact
+    emergencyContact: { type: String },
+    prevemergencyContact: { type: String },
+    emergencyPhone: { type: String },
+    prevemergencyPhone: { type: String },
+
+    // Payment & Additional
+    paymentMethod: { type: String },
+    prevpaymentMethod: { type: String },
+    specialRequests: { type: String },
+    prevspecialRequests: { type: String },
+
+    // Medical Records
+    prescription: { type: PrescriptionSchema },
+    document: [FileUploadSchema],
+
+    // Timestamp
+    prevcreatedAt: { type: Date },
+    createdAt: {
+      type: Date,
+    },
+  },
+  {
+    timestamps: true, // This automatically adds createdAt and updatedAt
+    _id: true,
+  }
+);
+
 const doctorDetailsSchema = new mongoose.Schema({
   userId: {
     type: String,
@@ -933,6 +1004,10 @@ const adminStoreSchema = new mongoose.Schema({
   },
   appointment: {
     type: [AdminAppointmentSchema],
+    default: [],
+  },
+  rescheduleAppointment: {
+    type: [RescheduleAppointmentSchema],
     default: [],
   },
   upload: {
