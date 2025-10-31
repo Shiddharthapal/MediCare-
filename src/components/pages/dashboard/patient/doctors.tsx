@@ -481,10 +481,14 @@ export default function Doctors({
                       // Check if availableSlots exists
                       if (!doctor?.availableSlots) return false;
 
-                      // Check if any day has enabled slots
-                      return Object.values(doctor.availableSlots).some(
-                        (slot) => slot?.enabled === true
-                      );
+                      // Get current day name (e.g., "Friday")
+                      const today = new Date().toLocaleDateString("en-US", {
+                        weekday: "long",
+                      });
+
+                      // Check if today's slot exists and is enabled
+                      const todaySlot = doctor?.availableSlots[today];
+                      return todaySlot?.enabled === true;
                     }).length
                   }
                 </p>
