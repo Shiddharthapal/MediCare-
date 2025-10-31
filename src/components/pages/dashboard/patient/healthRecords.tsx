@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -57,8 +57,7 @@ export default function HealthRecords({
         throw new Error("Failed to fetch user data");
       }
       let result = await response.json();
-      console.log("🧞‍♂️  result --->", result);
-      setRecords(result?.userdetails?.healthRecords);
+      setRecords(result?.userdetails?.healthRecord);
     };
     fetchData();
   }, [user]);
@@ -80,7 +79,8 @@ export default function HealthRecords({
         throw new Error("Failed to save health record");
       }
       const result = await response.json();
-      setRecords(result?.userdetails?.healthRecords);
+      console.log("🧞‍♂️  result --->", result);
+      setRecords(result?.updatedRecord?.healthRecord);
 
       // Reset form
       setFormData({
@@ -110,17 +110,23 @@ export default function HealthRecords({
   };
 
   // Group records by date
-  const groupedRecords = records?.reduce(
-    (acc, record) => {
-      const date = record.date;
-      if (!acc[date]) {
-        acc[date] = [];
-      }
-      acc[date].push(record);
-      return acc;
-    },
-    {} as Record<string, HealthRecord[]>
-  );
+  const groupedRecords = useMemo(() => {
+    return records?.reduce(
+      (acc, record) => {
+        // Extract date from createdAt, fallback to date field if createdAt doesn't exist
+        const dateKey = record.createdAt
+          ? new Date(record.createdAt).toISOString().split("T")[0]
+          : record.date;
+
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(record);
+        return acc;
+      },
+      {} as Record<string, HealthRecord[]>
+    );
+  }, [records]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

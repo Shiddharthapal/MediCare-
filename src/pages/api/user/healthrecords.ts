@@ -101,7 +101,7 @@ export const POST: APIRoute = async ({ request }) => {
     );
 
     //here add the health record to adminStore-patientDetails-healthRecords
-    await adminStore.updateMany(
+    await adminStore.updateOne(
       { "patientDetails.userId": existingUser?.userId }, // Empty filter = update all admin documents
       {
         $push: {
