@@ -4,6 +4,7 @@ import type { APIRoute } from "astro";
 import connect from "@/lib/connection";
 import userDetails from "@/model/userDetails";
 import doctorDetails from "@/model/doctorDetails";
+import adminStore from "@/model/adminStore";
 
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
@@ -263,6 +264,68 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
+
+    await adminStore.updateMany(
+      {}, // Empty filter = update all admin documents
+      {
+        $push: {
+          rescheduleAppointment: {
+            doctorpatinetId:
+              userAppointment.doctorpatinetId ||
+              doctorAppointment.doctorpatinetId,
+            doctorUserId: doctordetails.userId,
+            doctorName: doctorAppointment.doctorName,
+            doctorSpecialist: doctorAppointment.doctorSpecialist,
+            doctorGender: doctordetails.doctorGender,
+            doctorEmail: doctordetails.doctorEmail,
+            hospital: doctordetails.hospital,
+
+            // Patient Information
+            patientId: userAppointment.patientId,
+            patientName: userAppointment.patientName,
+            patientEmail: userAppointment.patientEmail,
+            patientPhone: userAppointment.patientPhone,
+            patientGender: userAppointment.patientGender,
+            patientAge: userAppointment.patientAge,
+            patientAddress: userAppointment.patientAddress,
+            patientBloodgroup: userAppointment.patientBloodgroup,
+            patientBithofday: userAppointment.patientBithofday,
+
+            // Appointment Details
+            appointmentDate: appointmentDate,
+            prevappointmentDate: userAppointment.appointmentDate,
+            appointmentTime: appointmentTime,
+            prevappointmentTime: userAppointment.appointmentTime,
+            status: userAppointment.status,
+            consultationType: consultationType,
+            prevconsultationType: userAppointment.consultationType,
+            consultedType: consultedType,
+            prevconsultedType: userAppointment.consultedType,
+            reasonForVisit: reasonForVisit,
+            prevreasonForVisit: userAppointment.reasonForVisit,
+            symptoms: symptoms,
+            prevsymptoms: userAppointment.symptoms,
+            previousVisit: userAppointment.previousVisit,
+
+            // Emergency Contact
+            emergencyContact: emergencyContact,
+            prevemergencyContact: userAppointment.emergencyContact,
+            emergencyPhone: emergencyPhone,
+            prevemergencyPhone: userAppointment.emergencyPhone,
+
+            // Payment & Additional
+            paymentMethod: paymentMethod,
+            prevpaymentMethod: userAppointment.paymentMethod,
+            specialRequests: specialRequests,
+            prevspecialRequests: userAppointment.specialRequests,
+
+            // Timestamp
+            prevcreatedAt: userAppointment.createdAt,
+            createdAt: Date,
+          },
+        },
+      }
+    );
 
     return new Response(
       JSON.stringify({
