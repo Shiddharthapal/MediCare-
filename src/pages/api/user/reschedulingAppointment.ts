@@ -321,7 +321,6 @@ export const POST: APIRoute = async ({ request }) => {
 
             // Timestamp
             prevcreatedAt: userAppointment.createdAt,
-            createdAt: Date,
           },
         },
       }
