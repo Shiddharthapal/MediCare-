@@ -23,6 +23,11 @@ import {
   Loader2,
 } from "lucide-react";
 import BookAppointment from "./bookAppoinment";
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+}
 
 interface DoctorDetails {
   _id: string;
@@ -42,12 +47,6 @@ interface DoctorDetails {
   availableSlots: AppointmentSlot;
   consultationModes: string[];
   createdAt: Date;
-}
-
-interface AppointmentSlot {
-  enabled: boolean;
-  startTime: string;
-  endTime: string;
 }
 
 const availabilityFilters = [

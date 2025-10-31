@@ -89,7 +89,11 @@ export function DatePickerWithSlots({
       day
     );
     if (isDateAvailable(selectedDate) && isDateInRange(selectedDate)) {
-      const dateString = selectedDate.toISOString().split("T")[0];
+      // Format date as YYYY-MM-DD using local date values that's why i don't need to use timezone offset
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const dayStr = String(selectedDate.getDate()).padStart(2, "0");
+      const dateString = `${year}-${month}-${dayStr}`;
       onChange(dateString);
       setIsOpen(false);
     }
