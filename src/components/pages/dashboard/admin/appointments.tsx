@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppSelector } from "@/redux/hooks";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Calendar,
   Clock,
@@ -18,9 +17,6 @@ import {
   X,
   FileText,
   Info,
-  Plus,
-  Edit,
-  Trash2,
   MoreVertical,
 } from "lucide-react";
 
@@ -123,6 +119,7 @@ interface AppointmentData {
   hospital: string;
   patientName: string;
   patientEmail: string;
+  patientId: string;
   patientPhone: string;
   appointmentDate: string;
   appointmentTime: string;
@@ -876,167 +873,161 @@ export default function Appointments({
             </Badge>
           </div>
 
-          {Object.keys(todayGrouped).length > 0 ? (
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Doctor
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Patient
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Date & Time
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Disease
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Status
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(pastGrouped)
-                  .sort(
-                    ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
-                  )
-                  .map(([date, appointments]: [string, any[]]) =>
-                    appointments.map((apt) => (
-                      <tr
-                        key={apt.id}
-                        className="border-b border-slate-100 hover:bg-slate-50"
-                      >
-                        <td className="py-4 px-3 text-slate-900">
-                          {apt.doctorName}
-                        </td>
-                        <td className="py-4 px-1 text-slate-900">
-                          {apt?.patientName}
-                        </td>
-                        <td className="py-4 px-1 text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <Calendar size={16} />
-                            {apt?.appointmentDate}•{apt?.appointmentTime}
-                          </div>
-                        </td>
-                        <td className="py-4 px-2 text-slate-600">
-                          {apt?.reasonForVisit ||
-                            apt.prescription?.prescription?.symptoms}
-                        </td>
-                        <td className="py-4 px-3">
-                          <span
-                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                              apt.status === "Confirmed"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-yellow-100 text-yellow-700"
-                            }`}
-                          >
-                            {apt.status}
-                          </span>
-                        </td>
-                        <td className="py-4 ">
-                          <Dialog>
-                            <DialogTrigger asChild>
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Doctor
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Patient
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Date & Time
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Disease
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Status
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(todayGrouped)
+                .sort(
+                  ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
+                )
+                .map(([date, appointments]: [string, any[]]) =>
+                  appointments.map((apt) => (
+                    <tr
+                      key={apt.id}
+                      className="border-b border-slate-100 hover:bg-slate-50"
+                    >
+                      <td className="py-4 px-3 text-slate-900">
+                        {apt.doctorName}
+                      </td>
+                      <td className="py-4 px-1 text-slate-900">
+                        {apt?.patientName}
+                      </td>
+                      <td className="py-4 px-1 text-slate-600">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={16} />
+                          {apt?.appointmentDate}•{apt?.appointmentTime}
+                        </div>
+                      </td>
+                      <td className="py-4 px-2 text-slate-600">
+                        {apt?.reasonForVisit ||
+                          apt.prescription?.prescription?.symptoms}
+                      </td>
+                      <td className="py-4 px-3">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                            apt.status === "Confirmed"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {apt.status}
+                        </span>
+                      </td>
+                      <td className="py-4 ">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                            >
+                              <MoreVertical className="h-4 w-4 mr-2" />
+                              Actions
+                            </Button>
+                          </DialogTrigger>
+
+                          {/* Modal Content */}
+
+                          <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Appointment Actions</DialogTitle>
+                              <DialogDescription className="text-sm text-gray-500 mt-1">
+                                Choose an action for this appointment
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="grid grid-cols-2 gap-3 mt-4">
                               <Button
                                 variant="outline"
-                                className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                                className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
+                                onClick={() => {
+                                  handleCancelAppointment(apt);
+                                }}
                               >
-                                <MoreVertical className="h-4 w-4 mr-2" />
-                                Actions
+                                Cancel
                               </Button>
-                            </DialogTrigger>
 
-                            {/* Modal Content */}
+                              <Button
+                                variant="outline"
+                                className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
+                                onClick={() => {
+                                  handleRescheduleAppointment(apt);
+                                }}
+                              >
+                                Reschedule
+                              </Button>
 
-                            <DialogContent className="sm:max-w-md">
-                              <DialogHeader>
-                                <DialogTitle>Appointment Actions</DialogTitle>
-                                <DialogDescription className="text-sm text-gray-500 mt-1">
-                                  Choose an action for this appointment
-                                </DialogDescription>
-                              </DialogHeader>
+                              <Button
+                                className="bg-pink-500 hover:bg-pink-600 text-white"
+                                onClick={() => {
+                                  handleJoinSession(apt);
+                                }}
+                              >
+                                <Video className="h-4 w-4 mr-2" />
+                                Join
+                              </Button>
 
-                              <div className="grid grid-cols-2 gap-3 mt-4">
-                                <Button
-                                  variant="outline"
-                                  className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                                  onClick={() => {
-                                    handleCancelAppointment(apt);
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
+                              <Button
+                                variant="outline"
+                                className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                                onClick={() => {
+                                  handleViewReports(apt);
+                                }}
+                              >
+                                <Upload className="h-4 w-4 mr-2" />
+                                Reports
+                              </Button>
 
-                                <Button
-                                  variant="outline"
-                                  className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                                  onClick={() => {
-                                    handleRescheduleAppointment(apt);
-                                  }}
-                                >
-                                  Reschedule
-                                </Button>
+                              <Button
+                                variant="outline"
+                                className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                                onClick={() => {
+                                  handleViewPrescription(apt);
+                                }}
+                              >
+                                <FileText className="h-4 w-4 mr-2" />
+                                Prescription
+                              </Button>
 
-                                <Button
-                                  className="bg-pink-500 hover:bg-pink-600 text-white"
-                                  onClick={() => {
-                                    handleJoinSession(apt);
-                                  }}
-                                >
-                                  <Video className="h-4 w-4 mr-2" />
-                                  Join
-                                </Button>
-
-                                <Button
-                                  variant="outline"
-                                  className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-                                  onClick={() => {
-                                    handleViewReports(apt);
-                                  }}
-                                >
-                                  <Upload className="h-4 w-4 mr-2" />
-                                  Reports
-                                </Button>
-
-                                <Button
-                                  variant="outline"
-                                  className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-                                  onClick={() => {
-                                    handleViewPrescription(apt);
-                                  }}
-                                >
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Prescription
-                                </Button>
-
-                                <Button
-                                  variant="outline"
-                                  className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                                  onClick={() => {
-                                    handleViewDetails(apt);
-                                  }}
-                                >
-                                  <Info className="h-4 w-4 mr-2" />
-                                  See Details
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-gray-500 text-center py-8 border border-slate-200 rounded-lg">
-              No appointment data available
-            </div>
-          )}
+                              <Button
+                                variant="outline"
+                                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                                onClick={() => {
+                                  handleViewDetails(apt);
+                                }}
+                              >
+                                <Info className="h-4 w-4 mr-2" />
+                                See Details
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </td>
+                    </tr>
+                  ))
+                )}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -1349,6 +1340,10 @@ export default function Appointments({
                 </Button>
               </div>
               <div className="mb-4">
+                <p>
+                  <strong>AppointmentId:</strong>{" "}
+                  {selectedAppointment.doctorpatinetId}
+                </p>
                 <p className="text-sm text-gray-600">
                   {formatDate(selectedAppointment.appointmentDate)}
                 </p>
