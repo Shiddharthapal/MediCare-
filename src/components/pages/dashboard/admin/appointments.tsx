@@ -18,6 +18,8 @@ import {
   FileText,
   Info,
   MoreVertical,
+  User,
+  Stethoscope,
 } from "lucide-react";
 
 import {
@@ -1358,7 +1360,7 @@ export default function Appointments({
                                 variant="outline"
                                 className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
                                 onClick={() => {
-                                  handleViewDetails(apt);
+                                  handleViewRescheduleAppointmentDetails(apt);
                                 }}
                               >
                                 <Info className="h-4 w-4 mr-2" />
@@ -1650,13 +1652,18 @@ export default function Appointments({
 
       {showDetailsModal && selectedrescheduleappointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[85vh] overflow-y-auto">
             <div className="p-6">
+              {/* Header */}
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Appointment Details -{" "}
-                  {selectedrescheduleappointment.reasonForVisit}
-                </h2>
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Rescheduled Appointment Details
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Changed fields are highlighted in yellow
+                  </p>
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -1665,121 +1672,378 @@ export default function Appointments({
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="mb-4">
-                <p>
-                  <strong>AppointmentId:</strong>{" "}
+
+              {/* Appointment ID */}
+              <div className="mb-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm">
+                  <strong>Appointment ID:</strong>{" "}
                   {selectedrescheduleappointment.doctorpatinetId}
                 </p>
                 <p className="text-sm text-gray-600">
                   {formatDate(selectedrescheduleappointment.appointmentDate)}
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                {/* Patient Information */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <User className="h-4 w-4" />
                     Patient Information
                   </h3>
-                  <p>
-                    <strong>Name:</strong>{" "}
-                    {selectedrescheduleappointment.patientName}
-                  </p>
-                  <p>
-                    <strong>Email:</strong>{" "}
-                    {selectedrescheduleappointment.patientEmail}
-                  </p>
-                  <p>
-                    <strong>Phone:</strong>{" "}
-                    {selectedrescheduleappointment.patientPhone}
-                  </p>
+                  <div className="space-y-2">
+                    <p>
+                      <strong>Name:</strong>{" "}
+                      {selectedrescheduleappointment.patientName}
+                    </p>
+                    <p>
+                      <strong>Email:</strong>{" "}
+                      {selectedrescheduleappointment.patientEmail || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Phone:</strong>{" "}
+                      {selectedrescheduleappointment.patientPhone}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+
+                {/* Doctor Information */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Stethoscope className="h-4 w-4" />
                     Doctor Information
                   </h3>
-                  <p>
-                    <strong>Name:</strong>{" "}
-                    {selectedrescheduleappointment.doctorName}
-                  </p>
-                  <p>
-                    <strong>Email:</strong>{" "}
-                    {selectedrescheduleappointment.doctorEmail}
-                  </p>
-                  <p>
-                    <strong>Specialist:</strong>{" "}
-                    {selectedrescheduleappointment.doctorSpecialist}
-                  </p>
-                  <p>
-                    <strong>Hospital:</strong>{" "}
-                    {selectedrescheduleappointment.hospital}
-                  </p>
+                  <div className="space-y-2">
+                    <p>
+                      <strong>Name:</strong>{" "}
+                      {selectedrescheduleappointment.doctorName}
+                    </p>
+                    <p>
+                      <strong>Email:</strong>{" "}
+                      {selectedrescheduleappointment.doctorEmail || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Specialist:</strong>{" "}
+                      {selectedrescheduleappointment.doctorSpecialist}
+                    </p>
+                    <p>
+                      <strong>Hospital:</strong>{" "}
+                      {selectedrescheduleappointment.hospital || "N/A"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Appointment Specifics
+
+                {/* Appointment Specifics */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Appointment Details
                   </h3>
-                  <p>
-                    <strong>Date:</strong>{" "}
-                    {selectedrescheduleappointment.appointmentDate}
-                  </p>
-                  <p>
-                    <strong>Time:</strong>{" "}
-                    {selectedrescheduleappointment.appointmentTime}
-                  </p>
-                  <p>
-                    <strong>Consultation Type:</strong>{" "}
-                    {selectedrescheduleappointment.consultedType}
-                  </p>
-                  <p>
-                    <strong>Mode:</strong>{" "}
-                    {selectedrescheduleappointment.consultationType}
-                  </p>
-                  <p>
-                    <strong>Status:</strong>{" "}
-                    {selectedrescheduleappointment.status}
-                  </p>
+                  <div className="space-y-2">
+                    {/* Date */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevappointmentDate &&
+                        selectedrescheduleappointment.appointmentDate !==
+                          selectedrescheduleappointment.prevappointmentDate
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {selectedrescheduleappointment.appointmentDate}
+                      </p>
+                      {selectedrescheduleappointment.prevappointmentDate &&
+                        selectedrescheduleappointment.appointmentDate !==
+                          selectedrescheduleappointment.prevappointmentDate && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevappointmentDate}
+                          </p>
+                        )}
+                    </div>
+
+                    {/* Time */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevappointmentTime &&
+                        selectedrescheduleappointment.appointmentTime !==
+                          selectedrescheduleappointment.prevappointmentTime
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Time:</strong>{" "}
+                        {selectedrescheduleappointment.appointmentTime}
+                      </p>
+                      {selectedrescheduleappointment.prevappointmentTime &&
+                        selectedrescheduleappointment.appointmentTime !==
+                          selectedrescheduleappointment.prevappointmentTime && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevappointmentTime}
+                          </p>
+                        )}
+                    </div>
+
+                    {/* Consultation Type */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevconsultedType &&
+                        selectedrescheduleappointment.consultedType !==
+                          selectedrescheduleappointment.prevconsultedType
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Consultation Type:</strong>{" "}
+                        {selectedrescheduleappointment.consultedType}
+                      </p>
+                      {selectedrescheduleappointment.prevconsultedType &&
+                        selectedrescheduleappointment.consultedType !==
+                          selectedrescheduleappointment.prevconsultedType && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevconsultedType}
+                          </p>
+                        )}
+                    </div>
+
+                    {/* Mode */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevconsultationType &&
+                        selectedrescheduleappointment.consultationType !==
+                          selectedrescheduleappointment.prevconsultationType
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Mode:</strong>{" "}
+                        {selectedrescheduleappointment.consultationType}
+                      </p>
+                      {selectedrescheduleappointment.prevconsultationType &&
+                        selectedrescheduleappointment.consultationType !==
+                          selectedrescheduleappointment.prevconsultationType && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevconsultationType}
+                          </p>
+                        )}
+                    </div>
+
+                    <p>
+                      <strong>Status:</strong>{" "}
+                      <span
+                        className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                          selectedrescheduleappointment.status === "Confirmed"
+                            ? "bg-green-100 text-green-700"
+                            : selectedrescheduleappointment.status ===
+                                "rescheduled"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {selectedrescheduleappointment.status || "Rescheduled"}
+                      </span>
+                    </p>
+                  </div>
                 </div>
-                <div className="md:col-span-2">
-                  <h3 className="font-semibold text-gray-900 mb-2">
+
+                {/* Medical Details */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
                     Medical Details
                   </h3>
-                  <p>
-                    <strong>Reason for Visit:</strong>{" "}
-                    {selectedrescheduleappointment.reasonForVisit}
-                  </p>
-                  <p>
-                    <strong>Symptoms:</strong>{" "}
-                    {selectedrescheduleappointment.symptoms}
-                  </p>
-                  <p>
-                    <strong>Previous Visit:</strong>{" "}
-                    {selectedrescheduleappointment.previousVisit}
-                  </p>
+                  <div className="space-y-2">
+                    {/* Reason for Visit */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevreasonForVisit &&
+                        selectedrescheduleappointment.reasonForVisit !==
+                          selectedrescheduleappointment.prevreasonForVisit
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Reason for Visit:</strong>{" "}
+                        {selectedrescheduleappointment.reasonForVisit}
+                      </p>
+                      {selectedrescheduleappointment.prevreasonForVisit &&
+                        selectedrescheduleappointment.reasonForVisit !==
+                          selectedrescheduleappointment.prevreasonForVisit && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevreasonForVisit}
+                          </p>
+                        )}
+                    </div>
+
+                    {/* Symptoms */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevsymptoms &&
+                        selectedrescheduleappointment.symptoms !==
+                          selectedrescheduleappointment.prevsymptoms
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Symptoms:</strong>{" "}
+                        {selectedrescheduleappointment.symptoms}
+                      </p>
+                      {selectedrescheduleappointment.prevsymptoms &&
+                        selectedrescheduleappointment.symptoms !==
+                          selectedrescheduleappointment.prevsymptoms && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevsymptoms}
+                          </p>
+                        )}
+                    </div>
+
+                    <p>
+                      <strong>Previous Visit:</strong>{" "}
+                      {selectedrescheduleappointment.previousVisit}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+
+                {/* Emergency Contact */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
                     Emergency Contact
                   </h3>
-                  <p>
-                    <strong>Name:</strong>{" "}
-                    {selectedrescheduleappointment.emergencyContact}
-                  </p>
-                  <p>
-                    <strong>Phone:</strong>{" "}
-                    {selectedrescheduleappointment.emergencyPhone}
-                  </p>
+                  <div className="space-y-2">
+                    {/* Emergency Contact Name */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevemergencyContact &&
+                        selectedrescheduleappointment.emergencyContact !==
+                          selectedrescheduleappointment.prevemergencyContact
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Name:</strong>{" "}
+                        {selectedrescheduleappointment.emergencyContact ||
+                          "N/A"}
+                      </p>
+                      {selectedrescheduleappointment.prevemergencyContact &&
+                        selectedrescheduleappointment.emergencyContact !==
+                          selectedrescheduleappointment.prevemergencyContact && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevemergencyContact}
+                          </p>
+                        )}
+                    </div>
+
+                    {/* Emergency Phone */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevemergencyPhone &&
+                        selectedrescheduleappointment.emergencyPhone !==
+                          selectedrescheduleappointment.prevemergencyPhone
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Phone:</strong>{" "}
+                        {selectedrescheduleappointment.emergencyPhone || "N/A"}
+                      </p>
+                      {selectedrescheduleappointment.prevemergencyPhone &&
+                        selectedrescheduleappointment.emergencyPhone !==
+                          selectedrescheduleappointment.prevemergencyPhone && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevemergencyPhone}
+                          </p>
+                        )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+
+                {/* Other Information */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Info className="h-4 w-4" />
                     Other Information
                   </h3>
-                  <p>
-                    <strong>Payment Method:</strong>{" "}
-                    {selectedrescheduleappointment.paymentMethod}
-                  </p>
-                  <p>
-                    <strong>Special Requests:</strong>{" "}
-                    {selectedrescheduleappointment.specialRequests}
-                  </p>
+                  <div className="space-y-2">
+                    {/* Payment Method */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevpaymentMethod &&
+                        selectedrescheduleappointment.paymentMethod !==
+                          selectedrescheduleappointment.prevpaymentMethod
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Payment Method:</strong>{" "}
+                        {selectedrescheduleappointment.paymentMethod}
+                      </p>
+                      {selectedrescheduleappointment.prevpaymentMethod &&
+                        selectedrescheduleappointment.paymentMethod !==
+                          selectedrescheduleappointment.prevpaymentMethod && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevpaymentMethod}
+                          </p>
+                        )}
+                    </div>
+
+                    {/* Special Requests */}
+                    <div
+                      className={
+                        selectedrescheduleappointment.prevspecialRequests &&
+                        selectedrescheduleappointment.specialRequests !==
+                          selectedrescheduleappointment.prevspecialRequests
+                          ? "bg-yellow-100 p-2 rounded"
+                          : ""
+                      }
+                    >
+                      <p>
+                        <strong>Special Requests:</strong>{" "}
+                        {selectedrescheduleappointment.specialRequests ||
+                          "None"}
+                      </p>
+                      {selectedrescheduleappointment.prevspecialRequests &&
+                        selectedrescheduleappointment.specialRequests !==
+                          selectedrescheduleappointment.prevspecialRequests && (
+                          <p className="text-xs text-gray-500 line-through mt-1">
+                            Previous:{" "}
+                            {selectedrescheduleappointment.prevspecialRequests}
+                          </p>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-4 text-xs text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-yellow-100 border border-yellow-300 rounded"></div>
+                    <span>Changed Field</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="line-through">Strikethrough</span>
+                    <span>= Previous Value</span>
+                  </div>
                 </div>
               </div>
             </div>
