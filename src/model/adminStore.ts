@@ -1097,6 +1097,10 @@ const adminStoreSchema = new mongoose.Schema({
     type: [RescheduleAppointmentSchema],
     default: [],
   },
+  cancelAppointment: {
+    type: [AdminAppointmentSchema],
+    default: [],
+  },
   upload: {
     type: [FileUploadSchema],
     default: [],

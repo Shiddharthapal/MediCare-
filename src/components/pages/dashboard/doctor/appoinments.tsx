@@ -429,7 +429,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          appointmentId: appointment._id,
+          appointment: appointment,
           doctorId: id,
           patientId: appointment.patientId,
         }),
