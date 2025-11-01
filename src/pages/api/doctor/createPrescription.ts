@@ -11,7 +11,6 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     let body = await request.json();
-    console.log("🧞‍♂️  body --->", body);
 
     let { patientData, prescriptionData } = body;
     let { doctorpatinetId, patientId, doctorId, doctorName, reasonForVisit } =
@@ -30,7 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
     //console.log("🧞‍♂️prescriptionForm --->", prescriptionForm);
     await connect();
 
-    let userdetails = await userDetails.findById({ _id: patientId });
+    let userdetails = await userDetails.findOne({ userId: patientId });
     //console.log("🧞‍♂️userdetails --->", userdetails);
     if (!userdetails) {
       return new Response(
@@ -62,10 +61,10 @@ export const POST: APIRoute = async ({ request }) => {
       prescriptionId,
       createdAt: new Date(),
     };
-    //console.log("🧞‍♂️newPrescriptionPatient --->", newPrescriptionPatient);
+
     const createUserPrescription = await userDetails.findOneAndUpdate(
       {
-        _id: userdetails._id,
+        userId: patientId,
         "appointments.doctorpatinetId": doctorpatinetId,
       },
       {
@@ -80,7 +79,6 @@ export const POST: APIRoute = async ({ request }) => {
     );
 
     let doctordetails = await doctorDetails.findOne({ userId: doctorId });
-    //console.log("🧞‍♂️  doctordetails --->", doctordetails);
 
     if (!doctordetails) {
       return new Response(
@@ -113,16 +111,30 @@ export const POST: APIRoute = async ({ request }) => {
       prescriptionId,
       createdAt: new Date(),
     };
-    //console.log("🧞‍♂️newPrescriptionDoctor --->", newPrescriptionDoctor);
 
     const createDoctorPrescription = await doctorDetails.findOneAndUpdate(
       {
-        _id: doctordetails._id,
+        userId: doctorId,
         "appointments.doctorpatinetId": doctorpatinetId,
       },
       {
         $set: {
           "appointments.$.prescription": newPrescriptionDoctor,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    const createprescription = await doctorDetails.findOneAndUpdate(
+      {
+        userId: doctorId,
+      },
+      {
+        $push: {
+          prescription: newPrescriptionDoctor,
         },
       },
       {

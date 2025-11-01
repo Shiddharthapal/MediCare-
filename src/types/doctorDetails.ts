@@ -148,6 +148,6 @@ export interface DoctorDetails {
   appointments: AppointmentData[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
-  prescription?: Prescription;
+  prescription?: Prescription[];
   createdAt: Date;
 }

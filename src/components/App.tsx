@@ -59,22 +59,8 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/doctor"
-                element={
-                  <ProtectedDashboard>
-                    <DashboardofDoctor />
-                  </ProtectedDashboard>
-                }
-              />
-              <Route
-                path="/patient"
-                element={
-                  <ProtectedDashboard>
-                    <DashboardofPatient />
-                  </ProtectedDashboard>
-                }
-              />
+              <Route path="/doctor" element={<DashboardofDoctor />} />
+              <Route path="/patient" element={<DashboardofPatient />} />
               <Route path="/admin" element={<DashboardofAdmin />} />
               <Route path="/about" element={<About />} />
             </Route>
