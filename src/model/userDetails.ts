@@ -161,7 +161,16 @@ const FileUploadSchema = new mongoose.Schema({
 
   uploadedAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
   },
   doctorName: {
     type: String,
@@ -181,11 +190,30 @@ const FileUploadSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
   },
+
   updatedAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
   },
 });
 
@@ -210,7 +238,16 @@ const HealthRecord = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
   },
 });
 
@@ -261,7 +298,16 @@ const PrescriptionSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: () => {
+        // Get current time in Bangladesh timezone (UTC+6)
+        const now = new Date();
+        const bdTime = new Date(
+          now.toLocaleString("en-US", {
+            timeZone: "Asia/Dhaka",
+          })
+        );
+        return bdTime;
+      },
     },
   },
   { _id: true }
@@ -290,6 +336,9 @@ const appointmentDataSchema = new mongoose.Schema(
     hospital: {
       type: String,
     },
+    patientId: {
+      type: String,
+    },
     patientName: {
       type: String,
     },
@@ -301,11 +350,9 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     appointmentDate: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     appointmentTime: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     status: {
       type: String,
@@ -313,22 +360,18 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     consultationType: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     consultedType: {
       type: String,
-      required: true,
     },
     reasonForVisit: {
       type: String,
     },
     symptoms: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     previousVisit: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     emergencyContact: {
       type: String,
@@ -338,7 +381,6 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     specialRequests: {
       type: String,
@@ -351,8 +393,37 @@ const appointmentDataSchema = new mongoose.Schema(
       type: [FileUploadSchema],
       default: [],
     },
+    cancelledBy: {
+      type: String,
+    },
+    cancelledAt: {
+      type: Date,
+    },
+    updatedAt: {
+      type: Date,
+      default: () => {
+        // Get current time in Bangladesh timezone (UTC+6)
+        const now = new Date();
+        const bdTime = new Date(
+          now.toLocaleString("en-US", {
+            timeZone: "Asia/Dhaka",
+          })
+        );
+        return bdTime;
+      },
+    },
     createdAt: {
       type: Date,
+      default: () => {
+        // Get current time in Bangladesh timezone (UTC+6)
+        const now = new Date();
+        const bdTime = new Date(
+          now.toLocaleString("en-US", {
+            timeZone: "Asia/Dhaka",
+          })
+        );
+        return bdTime;
+      },
     },
   },
   { _id: true }
@@ -416,11 +487,29 @@ const userDetailsSchema = new mongoose.Schema({
   },
   lastTreatmentDate: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
   },
 });
 

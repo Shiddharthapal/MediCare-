@@ -32,6 +32,14 @@ import {
   Star,
   AlertCircle,
 } from "lucide-react";
+import { DatePickerWithSlots } from "./date-picker-with-availableSlots";
+
+interface Appointmentslot {
+  day: string;
+  enabled: boolean;
+  startTime: any;
+  endTime: any;
+}
 
 interface Doctor {
   _id: string;
@@ -48,7 +56,7 @@ interface Doctor {
   degree: string;
   language: string[];
   about: string;
-  availableSlots: string[];
+  availableSlots: Appointmentslot[];
   consultationModes: string[];
 }
 
@@ -178,6 +186,7 @@ export default function BookAppointment({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [doctor, setDoctor] = useState<Doctor>();
+  const [enabledDays, setEnabledDays] = useState<Appointmentslot[]>();
 
   const [formData, setFormData] = useState<AppointmentData>({
     doctorpatinetId: existingAppointmentData?.doctorpatinetId || "",
@@ -309,6 +318,35 @@ export default function BookAppointment({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  //Set the time in pm/am formate
+  const formatTo12Hour = (time24) => {
+    if (!time24) return "";
+    const [hours, minutes] = time24.split(":");
+    const hour = parseInt(hours, 10);
+    const minute = minutes || "00";
+
+    if (hour === 0) {
+      return `12:${minute} AM`;
+    } else if (hour < 12) {
+      return `${hour}:${minute} AM`;
+    } else if (hour === 12) {
+      return `12:${minute} PM`;
+    } else {
+      return `${hour - 12}:${minute} PM`;
+    }
+  };
+
+  //handle the working hour format
+  const formatWorkingHours = (hours) => {
+    if (!hours?.enabled) {
+      return "Closed";
+    }
+
+    const startTime = formatTo12Hour(hours.startTime);
+    const endTime = formatTo12Hour(hours.endTime);
+    return `${startTime} - ${endTime}`;
   };
 
   const resetForm = () => {
@@ -526,27 +564,33 @@ export default function BookAppointment({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="appointmentDate">Preferred Date *</Label>
-                      <Input
-                        id="appointmentDate"
-                        type="date"
+                      <Label htmlFor="appointmentDate" className="mb-2">
+                        Preferred Date *
+                      </Label>
+                      <DatePickerWithSlots
                         value={formData.appointmentDate}
-                        onChange={(e) =>
-                          handleInputChange("appointmentDate", e.target.value)
-                        }
-                        min={getMinDate()}
-                        max={getMaxDate()}
-                        className={
-                          errors.appointmentDate
-                            ? "border-red-500 mt-2"
-                            : "mt-2"
-                        }
+                        onChange={(date) => {
+                          handleInputChange("appointmentDate", date);
+                          // Reset time when date changes
+                          handleInputChange("appointmentTime", "");
+                        }}
+                        availableSlots={enabledDays}
+                        minDate={getMinDate()}
+                        maxDate={getMaxDate()}
+                        error={errors.appointmentDate}
                       />
-                      {errors.appointmentDate && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.appointmentDate}
-                        </p>
-                      )}
+                      <p className="text-xs text-gray-500 mt-2">
+                        Available days:{" "}
+                        {doctor?.availableSlots
+                          ? Object.entries(doctor.availableSlots)
+                              .filter(([_, slot]) => slot?.enabled)
+                              .map(
+                                ([day]) =>
+                                  day.charAt(0).toUpperCase() + day.slice(1)
+                              )
+                              .join(", ")
+                          : "Check doctor availability"}
+                      </p>
                     </div>
 
                     <div>
@@ -556,6 +600,7 @@ export default function BookAppointment({
                         onValueChange={(value) =>
                           handleInputChange("appointmentTime", value)
                         }
+                        disabled={!formData.appointmentDate}
                       >
                         <SelectTrigger
                           className={
@@ -564,14 +609,50 @@ export default function BookAppointment({
                               : "mt-2"
                           }
                         >
-                          <SelectValue placeholder="Select time" />
+                          <SelectValue
+                            placeholder={
+                              formData.appointmentDate
+                                ? "Select time"
+                                : "Select a date first"
+                            }
+                          />
                         </SelectTrigger>
-                        <SelectContent>
-                          {doctor.availableSlots.map((time) => (
-                            <SelectItem key={time} value={time}>
-                              {time}
-                            </SelectItem>
-                          ))}
+                        <SelectContent className="border border-gray-400">
+                          {(() => {
+                            // Get the day name from selected date
+                            if (!formData.appointmentDate) return null;
+
+                            const selectedDate = new Date(
+                              formData.appointmentDate
+                            );
+                            const dayName = selectedDate.toLocaleDateString(
+                              "en-US",
+                              {
+                                weekday: "long",
+                              }
+                            );
+
+                            // Get the slot for that specific day
+                            const daySlot = doctor?.availableSlots?.[dayName];
+
+                            if (!daySlot?.enabled) {
+                              return (
+                                <div className="px-2 py-4 text-center text-gray-500">
+                                  No slots available for {dayName}
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <SelectItem
+                                key={dayName}
+                                value={formatWorkingHours(daySlot)}
+                                className="font-medium"
+                              >
+                                {dayName}: {formatWorkingHours(daySlot)}
+                              </SelectItem>
+                            );
+                          })()}
                         </SelectContent>
                       </Select>
                       {errors.appointmentTime && (

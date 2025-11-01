@@ -2,6 +2,7 @@
 import type { APIRoute } from "astro";
 import { bunnyStorageService } from "@/lib/bunny-cdn";
 import userDetails from "@/model/userDetails";
+import adminStore from "@/model/adminStore";
 import connect from "@/lib/connection";
 import crypto from "crypto";
 
@@ -147,6 +148,7 @@ export const POST: APIRoute = async ({ request }) => {
         // Prepare upload data
         const uploadfile = {
           patientId: userId,
+          appointmentId: appointmentId,
           filename: uniqueFilename,
           originalName: originalName,
           documentName: documentName,
@@ -159,7 +161,6 @@ export const POST: APIRoute = async ({ request }) => {
           doctorName: doctorName,
           category: category,
           userIdWHUP: useridwhup,
-          appointmentId: appointmentId,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -194,6 +195,52 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
+    const documentReferences = uploadedFiles.map((file) => ({
+      // You might need to generate ObjectId
+      patientId: userId,
+      appointmentId: appointmentId,
+      filename: file.filename,
+      url: file.url,
+      fileType: file.fileType,
+      uploadedAt: file.uploadedAt,
+      originalName: file.originalName,
+      documentName: file.documentName,
+      fileSize: file.fileSize,
+      path: file.path,
+      checksum: file.checksum,
+      category: category,
+      userIdWHUP: useridwhup,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+
+    // Update the specific reschedule appointment with document references
+    await adminStore.updateOne(
+      { "patientDetails.userId": userId },
+      {
+        $push: {
+          "patientDetails.$[patient].upload": {
+            $each: documentReferences,
+          },
+        },
+      },
+      {
+        arrayFilters: [
+          { "patient.userId": userId }, // Match all patients with this ID
+        ],
+      }
+    );
+
+    await adminStore.updateMany(
+      {}, // Update all admin documents
+      {
+        $push: {
+          upload: {
+            $each: uploadedFiles,
+          },
+        },
+      }
+    );
 
     //Return response
     return new Response(

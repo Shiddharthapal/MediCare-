@@ -25,7 +25,16 @@ const doctorSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
   },
 });
 

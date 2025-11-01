@@ -727,7 +727,7 @@ export default function Dashboard() {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="px-4 pb-2 pt-2 border-t border-gray-200">
             {!collapsed ? (
               <div className="mb-4">
                 <div className="flex items-center gap-3">
@@ -768,7 +768,7 @@ export default function Dashboard() {
               variant="ghost"
               size="sm"
               onClick={() => setCollapsed(!collapsed)}
-              className="w-full hidden lg:flex"
+              className="w-full hidden text-3xl pb-1 lg:flex border border-gray-700 hover:bg-blue-600 hover:text-white"
             >
               {collapsed ? "→" : "←"}
             </Button>

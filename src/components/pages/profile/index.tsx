@@ -240,7 +240,7 @@ export default function PatientProfileForm() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <Card className="">
+      <Card className="border border-gray-700 mt-2 mb-5">
         <CardHeader>
           <CardTitle>Patient Information</CardTitle>
           <CardDescription>
@@ -775,13 +775,12 @@ export default function PatientProfileForm() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 ">
                   <Label>
                     Gender <span className="text-red-500">*</span>
                   </Label>
                   {isEditing ? (
                     <>
-                      <div></div>
                       <Select
                         value={formData?.gender}
                         onValueChange={(value) =>

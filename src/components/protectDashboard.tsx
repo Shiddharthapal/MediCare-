@@ -27,7 +27,8 @@ export default function ProtectedDashboard({ children }: ProtectedRouteProps) {
 
       dispatch(verifyProfileStart());
       try {
-        const endpoint = role === "doctor" ? `/api/doctor/${id}` : `/api/user/${id}`;
+        const endpoint =
+          role === "doctor" ? `/api/doctor/${id}` : `/api/user/${id}`;
         const response = await fetch(endpoint);
 
         if (!response.ok) {
@@ -35,17 +36,17 @@ export default function ProtectedDashboard({ children }: ProtectedRouteProps) {
         }
 
         const data = await response.json();
-        
+
         // Check for profile data based on role
-        const hasExistingProfile = role === "doctor"
-          ? !!data.doctordetails
-          : !!data.userdetails;
+        const hasExistingProfile =
+          role === "doctor" ? !!data.doctordetails : !!data.userdetails;
 
         dispatch(
           verifyProfileSuccess({
             hasProfile: hasExistingProfile,
             profileType: role as "user" | "doctor",
-            profileData: role === "doctor" ? data.doctordetails : data.userdetails
+            profileData:
+              role === "doctor" ? data.doctordetails : data.userdetails,
           })
         );
       } catch (error) {
@@ -73,7 +74,7 @@ export default function ProtectedDashboard({ children }: ProtectedRouteProps) {
 
   // Redirect if not authenticated
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Handle different states
@@ -86,7 +87,7 @@ export default function ProtectedDashboard({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Only redirect if we've confirmed there's no profile

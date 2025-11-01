@@ -3,6 +3,7 @@ import connect from "@/lib/connection";
 import User from "@/model/user";
 import jwt from "jsonwebtoken";
 import Doctor from "@/model/doctor";
+import adminStore from "@/model/adminStore";
 
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
@@ -21,7 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
       const existingUser = await User.findOne({
         email: email,
       });
-      console.log("existingUser --->", existingUser);
+
       if (existingUser) {
         return new Response(
           JSON.stringify({
@@ -45,6 +46,27 @@ export const POST: APIRoute = async ({ request }) => {
 
       await users.save();
 
+      try {
+        await adminStore.updateMany(
+          {}, // Empty filter = update all admin documents
+          {
+            $push: {
+              patientRegister: {
+                userId: users._id,
+                email: users.email,
+                role: "user",
+                createdAt: users.createdAt || new Date(),
+                status: "active",
+              },
+            },
+          }
+        );
+        console.log("User added to all admin stores");
+      } catch (error) {
+        console.error("Error updating admin stores:", error);
+        // Continue even if admin update fails
+      }
+
       // Generate JWT token
       token = jwt.sign(
         { userId: users._id },
@@ -53,6 +75,7 @@ export const POST: APIRoute = async ({ request }) => {
           "your-secret-key",
         { expiresIn: "24h" }
       );
+
       let _id = users._id;
       return new Response(
         JSON.stringify({
@@ -88,9 +111,31 @@ export const POST: APIRoute = async ({ request }) => {
         email: email,
         user: "doctor",
         password,
-        registrationNo,
+        registrationNo: registrationNo,
       });
       await doctor.save();
+
+      try {
+        await adminStore.updateMany(
+          {}, // Empty filter = update all admin documents
+          {
+            $push: {
+              doctorRegister: {
+                userId: doctor._id,
+                email: doctor.email,
+                registrationNo: registrationNo,
+                role: "doctor",
+                createdAt: doctor.createdAt || new Date(),
+                status: "active",
+              },
+            },
+          }
+        );
+        console.log("User added to all admin stores");
+      } catch (error) {
+        console.error("Error updating admin stores:", error);
+        // Continue even if admin update fails
+      }
 
       token = jwt.sign(
         { userId: doctor._id },

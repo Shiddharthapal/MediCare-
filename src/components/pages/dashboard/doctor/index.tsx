@@ -424,7 +424,13 @@ export default function DashboardPage() {
     },
     {
       title: "Revenue",
-      value: "$982",
+      value: doctorData?.appointments.length * doctorData.fees || 0,
+      // doctorData?.appointments?.filter((appointment) => {
+      //   const appointmentDate = new Date(appointment.appointmentDate);
+      //   const today = new Date();
+      //   today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+      //   return appointmentDate <= today;
+      // }).length * doctorData.fees || 0,
       change: "-1%",
       trend: "down",
       icon: CreditCard,

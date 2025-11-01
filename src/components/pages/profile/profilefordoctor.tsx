@@ -139,6 +139,7 @@ export default function DoctorProfilePage() {
   const token = useAppSelector((state) => state.auth.token);
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
+  console.log("🧞‍♂️  id --->", id);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -153,7 +154,6 @@ export default function DoctorProfilePage() {
     // setEditedDoctor({ ...doctor });
 
     const fetchDetails = async () => {
-      console.log("🧞‍♂️id --->", id);
       if (!id) {
         // Handle auth error - redirect to login or show error
         console.error("Unable to authenticate user");

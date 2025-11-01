@@ -95,6 +95,7 @@ interface AppointmentData {
   doctorpatinetId: string;
   doctorName: string;
   doctorSpecialist: string;
+  doctorUserId: string;
   doctorEmail: string;
   patientId: string;
   patientName: string;
@@ -119,6 +120,9 @@ interface AppointmentData {
   specialRequests: string;
   prescription: Prescription;
   document: FileUpload[];
+  cancelledBy?: string;
+  cancelledAt?: Date;
+  updatedAt: Date;
   createdAt: Date;
 }
 export interface DoctorDetails {
@@ -144,6 +148,6 @@ export interface DoctorDetails {
   appointments: AppointmentData[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
-  prescription?: Prescription;
+  prescription?: Prescription[];
   createdAt: Date;
 }

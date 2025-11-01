@@ -101,6 +101,7 @@ interface AppointmentData {
   doctorEmail: string;
   hospital: string;
   patientName: string;
+  patientId: string;
   patientEmail: string;
   patientPhone: string;
   appointmentDate: string;
@@ -117,6 +118,9 @@ interface AppointmentData {
   specialRequests: string;
   prescription: Prescription;
   document?: FileUpload[];
+  cancelledBy?: string;
+  cancelledAt?: Date;
+  updatedAt: Date;
   createdAt: Date;
 }
 
@@ -134,7 +138,7 @@ export interface UserDetails {
   bloodGroup: string;
   weight: number;
   height?: number;
-  appoinments: AppointmentData[];
+  appointments: AppointmentData[];
   payment: PaymentMethods;
   upload: FileUpload[];
   healthRecord: HealthRecord[];

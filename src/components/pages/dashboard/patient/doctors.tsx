@@ -23,6 +23,11 @@ import {
   Loader2,
 } from "lucide-react";
 import BookAppointment from "./bookAppoinment";
+interface AppointmentSlot {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+}
 
 interface DoctorDetails {
   _id: string;
@@ -42,12 +47,6 @@ interface DoctorDetails {
   availableSlots: AppointmentSlot;
   consultationModes: string[];
   createdAt: Date;
-}
-
-interface AppointmentSlot {
-  enabled: boolean;
-  startTime: string;
-  endTime: string;
 }
 
 const availabilityFilters = [
@@ -267,9 +266,32 @@ export default function Doctors({
               <h3 className="text-xl font-semibold text-gray-900">
                 {doctor.name}
               </h3>
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-medium">4.5</span>
+              <div className="flex items-center justify-between gap-1">
+                {Boolean(
+                  (() => {
+                    if (!doctor?.availableSlots) return false;
+
+                    // Get current day name (e.g., "Friday")
+                    const today = new Date().toLocaleDateString("en-US", {
+                      weekday: "long",
+                    });
+
+                    // Check if today's slot exists and is enabled
+                    const todaySlot = doctor.availableSlots[today];
+                    return todaySlot?.enabled === true;
+                  })()
+                ) && (
+                  <Badge
+                    variant="outline"
+                    className="bg-yellow-100 text-yellow-700 border-yellow-200"
+                  >
+                    Today Available
+                  </Badge>
+                )}
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm font-medium">4.5</span>
+                </div>
               </div>
             </div>
             <div>
@@ -481,10 +503,14 @@ export default function Doctors({
                       // Check if availableSlots exists
                       if (!doctor?.availableSlots) return false;
 
-                      // Check if any day has enabled slots
-                      return Object.values(doctor.availableSlots).some(
-                        (slot) => slot?.enabled === true
-                      );
+                      // Get current day name (e.g., "Friday")
+                      const today = new Date().toLocaleDateString("en-US", {
+                        weekday: "long",
+                      });
+
+                      // Check if today's slot exists and is enabled
+                      const todaySlot = doctor?.availableSlots[today];
+                      return todaySlot?.enabled === true;
                     }).length
                   }
                 </p>

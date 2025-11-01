@@ -6,12 +6,15 @@ import Home from "./pages/home";
 import Layout from "../layouts/Layout";
 import LoginAsUser from "./pages/loginasUser";
 import LoginAsDoctor from "./pages/loginasdoctor";
+import LoginAsAdmin from "./pages/loginasAdmin";
 import RegisterAsUser from "./pages/registerasUser";
 import RegisterAsDoctor from "./pages/registerasDoctor";
+import RegisterAsAdmin from "./pages/registerasAdmin";
 import Services from "./pages/services";
 import Profile from "./pages/profile";
 import DashboardofDoctor from "./pages/dashboard/doctor";
 import DashboardofPatient from "./pages/dashboard/patient";
+import DashboardofAdmin from "./pages/dashboard/admin";
 import ProfileofDoctor from "./pages/profile/profilefordoctor";
 import About from "./pages/about";
 import ScrollToTop from "./ScrollToTop";
@@ -28,8 +31,10 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/loginasUser" element={<LoginAsUser />} />
               <Route path="/loginasDoctor" element={<LoginAsDoctor />} />
+              <Route path="/loginasAdmin" element={<LoginAsAdmin />} />
               <Route path="/registerasUser" element={<RegisterAsUser />} />
               <Route path="/registerasDoctor" element={<RegisterAsDoctor />} />
+              <Route path="/registerasAdmin" element={<RegisterAsAdmin />} />
               <Route
                 path="/services"
                 element={
@@ -54,22 +59,9 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/doctor"
-                element={
-                  <ProtectedDashboard>
-                    <DashboardofDoctor />
-                  </ProtectedDashboard>
-                }
-              />
-              <Route
-                path="/patient"
-                element={
-                  <ProtectedDashboard>
-                    <DashboardofPatient />
-                  </ProtectedDashboard>
-                }
-              />
+              <Route path="/doctor" element={<DashboardofDoctor />} />
+              <Route path="/patient" element={<DashboardofPatient />} />
+              <Route path="/admin" element={<DashboardofAdmin />} />
               <Route path="/about" element={<About />} />
             </Route>
           </Routes>

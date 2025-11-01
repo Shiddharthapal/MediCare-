@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-
-const userSchema = new mongoose.Schema({
+const adminDetailsSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Please provide an email"],
@@ -11,13 +10,23 @@ const userSchema = new mongoose.Schema({
       "Please provide a valid email",
     ],
   },
+  name: {
+    type: String,
+    required: true,
+  },
+  adminId: {
+    type: String,
+    required: [true, "Please provide a admin id"],
+    unique: true,
+  },
   password: {
     type: String,
     required: [true, "Password is required"],
     minlength: [6, "Password must be at least 6 characters"],
   },
-  user: {
+  role: {
     type: String,
+    required: true,
   },
   createdAt: {
     type: Date,
@@ -35,7 +44,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Set default name and hash password before saving
-userSchema.pre("save", async function (next) {
+adminDetailsSchema.pre("save", async function (next) {
   try {
     // Hash password if modified
     if (this.isModified("password")) {
@@ -49,11 +58,10 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Method to compare password
-userSchema.methods.comparePassword = async function (
+adminDetailsSchema.methods.comparePassword = async function (
   candidatePassword: string
 ) {
   return bcrypt.compare(candidatePassword, this.password);
 };
-
-export default mongoose.models.User || mongoose.model("User", userSchema);
+export default mongoose.models.AdminDetails ||
+  mongoose.model("AdminDetails", adminDetailsSchema);

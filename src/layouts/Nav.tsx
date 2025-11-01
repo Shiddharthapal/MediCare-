@@ -47,6 +47,9 @@ export default function Navigation() {
     setIsMobileMenuOpen(false);
   };
 
+  const isAdmin = authuser.role === "admin";
+  const isDoctor = authuser.role === "doctor";
+
   return (
     <nav className="bg-white shadow-sm border-b print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,6 +67,7 @@ export default function Navigation() {
           </div>
 
           {/* Navigation Links */}
+
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
               <Link
@@ -80,7 +84,8 @@ export default function Navigation() {
                 Services
                 <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
               </Link>
-              {authuser.role !== "doctor" && (
+
+              {!isAdmin && !isDoctor && (
                 <Link
                   to="/patient"
                   className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
@@ -99,6 +104,15 @@ export default function Navigation() {
                   <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[hsl(201,96%,32%)] transition-all duration-300 ease-out group-hover:w-full group-hover:left-0"></span>
                 </Link>
               )}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={closeMobileMenu}
+                  className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
+                >
+                  Dashboard
+                </Link>
+              )}
               <Link
                 to="/about"
                 className="relative text-gray-900 hover:text-[hsl(201,96%,32%)] px-3 py-2 text-sm font-medium transition-colors duration-300 group"
@@ -110,7 +124,7 @@ export default function Navigation() {
           </div>
 
           {/* Mobile menu button */}
-          {/* Mobile menu button */}
+
           <div className="md:hidden">
             <Button
               variant="ghost"
@@ -141,9 +155,11 @@ export default function Navigation() {
                     variant="outline"
                     className="text-[hsl(201,96%,32%)] border-[hsl(201,96%,32%)]"
                   >
-                    {authuser.role === "doctor"
-                      ? "Doctor Active"
-                      : "Patient Active"}
+                    {isAdmin
+                      ? "Admin Active"
+                      : isDoctor
+                        ? "Doctor Active"
+                        : "Patient Active"}
                   </Badge>
                 </div>
 
@@ -164,9 +180,11 @@ export default function Navigation() {
                     <DropdownMenuItem asChild>
                       <Link
                         to={
-                          authuser.role === "doctor"
-                            ? "/profilefordoctor"
-                            : "/profile"
+                          isAdmin
+                            ? "/admin/profile"
+                            : isDoctor
+                              ? "/profilefordoctor"
+                              : "/profile"
                         }
                         className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
                       >
@@ -175,19 +193,35 @@ export default function Navigation() {
                       </Link>
                     </DropdownMenuItem>
 
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/admin"
+                          className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
+                        >
+                          <Shield className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+
                     {/* Settings Link */}
                     <DropdownMenuItem asChild>
                       <Link
-                        to={authuser.role === "doctor" ? "/doctor" : "/patient"}
+                        to={
+                          isAdmin ? "/admin" : isDoctor ? "/doctor" : "/patient"
+                        }
                         state={{
-                          file:
-                            authuser.role === "doctor" ? "setting" : "settings",
+                          file: isAdmin
+                            ? "settings"
+                            : isDoctor
+                              ? "setting"
+                              : "settings",
                           id: 123,
                         }}
-                        className="flex flex-row 
-                      items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
+                        className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
                       >
-                        <Settings className="mr-2 h-4 w-4 " />
+                        <Settings className="mr-2 h-4 w-4" />
                         Settings
                       </Link>
                     </DropdownMenuItem>
@@ -210,16 +244,31 @@ export default function Navigation() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Users className="mr-2 h-4 w-4" />
-                    <Link to="/loginasUser" className="text-gray-900">
-                      <p>As a Patient</p>
+                  <DropdownMenuItem className="cursor-pointer" asChild>
+                    <Link
+                      to="/loginasUser"
+                      className="flex items-center text-gray-900"
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>Patient</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer">
-                    <Shield className="mr-2 h-4 w-4" />
-                    <Link to="/loginasDoctor">
-                      <p>As an Doctor</p>
+                    <Link
+                      to="/loginasDoctor"
+                      className="flex items-center text-gray-900"
+                    >
+                      <Shield className="mr-4 h-4 w-4" />
+                      <span>Doctor</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Link
+                      to="/loginasAdmin"
+                      className="flex items-center text-gray-900"
+                    >
+                      <Users className="mr-4 h-4 w-4" />
+                      <p>Admin</p>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -244,7 +293,7 @@ export default function Navigation() {
             >
               Services
             </Link>
-            {authuser.role !== "doctor" && (
+            {!isAdmin && !isDoctor && (
               <Link
                 to="/patient"
                 onClick={closeMobileMenu}
@@ -256,6 +305,15 @@ export default function Navigation() {
             {authuser.role === "doctor" && (
               <Link
                 to="/doctor"
+                onClick={closeMobileMenu}
+                className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
+              >
+                Dashboard
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                to="/admin"
                 onClick={closeMobileMenu}
                 className="text-gray-600 hover:text-[hsl(201,96%,32%)] block px-3 py-2 text-base font-medium transition-colors duration-300"
               >

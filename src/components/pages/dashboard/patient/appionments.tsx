@@ -101,6 +101,19 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getBorderColor = (status: string) => {
+  switch (status) {
+    case "confirmed":
+      return "border-green-600";
+    case "pending":
+      return "border-yellow-600";
+    case "completed":
+      return "border-blue-600";
+    default:
+      return "border-gray-600";
+  }
+};
+
 const getModeIcon = (mode: string) => {
   switch (mode) {
     case "video":
@@ -502,6 +515,7 @@ export default function Appointments({
     setSelectedAppointment(appointmentWithStatus);
     setShowDetailsModal(true);
   };
+
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);
@@ -544,7 +558,9 @@ export default function Appointments({
     appointment: any;
     showActions?: boolean;
   }) => (
-    <Card className="mb-4 hover:shadow-md transition-shadow">
+    <Card
+      className={`mb-4 border-l-4 ${getBorderColor(status)} hover:shadow-md transition-shadow`}
+    >
       <CardContent className="p-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">

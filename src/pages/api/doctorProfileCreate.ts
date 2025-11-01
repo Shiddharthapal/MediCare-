@@ -1,6 +1,7 @@
 import connect from "@/lib/connection";
 import Doctor from "@/model/doctor";
 import DoctorDetails from "@/model/doctorDetails";
+import adminStore from "@/model/adminStore";
 import type { APIRoute } from "astro";
 
 interface AppointmentSlot {
@@ -14,7 +15,7 @@ export const POST: APIRoute = async ({ request }) => {
   };
   try {
     const body = await request.json();
-    // console.log("🧞‍♂️body --->", body);
+    console.log("🧞‍♂️body --->", body);
     const { editedDoctor, id, formData } = body;
     const {
       name,
@@ -178,6 +179,35 @@ export const POST: APIRoute = async ({ request }) => {
       });
 
       await doctordetails.save();
+
+      //add doctordetails to admin when create profile
+      await adminStore.updateMany(
+        {}, // Empty filter = update all admin documents
+        {
+          $push: {
+            doctorDetails: {
+              userId: id,
+              name,
+              email: doctordata?.email,
+              registrationNo: doctordata?.registrationNo,
+              contact,
+              specialist,
+              specializations,
+              hospital,
+              gender,
+              fees,
+              experience,
+              education,
+              availableSlots:
+                availableSlotsMap.size > 0 ? availableSlotsMap : undefined,
+              degree,
+              language,
+              about,
+              consultationModes,
+            },
+          },
+        }
+      );
     } else {
       doctordetails.name = name ?? doctordetails.name;
       doctordetails.email = doctordata?.email ?? doctordetails.email;
@@ -203,7 +233,39 @@ export const POST: APIRoute = async ({ request }) => {
       }
 
       await doctordetails.save();
+
+      //add doctordetails to admin after edit
+      await adminStore.updateMany(
+        {}, // Empty filter = update all admin documents
+        {
+          $push: {
+            doctorDetails: {
+              userId: id,
+              name: name ?? doctordetails.name,
+              email: doctordata?.email,
+              registrationNo:
+                doctordata?.registrationNo ?? doctordetails.registrationNo,
+              contact: contact ?? doctordetails.contact,
+              specialist: specialist ?? doctordetails.specialist,
+              specializations: specializations ?? doctordetails.specializations,
+              hospital: hospital ?? doctordetails.hospital,
+              gender: gender ?? doctordetails.gender,
+              fees: fees ?? doctordetails.fees,
+              experience: experience ?? doctordetails.experience,
+              education: education ?? doctordetails.education,
+              availableSlots:
+                availableSlotsMap ?? doctordetails?.availableSlots,
+              degree: degree ?? doctordetails.degree,
+              language: language ?? doctordetails.language,
+              about: about ?? doctordetails.about,
+              consultationModes:
+                consultationModes ?? doctordetails.consultationModes,
+            },
+          },
+        }
+      );
     }
+
     return new Response(JSON.stringify({ doctordetails }), {
       status: 200,
       headers,

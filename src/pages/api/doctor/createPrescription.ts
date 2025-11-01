@@ -1,6 +1,7 @@
 import connect from "@/lib/connection";
 import doctorDetails from "@/model/doctorDetails";
 import userDetails from "@/model/userDetails";
+import adminStore from "@/model/adminStore";
 import type { APIRoute } from "astro";
 
 export const POST: APIRoute = async ({ request }) => {
@@ -10,7 +11,6 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     let body = await request.json();
-    console.log("🧞‍♂️  body --->", body);
 
     let { patientData, prescriptionData } = body;
     let { doctorpatinetId, patientId, doctorId, doctorName, reasonForVisit } =
@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
     //console.log("🧞‍♂️prescriptionForm --->", prescriptionForm);
     await connect();
 
-    let userdetails = await userDetails.findById({ _id: patientId });
+    let userdetails = await userDetails.findOne({ userId: patientId });
     //console.log("🧞‍♂️userdetails --->", userdetails);
     if (!userdetails) {
       return new Response(
@@ -61,10 +61,10 @@ export const POST: APIRoute = async ({ request }) => {
       prescriptionId,
       createdAt: new Date(),
     };
-    //console.log("🧞‍♂️newPrescriptionPatient --->", newPrescriptionPatient);
+
     const createUserPrescription = await userDetails.findOneAndUpdate(
       {
-        _id: userdetails._id,
+        userId: patientId,
         "appointments.doctorpatinetId": doctorpatinetId,
       },
       {
@@ -79,7 +79,6 @@ export const POST: APIRoute = async ({ request }) => {
     );
 
     let doctordetails = await doctorDetails.findOne({ userId: doctorId });
-    //console.log("🧞‍♂️  doctordetails --->", doctordetails);
 
     if (!doctordetails) {
       return new Response(
@@ -112,11 +111,10 @@ export const POST: APIRoute = async ({ request }) => {
       prescriptionId,
       createdAt: new Date(),
     };
-    //console.log("🧞‍♂️newPrescriptionDoctor --->", newPrescriptionDoctor);
 
     const createDoctorPrescription = await doctorDetails.findOneAndUpdate(
       {
-        _id: doctordetails._id,
+        userId: doctorId,
         "appointments.doctorpatinetId": doctorpatinetId,
       },
       {
@@ -127,6 +125,112 @@ export const POST: APIRoute = async ({ request }) => {
       {
         new: true,
         runValidators: true,
+      }
+    );
+
+    const createprescription = await doctorDetails.findOneAndUpdate(
+      {
+        userId: doctorId,
+      },
+      {
+        $push: {
+          prescription: newPrescriptionDoctor,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    //store the prescription deatils to adminStorage
+    await adminStore.updateMany(
+      {}, // Update all admin documents
+      {
+        $push: {
+          prescription: {
+            doctorpatinetId,
+            patientId,
+            doctorName,
+            doctorId,
+            vitalSign,
+            reasonForVisit,
+            primaryDiagnosis,
+            testandReport,
+            medication,
+            symptoms,
+            restrictions,
+            followUpDate,
+            additionalNote,
+            prescriptionId,
+            createdAt: new Date(),
+          },
+        },
+      }
+    );
+
+    //add prescription data to doctorDetails of adminStore
+    await adminStore.updateOne(
+      { "doctorDetails.userId": doctorId },
+      {
+        $set: {
+          "doctorDetails.$[doctor].appointments.$[appointment].prescription": {
+            doctorpatinetId,
+            patientId,
+            doctorName,
+            doctorId,
+            vitalSign,
+            reasonForVisit,
+            primaryDiagnosis,
+            testandReport,
+            medication,
+            symptoms,
+            restrictions,
+            followUpDate,
+            additionalNote,
+            prescriptionId,
+            createdAt: new Date(),
+          },
+        },
+      },
+      {
+        arrayFilters: [
+          { "doctor.userId": doctorId }, // Match all patients with this ID
+          { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
+        ],
+      }
+    );
+
+    //add prescription data to patientDetails of adminStore
+    await adminStore.updateOne(
+      { "patientDetails.userId": patientId },
+      {
+        $set: {
+          "patientDetails.$[patient].appointments.$[appointment].prescription":
+            {
+              doctorpatinetId,
+              patientId,
+              doctorName,
+              doctorId,
+              vitalSign,
+              reasonForVisit,
+              primaryDiagnosis,
+              testandReport,
+              medication,
+              symptoms,
+              restrictions,
+              followUpDate,
+              additionalNote,
+              prescriptionId,
+              createdAt: new Date(),
+            },
+        },
+      },
+      {
+        arrayFilters: [
+          { "patient.userId": patientId }, // Match all patients with this ID
+          { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
+        ],
       }
     );
     // console.log("🧞‍♂️  createDoctorPrescription --->", createDoctorPrescription);

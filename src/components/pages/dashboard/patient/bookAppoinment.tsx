@@ -596,9 +596,11 @@ export default function BookAppointment({
                       </Label>
                       <DatePickerWithSlots
                         value={formData.appointmentDate}
-                        onChange={(date) =>
-                          handleInputChange("appointmentDate", date)
-                        }
+                        onChange={(date) => {
+                          handleInputChange("appointmentDate", date);
+                          // Reset time when date changes
+                          handleInputChange("appointmentTime", "");
+                        }}
                         availableSlots={enabledDays}
                         minDate={getMinDate()}
                         maxDate={getMaxDate()}
@@ -625,6 +627,7 @@ export default function BookAppointment({
                         onValueChange={(value) =>
                           handleInputChange("appointmentTime", value)
                         }
+                        disabled={!formData.appointmentDate}
                       >
                         <SelectTrigger
                           className={
@@ -633,21 +636,50 @@ export default function BookAppointment({
                               : "mt-2"
                           }
                         >
-                          <SelectValue placeholder="Select time" />
+                          <SelectValue
+                            placeholder={
+                              formData.appointmentDate
+                                ? "Select time"
+                                : "Select a date first"
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent className="border border-gray-400">
-                          {doctor?.availableSlots &&
-                            Object.entries(doctor?.availableSlots)
-                              .filter(([day, hours]) => hours?.enabled) // Optional: only show enabled days
-                              .map(([day, hours]) => (
-                                <SelectItem
-                                  key={day}
-                                  value={day}
-                                  className="font-medium"
-                                >
-                                  {formatWorkingHours(hours)}
-                                </SelectItem>
-                              ))}
+                          {(() => {
+                            // Get the day name from selected date
+                            if (!formData.appointmentDate) return null;
+
+                            const selectedDate = new Date(
+                              formData.appointmentDate
+                            );
+                            const dayName = selectedDate.toLocaleDateString(
+                              "en-US",
+                              {
+                                weekday: "long",
+                              }
+                            );
+
+                            // Get the slot for that specific day
+                            const daySlot = doctor?.availableSlots?.[dayName];
+
+                            if (!daySlot?.enabled) {
+                              return (
+                                <div className="px-2 py-4 text-center text-gray-500">
+                                  No slots available for {dayName}
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <SelectItem
+                                key={dayName}
+                                value={formatWorkingHours(daySlot)}
+                                className="font-medium"
+                              >
+                                {dayName}: {formatWorkingHours(daySlot)}
+                              </SelectItem>
+                            );
+                          })()}
                         </SelectContent>
                       </Select>
                       {errors.appointmentTime && (
