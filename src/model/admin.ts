@@ -9,11 +9,14 @@ const AdminSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: () => {
-      // Bangladesh is UTC+6
+      // Get current time in Bangladesh timezone (UTC+6)
       const now = new Date();
-      const offset = 6 * 60; // 6 hours in minutes
-      const localTime = new Date(now.getTime() + offset * 60 * 1000);
-      return localTime;
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
     },
   },
 });
