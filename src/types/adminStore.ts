@@ -230,6 +230,9 @@ interface Appointment {
   // Medical Records
   prescription?: Prescription;
   document?: FileUpload[];
+  cancelledBy?: string;
+  cancelledAt?: Date;
+  updatedAt: Date;
   // Timestamp
   createdAt?: Date;
 }

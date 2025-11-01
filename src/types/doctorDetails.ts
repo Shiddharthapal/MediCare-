@@ -120,6 +120,9 @@ interface AppointmentData {
   specialRequests: string;
   prescription: Prescription;
   document: FileUpload[];
+  cancelledBy?: string;
+  cancelledAt?: Date;
+  updatedAt: Date;
   createdAt: Date;
 }
 export interface DoctorDetails {
