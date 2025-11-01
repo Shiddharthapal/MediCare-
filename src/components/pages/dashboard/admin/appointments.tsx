@@ -482,6 +482,19 @@ export default function Appointments({
     }
   };
 
+  const getBorderColor = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return "border-green-600";
+      case "pending":
+        return "border-yellow-600";
+      case "completed":
+        return "border-blue-600";
+      default:
+        return "border-gray-600";
+    }
+  };
+
   const handleViewDetails = (appointment: appointmentdata) => {
     setSelectedAppointment(appointment);
     setShowDetailsModal(true);
@@ -530,10 +543,18 @@ export default function Appointments({
     appointment: any;
     showActions?: boolean;
   }) => (
-    <Card className="mb-4 hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
+    <Card
+      className={`mb-4 hover:shadow-md border-l-4 ${getBorderColor(status)} transition-shadow`}
+    >
+      <CardContent className="">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src="/placeholder.svg?height=48&width=48" />
+              <AvatarFallback className="bg-red-100 text-red-600 font-semibold">
+                {getDoctorInitials(appointment.doctorName)}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-gray-900">
@@ -545,11 +566,11 @@ export default function Appointments({
               <p className="text-sm text-gray-600 mb-1">
                 {appointment.doctorName} • {appointment.doctorSpecialist}
               </p>
-              <div>
+              <div className="flex flex-row gap-2">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Patient
+                  Patient:
                 </p>
-                <p className="text-sm text-gray-900 font-medium">
+                <p className="text-xs text-gray-900 font-medium">
                   {appointment.patientName || "N/A"}
                 </p>
               </div>
@@ -558,6 +579,10 @@ export default function Appointments({
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
                   {appointment.appointmentTime}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {appointment.appointmentDate}
                 </div>
                 <div className="flex items-center gap-1">
                   {getModeIcon(appointment.consultationType)}
@@ -612,7 +637,7 @@ export default function Appointments({
               className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
               onClick={() => handleViewPrescription(appointment)}
             >
-              <FileText className="h-4 w-4 mr-2" />
+              <FileText className="h-4 w-4 mr-0" />
               Prescription
             </Button>
             <Button
@@ -620,7 +645,7 @@ export default function Appointments({
               className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
               onClick={() => handleViewDetails(appointment, status)}
             >
-              <Info className="h-4 w-4 mr-2" />
+              <Info className="h-4 w-4 mr-0" />
               See Details
             </Button>
             <Button
@@ -628,7 +653,7 @@ export default function Appointments({
               className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
               onClick={() => handleViewReports(appointment)}
             >
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className="h-4 w-4 mr-0" />
               Reports
             </Button>
           </div>
@@ -639,7 +664,7 @@ export default function Appointments({
 
   const CancelledAppointmentCard = ({ appointment }: { appointment: any }) => (
     <Card className="mb-4 border-l-4 border-red-500">
-      <CardContent className="p-4">
+      <CardContent className="">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
             <Avatar className="h-12 w-12">
@@ -662,6 +687,14 @@ export default function Appointments({
               <p className="text-sm text-gray-600 mb-1">
                 {appointment.doctorName} • {appointment.doctorSpecialist}
               </p>
+              <div className="flex flex-row gap-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                  Patient:
+                </p>
+                <p className="text-xs text-gray-900 font-medium">
+                  {appointment.patientName || "N/A"}
+                </p>
+              </div>
 
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
@@ -673,6 +706,33 @@ export default function Appointments({
                   {appointment.appointmentDate}
                 </div>
               </div>
+            </div>
+            <div className=" flex gap-2 flex-wrap">
+              {/* Prescription and Reports options (always visible) */}
+              <Button
+                variant="outline"
+                className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                onClick={() => handleViewPrescription(appointment)}
+              >
+                <FileText className="h-4 w-4 mr-0" />
+                Prescription
+              </Button>
+              <Button
+                variant="outline"
+                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                onClick={() => handleViewDetails(appointment)}
+              >
+                <Info className="h-4 w-4 mr-0" />
+                See Details
+              </Button>
+              <Button
+                variant="outline"
+                className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                onClick={() => handleViewReports(appointment)}
+              >
+                <Upload className="h-4 w-4 mr-0" />
+                Reports
+              </Button>
             </div>
           </div>
         </div>
@@ -771,76 +831,215 @@ export default function Appointments({
         <div className="space-y-6">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Next 7 Days</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Upcoming Appointments
+            </h2>
+            <Badge variant="outline" className="bg-blue-600 text-white">
+              {Object.keys(futureGrouped).length} scheduled
+            </Badge>
           </div>
 
           {Object.keys(futureGrouped).length > 0 ? (
-            Object.entries(futureGrouped).map(
-              ([date, appointments]: [string, appointmentdata[]]) => (
-                <div key={date} className="space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b">
-                    <h3 className="text-lg font-medium text-gray-800">
-                      {formatDate(date)}
-                    </h3>
-                    <span className="text-sm text-gray-500">
-                      {new Date(date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                    <Badge variant="outline" className="ml-2">
-                      {appointments.length} appointment
-                      {appointments.length !== 1 ? "s" : ""}
-                    </Badge>
-                  </div>
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Doctor
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Patient
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Date & Time
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Reason
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Status
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(futureGrouped)
+                  .sort(
+                    ([a], [b]) => new Date(a).getTime() - new Date(b).getTime()
+                  )
+                  .map(([date, appointments]: [string, appointmentdata[]]) =>
+                    appointments.map((apt) => (
+                      <tr
+                        key={apt._id}
+                        className={`border-b border-slate-100 hover:bg-slate-50 ${
+                          apt.status === "cancelled" ? "opacity-60" : ""
+                        }`}
+                      >
+                        <td className="py-4 px-3 text-slate-900">
+                          {apt.doctorName}
+                        </td>
+                        <td className="py-4 px-3 text-slate-900">
+                          {apt?.patientName}
+                        </td>
+                        <td className="py-4 px-3 text-slate-600">
+                          <div className="flex items-center gap-2">
+                            <Calendar size={16} />
+                            {apt?.appointmentDate} • {apt?.appointmentTime}
+                          </div>
+                        </td>
+                        <td className="py-4 px-3 text-slate-600">
+                          {apt?.reasonForVisit || "N/A"}
+                        </td>
+                        <td className="py-4 px-3">
+                          <span
+                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                              apt.status === "cancelled"
+                                ? "bg-red-100 text-red-700"
+                                : apt.status === "confirmed"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {apt.status}
+                          </span>
+                        </td>
 
-                  {appointments && appointments.length > 0 ? (
-                    appointments.map((appointment: appointmentdata) => {
-                      // Add individual appointment validation
-                      if (!appointment || !appointment._id) {
-                        console.warn("Invalid appointment data:", appointment);
-                        return null;
-                      }
+                        <td className="py-4 ">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                              >
+                                <MoreVertical className="h-4 w-4 mr-2" />
+                                Actions
+                              </Button>
+                            </DialogTrigger>
 
-                      if (appointment.status === "cancelled") {
-                        return (
-                          <CancelledAppointmentCard
-                            key={appointment._id}
-                            appointment={appointment}
-                          />
-                        );
-                      } else {
-                        return (
-                          <AppointmentCard
-                            status="pending"
-                            key={appointment._id}
-                            appointment={appointment}
-                            showActions={true}
-                          />
-                        );
-                      }
-                    })
-                  ) : (
-                    <div className="text-gray-500 text-center py-4">
-                      No appointments found for this date
-                    </div>
+                            {/* Modal Content */}
+
+                            <DialogContent className="sm:max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Appointment Actions</DialogTitle>
+                                <DialogDescription className="text-sm text-gray-500 mt-1">
+                                  Choose an action for this appointment
+                                </DialogDescription>
+                              </DialogHeader>
+
+                              {apt.status === "cancelled" ? (
+                                <div className="grid grid-cols-2 gap-3 mt-4">
+                                  <Button
+                                    variant="outline"
+                                    className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                                    onClick={() => {
+                                      handleViewReports(apt);
+                                    }}
+                                  >
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Reports
+                                  </Button>
+
+                                  <Button
+                                    variant="outline"
+                                    className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                                    onClick={() => {
+                                      handleViewPrescription(apt);
+                                    }}
+                                  >
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    Prescription
+                                  </Button>
+
+                                  <Button
+                                    variant="outline"
+                                    className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                                    onClick={() => {
+                                      handleViewDetails(apt);
+                                    }}
+                                  >
+                                    <Info className="h-4 w-4 mr-2" />
+                                    See Details
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-3 mt-4">
+                                  <Button
+                                    variant="outline"
+                                    className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
+                                    onClick={() => {
+                                      handleCancelAppointment(apt);
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+
+                                  <Button
+                                    variant="outline"
+                                    className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
+                                    onClick={() => {
+                                      handleRescheduleAppointment(apt);
+                                    }}
+                                  >
+                                    Reschedule
+                                  </Button>
+
+                                  <Button
+                                    className="bg-pink-500 hover:bg-pink-600 text-white"
+                                    onClick={() => {
+                                      handleJoinSession(apt);
+                                    }}
+                                  >
+                                    <Video className="h-4 w-4 mr-2" />
+                                    Join
+                                  </Button>
+
+                                  <Button
+                                    variant="outline"
+                                    className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                                    onClick={() => {
+                                      handleViewReports(apt);
+                                    }}
+                                  >
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Reports
+                                  </Button>
+
+                                  <Button
+                                    variant="outline"
+                                    className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                                    onClick={() => {
+                                      handleViewPrescription(apt);
+                                    }}
+                                  >
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    Prescription
+                                  </Button>
+
+                                  <Button
+                                    variant="outline"
+                                    className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                                    onClick={() => {
+                                      handleViewDetails(apt);
+                                    }}
+                                  >
+                                    <Info className="h-4 w-4 mr-2" />
+                                    See Details
+                                  </Button>
+                                </div>
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                        </td>
+                      </tr>
+                    ))
                   )}
-                </div>
-              )
-            )
+              </tbody>
+            </table>
           ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No upcoming appointments
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  You don't have any appointments scheduled for the next 7 days.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="text-gray-500 text-center py-8 border border-slate-200 rounded-lg">
+              No upcoming appointments
+            </div>
           )}
         </div>
       )}
@@ -857,7 +1056,7 @@ export default function Appointments({
             </Badge>
           </div>
 
-          {Object.keys(pastGrouped).length > 0 ? (
+          {Object.keys(todayGrouped).length > 0 ? (
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
@@ -1096,34 +1295,63 @@ export default function Appointments({
                           </span>
                         </td>
                         <td className="py-4 px-3">
-                          <div className="flex flex-col space-y-1">
-                            <Button
-                              variant="outline"
-                              className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-                              onClick={() =>
-                                handleViewPrescription(appointment)
-                              }
-                            >
-                              <FileText className="h-4 w-4 mr-2" />
-                              Prescription
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                              onClick={() => handleViewDetails(appointment)}
-                            >
-                              <Info className="h-4 w-4 mr-2" />
-                              See Details
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-                              onClick={() => handleViewReports(appointment)}
-                            >
-                              <Upload className="h-4 w-4 mr-2" />
-                              Reports
-                            </Button>
-                          </div>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                              >
+                                <MoreVertical className="h-4 w-4 mr-2" />
+                                Actions
+                              </Button>
+                            </DialogTrigger>
+
+                            {/* Modal Content */}
+
+                            <DialogContent className="sm:max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Appointment Actions</DialogTitle>
+                                <DialogDescription className="text-sm text-gray-500 mt-1">
+                                  Choose an action for this appointment
+                                </DialogDescription>
+                              </DialogHeader>
+
+                              <div className="grid grid-cols-2 gap-3 mt-4">
+                                <Button
+                                  variant="outline"
+                                  className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                                  onClick={() => {
+                                    handleViewReports(apt);
+                                  }}
+                                >
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Reports
+                                </Button>
+
+                                <Button
+                                  variant="outline"
+                                  className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                                  onClick={() => {
+                                    handleViewPrescription(apt);
+                                  }}
+                                >
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Prescription
+                                </Button>
+
+                                <Button
+                                  variant="outline"
+                                  className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                                  onClick={() => {
+                                    handleViewDetails(apt);
+                                  }}
+                                >
+                                  <Info className="h-4 w-4 mr-2" />
+                                  See Details
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </td>
                       </tr>
                     ))
