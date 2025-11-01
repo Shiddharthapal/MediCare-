@@ -221,7 +221,7 @@ export default function Dashboard() {
           },
         });
         let admindata = await response.json();
-        setAdminData(admindata?.admindetails);
+        setAdminData(admindata?.adminstore);
       } catch (err) {
         console.log(err);
       }

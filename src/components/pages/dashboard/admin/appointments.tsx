@@ -154,27 +154,63 @@ interface UserDetails {
   createdAt: Date;
 }
 
-const mockappointmentdata = {
-  _id: "",
-  doctorUserId: "",
-  doctorName: "",
-  doctorSpecialist: "",
-  patientName: "",
-  patientEmail: "",
-  patientPhone: "",
-  appointmentDate: "",
-  appointmentTime: "",
-  mode: "",
-  consultedType: "",
-  reasonForVisit: "",
-  symptoms: "",
-  previousVisit: "",
-  emergencyContact: "",
-  emergencyPhone: "",
-  paymentMethod: "",
-  specialRequests: "",
-  status: "",
-};
+interface RescheduleAppointment {
+  _id?: string;
+
+  // Doctor Information
+  doctorpatinetId?: string;
+  doctorUserId?: string;
+  doctorName?: string;
+  doctorSpecialist?: string;
+  doctorGender?: string;
+  doctorEmail?: string;
+  hospital?: string;
+
+  // Patient Information
+  patientId?: string;
+  patientName: string;
+  patientEmail?: string;
+  patientPhone: string;
+  patientGender?: string;
+  patientAge?: number;
+  patientAddress?: string;
+  patientBloodgroup?: string;
+  patientBithofday?: Date;
+
+  // Appointment Details
+  appointmentDate: string;
+  prevappointmentDate?: string;
+  appointmentTime: string;
+  prevappointmentTime?: string;
+  status?: string;
+  consultationType: string;
+  prevconsultationType?: string;
+  consultedType: string;
+  prevconsultedType?: string;
+  reasonForVisit: string;
+  prevreasonForVisit?: string;
+  symptoms: string;
+  prevsymptoms?: string;
+  previousVisit: string;
+
+  // Emergency Contact
+  emergencyContact?: string;
+  prevemergencyContact?: string;
+  emergencyPhone?: string;
+  prevemergencyPhone?: string;
+
+  // Payment & Additional
+  paymentMethod: string;
+  prevpaymentMethod?: string;
+  specialRequests?: string;
+  prevspecialRequests?: string;
+
+  // Medical Records
+  prescription?: Prescription;
+  // Timestamp
+  prevcreatedAt?: Date;
+  createdAt?: Date;
+}
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -341,7 +377,12 @@ export default function Appointments({
   > | null>(null);
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentData | null>(null);
+  const [rescheduleappointment, setRescheduleappointment] = useState<
+    RescheduleAppointment[]
+  >([]);
 
+  const [selectedrescheduleappointment, setSelectedrescheduleappointment] =
+    useState<RescheduleAppointment | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
   const [appointmentsData, setAppointmentsData] =
@@ -379,7 +420,7 @@ export default function Appointments({
   }, [admin]);
 
   const allAppointments = useMemo(() => {
-    return patientData.flatMap((patient) => patient.appointments || []);
+    return patientData.flatMap((patient) => patient?.appointments || []);
   }, [patientData]);
 
   const categorizedAppointments = useMemo(() => {
@@ -391,6 +432,29 @@ export default function Appointments({
         : []
     );
   }, [allAppointments]);
+
+  useEffect(() => {
+    const fetchDataofAdmin = async () => {
+      try {
+        let response = await fetch(`/api/admin/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Not fetch patient and doctor details successfully");
+        }
+        let result = await response.json();
+
+        setRescheduleappointment(result?.adminstore?.rescheduleAppointment);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchDataofAdmin();
+  }, [admin]);
 
   // Group appointments by date
   const todayGrouped = useMemo(() => {
@@ -516,6 +580,13 @@ export default function Appointments({
     setShowDetailsModal(true);
   };
 
+  const handleViewRescheduleAppointmentDetails = (
+    appointment: RescheduleAppointment
+  ) => {
+    setSelectedrescheduleappointment(appointment);
+    setShowDetailsModal(true);
+  };
+
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);
@@ -551,7 +622,7 @@ export default function Appointments({
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="px-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
       </div>
@@ -612,7 +683,7 @@ export default function Appointments({
       </div>
 
       {/* Tabs */}
-      <div className=" grid grid-cols-4 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
+      <div className=" grid grid-cols-5 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
         <Button
           variant={activeTab === "upcoming" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
@@ -633,6 +704,13 @@ export default function Appointments({
           onClick={() => setActiveTab("past")}
         >
           Past ({Object.keys(pastGrouped).length})
+        </Button>
+        <Button
+          variant={activeTab === "reschedule" ? "default" : "ghost"}
+          className={`px-4 py-2 ${activeTab === "reschedule" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+          onClick={() => setActiveTab("reschedule")}
+        >
+          Reschedule ({rescheduleappointment?.length})
         </Button>
         <Button
           variant={activeTab === "cancelled" ? "default" : "ghost"}
@@ -1177,6 +1255,126 @@ export default function Appointments({
         </div>
       )}
 
+      {activeTab === "reschedule" && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-gray-600" />
+            <h2 className="text-xl font-semibold text-gray-900">
+              All Rescheduled Appointment History
+            </h2>
+            <Badge variant="outline" className="bg-purple-700 text-white">
+              {rescheduleappointment.length} completed
+            </Badge>
+          </div>
+
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Doctor
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Patient
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Date & Time
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Disease
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Status
+                </th>
+                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rescheduleappointment &&
+                rescheduleappointment.length > 0 &&
+                rescheduleappointment
+                  .sort((a, b) => {
+                    const dateA = new Date(a.appointmentDate).getTime();
+                    const dateB = new Date(b.appointmentDate).getTime();
+                    return dateB - dateA;
+                  })
+
+                  .map((apt) => (
+                    <tr
+                      key={apt._id}
+                      className="border-b border-slate-100 hover:bg-slate-50"
+                    >
+                      <td className="py-4 px-3 text-slate-900">
+                        {apt.doctorName}
+                      </td>
+                      <td className="py-4 px-3 text-slate-900">
+                        {apt?.patientName}
+                      </td>
+                      <td className="py-4 px-3 text-slate-600">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={16} />
+                          {apt?.appointmentDate}•{apt?.appointmentTime}
+                        </div>
+                      </td>
+                      <td className="py-4 px-3 text-slate-600">
+                        {apt?.reasonForVisit || apt.prescription?.symptoms}
+                      </td>
+                      <td className="py-4 px-3">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                            apt.status === "Confirmed"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {apt.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-3">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                            >
+                              <MoreVertical className="h-4 w-4 mr-2" />
+                              Actions
+                            </Button>
+                          </DialogTrigger>
+
+                          {/* Modal Content */}
+
+                          <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Appointment Actions</DialogTitle>
+                              <DialogDescription className="text-sm text-gray-500 mt-1">
+                                Choose an action for this appointment
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="grid grid-cols-1 gap-3 mt-4">
+                              <Button
+                                variant="outline"
+                                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                                onClick={() => {
+                                  handleViewDetails(apt);
+                                }}
+                              >
+                                <Info className="h-4 w-4 mr-2" />
+                                See Details
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {activeTab === "cancelled" && (
         <div className="space-y-6">
           <div className="flex items-center gap-2">
@@ -1442,6 +1640,145 @@ export default function Appointments({
                   <p>
                     <strong>Special Requests:</strong>{" "}
                     {selectedAppointment.specialRequests}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDetailsModal && selectedrescheduleappointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Appointment Details -{" "}
+                  {selectedrescheduleappointment.reasonForVisit}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDetailsModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="mb-4">
+                <p>
+                  <strong>AppointmentId:</strong>{" "}
+                  {selectedrescheduleappointment.doctorpatinetId}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {formatDate(selectedrescheduleappointment.appointmentDate)}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Patient Information
+                  </h3>
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {selectedrescheduleappointment.patientName}
+                  </p>
+                  <p>
+                    <strong>Email:</strong>{" "}
+                    {selectedrescheduleappointment.patientEmail}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong>{" "}
+                    {selectedrescheduleappointment.patientPhone}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Doctor Information
+                  </h3>
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {selectedrescheduleappointment.doctorName}
+                  </p>
+                  <p>
+                    <strong>Email:</strong>{" "}
+                    {selectedrescheduleappointment.doctorEmail}
+                  </p>
+                  <p>
+                    <strong>Specialist:</strong>{" "}
+                    {selectedrescheduleappointment.doctorSpecialist}
+                  </p>
+                  <p>
+                    <strong>Hospital:</strong>{" "}
+                    {selectedrescheduleappointment.hospital}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Appointment Specifics
+                  </h3>
+                  <p>
+                    <strong>Date:</strong>{" "}
+                    {selectedrescheduleappointment.appointmentDate}
+                  </p>
+                  <p>
+                    <strong>Time:</strong>{" "}
+                    {selectedrescheduleappointment.appointmentTime}
+                  </p>
+                  <p>
+                    <strong>Consultation Type:</strong>{" "}
+                    {selectedrescheduleappointment.consultedType}
+                  </p>
+                  <p>
+                    <strong>Mode:</strong>{" "}
+                    {selectedrescheduleappointment.consultationType}
+                  </p>
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    {selectedrescheduleappointment.status}
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Medical Details
+                  </h3>
+                  <p>
+                    <strong>Reason for Visit:</strong>{" "}
+                    {selectedrescheduleappointment.reasonForVisit}
+                  </p>
+                  <p>
+                    <strong>Symptoms:</strong>{" "}
+                    {selectedrescheduleappointment.symptoms}
+                  </p>
+                  <p>
+                    <strong>Previous Visit:</strong>{" "}
+                    {selectedrescheduleappointment.previousVisit}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Emergency Contact
+                  </h3>
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {selectedrescheduleappointment.emergencyContact}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong>{" "}
+                    {selectedrescheduleappointment.emergencyPhone}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Other Information
+                  </h3>
+                  <p>
+                    <strong>Payment Method:</strong>{" "}
+                    {selectedrescheduleappointment.paymentMethod}
+                  </p>
+                  <p>
+                    <strong>Special Requests:</strong>{" "}
+                    {selectedrescheduleappointment.specialRequests}
                   </p>
                 </div>
               </div>

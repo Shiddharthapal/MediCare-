@@ -1,5 +1,6 @@
 import connect from "@/lib/connection";
 import adminDetails from "@/model/adminDetails";
+import adminStore from "@/model/adminStore";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ params, request }: any) => {
@@ -12,12 +13,12 @@ export const GET: APIRoute = async ({ params, request }: any) => {
     await connect();
 
     //check and findout admin and details
-    let admindetails = await adminDetails.findOne({ adminId: id });
+    let adminstore = await adminStore.findOne({ adminId: id });
 
     // return the details of admin
     return new Response(
       JSON.stringify({
-        admindetails,
+        adminstore,
       }),
       {
         status: 200,
