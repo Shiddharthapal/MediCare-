@@ -1166,6 +1166,10 @@ const adminStoreSchema = new mongoose.Schema({
     type: [FileUploadSchema],
     default: [],
   },
+  prescription: {
+    type: [PrescriptionSchema],
+    default: [],
+  },
   healthRecord: {
     type: [HealthRecord],
     default: [],
