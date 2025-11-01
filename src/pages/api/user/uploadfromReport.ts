@@ -196,7 +196,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
     const documentReferences = uploadedFiles.map((file) => ({
-      fileId: file._id, // You might need to generate ObjectId
+      // You might need to generate ObjectId
       patientId: userId,
       appointmentId: appointmentId,
       filename: file.filename,
@@ -208,7 +208,6 @@ export const POST: APIRoute = async ({ request }) => {
       fileSize: file.fileSize,
       path: file.path,
       checksum: file.checksum,
-      doctorName: doctorName,
       category: category,
       userIdWHUP: useridwhup,
       createdAt: new Date().toISOString(),

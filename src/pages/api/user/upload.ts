@@ -5,6 +5,7 @@ import userDetails from "@/model/userDetails";
 import connect from "@/lib/connection";
 import crypto from "crypto";
 import doctorDetails from "@/model/doctorDetails";
+import adminStore from "@/model/adminStore";
 
 // Allowed file types with their MIME types
 const ALLOWED_FILE_TYPES: { [key: string]: string } = {
@@ -275,6 +276,54 @@ export const POST: APIRoute = async ({ request }) => {
           runValidators: true,
         }
       );
+
+      //upload multiple document into patientdetails of adminStore
+      await adminStore.updateOne(
+        { "patientDetails.userId": userId },
+        {
+          $push: {
+            "patientDetails.$[patient].appointments.$[appointment].document": {
+              $each: uploadedFiles,
+            },
+          },
+        },
+        {
+          arrayFilters: [
+            { "patient.userId": userId }, // Match all patients with this ID
+            { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
+          ],
+        }
+      );
+
+      //upload multiple document into doctordetails of adminStore
+      await adminStore.updateOne(
+        { "doctorDetails.userId": doctorId },
+        {
+          $push: {
+            "doctorDetails.$[doctor].appointments.$[appointment].document": {
+              $each: uploadedFiles,
+            },
+          },
+        },
+        {
+          arrayFilters: [
+            { "doctor.userId": doctorId }, // Match all patients with this ID
+            { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
+          ],
+        }
+      );
+
+      //upload multiple document into adminStore upload interface
+      await adminStore.updateMany(
+        {}, // Update all admin documents
+        {
+          $push: {
+            upload: {
+              $each: uploadedFiles,
+            },
+          },
+        }
+      );
     }
 
     if (uploadedSingleFiles.length > 0) {
@@ -286,6 +335,54 @@ export const POST: APIRoute = async ({ request }) => {
         {
           new: true,
           runValidators: true,
+        }
+      );
+
+      //upload single document into patientdetails of adminStore
+      await adminStore.updateOne(
+        { "patientDetails.userId": userId },
+        {
+          $push: {
+            "patientDetails.$[patient].appointments.$[appointment].document": {
+              $each: uploadedSingleFiles,
+            },
+          },
+        },
+        {
+          arrayFilters: [
+            { "patient.userId": userId }, // Match all patients with this ID
+            { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
+          ],
+        }
+      );
+
+      //upload multiple document into doctordetails of adminStore
+      await adminStore.updateOne(
+        { "doctorDetails.userId": doctorId },
+        {
+          $push: {
+            "doctorDetails.$[doctor].appointments.$[appointment].document": {
+              $each: uploadedSingleFiles,
+            },
+          },
+        },
+        {
+          arrayFilters: [
+            { "doctor.userId": doctorId }, // Match all patients with this ID
+            { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
+          ],
+        }
+      );
+
+      //upload single document into adminStore upload interface
+      await adminStore.updateMany(
+        {}, // Update all admin documents
+        {
+          $push: {
+            upload: {
+              $each: uploadedSingleFiles,
+            },
+          },
         }
       );
     }
