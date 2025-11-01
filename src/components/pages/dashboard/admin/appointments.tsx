@@ -231,6 +231,7 @@ interface CategorizedAppointments {
   today: appointmentdata[];
   future: appointmentdata[];
   past: appointmentdata[];
+  cancelled: appointmentdata[];
 }
 
 // Interface for grouped appointments by date
@@ -264,11 +265,18 @@ const categorizeAppointments = (
     today: [],
     future: [],
     past: [],
+    cancelled: [], // Added cancelled array
   };
 
   appointments.forEach((appointment) => {
-    const category = compareDates(appointment.appointmentDate, todayDate);
-    categorized[category].push(appointment);
+    // First check if appointment is cancelled
+    if (appointment.status === "cancelled") {
+      categorized.cancelled.push(appointment);
+    } else {
+      // If not cancelled, categorize by date
+      const category = compareDates(appointment.appointmentDate, todayDate);
+      categorized[category].push(appointment);
+    }
   });
 
   // Sort appointments within each category
@@ -282,6 +290,13 @@ const categorizeAppointments = (
     return a.appointmentDate.localeCompare(b.appointmentDate);
   });
   categorized.past.sort((a, b) => {
+    if (b.appointmentDate === a.appointmentDate) {
+      return b.appointmentTime.localeCompare(a.appointmentTime);
+    }
+    return b.appointmentDate.localeCompare(a.appointmentDate);
+  });
+
+  categorized.cancelled.sort((a, b) => {
     if (b.appointmentDate === a.appointmentDate) {
       return b.appointmentTime.localeCompare(a.appointmentTime);
     }
@@ -392,6 +407,10 @@ export default function Appointments({
   const pastGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
+
+  const cancelledGrouped = useMemo(() => {
+    return groupAppointmentsByDate(categorizedAppointments.cancelled);
+  }, [categorizedAppointments.cancelled]);
 
   //Handle to join in video conferrance
   const handleJoinSession = async (appointment: appointmentdata) => {
@@ -534,212 +553,6 @@ export default function Appointments({
     }
   };
 
-  const AppointmentCard = ({
-    status,
-    appointment,
-    showActions = false,
-  }: {
-    status: string;
-    appointment: any;
-    showActions?: boolean;
-  }) => (
-    <Card
-      className={`mb-4 hover:shadow-md border-l-4 ${getBorderColor(status)} transition-shadow`}
-    >
-      <CardContent className="">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback className="bg-red-100 text-red-600 font-semibold">
-                {getDoctorInitials(appointment.doctorName)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-gray-900">
-                  {appointment.reasonForVisit}
-                </h3>
-                <Badge className={getStatusColor(status)}>{status}</Badge>
-              </div>
-
-              <p className="text-sm text-gray-600 mb-1">
-                {appointment.doctorName} • {appointment.doctorSpecialist}
-              </p>
-              <div className="flex flex-row gap-2">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Patient:
-                </p>
-                <p className="text-xs text-gray-900 font-medium">
-                  {appointment.patientName || "N/A"}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {appointment.appointmentTime}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  {appointment.appointmentDate}
-                </div>
-                <div className="flex items-center gap-1">
-                  {getModeIcon(appointment.consultationType)}
-                  {appointment.consultationType === "in-person"
-                    ? "In-person"
-                    : appointment.consultationType === "video"
-                      ? "Video Call"
-                      : "Phone Call"}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            {/* Appointment Management Actions (only for upcoming/today) */}
-            {showActions && (
-              <>
-                {status === "confirmed" &&
-                  appointment.consultationType === "video" && (
-                    <Button
-                      className="bg-pink-500 hover:bg-pink-600 text-white"
-                      onClick={() => handleJoinSession(appointment)}
-                    >
-                      <Video className="h-4 w-4 mr-2" />
-                      {appointment.meetLink ? "Join" : "Create & Join"}
-                    </Button>
-                  )}
-                {status === "pending" && (
-                  <>
-                    <Button
-                      variant="outline"
-                      className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                      onClick={() => handleCancelAppointment(appointment._id)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                      onClick={() => handleRescheduleAppointment(appointment)}
-                    >
-                      Reschedule
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
-
-            {/* Prescription and Reports options (always visible) */}
-            <Button
-              variant="outline"
-              className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-              onClick={() => handleViewPrescription(appointment)}
-            >
-              <FileText className="h-4 w-4 mr-0" />
-              Prescription
-            </Button>
-            <Button
-              variant="outline"
-              className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-              onClick={() => handleViewDetails(appointment, status)}
-            >
-              <Info className="h-4 w-4 mr-0" />
-              See Details
-            </Button>
-            <Button
-              variant="outline"
-              className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-              onClick={() => handleViewReports(appointment)}
-            >
-              <Upload className="h-4 w-4 mr-0" />
-              Reports
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const CancelledAppointmentCard = ({ appointment }: { appointment: any }) => (
-    <Card className="mb-4 border-l-4 border-red-500">
-      <CardContent className="">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback className="bg-red-100 text-red-600 font-semibold">
-                {getDoctorInitials(appointment.doctorName)}
-              </AvatarFallback>
-            </Avatar>
-
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-gray-900">
-                  {appointment.reasonForVisit}
-                </h3>
-                <Badge className={getStatusColor("cancelled")}>
-                  Cancelled by Doctor
-                </Badge>
-              </div>
-
-              <p className="text-sm text-gray-600 mb-1">
-                {appointment.doctorName} • {appointment.doctorSpecialist}
-              </p>
-              <div className="flex flex-row gap-2">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Patient:
-                </p>
-                <p className="text-xs text-gray-900 font-medium">
-                  {appointment.patientName || "N/A"}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {appointment.appointmentTime}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  {appointment.appointmentDate}
-                </div>
-              </div>
-            </div>
-            <div className=" flex gap-2 flex-wrap">
-              {/* Prescription and Reports options (always visible) */}
-              <Button
-                variant="outline"
-                className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-                onClick={() => handleViewPrescription(appointment)}
-              >
-                <FileText className="h-4 w-4 mr-0" />
-                Prescription
-              </Button>
-              <Button
-                variant="outline"
-                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                onClick={() => handleViewDetails(appointment)}
-              >
-                <Info className="h-4 w-4 mr-0" />
-                See Details
-              </Button>
-              <Button
-                variant="outline"
-                className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-                onClick={() => handleViewReports(appointment)}
-              >
-                <Upload className="h-4 w-4 mr-0" />
-                Reports
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -802,7 +615,7 @@ export default function Appointments({
       </div>
 
       {/* Tabs */}
-      <div className=" grid grid-cols-3 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
+      <div className=" grid grid-cols-4 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
         <Button
           variant={activeTab === "upcoming" ? "default" : "ghost"}
           className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
@@ -823,6 +636,13 @@ export default function Appointments({
           onClick={() => setActiveTab("past")}
         >
           Past ({Object.keys(pastGrouped).length})
+        </Button>
+        <Button
+          variant={activeTab === "cancelled" ? "default" : "ghost"}
+          className={`px-4 py-2 ${activeTab === "cancelled" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+          onClick={() => setActiveTab("cancelled")}
+        >
+          Cancelled ({Object.keys(cancelledGrouped).length})
         </Button>
       </div>
 
@@ -1258,6 +1078,152 @@ export default function Appointments({
               </thead>
               <tbody>
                 {Object.entries(pastGrouped)
+                  .sort(
+                    ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
+                  )
+                  .map(([date, appointments]: [string, any[]]) =>
+                    appointments.map((apt) => (
+                      <tr
+                        key={apt.id}
+                        className="border-b border-slate-100 hover:bg-slate-50"
+                      >
+                        <td className="py-4 px-3 text-slate-900">
+                          {apt.doctorName}
+                        </td>
+                        <td className="py-4 px-3 text-slate-900">
+                          {apt?.patientName}
+                        </td>
+                        <td className="py-4 px-3 text-slate-600">
+                          <div className="flex items-center gap-2">
+                            <Calendar size={16} />
+                            {apt?.appointmentDate}•{apt?.appointmentTime}
+                          </div>
+                        </td>
+                        <td className="py-4 px-3 text-slate-600">
+                          {apt?.reasonForVisit ||
+                            apt.prescription?.prescription?.symptoms}
+                        </td>
+                        <td className="py-4 px-3">
+                          <span
+                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                              apt.status === "Confirmed"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {apt.status}
+                          </span>
+                        </td>
+                        <td className="py-4 px-3">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                              >
+                                <MoreVertical className="h-4 w-4 mr-2" />
+                                Actions
+                              </Button>
+                            </DialogTrigger>
+
+                            {/* Modal Content */}
+
+                            <DialogContent className="sm:max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Appointment Actions</DialogTitle>
+                                <DialogDescription className="text-sm text-gray-500 mt-1">
+                                  Choose an action for this appointment
+                                </DialogDescription>
+                              </DialogHeader>
+
+                              <div className="grid grid-cols-2 gap-3 mt-4">
+                                <Button
+                                  variant="outline"
+                                  className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                                  onClick={() => {
+                                    handleViewReports(apt);
+                                  }}
+                                >
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Reports
+                                </Button>
+
+                                <Button
+                                  variant="outline"
+                                  className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                                  onClick={() => {
+                                    handleViewPrescription(apt);
+                                  }}
+                                >
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Prescription
+                                </Button>
+
+                                <Button
+                                  variant="outline"
+                                  className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                                  onClick={() => {
+                                    handleViewDetails(apt);
+                                  }}
+                                >
+                                  <Info className="h-4 w-4 mr-2" />
+                                  See Details
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+              </tbody>
+            </table>
+          ) : (
+            <div className="text-gray-500 text-center py-8 border border-slate-200 rounded-lg">
+              No appointment data available
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "cancelled" && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-gray-600" />
+            <h2 className="text-xl font-semibold text-gray-900">
+              All Cancelled Appointment
+            </h2>
+            <Badge variant="outline" className="bg-purple-700 text-white">
+              {Object.keys(cancelledGrouped).length} completed
+            </Badge>
+          </div>
+
+          {Object.keys(cancelledGrouped).length > 0 ? (
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Doctor
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Patient
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Date & Time
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Disease
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Status
+                  </th>
+                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(cancelledGrouped)
                   .sort(
                     ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
                   )
