@@ -220,12 +220,15 @@ export const POST: APIRoute = async ({ request }) => {
       { "patientDetails.userId": userId },
       {
         $push: {
-          "patientDetails.$[patient].upload": { $each: documentReferences },
+          "patientDetails.$[patient].appointments.$[appointment].document": {
+            $each: documentReferences,
+          },
         },
       },
       {
         arrayFilters: [
           { "patient.userId": userId }, // Match all patients with this ID
+          { "appointment.doctorpatinetId": appointmentId }, // Match all appointments with this ID
         ],
       }
     );
