@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppSelector } from "@/redux/hooks";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   Calendar,
@@ -541,13 +542,6 @@ export default function Appointments({
     setAppointmentsData(appointmentdeleteresponse?.userdetails?.appointments);
   };
 
-  //handle bokking when user reschedule appointment booking
-  const handleCloseBooking = () => {
-    setIsBookingOpen(false);
-    setIsReschedule(false);
-    setRescheduleData(null);
-  };
-
   const handleRescheduleAppointment = (appointment: appointmentdata) => {
     setRescheduleData(appointment);
     setIsReschedule(true);
@@ -623,8 +617,150 @@ export default function Appointments({
     }
   };
 
+  const AppointmentCard = ({
+    status,
+    appointment,
+    showActions = false,
+    type,
+  }: {
+    status: string;
+    appointment: any;
+    showActions?: boolean;
+    type?: string;
+  }) => (
+    <Card
+      className={`mb-4 border-l-4 ${getBorderColor(status)} hover:shadow-md transition-shadow`}
+    >
+      <CardContent className="">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src="/placeholder.svg?height=48&width=48" />
+              <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                {getDoctorInitials(appointment.doctorName)}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-gray-900">
+                  {appointment.reasonForVisit}
+                </h3>
+                <Badge className={getStatusColor(status)}>{status}</Badge>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-1">
+                {appointment.doctorName} • {appointment.doctorSpecialist}
+              </p>
+
+              <p className="text-sm text-gray-600 mb-1">
+                Patient• {appointment.patientName}
+              </p>
+
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {appointment.appointmentTime}
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {appointment.appointmentDate}
+                </div>
+                <div className="flex items-center gap-1">
+                  {getModeIcon(appointment.consultationType)}
+                  {appointment.consultationType === "in-person"
+                    ? "In-person"
+                    : appointment.consultationType === "video"
+                      ? "Video Call"
+                      : "Phone Call"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            {/* Appointment Management Actions (only for upcoming/today) */}
+
+            {showActions && (
+              <>
+                {status === "confirmed" &&
+                  appointment.consultationType === "video" && (
+                    <Button
+                      className="bg-pink-500 hover:bg-pink-600 text-white"
+                      onClick={() => handleJoinSession(appointment)}
+                    >
+                      <Video className="h-4 w-4 mr-2" />
+                      Join
+                    </Button>
+                  )}
+                {type === "upcoming" && (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
+                      onClick={() => handleCancelAppointment(appointment._id)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
+                      onClick={() => handleRescheduleAppointment(appointment)}
+                    >
+                      Reschedule
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
+
+            {/* Prescription and Reports options (always visible) */}
+            <Button
+              variant="outline"
+              className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+              onClick={() => handleViewPrescription(appointment)}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Prescription
+            </Button>
+            {type === "reschedule" ? (
+              <Button
+                variant="outline"
+                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                onClick={() =>
+                  handleViewRescheduleAppointmentDetails(appointment)
+                }
+              >
+                <Info className="h-4 w-4 mr-2" />
+                See Details
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                onClick={() => handleViewDetails(appointment)}
+              >
+                <Info className="h-4 w-4 mr-2" />
+                See Details
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+              onClick={() => handleViewReports(appointment)}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Reports
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
-    <div className="px-6 space-y-4">
+    <div className="container px-6 space-y-4 w-full max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
       </div>
@@ -635,7 +771,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-blue-600 font-medium">Upcoming</p>
                 <p className="text-2xl font-bold text-blue-900">
-                  {/* {Object.keys(futureGrouped).length} */}
+                  {Object.keys(futureGrouped).length}
                 </p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
@@ -649,7 +785,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-green-600 font-medium">Today</p>
                 <p className="text-2xl font-bold text-green-900">
-                  {/* {Object.keys(todayGrouped).length} */}
+                  {Object.keys(todayGrouped).length}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-green-500" />
@@ -663,7 +799,7 @@ export default function Appointments({
               <div>
                 <p className="text-sm text-purple-600 font-medium">Completed</p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {/* {Object.keys(pastGrouped).length} */}
+                  {Object.keys(pastGrouped).length}
                 </p>
               </div>
               <Badge className="h-8 w-8 text-purple-500 bg-transparent p-0">
@@ -737,206 +873,66 @@ export default function Appointments({
           </div>
 
           {Object.keys(futureGrouped).length > 0 ? (
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Doctor
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Patient
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Date & Time
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Reason
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Status
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(futureGrouped)
-                  .sort(
-                    ([a], [b]) => new Date(a).getTime() - new Date(b).getTime()
-                  )
-                  .map(([date, appointments]: [string, appointmentdata[]]) =>
-                    appointments.map((apt) => (
-                      <tr
-                        key={apt._id}
-                        className={`border-b border-slate-100 hover:bg-slate-50 ${
-                          apt.status === "cancelled" ? "opacity-60" : ""
-                        }`}
-                      >
-                        <td className="py-4 px-3 text-slate-900">
-                          {apt.doctorName}
-                        </td>
-                        <td className="py-4 px-3 text-slate-900">
-                          {apt?.patientName}
-                        </td>
-                        <td className="py-4 px-3 text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <Calendar size={16} />
-                            {apt?.appointmentDate} • {apt?.appointmentTime}
-                          </div>
-                        </td>
-                        <td className="py-4 px-3 text-slate-600">
-                          {apt?.reasonForVisit || "N/A"}
-                        </td>
-                        <td className="py-4 px-3">
-                          <span
-                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                              apt.status === "cancelled"
-                                ? "bg-red-100 text-red-700"
-                                : apt.status === "confirmed"
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-yellow-100 text-yellow-700"
-                            }`}
-                          >
-                            {apt.status}
-                          </span>
-                        </td>
+            Object.entries(futureGrouped).map(
+              ([date, appointments]: [string, appointmentdata[]]) => (
+                <div key={date} className="space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b">
+                    <h3 className="text-lg font-medium text-gray-800">
+                      {formatDate(date)}
+                    </h3>
+                    <span className="text-sm text-gray-500">
+                      {new Date(date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                    <Badge variant="outline" className="ml-2">
+                      {appointments.length} appointment
+                      {appointments.length !== 1 ? "s" : ""}
+                    </Badge>
+                  </div>
 
-                        <td className="py-4 ">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="text-gray-600 border-gray-200 hover:bg-gray-50"
-                              >
-                                <MoreVertical className="h-4 w-4 mr-2" />
-                                Actions
-                              </Button>
-                            </DialogTrigger>
+                  {appointments && appointments.length > 0 ? (
+                    appointments.map((appointment: appointmentdata) => {
+                      // Add individual appointment validation
+                      if (!appointment || !appointment._id) {
+                        console.warn("Invalid appointment data:", appointment);
+                        return null;
+                      }
 
-                            {/* Modal Content */}
-
-                            <DialogContent className="sm:max-w-md">
-                              <DialogHeader>
-                                <DialogTitle>Appointment Actions</DialogTitle>
-                                <DialogDescription className="text-sm text-gray-500 mt-1">
-                                  Choose an action for this appointment
-                                </DialogDescription>
-                              </DialogHeader>
-
-                              {apt.status === "cancelled" ? (
-                                <div className="grid grid-cols-2 gap-3 mt-4">
-                                  <Button
-                                    variant="outline"
-                                    className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-                                    onClick={() => {
-                                      handleViewReports(apt);
-                                    }}
-                                  >
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    Reports
-                                  </Button>
-
-                                  <Button
-                                    variant="outline"
-                                    className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-                                    onClick={() => {
-                                      handleViewPrescription(apt);
-                                    }}
-                                  >
-                                    <FileText className="h-4 w-4 mr-2" />
-                                    Prescription
-                                  </Button>
-
-                                  <Button
-                                    variant="outline"
-                                    className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                                    onClick={() => {
-                                      handleViewDetails(apt);
-                                    }}
-                                  >
-                                    <Info className="h-4 w-4 mr-2" />
-                                    See Details
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="grid grid-cols-2 gap-3 mt-4">
-                                  <Button
-                                    variant="outline"
-                                    className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                                    onClick={() => {
-                                      handleCancelAppointment(apt);
-                                    }}
-                                  >
-                                    Cancel
-                                  </Button>
-
-                                  <Button
-                                    variant="outline"
-                                    className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                                    onClick={() => {
-                                      handleRescheduleAppointment(apt);
-                                    }}
-                                  >
-                                    Reschedule
-                                  </Button>
-
-                                  <Button
-                                    className="bg-pink-500 hover:bg-pink-600 text-white"
-                                    onClick={() => {
-                                      handleJoinSession(apt);
-                                    }}
-                                  >
-                                    <Video className="h-4 w-4 mr-2" />
-                                    Join
-                                  </Button>
-
-                                  <Button
-                                    variant="outline"
-                                    className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-                                    onClick={() => {
-                                      handleViewReports(apt);
-                                    }}
-                                  >
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    Reports
-                                  </Button>
-
-                                  <Button
-                                    variant="outline"
-                                    className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-                                    onClick={() => {
-                                      handleViewPrescription(apt);
-                                    }}
-                                  >
-                                    <FileText className="h-4 w-4 mr-2" />
-                                    Prescription
-                                  </Button>
-
-                                  <Button
-                                    variant="outline"
-                                    className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                                    onClick={() => {
-                                      handleViewDetails(apt);
-                                    }}
-                                  >
-                                    <Info className="h-4 w-4 mr-2" />
-                                    See Details
-                                  </Button>
-                                </div>
-                              )}
-                            </DialogContent>
-                          </Dialog>
-                        </td>
-                      </tr>
-                    ))
+                      if (appointment.status !== "cancelled") {
+                        return (
+                          <AppointmentCard
+                            status="pending"
+                            key={appointment._id}
+                            appointment={appointment}
+                            showActions={true}
+                            type="upcoming"
+                          />
+                        );
+                      }
+                    })
+                  ) : (
+                    <div className="text-gray-500 text-center py-4">
+                      No appointments found for this date
+                    </div>
                   )}
-              </tbody>
-            </table>
+                </div>
+              )
+            )
           ) : (
-            <div className="text-gray-500 text-center py-8 border border-slate-200 rounded-lg">
-              No upcoming appointments
-            </div>
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No upcoming appointments
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  You don't have any appointments scheduled for the next 7 days.
+                </p>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
@@ -953,161 +949,40 @@ export default function Appointments({
             </Badge>
           </div>
 
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Doctor
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Patient
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Date & Time
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Disease
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Status
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(todayGrouped)
-                .sort(
-                  ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
-                )
-                .map(([date, appointments]: [string, any[]]) =>
-                  appointments.map((apt) => (
-                    <tr
-                      key={apt.id}
-                      className="border-b border-slate-100 hover:bg-slate-50"
-                    >
-                      <td className="py-4 px-3 text-slate-900">
-                        {apt.doctorName}
-                      </td>
-                      <td className="py-4 px-1 text-slate-900">
-                        {apt?.patientName}
-                      </td>
-                      <td className="py-4 px-1 text-slate-600">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={16} />
-                          {apt?.appointmentDate}•{apt?.appointmentTime}
-                        </div>
-                      </td>
-                      <td className="py-4 px-2 text-slate-600">
-                        {apt?.reasonForVisit ||
-                          apt.prescription?.prescription?.symptoms}
-                      </td>
-                      <td className="py-4 px-3">
-                        <span
-                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                            apt.status === "Confirmed"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-yellow-100 text-yellow-700"
-                          }`}
-                        >
-                          {apt.status}
-                        </span>
-                      </td>
-                      <td className="py-4 ">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="text-gray-600 border-gray-200 hover:bg-gray-50"
-                            >
-                              <MoreVertical className="h-4 w-4 mr-2" />
-                              Actions
-                            </Button>
-                          </DialogTrigger>
+          {Object.keys(todayGrouped).length > 0 ? (
+            todayGrouped && Object.keys(todayGrouped).length > 0 ? (
+              Object.entries(todayGrouped).map(
+                ([date, appointments]: [string, appointmentdata[]]) =>
+                  appointments.map((appointment: appointmentdata) => {
+                    // Add individual appointment validation
+                    if (!appointment || !appointment._id) {
+                      console.warn("Invalid appointment data:", appointment);
+                      return null;
+                    }
 
-                          {/* Modal Content */}
-
-                          <DialogContent className="sm:max-w-md">
-                            <DialogHeader>
-                              <DialogTitle>Appointment Actions</DialogTitle>
-                              <DialogDescription className="text-sm text-gray-500 mt-1">
-                                Choose an action for this appointment
-                              </DialogDescription>
-                            </DialogHeader>
-
-                            <div className="grid grid-cols-2 gap-3 mt-4">
-                              <Button
-                                variant="outline"
-                                className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                                onClick={() => {
-                                  handleCancelAppointment(apt);
-                                }}
-                              >
-                                Cancel
-                              </Button>
-
-                              <Button
-                                variant="outline"
-                                className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                                onClick={() => {
-                                  handleRescheduleAppointment(apt);
-                                }}
-                              >
-                                Reschedule
-                              </Button>
-
-                              <Button
-                                className="bg-pink-500 hover:bg-pink-600 text-white"
-                                onClick={() => {
-                                  handleJoinSession(apt);
-                                }}
-                              >
-                                <Video className="h-4 w-4 mr-2" />
-                                Join
-                              </Button>
-
-                              <Button
-                                variant="outline"
-                                className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-                                onClick={() => {
-                                  handleViewReports(apt);
-                                }}
-                              >
-                                <Upload className="h-4 w-4 mr-2" />
-                                Reports
-                              </Button>
-
-                              <Button
-                                variant="outline"
-                                className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-                                onClick={() => {
-                                  handleViewPrescription(apt);
-                                }}
-                              >
-                                <FileText className="h-4 w-4 mr-2" />
-                                Prescription
-                              </Button>
-
-                              <Button
-                                variant="outline"
-                                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                                onClick={() => {
-                                  handleViewDetails(apt);
-                                }}
-                              >
-                                <Info className="h-4 w-4 mr-2" />
-                                See Details
-                              </Button>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </td>
-                    </tr>
-                  ))
-                )}
-            </tbody>
-          </table>
+                    if (appointment.status !== "cancelled") {
+                      return (
+                        <AppointmentCard
+                          status="confirmed"
+                          key={appointment._id}
+                          appointment={appointment}
+                          showActions={true}
+                          type="today"
+                        />
+                      );
+                    }
+                  })
+              )
+            ) : (
+              <div className="text-gray-500 text-center py-4">
+                No appointments found for today
+              </div>
+            )
+          ) : (
+            <div className="text-gray-500 text-center py-4">
+              No appointment data available
+            </div>
+          )}
         </div>
       )}
 
@@ -1124,133 +999,42 @@ export default function Appointments({
           </div>
 
           {Object.keys(pastGrouped).length > 0 ? (
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Doctor
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Patient
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Date & Time
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Disease
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Status
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(pastGrouped)
-                  .sort(
-                    ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
-                  )
-                  .map(([date, appointments]: [string, any[]]) =>
-                    appointments.map((apt) => (
-                      <tr
-                        key={apt.id}
-                        className="border-b border-slate-100 hover:bg-slate-50"
-                      >
-                        <td className="py-4 px-3 text-slate-900">
-                          {apt.doctorName}
-                        </td>
-                        <td className="py-4 px-3 text-slate-900">
-                          {apt?.patientName}
-                        </td>
-                        <td className="py-4 px-3 text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <Calendar size={16} />
-                            {apt?.appointmentDate}•{apt?.appointmentTime}
-                          </div>
-                        </td>
-                        <td className="py-4 px-3 text-slate-600">
-                          {apt?.reasonForVisit ||
-                            apt.prescription?.prescription?.symptoms}
-                        </td>
-                        <td className="py-4 px-3">
-                          <span
-                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                              apt.status === "Confirmed"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-yellow-100 text-yellow-700"
-                            }`}
-                          >
-                            {apt.status}
-                          </span>
-                        </td>
-                        <td className="py-4 px-3">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="text-gray-600 border-gray-200 hover:bg-gray-50"
-                              >
-                                <MoreVertical className="h-4 w-4 mr-2" />
-                                Actions
-                              </Button>
-                            </DialogTrigger>
+            Object.entries(pastGrouped)
+              .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+              .map(([date, appointments]: [string, any]) => (
+                <div key={date} className="space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b">
+                    <h3 className="text-lg font-medium text-gray-800">
+                      {new Date(date).toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </h3>
+                    <Badge variant="outline" className="ml-2">
+                      {appointments.length} appointment
+                      {appointments.length !== 1 ? "s" : ""}
+                    </Badge>
+                  </div>
 
-                            {/* Modal Content */}
-
-                            <DialogContent className="sm:max-w-md">
-                              <DialogHeader>
-                                <DialogTitle>Appointment Actions</DialogTitle>
-                                <DialogDescription className="text-sm text-gray-500 mt-1">
-                                  Choose an action for this appointment
-                                </DialogDescription>
-                              </DialogHeader>
-
-                              <div className="grid grid-cols-2 gap-3 mt-4">
-                                <Button
-                                  variant="outline"
-                                  className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-                                  onClick={() => {
-                                    handleViewReports(apt);
-                                  }}
-                                >
-                                  <Upload className="h-4 w-4 mr-2" />
-                                  Reports
-                                </Button>
-
-                                <Button
-                                  variant="outline"
-                                  className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-                                  onClick={() => {
-                                    handleViewPrescription(apt);
-                                  }}
-                                >
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Prescription
-                                </Button>
-
-                                <Button
-                                  variant="outline"
-                                  className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                                  onClick={() => {
-                                    handleViewDetails(apt);
-                                  }}
-                                >
-                                  <Info className="h-4 w-4 mr-2" />
-                                  See Details
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-              </tbody>
-            </table>
+                  {appointments.map((appointment: any) => {
+                    if (appointment.status !== "cancelled") {
+                      return (
+                        <AppointmentCard
+                          status="completed"
+                          key={appointment.id}
+                          appointment={appointment}
+                          showActions={false}
+                          type="past"
+                        />
+                      );
+                    }
+                  })}
+                </div>
+              ))
           ) : (
-            <div className="text-gray-500 text-center py-8 border border-slate-200 rounded-lg">
+            <div className="text-gray-500 text-center py-4">
               No appointment data available
             </div>
           )}
@@ -1269,111 +1053,31 @@ export default function Appointments({
             </Badge>
           </div>
 
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Doctor
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Patient
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Date & Time
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Disease
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Status
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rescheduleappointment &&
-                rescheduleappointment.length > 0 &&
-                rescheduleappointment
-                  .sort((a, b) => {
-                    const dateA = new Date(a.appointmentDate).getTime();
-                    const dateB = new Date(b.appointmentDate).getTime();
-                    return dateB - dateA;
-                  })
+          {rescheduleappointment &&
+            rescheduleappointment.length > 0 &&
+            rescheduleappointment
+              .sort((a, b) => {
+                const dateA = new Date(a.appointmentDate).getTime();
+                const dateB = new Date(b.appointmentDate).getTime();
+                return dateB - dateA;
+              })
 
-                  .map((apt) => (
-                    <tr
-                      key={apt._id}
-                      className="border-b border-slate-100 hover:bg-slate-50"
-                    >
-                      <td className="py-4 px-3 text-slate-900">
-                        {apt.doctorName}
-                      </td>
-                      <td className="py-4 px-3 text-slate-900">
-                        {apt?.patientName}
-                      </td>
-                      <td className="py-4 px-3 text-slate-600">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={16} />
-                          {apt?.appointmentDate}•{apt?.appointmentTime}
-                        </div>
-                      </td>
-                      <td className="py-4 px-3 text-slate-600">
-                        {apt?.reasonForVisit || apt.prescription?.symptoms}
-                      </td>
-                      <td className="py-4 px-3">
-                        <span
-                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                            apt.status === "Confirmed"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-yellow-100 text-yellow-700"
-                          }`}
-                        >
-                          {apt.status}
-                        </span>
-                      </td>
-                      <td className="py-4 px-3">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="text-gray-600 border-gray-200 hover:bg-gray-50"
-                            >
-                              <MoreVertical className="h-4 w-4 mr-2" />
-                              Actions
-                            </Button>
-                          </DialogTrigger>
+              .map((apt) => {
+                if (!apt || !apt._id) {
+                  console.warn("Invalid appointment data:", apt);
+                  return null;
+                }
 
-                          {/* Modal Content */}
-
-                          <DialogContent className="sm:max-w-md">
-                            <DialogHeader>
-                              <DialogTitle>Appointment Actions</DialogTitle>
-                              <DialogDescription className="text-sm text-gray-500 mt-1">
-                                Choose an action for this appointment
-                              </DialogDescription>
-                            </DialogHeader>
-
-                            <div className="grid grid-cols-1 gap-3 mt-4">
-                              <Button
-                                variant="outline"
-                                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                                onClick={() => {
-                                  handleViewRescheduleAppointmentDetails(apt);
-                                }}
-                              >
-                                <Info className="h-4 w-4 mr-2" />
-                                See Details
-                              </Button>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </td>
-                    </tr>
-                  ))}
-            </tbody>
-          </table>
+                return (
+                  <AppointmentCard
+                    status="reschedule"
+                    key={apt._id}
+                    appointment={apt}
+                    showActions={true}
+                    type="reschedule"
+                  />
+                );
+              })}
         </div>
       )}
 
@@ -1390,131 +1094,26 @@ export default function Appointments({
           </div>
 
           {Object.keys(cancelledGrouped).length > 0 ? (
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Doctor
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Patient
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Date & Time
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Disease
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Status
-                  </th>
-                  <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(cancelledGrouped)
-                  .sort(
-                    ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
-                  )
-                  .map(([date, appointments]: [string, any[]]) =>
-                    appointments.map((apt) => (
-                      <tr
-                        key={apt.id}
-                        className="border-b border-slate-100 hover:bg-slate-50"
-                      >
-                        <td className="py-4 px-3 text-slate-900">
-                          {apt.doctorName}
-                        </td>
-                        <td className="py-4 px-3 text-slate-900">
-                          {apt?.patientName}
-                        </td>
-                        <td className="py-4 px-3 text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <Calendar size={16} />
-                            {apt?.appointmentDate}•{apt?.appointmentTime}
-                          </div>
-                        </td>
-                        <td className="py-4 px-3 text-slate-600">
-                          {apt?.reasonForVisit ||
-                            apt.prescription?.prescription?.symptoms}
-                        </td>
-                        <td className="py-4 px-3">
-                          <span
-                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                              apt.status === "Confirmed"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-yellow-100 text-yellow-700"
-                            }`}
-                          >
-                            {apt.status}
-                          </span>
-                        </td>
-                        <td className="py-4 px-3">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="text-gray-600 border-gray-200 hover:bg-gray-50"
-                              >
-                                <MoreVertical className="h-4 w-4 mr-2" />
-                                Actions
-                              </Button>
-                            </DialogTrigger>
+            Object.entries(cancelledGrouped)
+              .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+              .map(([date, appointments]: [string, any[]]) =>
+                appointments.map((apt) => {
+                  if (!apt || !apt._id) {
+                    console.warn("Invalid appointment data:", apt);
+                    return null;
+                  }
 
-                            {/* Modal Content */}
-
-                            <DialogContent className="sm:max-w-md">
-                              <DialogHeader>
-                                <DialogTitle>Appointment Actions</DialogTitle>
-                                <DialogDescription className="text-sm text-gray-500 mt-1">
-                                  Choose an action for this appointment
-                                </DialogDescription>
-                              </DialogHeader>
-
-                              <div className="grid grid-cols-2 gap-3 mt-4">
-                                <Button
-                                  variant="outline"
-                                  className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-                                  onClick={() => {
-                                    handleViewReports(apt);
-                                  }}
-                                >
-                                  <Upload className="h-4 w-4 mr-2" />
-                                  Reports
-                                </Button>
-
-                                <Button
-                                  variant="outline"
-                                  className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-                                  onClick={() => {
-                                    handleViewPrescription(apt);
-                                  }}
-                                >
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Prescription
-                                </Button>
-
-                                <Button
-                                  variant="outline"
-                                  className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                                  onClick={() => {
-                                    handleViewDetails(apt);
-                                  }}
-                                >
-                                  <Info className="h-4 w-4 mr-2" />
-                                  See Details
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-              </tbody>
-            </table>
+                  return (
+                    <AppointmentCard
+                      status="cancelled"
+                      key={apt._id}
+                      appointment={apt}
+                      showActions={true}
+                      type="cancelled"
+                    />
+                  );
+                })
+              )
           ) : (
             <div className="text-gray-500 text-center py-8 border border-slate-200 rounded-lg">
               No appointment data available
