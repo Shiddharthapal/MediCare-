@@ -219,6 +219,16 @@ const Button = ({
   );
 };
 
+// Fisher-Yates shuffle algorithm
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 export default function DoctorManagement() {
   const [activeTab, setActiveTab] = useState("details");
   const [registerDoctor, setRegisterDoctor] = useState<DoctorRegister[]>([]);
@@ -251,12 +261,20 @@ export default function DoctorManagement() {
         }
         let result = await response.json();
 
-        setRegisterDoctor(result?.adminstore?.doctorRegister);
+        // Shuffle register doctors
+        const shuffledRegisterDoctors = shuffleArray(
+          result?.adminstore?.doctorRegister || []
+        );
+        setRegisterDoctor(shuffledRegisterDoctors);
+
         setDoctorData(result?.adminstore?.doctorDetails);
         const latestDocs: DoctorDetails[] = getLatestDoctorsByUserId(
           result?.adminstore?.doctorDetails
         );
-        setLatestDoctorData(latestDocs);
+
+        // Shuffle latest doctor data
+        const shuffledLatestDocs = shuffleArray(latestDocs);
+        setLatestDoctorData(shuffledLatestDocs);
       } catch (err) {
         console.log(err);
       }
