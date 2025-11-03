@@ -13,19 +13,15 @@ import {
   Calendar,
   Stethoscope,
   Star,
+  AlertCircle,
+  History,
+  Hospital,
+  BadgeDollarSign,
+  Video,
+  Target,
+  BookText,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useAppSelector } from "@/redux/hooks";
-
-interface DoctorRegister {
-  _id: string;
-  userId: string;
-  email: String;
-  registrationNo: Number;
-  status: string;
-  role: String;
-  createdAt: Date;
-}
 
 interface VitalSign {
   bloodPressure?: string;
@@ -181,69 +177,59 @@ interface DoctorDetails {
   createdAt: Date;
 }
 
-const doctorsData = [
-  {
-    id: 1,
-    name: "Dr Ruben Bothman",
-    specialty: "General Surgery",
-    email: "ruben@hospital.com",
-    phone: "+1-234-567-8900",
-    status: "Available",
-    patients: 24,
-  },
-  {
-    id: 2,
-    name: "Dr Kierra GA",
-    specialty: "Neurology",
-    email: "kierra@hospital.com",
-    phone: "+1-234-567-8901",
-    status: "Absent",
-    patients: 18,
-  },
-  {
-    id: 3,
-    name: "Dr Anika Septimus",
-    specialty: "ENT",
-    email: "anika@hospital.com",
-    phone: "+1-234-567-8902",
-    status: "Available",
-    patients: 31,
-  },
-  {
-    id: 4,
-    name: "Dr Jakob Passol",
-    specialty: "Cardiology",
-    email: "jakob@hospital.com",
-    phone: "+1-234-567-8903",
-    status: "Available",
-    patients: 27,
-  },
-  {
-    id: 5,
-    name: "Dr Allison Curtis",
-    specialty: "Pediatrics",
-    email: "allison@hospital.com",
-    phone: "+1-234-567-8904",
-    status: "Available",
-    patients: 35,
-  },
-];
+interface DoctorRegister {
+  _id: string;
+  userId: string;
+  email: String;
+  registrationNo: Number;
+  status: string;
+  role: String;
+  createdAt: Date;
+}
 
-export default function Doctors({
-  onNavigate,
-}: {
-  onNavigate?: (page: string) => void;
-}) {
-  const [doctors, setDoctors] = useState(doctorsData);
-  const [activeTab, setActiveTab] = useState("register");
+const Button = ({
+  children,
+  variant = "default",
+  size = "default",
+  className = "",
+  onClick,
+  ...props
+}) => {
+  const baseStyles =
+    "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50";
+  const variants = {
+    default: "bg-blue-600 text-white hover:bg-blue-700",
+    ghost: "hover:bg-gray-200",
+    outline: "border border-gray-300 bg-white hover:bg-gray-50",
+  };
+  const sizes = {
+    default: "h-10 px-4 py-2",
+    icon: "h-10 w-10",
+  };
+
+  return (
+    <button
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+export default function DoctorManagement() {
+  const [activeTab, setActiveTab] = useState("details");
   const [registerDoctor, setRegisterDoctor] = useState<DoctorRegister[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorDetails | null>(
     null
   );
   const [doctorData, setDoctorData] = useState<DoctorDetails[]>([]);
+  const [latestDoctorData, setLatestDoctorData] = useState<DoctorDetails[]>([]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showPrescriptions, setShowPrescriptions] = useState(false);
   const [showAppointments, setShowAppointments] = useState(false);
+  const [changedFields, setChangedFields] = useState({});
 
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
@@ -265,12 +251,84 @@ export default function Doctors({
 
         setRegisterDoctor(result?.adminstore?.doctorRegister);
         setDoctorData(result?.adminstore?.doctorDetails);
+        const latestDocs: DoctorDetails[] = getLatestDoctorsByUserId(
+          result?.adminstore?.doctorDetails
+        );
+        setLatestDoctorData(latestDocs);
       } catch (err) {
         console.log(err);
       }
     };
     fetchDataofAdmin();
   }, [admin]);
+
+  // Function to get latest doctor details grouped by userId
+  const getLatestDoctorsByUserId = (doctors: DoctorDetails[]) => {
+    const grouped = {};
+
+    doctors.forEach((doctor) => {
+      const userId = doctor.userId;
+
+      if (
+        !grouped[userId] ||
+        new Date(doctor.createdAt) > new Date(grouped[userId].createdAt)
+      ) {
+        grouped[userId] = doctor;
+      }
+    });
+
+    return Object.values(grouped);
+  };
+
+  // Function to get all versions of a doctor by userId
+  const getDoctorVersionsByUserId = (userId: string) => {
+    return doctorData
+      .filter((doc) => doc.userId === userId)
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+  };
+
+  // Function to detect changed fields between versions
+  const detectChangedFields = (currentDoc, previousDoc) => {
+    if (!previousDoc) return {};
+
+    const changes = {};
+    const fieldsToCompare = [
+      "contact",
+      "specialist",
+      "specializations",
+      "hospital",
+      "fees",
+      "experience",
+      "degree",
+      "language",
+      "about",
+      "consultationModes",
+    ];
+
+    fieldsToCompare.forEach((field) => {
+      const current = currentDoc[field];
+
+      const previous = previousDoc[field];
+
+      // Handle arrays
+      if (Array.isArray(current) && Array.isArray(previous)) {
+        if (
+          JSON.stringify(current.sort()) !== JSON.stringify(previous.sort())
+        ) {
+          changes[field] = { current, previous };
+        }
+      }
+      // Handle primitives
+      else if (current !== previous) {
+        changes[field] = { current, previous };
+      }
+    });
+
+    return changes;
+  };
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -280,48 +338,99 @@ export default function Doctors({
     });
   };
 
-  //Get function that return name initial of patient
-  const getPatientInitials = (patientName: String) => {
-    if (!patientName) return "AB";
-
-    const cleanName = patientName.trim();
+  const getPatientInitials = (name: string) => {
+    if (!name) return "AB";
+    const cleanName = name.trim();
     if (!cleanName) return "AB";
 
-    // Split the cleaned name and get first 2 words
     const words = cleanName.split(" ").filter((word) => word.length > 0);
     if (words.length >= 2) {
-      // Get first letter of first 2 words
       return (words[0][0] + words[1][0]).toUpperCase();
     } else if (words.length === 1) {
-      // If only one word, get first 2 letters
       return words[0].substring(0, 2).toUpperCase();
-    } else {
-      return "AB";
     }
+    return "AB";
   };
 
-  const handleViewDetails = (appointment: DoctorDetails) => {
-    setSelectedDoctor(appointment);
+  const handleViewDetails = (doctor: DoctorDetails) => {
+    const versions = getDoctorVersionsByUserId(doctor.userId);
+    const currentVersion = versions[versions.length - 1];
+    const previousVersion =
+      versions.length > 1 ? versions[versions.length - 2] : null;
+
+    const changes = detectChangedFields(currentVersion, previousVersion);
+
+    setSelectedDoctor(currentVersion);
+    setChangedFields(changes);
     setShowDetailsModal(true);
   };
 
+  // Component to render field with change indicator
+  interface FieldWithChangeIndicatorProps {
+    label: string;
+    value: string | number | string[];
+    fieldName: string;
+    icon?: React.ComponentType<{ className?: string }>;
+  }
+
+  const FieldWithChangeIndicator: React.FC<FieldWithChangeIndicatorProps> = ({
+    label,
+    value,
+    fieldName,
+    icon: Icon,
+  }) => {
+    const hasChanged = changedFields[fieldName];
+
+    return (
+      <div
+        className={`p-2 rounded ${hasChanged ? "bg-yellow-50 border border-yellow-200" : ""}`}
+      >
+        <div className="flex items-start justify-between">
+          <p>
+            <strong className="flex items-center gap-2">
+              {Icon && <Icon className="h-4 w-4" />}
+              {label}:
+            </strong>{" "}
+            <span className={hasChanged ? "text-yellow-900 font-medium" : ""}>
+              {Array.isArray(value) ? value.join(", ") : value}
+            </span>
+          </p>
+          {hasChanged && (
+            <div className="flex items-center gap-1 text-xs text-yellow-700">
+              <AlertCircle className="h-3 w-3" />
+              <span>Updated</span>
+            </div>
+          )}
+        </div>
+        {hasChanged && (
+          <p className="text-xs text-gray-500 mt-1">
+            Previous:{" "}
+            {Array.isArray(hasChanged.previous)
+              ? hasChanged.previous.join(", ")
+              : hasChanged.previous}
+          </p>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-slate-900">Doctors</h1>
       </div>
 
-      <div className=" grid grid-cols-2 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
+      <div className="grid grid-cols-2 gap-2 bg-white p-2 rounded-lg shadow-sm">
         <Button
           variant={activeTab === "register" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "register" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+          className={`${activeTab === "register" ? "bg-blue-500 text-white shadow-sm" : "border-2 border-gray-300"}`}
           onClick={() => setActiveTab("register")}
         >
           Register Doctor
         </Button>
         <Button
           variant={activeTab === "details" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "details" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+          className={`${activeTab === "details" ? "bg-blue-500 text-white shadow-sm" : "border-2 border-gray-300"}`}
           onClick={() => setActiveTab("details")}
         >
           Doctor Details
@@ -329,7 +438,7 @@ export default function Doctors({
       </div>
 
       {activeTab === "register" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-7">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {registerDoctor.map((doctor) => (
             <div
               key={doctor._id}
@@ -361,7 +470,7 @@ export default function Doctors({
               <div className="space-y-2 mb-4 text-sm text-slate-600">
                 {doctor?.registrationNo?.toString()}
               </div>
-              <div className="flex ">
+              <div className="flex">
                 <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded hover:bg-red-50 transition-colors">
                   <Trash2 size={18} className="mx-auto" />
                 </button>
@@ -372,78 +481,92 @@ export default function Doctors({
       )}
 
       {activeTab === "details" && (
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-7">
-          {doctorData && doctorData.length > 0 ? (
-            doctorData?.map((doctor) => (
-              <div
-                key={doctor._id}
-                className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                    {doctor.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                      doctor.status === "Available"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {latestDoctorData && latestDoctorData.length > 0 ? (
+            latestDoctorData.map((doctor: DoctorDetails) => {
+              const versions = getDoctorVersionsByUserId(doctor.userId);
+              const hasMultipleVersions = versions.length > 1;
+
+              return (
+                <div
+                  key={doctor._id}
+                  className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-lg transition-shadow relative"
+                >
+                  {hasMultipleVersions && (
+                    <div className="absolute top-2 right-2">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                        <History className="h-3 w-3" />v{versions.length}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-start justify-between mb-4 mt-6">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                      {getPatientInitials(doctor.name)}
+                    </div>
                     <span
-                      className={`w-2 h-2 rounded-full ${doctor.status === "Available" ? "bg-green-500" : "bg-red-500"}`}
-                    ></span>
-                    {doctor?.status}
-                  </span>
-                </div>
-                <h3 className="font-semibold text-slate-900 mb-1">
-                  {doctor.name}
-                </h3>
-                <p className="text-sm text-slate-600 mb-4">
-                  {doctor?.specialist}
-                </p>
-                <div className="space-y-2 mb-4 text-sm text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <Mail size={16} />
-                    {doctor.email}
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        doctor.status === "Available"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${doctor.status === "Available" ? "bg-green-500" : "bg-red-500"}`}
+                      ></span>
+                      {doctor?.status}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Phone size={16} />
-                    {doctor.contact}
+
+                  <h3 className="font-semibold text-slate-900 mb-1">
+                    {doctor.name}
+                  </h3>
+                  <p className="text-sm text-slate-600 mb-4">
+                    {doctor?.specialist}
+                  </p>
+
+                  <div className="space-y-2 mb-4 text-sm text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <Mail size={16} />
+                      <span className="truncate">{doctor.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone size={16} />
+                      {doctor.contact}
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-slate-600 mb-4">
+                    Appointments:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {doctor.appointments?.length || 0}
+                    </span>
+                  </p>
+
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1 text-blue-600 hover:text-blue-700 py-2 border border-blue-200 rounded hover:bg-blue-50 transition-colors"
+                      variant="ghost"
+                      onClick={() => handleViewDetails(doctor)}
+                    >
+                      <Info className="h-4 w-4" />
+                    </Button>
+                    <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded hover:bg-red-50 transition-colors">
+                      <Trash2 size={18} className="mx-auto" />
+                    </button>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600 mb-4">
-                  Patients:{" "}
-                  <span className="font-semibold text-slate-900">
-                    {doctor.patients}
-                  </span>
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1 text-blue-600 hover:text-blue-700 py-2 border border-blue-200 rounded hover:bg-blue-50 transition-colors"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleViewDetails(doctor)}
-                  >
-                    <Info className="h-4 w-4" />
-                  </Button>
-                  <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded hover:bg-red-50 transition-colors">
-                    <Trash2 size={18} className="mx-auto" />
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           ) : (
-            <div className="text-gray-500 text-center py-4">
+            <div className="col-span-full text-gray-500 text-center py-8 bg-white rounded-lg">
               No doctors found
             </div>
           )}
         </div>
       )}
 
+      {/* Details Modal */}
       {showDetailsModal && selectedDoctor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -471,6 +594,9 @@ export default function Doctors({
                         </span>
                       )}
                     </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Last updated: {formatDate(selectedDoctor.createdAt)}
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -481,6 +607,22 @@ export default function Doctors({
                   <X className="h-4 w-4" />
                 </Button>
               </div>
+
+              {/* Change Indicator */}
+              {Object.keys(changedFields).length > 0 && (
+                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-yellow-800">
+                    <AlertCircle className="h-5 w-5" />
+                    <p className="font-medium">
+                      {Object.keys(changedFields).length} field(s) updated from
+                      previous version
+                    </p>
+                  </div>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Highlighted fields show recent changes
+                  </p>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex gap-3 mb-6">
@@ -515,19 +657,25 @@ export default function Doctors({
                     <Calendar className="h-5 w-5" />
                     Appointments
                   </h3>
-                  <div className="space-y-2">
-                    {selectedDoctor.appointments.map((apt) => (
-                      <div
-                        key={apt.doctorpatinetId}
-                        className="bg-white p-3 rounded border border-gray-200"
-                      >
-                        <p className="font-medium">{apt.patientName}</p>
-                        <p className="text-sm text-gray-600">
-                          {apt.appointmentDate} at {apt.appointmentTime}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                  {selectedDoctor.appointments.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedDoctor.appointments.map((apt) => (
+                        <div
+                          key={apt.doctorpatinetId}
+                          className="bg-white p-3 rounded border border-gray-200"
+                        >
+                          <p className="font-medium">{apt.patientName}</p>
+                          <p className="text-sm text-gray-600">
+                            {apt.appointmentDate} at {apt.appointmentTime}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No appointments scheduled
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -555,114 +703,120 @@ export default function Doctors({
               {/* Main Content Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
                 {/* Contact Information */}
-                <div>
+                <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 mb-3">
                     Contact Information
                   </h3>
-                  <div className="space-y-2">
-                    <p>
-                      <strong>Email:</strong> {selectedDoctor.email}
-                    </p>
-                    <p>
-                      <strong>Phone:</strong> {selectedDoctor.contact}
-                    </p>
-                    <p>
-                      <strong>Registration No:</strong>{" "}
-                      {selectedDoctor.registrationNo}
-                    </p>
-                    <p>
-                      <strong>Gender:</strong> {selectedDoctor.gender}
-                    </p>
-                  </div>
+                  <p>
+                    <strong>Email:</strong> {selectedDoctor.email}
+                  </p>
+                  <FieldWithChangeIndicator
+                    label="Phone"
+                    value={selectedDoctor.contact}
+                    fieldName="contact"
+                    icon={Phone}
+                  />
+                  <p>
+                    <strong>Registration No:</strong>{" "}
+                    {selectedDoctor.registrationNo}
+                  </p>
+                  <p>
+                    <strong>Gender:</strong> {selectedDoctor.gender}
+                  </p>
                 </div>
 
                 {/* Professional Details */}
-                <div>
+                <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <GraduationCap className="h-5 w-5" />
                     Professional Details
                   </h3>
-                  <div className="space-y-2">
-                    <p>
-                      <strong>Degree:</strong> {selectedDoctor.degree}
-                    </p>
-                    <p>
-                      <strong>Education:</strong> {selectedDoctor.education}
-                    </p>
-                    <p>
-                      <strong>Experience:</strong> {selectedDoctor.experience}
-                    </p>
-                    <p>
-                      <strong>Status:</strong>{" "}
-                      <span
-                        className={`inline-flex px-2 py-1 rounded text-xs ${selectedDoctor.status === "Active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
-                      >
-                        {selectedDoctor.status}
-                      </span>
-                    </p>
-                  </div>
+                  <FieldWithChangeIndicator
+                    label="Degree"
+                    value={selectedDoctor.degree}
+                    fieldName="degree"
+                    icon={BookText}
+                  />
+                  <p>
+                    <strong>Education:</strong> {selectedDoctor.education}
+                  </p>
+                  <FieldWithChangeIndicator
+                    label="Experience"
+                    value={selectedDoctor.experience}
+                    fieldName="experience"
+                    icon={GraduationCap}
+                  />
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    <span
+                      className={`inline-flex px-2 py-1 rounded text-xs ${selectedDoctor.status === "Available" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
+                    >
+                      {selectedDoctor.status}
+                    </span>
+                  </p>
                 </div>
 
                 {/* Hospital & Practice */}
-                <div>
+                <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
                     Hospital & Practice
                   </h3>
-                  <div className="space-y-2">
-                    <p>
-                      <strong>Hospital:</strong> {selectedDoctor.hospital}
-                    </p>
-                    <p>
-                      <strong>Consultation Fee:</strong> ${selectedDoctor.fees}
-                    </p>
-                    <p>
-                      <strong>Consultation Modes:</strong>{" "}
-                      {selectedDoctor?.consultationModes}
-                    </p>
-                  </div>
+                  <FieldWithChangeIndicator
+                    label="Hospital"
+                    value={selectedDoctor.hospital}
+                    fieldName="hospital"
+                    icon={Hospital}
+                  />
+                  <FieldWithChangeIndicator
+                    label="Consultation Fee"
+                    value={`$${selectedDoctor.fees}`}
+                    fieldName="fees"
+                    icon={BadgeDollarSign}
+                  />
+                  <FieldWithChangeIndicator
+                    label="Consultation Modes"
+                    value={selectedDoctor.consultationModes}
+                    fieldName="consultationModes"
+                    icon={Video}
+                  />
                 </div>
 
                 {/* Languages & Specializations */}
-                <div>
+                <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Languages className="h-5 w-5" />
                     Languages & Specializations
                   </h3>
-                  <div className="space-y-2">
-                    <p>
-                      <strong>Languages:</strong>{" "}
-                      {selectedDoctor?.language?.map((lang, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
-                        >
-                          {lang}
-                        </span>
-                      ))}
-                    </p>
-                    <div>
-                      <strong>Specializations:</strong>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {selectedDoctor?.specializations?.map((spec, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
-                          >
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <FieldWithChangeIndicator
+                    label="Languages"
+                    value={selectedDoctor.language}
+                    fieldName="language"
+                    icon={Languages}
+                  />
+                  <FieldWithChangeIndicator
+                    label="Specializations"
+                    value={selectedDoctor.specializations}
+                    fieldName="specializations"
+                    icon={Target}
+                  />
+                  <FieldWithChangeIndicator
+                    label="Specialist"
+                    value={selectedDoctor.specialist}
+                    fieldName="specialist"
+                    icon={Stethoscope}
+                  />
                 </div>
 
                 {/* About */}
                 <div className="md:col-span-2">
                   <h3 className="font-semibold text-gray-900 mb-3">About</h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    {selectedDoctor.about}
-                  </p>
+                  <FieldWithChangeIndicator
+                    label=""
+                    value={selectedDoctor.about}
+                    fieldName="about"
+                    icon={Info}
+                  />
                 </div>
 
                 {/* Additional Info */}
