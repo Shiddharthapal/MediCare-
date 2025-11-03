@@ -338,18 +338,28 @@ export default function DoctorManagement() {
     });
   };
 
-  const getPatientInitials = (name: string) => {
-    if (!name) return "AB";
-    const cleanName = name.trim();
-    if (!cleanName) return "AB";
+  const getDoctorInitials = (doctorName: string) => {
+    if (!doctorName) return "DR";
 
+    // Remove DR/Dr prefix and clean the name
+    const cleanName = doctorName
+      .replace(/^(DR\.?|Dr\.?)\s*/i, "") // Remove DR/Dr at the beginning
+      .trim();
+
+    if (!cleanName) return "DR";
+
+    // Split the cleaned name and get first 2 words
     const words = cleanName.split(" ").filter((word) => word.length > 0);
+
     if (words.length >= 2) {
+      // Get first letter of first 2 words
       return (words[0][0] + words[1][0]).toUpperCase();
     } else if (words.length === 1) {
+      // If only one word, get first 2 letters
       return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "DR";
     }
-    return "AB";
   };
 
   const handleViewDetails = (doctor: DoctorDetails) => {
@@ -415,7 +425,7 @@ export default function DoctorManagement() {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="container mx-auto space-y-6  min-h-screen">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-slate-900">Doctors</h1>
       </div>
@@ -442,23 +452,17 @@ export default function DoctorManagement() {
           {registerDoctor.map((doctor) => (
             <div
               key={doctor._id}
-              className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-lg transition-shadow"
+              className="bg-purple-50 rounded-lg border  p-6 hover:shadow-md hover:shadow-blue-100 transition-shadow"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                  {getPatientInitials(doctor?.email)}
+                  {getDoctorInitials(doctor?.email)}
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    doctor.status === "Available"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
+                  className={`inline-flex border border-green-400 items-center justify-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700`}
                 >
-                  <span
-                    className={`w-2 h-2 rounded-full ${doctor.status === "Available" ? "bg-green-500" : "bg-red-500"}`}
-                  ></span>
-                  {doctor.status}
+                  <span className={`w-2 h-2 rounded-full  bg-green-500`}></span>
+                  Active
                 </span>
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">
@@ -471,7 +475,7 @@ export default function DoctorManagement() {
                 {doctor?.registrationNo?.toString()}
               </div>
               <div className="flex">
-                <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded hover:bg-red-50 transition-colors">
+                <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-500 rounded hover:bg-red-50 transition-colors">
                   <Trash2 size={18} className="mx-auto" />
                 </button>
               </div>
@@ -490,11 +494,11 @@ export default function DoctorManagement() {
               return (
                 <div
                   key={doctor._id}
-                  className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-lg transition-shadow relative"
+                  className="bg-purple-50 rounded-lg border border-slate-200 px-6 py-3 hover:shadow-md hover:shadow-blue-100  transition-shadow relative"
                 >
                   {hasMultipleVersions && (
-                    <div className="absolute top-2 right-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                    <div className="absolute top-2  right-2">
+                      <span className="inline-flex items-center gap-1 px-2  border border-blue-400 bg-blue-200 text-blue-700 rounded-full text-xs font-medium">
                         <History className="h-3 w-3" />v{versions.length}
                       </span>
                     </div>
@@ -502,30 +506,26 @@ export default function DoctorManagement() {
 
                   <div className="flex items-start justify-between mb-4 mt-6">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                      {getPatientInitials(doctor.name)}
+                      {getDoctorInitials(doctor.name)}
                     </div>
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                        doctor.status === "Available"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border border-green-400 bg-green-100 text-green-700`}
                     >
                       <span
-                        className={`w-2 h-2 rounded-full ${doctor.status === "Available" ? "bg-green-500" : "bg-red-500"}`}
+                        className={`w-2 h-2 rounded-full bg-green-500`}
                       ></span>
-                      {doctor?.status}
+                      Active
                     </span>
                   </div>
 
-                  <h3 className="font-semibold text-slate-900 mb-1">
+                  <h3 className="font-semibold text-slate-900 mb-0">
                     {doctor.name}
                   </h3>
-                  <p className="text-sm text-slate-600 mb-4">
+                  <p className="text-sm text-slate-600 mb-2">
                     {doctor?.specialist}
                   </p>
 
-                  <div className="space-y-2 mb-4 text-sm text-slate-600">
+                  <div className="space-y-2 mb-1 text-sm text-slate-600">
                     <div className="flex items-center gap-2">
                       <Mail size={16} />
                       <span className="truncate">{doctor.email}</span>
@@ -545,13 +545,13 @@ export default function DoctorManagement() {
 
                   <div className="flex gap-2">
                     <Button
-                      className="flex-1 text-blue-600 hover:text-blue-700 py-2 border border-blue-200 rounded hover:bg-blue-50 transition-colors"
-                      variant="ghost"
+                      className="flex-1  py-0 border border-blue-200 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 hover:bg-gradient-to-tl text-white transition-colors"
+                      variant="destructive"
                       onClick={() => handleViewDetails(doctor)}
                     >
                       <Info className="h-4 w-4" />
                     </Button>
-                    <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded hover:bg-red-50 transition-colors">
+                    <button className="flex-1 text-red-600 hover:text-red-700 py-0 border border-red-200  rounded-lg bg-red-200 hover:bg-red-300 transition-colors">
                       <Trash2 size={18} className="mx-auto" />
                     </button>
                   </div>
