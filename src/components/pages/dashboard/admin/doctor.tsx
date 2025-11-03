@@ -1,8 +1,17 @@
-"use client";
-
+import { useEffect, useState } from "react";
 import { Plus, Edit, Trash2, Phone, Mail } from "lucide-react";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useAppSelector } from "@/redux/hooks";
 
+interface DoctorRegister {
+  _id: string;
+  userId: string;
+  email: String;
+  registrationNo: Number;
+  status: string;
+  role: String;
+  createdAt: Date;
+}
 const doctorsData = [
   {
     id: 1,
@@ -57,72 +66,180 @@ export default function Doctors({
   onNavigate?: (page: string) => void;
 }) {
   const [doctors, setDoctors] = useState(doctorsData);
+  const [activeTab, setActiveTab] = useState("register");
+  const [registerDoctor, setRegisterDoctor] = useState<DoctorRegister[]>([]);
+
+  const admin = useAppSelector((state) => state.auth.user);
+  const id = admin?._id;
+
+  useEffect(() => {
+    const fetchDataofAdmin = async () => {
+      try {
+        let response = await fetch(`/api/admin/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Not fetch patient and doctor details successfully");
+        }
+        let result = await response.json();
+
+        setRegisterDoctor(result?.adminstore?.doctorRegister);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchDataofAdmin();
+  }, [admin]);
+
+  //Get function that return name initial of patient
+  const getPatientInitials = (patientName: String) => {
+    if (!patientName) return "AB";
+
+    const cleanName = patientName.trim();
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-slate-900">Doctors</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-          <Plus size={20} />
-          Add Doctor
-        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7">
-        {doctors.map((doctor) => (
-          <div
-            key={doctor.id}
-            className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-lg transition-shadow"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                {doctor.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </div>
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                  doctor.status === "Available"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                <span
-                  className={`w-2 h-2 rounded-full ${doctor.status === "Available" ? "bg-green-500" : "bg-red-500"}`}
-                ></span>
-                {doctor.status}
-              </span>
-            </div>
-            <h3 className="font-semibold text-slate-900 mb-1">{doctor.name}</h3>
-            <p className="text-sm text-slate-600 mb-4">{doctor.specialty}</p>
-            <div className="space-y-2 mb-4 text-sm text-slate-600">
-              <div className="flex items-center gap-2">
-                <Mail size={16} />
-                {doctor.email}
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone size={16} />
-                {doctor.phone}
-              </div>
-            </div>
-            <p className="text-sm text-slate-600 mb-4">
-              Patients:{" "}
-              <span className="font-semibold text-slate-900">
-                {doctor.patients}
-              </span>
-            </p>
-            <div className="flex gap-2">
-              <button className="flex-1 text-blue-600 hover:text-blue-700 py-2 border border-blue-200 rounded hover:bg-blue-50 transition-colors">
-                <Edit size={18} className="mx-auto" />
-              </button>
-              <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded hover:bg-red-50 transition-colors">
-                <Trash2 size={18} className="mx-auto" />
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className=" grid grid-cols-2 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
+        <Button
+          variant={activeTab === "register" ? "default" : "ghost"}
+          className={`px-4 py-2 ${activeTab === "register" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+          onClick={() => setActiveTab("register")}
+        >
+          Register Doctor
+        </Button>
+        <Button
+          variant={activeTab === "details" ? "default" : "ghost"}
+          className={`px-4 py-2 ${activeTab === "details" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+          onClick={() => setActiveTab("details")}
+        >
+          Doctor Details
+        </Button>
       </div>
+
+      {activeTab === "register" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-7">
+          {registerDoctor.map((doctor) => (
+            <div
+              key={doctor._id}
+              className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                  {getPatientInitials(doctor?.email)}
+                </div>
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                    doctor.status === "Available"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${doctor.status === "Available" ? "bg-green-500" : "bg-red-500"}`}
+                  ></span>
+                  {doctor.status}
+                </span>
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-1">
+                <div className="flex items-center gap-2">
+                  <Mail size={16} />
+                  {doctor.email}
+                </div>
+              </h3>
+              <div className="space-y-2 mb-4 text-sm text-slate-600">
+                {doctor?.registrationNo?.toString()}
+              </div>
+              <div className="flex ">
+                <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded hover:bg-red-50 transition-colors">
+                  <Trash2 size={18} className="mx-auto" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === "details" && (
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-7">
+          {doctors.map((doctor) => (
+            <div
+              key={doctor.id}
+              className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                  {doctor.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </div>
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                    doctor.status === "Available"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${doctor.status === "Available" ? "bg-green-500" : "bg-red-500"}`}
+                  ></span>
+                  {doctor.status}
+                </span>
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-1">
+                {doctor.name}
+              </h3>
+              <p className="text-sm text-slate-600 mb-4">{doctor.specialty}</p>
+              <div className="space-y-2 mb-4 text-sm text-slate-600">
+                <div className="flex items-center gap-2">
+                  <Mail size={16} />
+                  {doctor.email}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone size={16} />
+                  {doctor.phone}
+                </div>
+              </div>
+              <p className="text-sm text-slate-600 mb-4">
+                Patients:{" "}
+                <span className="font-semibold text-slate-900">
+                  {doctor.patients}
+                </span>
+              </p>
+              <div className="flex gap-2">
+                <button className="flex-1 text-blue-600 hover:text-blue-700 py-2 border border-blue-200 rounded hover:bg-blue-50 transition-colors">
+                  <Edit size={18} className="mx-auto" />
+                </button>
+                <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded hover:bg-red-50 transition-colors">
+                  <Trash2 size={18} className="mx-auto" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

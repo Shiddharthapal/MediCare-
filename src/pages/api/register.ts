@@ -123,7 +123,7 @@ export const POST: APIRoute = async ({ request }) => {
               doctorRegister: {
                 userId: doctor._id,
                 email: doctor.email,
-                registrationNo: registrationNo,
+                registrationNo: doctor.registrationNo,
                 role: "doctor",
                 createdAt: doctor.createdAt || new Date(),
                 status: "active",
