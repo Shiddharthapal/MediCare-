@@ -583,6 +583,7 @@ export default function DoctorManagement() {
             </div>
 
             {/* Prescription */}
+            {/* Prescription */}
             {appointment?.prescription && (
               <div className="bg-indigo-50 rounded-lg p-4">
                 <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
@@ -590,27 +591,87 @@ export default function DoctorManagement() {
                   Prescription
                 </h3>
                 <div className="space-y-3">
-                  {appointment?.prescription?.medications && (
+                  {appointment?.prescription?.medication && (
                     <div>
                       <p className="text-sm text-gray-600">Medications</p>
+                      <div className="space-y-3">
+                        {appointment.prescription.medication.map((med) => (
+                          <div key={med.id} className="font-medium">
+                            <p className="font-semibold">{med.medecineName}</p>
+                            <div className="text-sm text-gray-700 space-y-1">
+                              <p>Dosage: {med.medecineDosage}</p>
+                              <p>Frequency: {med.frequency}</p>
+                              <p>Duration: {med.duration}</p>
+                              <p>Quantity: {med.quantity}</p>
+                              {med.route && med.route.length > 0 && (
+                                <p>Route: {med.route.join(", ")}</p>
+                              )}
+                              {med.instructions && (
+                                <p>Instructions: {med.instructions}</p>
+                              )}
+                              {med.startDate && (
+                                <p>
+                                  Start Date:{" "}
+                                  {new Date(med.startDate).toLocaleDateString()}
+                                </p>
+                              )}
+                              {med.endDate && (
+                                <p>
+                                  End Date:{" "}
+                                  {new Date(med.endDate).toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {appointment?.prescription?.primaryDiagnosis && (
+                    <div>
+                      <p className="text-sm text-gray-600">Primary Diagnosis</p>
                       <p className="font-medium">
-                        {appointment?.prescription?.medications}
+                        {appointment?.prescription?.primaryDiagnosis}
                       </p>
                     </div>
                   )}
-                  {appointment?.prescription?.dosage && (
+                  {appointment?.prescription?.symptoms && (
                     <div>
-                      <p className="text-sm text-gray-600">Dosage</p>
+                      <p className="text-sm text-gray-600">Symptoms</p>
                       <p className="font-medium">
-                        {appointment?.prescription?.dosage}
+                        {appointment?.prescription?.symptoms}
                       </p>
                     </div>
                   )}
-                  {appointment?.prescription?.instructions && (
+                  {appointment?.prescription?.testandReport && (
                     <div>
-                      <p className="text-sm text-gray-600">Instructions</p>
+                      <p className="text-sm text-gray-600">Test & Report</p>
                       <p className="font-medium">
-                        {appointment?.prescription?.instructions}
+                        {appointment?.prescription?.testandReport}
+                      </p>
+                    </div>
+                  )}
+                  {appointment?.prescription?.restrictions && (
+                    <div>
+                      <p className="text-sm text-gray-600">Restrictions</p>
+                      <p className="font-medium">
+                        {appointment?.prescription?.restrictions}
+                      </p>
+                    </div>
+                  )}
+                  {appointment?.prescription?.additionalNote && (
+                    <div>
+                      <p className="text-sm text-gray-600">Additional Note</p>
+                      <p className="font-medium">
+                        {appointment?.prescription?.additionalNote}
+                      </p>
+                    </div>
+                  )}
+                  {appointment?.prescription?.followUpDate && (
+                    <div>
+                      <p className="text-sm text-gray-600">FollowUp Date</p>
+                      <p className="font-medium">
+                        {appointment?.prescription?.followUpDate}
                       </p>
                     </div>
                   )}

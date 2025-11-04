@@ -1,128 +1,1094 @@
-"use client";
+import { useEffect, useState } from "react";
+import {
+  Info,
+  Pill,
+  Trash2,
+  Phone,
+  Mail,
+  X,
+  Languages,
+  MapPin,
+  GraduationCap,
+  FileText,
+  Calendar,
+  Stethoscope,
+  Star,
+  AlertCircle,
+  History,
+  Hospital,
+  BadgeDollarSign,
+  Video,
+  Target,
+  BookText,
+  User,
+  Mars,
+  MapPinHouse,
+  Droplet,
+  Cake,
+  Anvil,
+  PersonStanding,
+} from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
 
-import { Plus, Edit, Trash2 } from "lucide-react";
-import { useState } from "react";
+interface VitalSign {
+  bloodPressure?: string;
+  heartRate?: string;
+  temperature?: string;
+  weight?: string;
+  height?: string;
+  respiratoryRate?: string;
+  oxygenSaturation?: string;
+  bmi?: number;
+}
 
-const patientsData = [
-  {
-    id: 1,
-    name: "Makenna Press",
-    age: 34,
-    gender: "Female",
-    email: "makenna@email.com",
-    phone: "+1-234-567-8920",
-    disease: "Allergies",
-    admissionDate: "18/04/2023",
-  },
-  {
-    id: 2,
-    name: "Lincoln Lubin",
-    age: 45,
-    gender: "Male",
-    email: "lincoln@email.com",
-    phone: "+1-234-567-8921",
-    disease: "Headaches",
-    admissionDate: "21/04/2023",
-  },
-  {
-    id: 3,
-    name: "Tiana Botor",
-    age: 28,
-    gender: "Female",
-    email: "tiana@email.com",
-    phone: "+1-234-567-8922",
-    disease: "Allergies",
-    admissionDate: "24/04/2023",
-  },
-  {
-    id: 4,
-    name: "Polyn Lipshutz",
-    age: 52,
-    gender: "Male",
-    email: "polyn@email.com",
-    phone: "+1-234-567-8923",
-    disease: "Allergies",
-    admissionDate: "26/04/2023",
-  },
-];
+interface PaymentMethods {
+  acceptCreditCards: boolean;
+  acceptDebitCards: boolean;
+  acceptBkash: boolean;
+  acceptNagad: boolean;
+  acceptRocket: boolean;
+  creditCardNumber?: string;
+  debitAccountNumber?: string;
+  bkashNumber?: string;
+  nagadNumber?: string;
+  rocketNumber?: string;
+}
 
-export default function Patients({
-  onNavigate,
-}: {
-  onNavigate?: (page: string) => void;
-}) {
-  const [patients, setPatients] = useState(patientsData);
+interface Medication {
+  id: string;
+  medecineName: string;
+  medecineDosage: string;
+  frequency: string;
+  duration: string;
+  instructions?: string;
+  quantity: string;
+  route?: string[];
+  startDate?: Date;
+  endDate?: Date;
+}
+
+interface FileUpload {
+  _id: string;
+  patientId: string;
+  doctorId: string;
+  filename: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
+  userIdWHUP?: string;
+  appointmentId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface HealthRecord {
+  _id: string;
+  weight: string;
+  bloodPressure: string;
+  heartRate: string;
+  date: string;
+  temperature: string;
+  notes: string;
+  createdAt: Date;
+}
+
+interface Prescription {
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  doctorpatinetId: string;
+  reasonForVisit: string;
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  symptoms: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+
+interface AppointmentData {
+  doctorpatinetId: string;
+  doctorUserId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorGender: string;
+  doctorEmail: string;
+  hospital: string;
+  patientName: string;
+  patientId: string;
+  patientEmail: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  prescription: Prescription;
+  document?: FileUpload[];
+  createdAt: Date;
+}
+
+interface UserDetails {
+  _id: string;
+  userId: string;
+  email: string;
+  name: string;
+  fatherName?: string;
+  address: string;
+  dateOfBirth: Date;
+  contactNumber: string;
+  age: number;
+  gender: string;
+  bloodGroup: string;
+  weight: number;
+  height?: number;
+  appointments: AppointmentData[];
+  payment: PaymentMethods;
+  upload: FileUpload[];
+  healthRecord: HealthRecord[];
+  lastTreatmentDate?: Date;
+  status?: string;
+  createdAt: Date;
+}
+
+interface UserRegister {
+  _id: string;
+  userId: string;
+  email: string;
+  role: string;
+  status: string;
+  createdAt: Date;
+}
+
+const Button = ({
+  children,
+  variant = "default",
+  size = "default",
+  className = "",
+  onClick,
+  ...props
+}) => {
+  const baseStyles =
+    "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50";
+  const variants = {
+    default: "bg-blue-600 text-white hover:bg-blue-700",
+    ghost: "hover:bg-gray-200",
+    outline: "border border-gray-300 bg-white hover:bg-gray-50",
+  };
+  const sizes = {
+    default: "h-10 px-4 py-2",
+    icon: "h-10 w-10",
+  };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900">Patients</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-          <Plus size={20} />
-          Add Patient
-        </button>
-      </div>
+    <button
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
 
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Name
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Age
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Gender
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Email
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Disease
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Admission Date
-                </th>
-                <th className="text-left py-3 px-6 text-slate-600 font-semibold">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {patients.map((patient) => (
-                <tr
-                  key={patient.id}
-                  className="border-b border-slate-100 hover:bg-slate-50"
-                >
-                  <td className="py-4 px-6 text-slate-900 font-medium">
-                    {patient.name}
-                  </td>
-                  <td className="py-4 px-6 text-slate-600">{patient.age}</td>
-                  <td className="py-4 px-6 text-slate-600">{patient.gender}</td>
-                  <td className="py-4 px-6 text-slate-600">{patient.email}</td>
-                  <td className="py-4 px-6 text-slate-600">
-                    {patient.disease}
-                  </td>
-                  <td className="py-4 px-6 text-slate-600">
-                    {patient.admissionDate}
-                  </td>
-                  <td className="py-4 px-6 flex gap-2">
-                    <button className="text-blue-600 hover:text-blue-700">
-                      <Edit size={18} />
-                    </button>
-                    <button className="text-red-600 hover:text-red-700">
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+// Fisher-Yates shuffle algorithm
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+export default function DoctorManagement() {
+  const [activeTab, setActiveTab] = useState("details");
+  const [registerPatient, setRegisterPatient] = useState<UserRegister[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<UserDetails | null>(
+    null
+  );
+  const [patientData, setPatientData] = useState<UserDetails[]>([]);
+  const [latestPatientData, setLatestPatientData] = useState<UserDetails[]>([]);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showPrescriptions, setShowPrescriptions] = useState(false);
+  const [showAppointments, setShowAppointments] = useState(false);
+  const [changedFields, setChangedFields] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const admin = useAppSelector((state) => state.auth.user);
+  const id = admin?._id;
+
+  useEffect(() => {
+    const fetchDataofAdmin = async () => {
+      try {
+        let response = await fetch(`/api/admin/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Not fetch patient and doctor details successfully");
+        }
+        let result = await response.json();
+
+        // Shuffle register doctors
+        const shuffledRegisterpatients = shuffleArray(
+          result?.adminstore?.patientRegister || []
+        );
+        setRegisterPatient(shuffledRegisterpatients);
+
+        setPatientData(result?.adminstore?.patientDetails);
+        const latestPats: UserDetails[] = getLatestDoctorsByUserId(
+          result?.adminstore?.patientDetails
+        );
+
+        // Shuffle latest doctor data
+        const shuffledLatestPats = shuffleArray(latestPats);
+        setLatestPatientData(shuffledLatestPats);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchDataofAdmin();
+  }, [admin]);
+
+  // Function to get latest doctor details grouped by userId
+  const getLatestDoctorsByUserId = (patients: UserDetails[]) => {
+    const grouped = {};
+
+    patients.forEach((patient) => {
+      const userId = patient.userId;
+
+      if (
+        !grouped[userId] ||
+        new Date(patient.createdAt) > new Date(grouped[userId].createdAt)
+      ) {
+        grouped[userId] = patient;
+      }
+    });
+
+    return Object.values(grouped);
+  };
+
+  // Function to get all versions of a doctor by userId
+  const getPatientVersionsByUserId = (userId: string) => {
+    return patientData
+      .filter((doc) => doc.userId === userId)
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+  };
+
+  // Function to detect changed fields between versions
+  const detectChangedFields = (currentPat, previousPat) => {
+    if (!previousPat) return {};
+
+    const changes = {};
+    const fieldsToCompare = [
+      "address",
+      "contactNumber",
+      "gender",
+      "bloodGroup",
+      "weight",
+      "height",
+      "payment",
+      "fatherName",
+      "name",
+      "dateOfBirth",
+    ];
+
+    fieldsToCompare.forEach((field) => {
+      const current = currentPat[field];
+
+      const previous = previousPat[field];
+
+      // Handle arrays
+      if (Array.isArray(current) && Array.isArray(previous)) {
+        if (
+          JSON.stringify(current.sort()) !== JSON.stringify(previous.sort())
+        ) {
+          changes[field] = { current, previous };
+        }
+      }
+      // Handle primitives
+      else if (current !== previous) {
+        changes[field] = { current, previous };
+      }
+    });
+
+    return changes;
+  };
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  //Get function that return name initial of patient
+  const getPatientInitials = (patientName: string) => {
+    if (!patientName) return "AB";
+
+    const cleanName = patientName.trim();
+    if (!cleanName) return "AB";
+
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
+  };
+
+  const handleViewDetails = (patient: UserDetails) => {
+    const versions = getPatientVersionsByUserId(patient.userId);
+    const currentVersion = versions[versions.length - 1];
+    const previousVersion =
+      versions.length > 1 ? versions[versions.length - 2] : null;
+
+    const changes = detectChangedFields(currentVersion, previousVersion);
+
+    setSelectedPatient(currentVersion);
+    setChangedFields(changes);
+    setShowDetailsModal(true);
+  };
+
+  const AppointmentDetailsModal = ({
+    appointment,
+    onClose,
+  }: {
+    appointment: AppointmentData;
+    onClose: () => void;
+  }) => {
+    const getStatusColor = (status: string) => {
+      switch (status.toLowerCase()) {
+        case "confirmed":
+          return "bg-green-100 text-green-800";
+        case "pending":
+          return "bg-yellow-100 text-yellow-800";
+        case "cancelled":
+          return "bg-red-100 text-red-800";
+        case "completed":
+          return "bg-blue-100 text-blue-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          {/* Header */}
+          <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Appointment Details
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Status Badge */}
+            <div className="flex items-center gap-3">
+              <span
+                className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(appointment.status)}`}
+              >
+                {appointment.status}
+              </span>
+              <span className="text-gray-500 text-sm">
+                Created on {formatDate(appointment.createdAt)}
+              </span>
+            </div>
+
+            {/* Appointment Information */}
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-600" />
+                Appointment Information
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Date</p>
+                  <p className="font-medium">
+                    {formatDate(appointment.appointmentDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Time</p>
+                  <p className="font-medium">{appointment.appointmentTime}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Consultation Type</p>
+                  <p className="font-medium">{appointment.consultationType}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Consulted Type</p>
+                  <p className="font-medium">{appointment.consultedType}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Doctor Information */}
+            <div className="bg-green-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <User className="w-5 h-5 text-green-600" />
+                Doctor Information
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Name</p>
+                  <p className="font-medium">{appointment.doctorName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Specialist</p>
+                  <p className="font-medium">{appointment.doctorSpecialist}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="font-medium">{appointment.doctorEmail}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-sm text-gray-600">Hospital</p>
+                  <p className="font-medium">{appointment.hospital}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-sm text-gray-600">Gender</p>
+                  <p className="font-medium">{appointment.doctorGender}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Patient Information */}
+            <div className="bg-purple-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <User className="w-5 h-5 text-purple-600" />
+                Patient Information
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Name</p>
+                  <p className="font-medium">{appointment.patientName}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="font-medium">{appointment.patientEmail}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Contact</p>
+                  <p className="font-medium">{appointment.patientPhone}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Medical Information */}
+            <div className="bg-orange-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-orange-600" />
+                Medical Information
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-600">Reason for Visit</p>
+                  <p className="font-medium">{appointment.reasonForVisit}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Symptoms</p>
+                  <p className="font-medium">{appointment.symptoms}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Previous Visit</p>
+                  <p className="font-medium">
+                    {appointment.previousVisit || "None"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Emergency Contact */}
+            <div className="bg-red-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+                Emergency Contact
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Contact Name</p>
+                  <p className="font-medium">{appointment.emergencyContact}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Phone Number</p>
+                  <p className="font-medium">{appointment.emergencyPhone}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Prescription */}
+            {appointment?.prescription && (
+              <div className="bg-indigo-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <Pill className="w-5 h-5 text-indigo-600" />
+                  Prescription
+                </h3>
+                <div className="space-y-3">
+                  {appointment?.prescription?.medication && (
+                    <div>
+                      <p className="text-sm text-gray-600">Medications</p>
+                      <div className="space-y-3">
+                        {appointment.prescription.medication.map((med) => (
+                          <div key={med.id} className="font-medium">
+                            <p className="font-semibold">{med.medecineName}</p>
+                            <div className="text-sm text-gray-700 space-y-1">
+                              <p>Dosage: {med.medecineDosage}</p>
+                              <p>Frequency: {med.frequency}</p>
+                              <p>Duration: {med.duration}</p>
+                              <p>Quantity: {med.quantity}</p>
+                              {med.route && med.route.length > 0 && (
+                                <p>Route: {med.route.join(", ")}</p>
+                              )}
+                              {med.instructions && (
+                                <p>Instructions: {med.instructions}</p>
+                              )}
+                              {med.startDate && (
+                                <p>
+                                  Start Date:{" "}
+                                  {new Date(med.startDate).toLocaleDateString()}
+                                </p>
+                              )}
+                              {med.endDate && (
+                                <p>
+                                  End Date:{" "}
+                                  {new Date(med.endDate).toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {appointment?.prescription?.primaryDiagnosis && (
+                    <div>
+                      <p className="text-sm text-gray-600">Primary Diagnosis</p>
+                      <p className="font-medium">
+                        {appointment?.prescription?.primaryDiagnosis}
+                      </p>
+                    </div>
+                  )}
+                  {appointment?.prescription?.symptoms && (
+                    <div>
+                      <p className="text-sm text-gray-600">Symptoms</p>
+                      <p className="font-medium">
+                        {appointment?.prescription?.symptoms}
+                      </p>
+                    </div>
+                  )}
+                  {appointment?.prescription?.testandReport && (
+                    <div>
+                      <p className="text-sm text-gray-600">Test & Report</p>
+                      <p className="font-medium">
+                        {appointment?.prescription?.testandReport}
+                      </p>
+                    </div>
+                  )}
+                  {appointment?.prescription?.restrictions && (
+                    <div>
+                      <p className="text-sm text-gray-600">Restrictions</p>
+                      <p className="font-medium">
+                        {appointment?.prescription?.restrictions}
+                      </p>
+                    </div>
+                  )}
+                  {appointment?.prescription?.additionalNote && (
+                    <div>
+                      <p className="text-sm text-gray-600">Additional Note</p>
+                      <p className="font-medium">
+                        {appointment?.prescription?.additionalNote}
+                      </p>
+                    </div>
+                  )}
+                  {appointment?.prescription?.followUpDate && (
+                    <div>
+                      <p className="text-sm text-gray-600">FollowUp Date</p>
+                      <p className="font-medium">
+                        {appointment?.prescription?.followUpDate}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Documents */}
+            {appointment.document && appointment.document.length > 0 && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-3">
+                  Attached Documents
+                </h3>
+                <div className="space-y-2">
+                  {appointment.document.map((doc, index) => (
+                    <a
+                      key={index}
+                      href={doc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      <FileText className="w-4 h-4" />
+                      {doc.filename || doc.originalName}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Additional Information */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3">
+                Additional Information
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Payment Method</p>
+                  <p className="font-medium">{appointment.paymentMethod}</p>
+                </div>
+                {appointment.specialRequests && (
+                  <div className="md:col-span-2">
+                    <p className="text-sm text-gray-600">Special Requests</p>
+                    <p className="font-medium">{appointment.specialRequests}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
+    );
+  };
+
+  // Component to render field with change indicator
+  interface FieldWithChangeIndicatorProps {
+    label: string;
+    value: string | number | string[];
+    fieldName: string;
+    icon?: React.ComponentType<{ className?: string }>;
+  }
+
+  const FieldWithChangeIndicator: React.FC<FieldWithChangeIndicatorProps> = ({
+    label,
+    value,
+    fieldName,
+    icon: Icon,
+  }) => {
+    const hasChanged = changedFields[fieldName];
+
+    return (
+      <div
+        className={`p-2 rounded ${hasChanged ? "bg-yellow-50 border border-yellow-200" : ""}`}
+      >
+        <div className="flex items-start justify-between">
+          <p>
+            <strong className="flex items-center gap-2">
+              {Icon && <Icon className="h-4 w-4" />}
+              {label}:
+            </strong>{" "}
+            <span className={hasChanged ? "text-yellow-900 font-medium" : ""}>
+              {Array.isArray(value) ? value.join(", ") : value}
+            </span>
+          </p>
+          {hasChanged && (
+            <div className="flex items-center gap-1 text-xs text-yellow-700">
+              <AlertCircle className="h-3 w-3" />
+              <span>Updated</span>
+            </div>
+          )}
+        </div>
+        {hasChanged && (
+          <p className="text-xs text-gray-500 mt-1">
+            Previous:{" "}
+            {Array.isArray(hasChanged.previous)
+              ? hasChanged.previous.join(", ")
+              : hasChanged.previous}
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="container mx-auto space-y-6  min-h-screen">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-slate-900">Patients</h1>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 bg-white p-2 rounded-lg shadow-sm">
+        <Button
+          variant={activeTab === "register" ? "default" : "ghost"}
+          className={`${activeTab === "register" ? "bg-blue-500 text-white shadow-sm" : "border-2 border-gray-300"}`}
+          onClick={() => setActiveTab("register")}
+        >
+          Register Patient
+        </Button>
+        <Button
+          variant={activeTab === "details" ? "default" : "ghost"}
+          className={`${activeTab === "details" ? "bg-blue-500 text-white shadow-sm" : "border-2 border-gray-300"}`}
+          onClick={() => setActiveTab("details")}
+        >
+          Patient Details
+        </Button>
+      </div>
+
+      {activeTab === "register" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {registerPatient.map((patient) => (
+            <div
+              key={patient._id}
+              className="bg-purple-50 rounded-lg border  p-6 hover:shadow-md hover:shadow-blue-100 transition-shadow"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                  {getPatientInitials(patient?.email)}
+                </div>
+                <span
+                  className={`inline-flex border border-green-400 items-center justify-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700`}
+                >
+                  <span className={`w-2 h-2 rounded-full  bg-green-500`}></span>
+                  Active
+                </span>
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-1">
+                <div className="flex items-center gap-2">
+                  <Mail size={16} />
+                  {patient.email}
+                </div>
+              </h3>
+              <div className="flex">
+                <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-500 rounded hover:bg-red-50 transition-colors">
+                  <Trash2 size={18} className="mx-auto" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === "details" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {latestPatientData && latestPatientData.length > 0 ? (
+            latestPatientData.map((patient: UserDetails) => {
+              const versions = getPatientVersionsByUserId(patient.userId);
+              const hasMultipleVersions = versions.length > 1;
+
+              return (
+                <div
+                  key={patient._id}
+                  className="bg-purple-50 rounded-lg border border-slate-200 px-6 py-3 hover:shadow-md hover:shadow-blue-100  transition-shadow relative"
+                >
+                  {hasMultipleVersions && (
+                    <div className="absolute top-2  right-2">
+                      <span className="inline-flex items-center gap-1 px-2  border border-blue-400 bg-blue-200 text-blue-700 rounded-full text-xs font-medium">
+                        <History className="h-3 w-3" />
+                        {versions.length}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-start justify-between mb-4 mt-6">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                      {getPatientInitials(patient.name)}
+                    </div>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border border-green-400 bg-green-100 text-green-700`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full bg-green-500`}
+                      ></span>
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="flex flex-row gap-0">
+                    <h3 className="font-semibold text-slate-900 mb-0">
+                      {patient.name} •
+                    </h3>
+                    <p className="text-sm text-slate-600 mb-2">
+                      {" "}
+                      {patient?.age} years
+                    </p>
+                  </div>
+                  <div className="space-y-1 mb-1 text-sm text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <Mail size={16} />
+                      <span className="truncate">{patient.email}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-slate-600 mb-4">
+                    Appointments:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {patient.appointments?.length || 0}
+                    </span>
+                  </p>
+
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1  py-0 border border-blue-200 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 hover:bg-gradient-to-tl text-white transition-colors"
+                      variant="destructive"
+                      onClick={() => handleViewDetails(patient)}
+                    >
+                      <Info className="h-4 w-4" />
+                    </Button>
+                    <button className="flex-1 text-red-600 hover:text-red-700 py-0 border border-red-200  rounded-lg bg-red-200 hover:bg-red-300 transition-colors">
+                      <Trash2 size={18} className="mx-auto" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="col-span-full text-gray-500 text-center py-8 bg-white rounded-lg">
+              No doctors found
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Details Modal */}
+      {showDetailsModal && selectedPatient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                    <User className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-semibold text-gray-900">
+                      {selectedPatient.name}
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Last updated: {formatDate(selectedPatient.createdAt)}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDetailsModal(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Change Indicator */}
+              {Object.keys(changedFields).length > 0 && (
+                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-yellow-800">
+                    <AlertCircle className="h-5 w-5" />
+                    <p className="font-medium">
+                      {Object.keys(changedFields).length} field(s) updated from
+                      previous version
+                    </p>
+                  </div>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Highlighted fields show recent changes
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 mb-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowAppointments(!showAppointments);
+                    setShowPrescriptions(false);
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Calendar className="h-4 w-4" />
+                  View Appointments ({selectedPatient.appointments?.length || 0}
+                  )
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowPrescriptions(!showPrescriptions);
+                    setShowAppointments(false);
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  View Prescriptions
+                </Button>
+              </div>
+
+              {/* Appointments Section */}
+              {showAppointments && selectedPatient.appointments && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Appointments
+                  </h3>
+                  {selectedPatient.appointments.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedPatient.appointments.map((apt) => (
+                        <div
+                          key={apt.doctorpatinetId}
+                          className="bg-white p-3 rounded border border-gray-200"
+                        >
+                          <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="px-6 py-1  text-black rounded-lg hover:bg-gray-200 transition font-semibold"
+                          >
+                            <p className="font-medium">{apt.patientName}</p>
+                            <p className="text-sm text-gray-600">
+                              {apt.appointmentDate} at {apt.appointmentTime}
+                            </p>
+                          </button>
+                          {isModalOpen && (
+                            <AppointmentDetailsModal
+                              appointment={apt}
+                              onClose={() => setIsModalOpen(false)}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No appointments scheduled
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Prescriptions Section */}
+              {showPrescriptions && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Prescriptions
+                  </h3>
+                  {selectedPatient?.prescription ? (
+                    <div className="bg-white p-3 rounded border border-gray-200">
+                      <p className="text-sm text-gray-600">
+                        Prescription details would appear here
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No prescriptions available
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Main Content Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
+                {/* Contact Information */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Contact Information
+                  </h3>
+                  <p>
+                    <strong>Email:</strong> {selectedPatient.email}
+                  </p>
+                  <FieldWithChangeIndicator
+                    label="Phone"
+                    value={selectedPatient.contactNumber}
+                    fieldName="contact"
+                    icon={Phone}
+                  />
+
+                  <p>
+                    <strong>Gender:</strong> {selectedPatient.gender}
+                  </p>
+                </div>
+
+                {/* Professional Details */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5" />
+                    Professional Details
+                  </h3>
+                  <p>
+                    <strong>Education:</strong> {selectedPatient.education}
+                  </p>
+
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    <span
+                      className={`inline-flex px-2 py-1 rounded text-xs ${selectedPatient.status === "Available" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
+                    >
+                      {selectedPatient.status}
+                    </span>
+                  </p>
+                </div>
+
+                {/* Additional Info */}
+                <div className="md:col-span-2">
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Additional Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <p>
+                      <strong>Member Since:</strong>{" "}
+                      {formatDate(selectedPatient.createdAt)}
+                    </p>
+                    <p>
+                      <strong>User ID:</strong> {selectedPatient.userId}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

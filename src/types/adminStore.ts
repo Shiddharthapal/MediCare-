@@ -239,7 +239,6 @@ interface Appointment {
 
 interface RescheduleAppointment {
   _id?: string;
-
   // Doctor Information
   doctorpatinetId?: string;
   doctorUserId?: string;
