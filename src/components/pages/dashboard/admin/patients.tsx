@@ -16,7 +16,7 @@ import {
   Star,
   AlertCircle,
   History,
-  Hospital,
+  Activity,
   BadgeDollarSign,
   Video,
   Target,
@@ -720,26 +720,11 @@ export default function DoctorManagement() {
     prescription: Prescription;
     onClose: () => void;
   }) => {
-    const getStatusColor = (status: string) => {
-      switch (status.toLowerCase()) {
-        case "confirmed":
-          return "bg-green-100 text-green-800";
-        case "pending":
-          return "bg-yellow-100 text-yellow-800";
-        case "cancelled":
-          return "bg-red-100 text-red-800";
-        case "completed":
-          return "bg-blue-100 text-blue-800";
-        default:
-          return "bg-gray-100 text-gray-800";
-      }
-    };
-
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="bg-blue-600 text-white p-6 flex items-center justify-between">
+          <div className="bg-blue-600 text-white px-6 py-2 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">Prescription Details</h2>
               <p className="text-blue-100 text-sm mt-1">
@@ -757,15 +742,15 @@ export default function DoctorManagement() {
           {/* Content */}
           <div className="overflow-y-auto flex-1 p-6">
             {/* Doctor and Date Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="bg-gray-100 px-4 py-1 rounded-lg">
                 <div className="flex items-center gap-2 text-gray-700 mb-2">
                   <User className="h-5 w-5" />
                   <span className="font-semibold">Doctor</span>
                 </div>
                 <p className="text-lg">{prescription.doctorName}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-100 px-4 py-1 rounded-lg">
                 <div className="flex items-center gap-2 text-gray-700 mb-2">
                   <Calendar className="h-5 w-5" />
                   <span className="font-semibold">Date Issued</span>
@@ -775,12 +760,12 @@ export default function DoctorManagement() {
             </div>
 
             {/* Reason for Visit */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-gray-700 mb-2">
+            <div className="mb-4">
+              <div className="flex items-center gap-2 text-gray-700 mb-1">
                 <Stethoscope className="h-5 w-5" />
                 <h3 className="font-semibold text-lg">Reason for Visit</h3>
               </div>
-              <p className="text-gray-800 bg-gray-50 p-3 rounded">
+              <p className="text-gray-800 bg-gray-100 px-3 py-2  rounded">
                 {prescription.reasonForVisit}
               </p>
             </div>
@@ -788,14 +773,14 @@ export default function DoctorManagement() {
             {/* Vital Signs */}
             {prescription.vitalSign &&
               Object.keys(prescription.vitalSign).length > 0 && (
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 text-gray-700 mb-3">
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 text-gray-700 mb-1">
                     <Activity className="h-5 w-5" />
                     <h3 className="font-semibold text-lg">Vital Signs</h3>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {prescription.vitalSign.bloodPressure && (
-                      <div className="bg-blue-50 p-3 rounded">
+                      <div className="bg-blue-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Blood Pressure</p>
                         <p className="font-semibold text-blue-900">
                           {prescription.vitalSign.bloodPressure}
@@ -803,7 +788,7 @@ export default function DoctorManagement() {
                       </div>
                     )}
                     {prescription.vitalSign.heartRate && (
-                      <div className="bg-red-50 p-3 rounded">
+                      <div className="bg-red-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Heart Rate</p>
                         <p className="font-semibold text-red-900">
                           {prescription.vitalSign.heartRate}
@@ -811,7 +796,7 @@ export default function DoctorManagement() {
                       </div>
                     )}
                     {prescription.vitalSign.temperature && (
-                      <div className="bg-orange-50 p-3 rounded">
+                      <div className="bg-orange-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Temperature</p>
                         <p className="font-semibold text-orange-900">
                           {prescription.vitalSign.temperature}
@@ -819,7 +804,7 @@ export default function DoctorManagement() {
                       </div>
                     )}
                     {prescription.vitalSign.weight && (
-                      <div className="bg-green-50 p-3 rounded">
+                      <div className="bg-green-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Weight</p>
                         <p className="font-semibold text-green-900">
                           {prescription.vitalSign.weight}
@@ -827,7 +812,7 @@ export default function DoctorManagement() {
                       </div>
                     )}
                     {prescription.vitalSign.height && (
-                      <div className="bg-purple-50 p-3 rounded">
+                      <div className="bg-purple-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Height</p>
                         <p className="font-semibold text-purple-900">
                           {prescription.vitalSign.height}
@@ -835,7 +820,7 @@ export default function DoctorManagement() {
                       </div>
                     )}
                     {prescription.vitalSign.respiratoryRate && (
-                      <div className="bg-cyan-50 p-3 rounded">
+                      <div className="bg-cyan-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">
                           Respiratory Rate
                         </p>
@@ -845,15 +830,15 @@ export default function DoctorManagement() {
                       </div>
                     )}
                     {prescription.vitalSign.oxygenSaturation && (
-                      <div className="bg-indigo-50 p-3 rounded">
-                        <p className="text-xs text-gray-600">O2 Saturation</p>
+                      <div className="bg-indigo-50 px-3 py-2 rounded">
+                        <p className="text-xs text-gray-600"> Saturation</p>
                         <p className="font-semibold text-indigo-900">
                           {prescription.vitalSign.oxygenSaturation}
                         </p>
                       </div>
                     )}
                     {prescription.vitalSign.bmi && (
-                      <div className="bg-pink-50 p-3 rounded">
+                      <div className="bg-pink-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">BMI</p>
                         <p className="font-semibold text-pink-900">
                           {prescription.vitalSign.bmi}
@@ -865,18 +850,18 @@ export default function DoctorManagement() {
               )}
 
             {/* Diagnosis and Symptoms */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <h3 className="font-semibold text-gray-700 mb-2">
+                <h3 className="font-semibold text-gray-700 mb-1">
                   Primary Diagnosis
                 </h3>
-                <p className="text-gray-800 bg-red-50 p-3 rounded border border-red-200">
+                <p className="text-gray-800 bg-red-50 px-3 py-2 rounded border border-red-200">
                   {prescription.primaryDiagnosis}
                 </p>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Symptoms</h3>
-                <p className="text-gray-800 bg-yellow-50 p-3 rounded border border-yellow-200">
+                <h3 className="font-semibold text-gray-700 mb-1">Symptoms</h3>
+                <p className="text-gray-800 bg-yellow-50 px-3 py-2 rounded border border-yellow-200">
                   {prescription.symptoms}
                 </p>
               </div>
@@ -884,24 +869,24 @@ export default function DoctorManagement() {
 
             {/* Tests and Reports */}
             {prescription.testandReport && (
-              <div className="mb-6">
-                <div className="flex items-center gap-2 text-gray-700 mb-2">
+              <div className="mb-4">
+                <div className="flex items-center gap-2 text-gray-700 mb-1">
                   <FileText className="h-5 w-5" />
                   <h3 className="font-semibold text-lg">Tests & Reports</h3>
                 </div>
-                <p className="text-gray-800 bg-gray-50 p-3 rounded">
+                <p className="text-gray-800 bg-gray-100 px-3 py-2 rounded">
                   {prescription.testandReport}
                 </p>
               </div>
             )}
 
             {/* Medications */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-gray-700 mb-3">
+            <div className="mb-4">
+              <div className="flex items-center gap-2 text-gray-700 mb-1">
                 <Pill className="h-5 w-5" />
                 <h3 className="font-semibold text-lg">Medications</h3>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {prescription.medication.map((med) => (
                   <div
                     key={med.id}
@@ -974,12 +959,12 @@ export default function DoctorManagement() {
 
             {/* Restrictions */}
             {prescription.restrictions && (
-              <div className="mb-6">
-                <div className="flex items-center gap-2 text-gray-700 mb-2">
+              <div className="mb-4">
+                <div className="flex items-center gap-2 text-gray-700 mb-1">
                   <AlertCircle className="h-5 w-5 text-red-600" />
                   <h3 className="font-semibold text-lg">Restrictions</h3>
                 </div>
-                <p className="text-gray-800 bg-red-50 p-3 rounded border border-red-200">
+                <p className="text-gray-800 bg-red-50 px-3 py-2 rounded border border-red-200">
                   {prescription.restrictions}
                 </p>
               </div>
@@ -987,12 +972,12 @@ export default function DoctorManagement() {
 
             {/* Follow-up Date */}
             {prescription.followUpDate && (
-              <div className="mb-6">
-                <div className="flex items-center gap-2 text-gray-700 mb-2">
+              <div className="mb-4">
+                <div className="flex items-center gap-2 text-gray-700 mb-1">
                   <Clock className="h-5 w-5" />
                   <h3 className="font-semibold text-lg">Follow-up Date</h3>
                 </div>
-                <p className="text-lg text-gray-800 bg-green-50 p-3 rounded border border-green-200">
+                <p className="text-lg text-gray-800 bg-green-50 px-3 py-2rounded border border-green-200">
                   {formatDate(prescription.followUpDate)}
                 </p>
               </div>
@@ -1000,16 +985,138 @@ export default function DoctorManagement() {
 
             {/* Additional Notes */}
             {prescription.additionalNote && (
-              <div className="mb-6">
-                <div className="flex items-center gap-2 text-gray-700 mb-2">
+              <div className="mb-4">
+                <div className="flex items-center gap-2 text-gray-700 mb-1">
                   <FileText className="h-5 w-5" />
                   <h3 className="font-semibold text-lg">Additional Notes</h3>
                 </div>
-                <p className="text-gray-800 bg-gray-50 p-3 rounded">
+                <p className="text-gray-800 bg-gray-50 px-3 py-2 rounded">
                   {prescription.additionalNote}
                 </p>
               </div>
             )}
+
+            <div className="mb-4 flex flex-row justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-gray-700 mb-1">
+                  <h3 className="font-semibold text-lg">Doctor Signature</h3>
+                </div>
+                <p className="text-blue-600  px-3 py-2rounded">
+                  {prescription.doctorName} •{" "}
+                  {prescription.createdAt.split("T")[0]}
+                </p>
+              </div>
+              <div className="h-20 w-20 pt-4">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                  {/* <!-- Outer circle --> */}
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="95"
+                    fill="none"
+                    stroke="#1e40af"
+                    stroke-width="3"
+                  />
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="88"
+                    fill="none"
+                    stroke="#1e40af"
+                    stroke-width="1.5"
+                  />
+
+                  {/* <!-- Medical caduceus symbol in center --> */}
+                  <g transform="translate(100, 100)">
+                    {/* <!-- Staff --> */}
+                    <rect x="-2" y="-45" width="4" height="70" fill="#1e40af" />
+
+                    {/* <!-- Wings --> */}
+                    <path
+                      d="M -2,-40 Q -25,-50 -35,-35 Q -30,-25 -2,-35 Z"
+                      fill="#1e40af"
+                    />
+                    <path
+                      d="M 2,-40 Q 25,-50 35,-35 Q 30,-25 2,-35 Z"
+                      fill="#1e40af"
+                    />
+
+                    {/* <!-- Serpents --> */}
+                    <path
+                      d="M -2,-30 Q -15,-20 -2,-10 Q -15,0 -2,10 Q -10,20 -2,25"
+                      fill="none"
+                      stroke="#1e40af"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M 2,-30 Q 15,-20 2,-10 Q 15,0 2,10 Q 10,20 2,25"
+                      fill="none"
+                      stroke="#1e40af"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+
+                    {/* <!-- Serpent heads --> */}
+                    <circle cx="-2" cy="-30" r="3" fill="#1e40af" />
+                    <circle cx="2" cy="-30" r="3" fill="#1e40af" />
+                  </g>
+
+                  {/* <!-- Top text curve --> */}
+                  <path
+                    id="topCurve"
+                    d="M 30,100 A 70,70 0 0,1 170,100"
+                    fill="none"
+                  />
+                  <text
+                    font-family="Georgia, serif"
+                    font-size="16"
+                    font-weight="bold"
+                    fill="#1e40af"
+                  >
+                    <textPath
+                      href="#topCurve"
+                      startOffset="50%"
+                      text-anchor="middle"
+                    >
+                      MediCare+
+                    </textPath>
+                  </text>
+
+                  {/* <!-- Bottom text curve --> */}
+                  <path
+                    id="bottomCurve"
+                    d="M 30,100 A 70,70 0 0,0 170,100"
+                    fill="none"
+                  />
+                  <text
+                    font-family="Georgia, serif"
+                    font-size="14"
+                    fill="#1e40af"
+                  >
+                    <textPath
+                      href="#bottomCurve"
+                      startOffset="50%"
+                      text-anchor="middle"
+                    >
+                      {prescription.doctorName}
+                    </textPath>
+                  </text>
+
+                  {/* <!-- Bottom straight text --> */}
+                  <text
+                    x="100"
+                    y="145"
+                    font-family="Georgia, serif"
+                    font-size="11"
+                    fill="#1e40af"
+                    text-anchor="middle"
+                  >
+                    EST. 2025
+                  </text>
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Footer */}
@@ -1047,8 +1154,6 @@ export default function DoctorManagement() {
     icon: Icon,
   }) => {
     const hasChanged = changedFields[fieldName];
-    console.log("🧞‍♂️  fieldName --->", fieldName);
-    console.log("🧞‍♂️  hasChanged --->", hasChanged);
 
     return (
       <div
@@ -1348,8 +1453,12 @@ export default function DoctorManagement() {
                 </div>
               )}
 
-              {selectedPatient.appointments.length > 0 ? (
-                <div className="space-y-2">
+              {showPrescriptions && selectedPatient.appointments.length > 0 ? (
+                <div className="space-y-2 mb-6 p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <File className="h-5 w-5" />
+                    Prescription
+                  </h3>
                   {selectedPatient.appointments.map((apt) =>
                     apt.prescription?.reasonForVisit ? (
                       <div
