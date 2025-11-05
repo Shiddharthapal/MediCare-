@@ -15,6 +15,10 @@ import {
   Trash2,
   MoreVertical,
   Zap,
+  File,
+  Dock,
+  FileText,
+  SquareLibrary,
 } from "lucide-react";
 import {
   LineChart,
@@ -149,7 +153,9 @@ const menuItems = [
   { id: "appointments", icon: Calendar, label: "Appointments", active: false },
   { id: "doctors", icon: Users, label: "Doctors", active: false },
   { id: "patients", icon: User, label: "Patients", active: false },
-  { id: "records", icon: User, label: "Records", active: false },
+  { id: "prescription", icon: File, label: "Prescription", active: false },
+  { id: "document", icon: FileText, label: "Document", active: false },
+  { id: "records", icon: SquareLibrary, label: "Records", active: false },
   { id: "settings", icon: Settings, label: "Settings", active: false },
 ];
 
@@ -884,6 +890,20 @@ export default function Dashboard() {
           <div className="h-screen  p-6 lg:p-6 ">
             <div className="max-w-6xl mx-auto">
               <Patients onNavigate={setCurrentPage} />
+            </div>
+          </div>
+        )}
+        {currentPage === "prescription" && (
+          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+            <div className="max-w-6xl mx-auto">
+              <Prescription />
+            </div>
+          </div>
+        )}
+        {currentPage === "document" && (
+          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+            <div className="max-w-6xl mx-auto">
+              <Document />
             </div>
           </div>
         )}
