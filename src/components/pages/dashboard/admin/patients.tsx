@@ -8,6 +8,7 @@ import {
   X,
   Languages,
   MapPin,
+  File,
   GraduationCap,
   FileText,
   Calendar,
@@ -25,8 +26,10 @@ import {
   MapPinHouse,
   Droplet,
   Cake,
+  Venus,
   Anvil,
   PersonStanding,
+  Clock,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -229,9 +232,12 @@ export default function DoctorManagement() {
   const [latestPatientData, setLatestPatientData] = useState<UserDetails[]>([]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showPrescriptions, setShowPrescriptions] = useState(false);
+  const [showDocument, setShowDocument] = useState(false);
   const [showAppointments, setShowAppointments] = useState(false);
   const [changedFields, setChangedFields] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<Prescription | null>(null);
 
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
@@ -707,6 +713,325 @@ export default function DoctorManagement() {
     );
   };
 
+  const PrescriptionDetailsModal = ({
+    prescription,
+    onClose,
+  }: {
+    prescription: Prescription;
+    onClose: () => void;
+  }) => {
+    const getStatusColor = (status: string) => {
+      switch (status.toLowerCase()) {
+        case "confirmed":
+          return "bg-green-100 text-green-800";
+        case "pending":
+          return "bg-yellow-100 text-yellow-800";
+        case "cancelled":
+          return "bg-red-100 text-red-800";
+        case "completed":
+          return "bg-blue-100 text-blue-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="bg-blue-600 text-white p-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">Prescription Details</h2>
+              <p className="text-blue-100 text-sm mt-1">
+                ID: {prescription.prescriptionId}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-white hover:bg-blue-700 rounded-full p-2 transition"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="overflow-y-auto flex-1 p-6">
+            {/* Doctor and Date Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <User className="h-5 w-5" />
+                  <span className="font-semibold">Doctor</span>
+                </div>
+                <p className="text-lg">{prescription.doctorName}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <Calendar className="h-5 w-5" />
+                  <span className="font-semibold">Date Issued</span>
+                </div>
+                <p className="text-lg">{formatDate(prescription.createdAt)}</p>
+              </div>
+            </div>
+
+            {/* Reason for Visit */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 text-gray-700 mb-2">
+                <Stethoscope className="h-5 w-5" />
+                <h3 className="font-semibold text-lg">Reason for Visit</h3>
+              </div>
+              <p className="text-gray-800 bg-gray-50 p-3 rounded">
+                {prescription.reasonForVisit}
+              </p>
+            </div>
+
+            {/* Vital Signs */}
+            {prescription.vitalSign &&
+              Object.keys(prescription.vitalSign).length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 text-gray-700 mb-3">
+                    <Activity className="h-5 w-5" />
+                    <h3 className="font-semibold text-lg">Vital Signs</h3>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {prescription.vitalSign.bloodPressure && (
+                      <div className="bg-blue-50 p-3 rounded">
+                        <p className="text-xs text-gray-600">Blood Pressure</p>
+                        <p className="font-semibold text-blue-900">
+                          {prescription.vitalSign.bloodPressure}
+                        </p>
+                      </div>
+                    )}
+                    {prescription.vitalSign.heartRate && (
+                      <div className="bg-red-50 p-3 rounded">
+                        <p className="text-xs text-gray-600">Heart Rate</p>
+                        <p className="font-semibold text-red-900">
+                          {prescription.vitalSign.heartRate}
+                        </p>
+                      </div>
+                    )}
+                    {prescription.vitalSign.temperature && (
+                      <div className="bg-orange-50 p-3 rounded">
+                        <p className="text-xs text-gray-600">Temperature</p>
+                        <p className="font-semibold text-orange-900">
+                          {prescription.vitalSign.temperature}
+                        </p>
+                      </div>
+                    )}
+                    {prescription.vitalSign.weight && (
+                      <div className="bg-green-50 p-3 rounded">
+                        <p className="text-xs text-gray-600">Weight</p>
+                        <p className="font-semibold text-green-900">
+                          {prescription.vitalSign.weight}
+                        </p>
+                      </div>
+                    )}
+                    {prescription.vitalSign.height && (
+                      <div className="bg-purple-50 p-3 rounded">
+                        <p className="text-xs text-gray-600">Height</p>
+                        <p className="font-semibold text-purple-900">
+                          {prescription.vitalSign.height}
+                        </p>
+                      </div>
+                    )}
+                    {prescription.vitalSign.respiratoryRate && (
+                      <div className="bg-cyan-50 p-3 rounded">
+                        <p className="text-xs text-gray-600">
+                          Respiratory Rate
+                        </p>
+                        <p className="font-semibold text-cyan-900">
+                          {prescription.vitalSign.respiratoryRate}
+                        </p>
+                      </div>
+                    )}
+                    {prescription.vitalSign.oxygenSaturation && (
+                      <div className="bg-indigo-50 p-3 rounded">
+                        <p className="text-xs text-gray-600">O2 Saturation</p>
+                        <p className="font-semibold text-indigo-900">
+                          {prescription.vitalSign.oxygenSaturation}
+                        </p>
+                      </div>
+                    )}
+                    {prescription.vitalSign.bmi && (
+                      <div className="bg-pink-50 p-3 rounded">
+                        <p className="text-xs text-gray-600">BMI</p>
+                        <p className="font-semibold text-pink-900">
+                          {prescription.vitalSign.bmi}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+            {/* Diagnosis and Symptoms */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <h3 className="font-semibold text-gray-700 mb-2">
+                  Primary Diagnosis
+                </h3>
+                <p className="text-gray-800 bg-red-50 p-3 rounded border border-red-200">
+                  {prescription.primaryDiagnosis}
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-700 mb-2">Symptoms</h3>
+                <p className="text-gray-800 bg-yellow-50 p-3 rounded border border-yellow-200">
+                  {prescription.symptoms}
+                </p>
+              </div>
+            </div>
+
+            {/* Tests and Reports */}
+            {prescription.testandReport && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <FileText className="h-5 w-5" />
+                  <h3 className="font-semibold text-lg">Tests & Reports</h3>
+                </div>
+                <p className="text-gray-800 bg-gray-50 p-3 rounded">
+                  {prescription.testandReport}
+                </p>
+              </div>
+            )}
+
+            {/* Medications */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 text-gray-700 mb-3">
+                <Pill className="h-5 w-5" />
+                <h3 className="font-semibold text-lg">Medications</h3>
+              </div>
+              <div className="space-y-3">
+                {prescription.medication.map((med) => (
+                  <div
+                    key={med.id}
+                    className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-semibold text-blue-900 text-lg">
+                        {med.medecineName}
+                      </h4>
+                      <span className="bg-blue-200 text-blue-900 text-xs px-2 py-1 rounded">
+                        {med.medecineDosage}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <span className="text-gray-600">Frequency:</span>
+                        <p className="font-medium text-gray-900">
+                          {med.frequency}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Duration:</span>
+                        <p className="font-medium text-gray-900">
+                          {med.duration}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Quantity:</span>
+                        <p className="font-medium text-gray-900">
+                          {med.quantity}
+                        </p>
+                      </div>
+                      {med.route && med.route.length > 0 && (
+                        <div>
+                          <span className="text-gray-600">Route:</span>
+                          <p className="font-medium text-gray-900">
+                            {med.route.join(", ")}
+                          </p>
+                        </div>
+                      )}
+                      {med.startDate && (
+                        <div>
+                          <span className="text-gray-600">Start Date:</span>
+                          <p className="font-medium text-gray-900">
+                            {formatDate(med.startDate)}
+                          </p>
+                        </div>
+                      )}
+                      {med.endDate && (
+                        <div>
+                          <span className="text-gray-600">End Date:</span>
+                          <p className="font-medium text-gray-900">
+                            {formatDate(med.endDate)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {med.instructions && (
+                      <div className="mt-3 pt-3 border-t border-blue-200">
+                        <span className="text-gray-600 text-sm">
+                          Instructions:
+                        </span>
+                        <p className="text-gray-900 mt-1">{med.instructions}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Restrictions */}
+            {prescription.restrictions && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <AlertCircle className="h-5 w-5 text-red-600" />
+                  <h3 className="font-semibold text-lg">Restrictions</h3>
+                </div>
+                <p className="text-gray-800 bg-red-50 p-3 rounded border border-red-200">
+                  {prescription.restrictions}
+                </p>
+              </div>
+            )}
+
+            {/* Follow-up Date */}
+            {prescription.followUpDate && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <Clock className="h-5 w-5" />
+                  <h3 className="font-semibold text-lg">Follow-up Date</h3>
+                </div>
+                <p className="text-lg text-gray-800 bg-green-50 p-3 rounded border border-green-200">
+                  {formatDate(prescription.followUpDate)}
+                </p>
+              </div>
+            )}
+
+            {/* Additional Notes */}
+            {prescription.additionalNote && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <FileText className="h-5 w-5" />
+                  <h3 className="font-semibold text-lg">Additional Notes</h3>
+                </div>
+                <p className="text-gray-800 bg-gray-50 p-3 rounded">
+                  {prescription.additionalNote}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="bg-gray-50 p-4 flex justify-end gap-3 border-t">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+            >
+              Print
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Component to render field with change indicator
   interface FieldWithChangeIndicatorProps {
     label: string;
@@ -725,11 +1050,11 @@ export default function DoctorManagement() {
 
     return (
       <div
-        className={`p-2 rounded ${hasChanged ? "bg-yellow-50 border border-yellow-200" : ""}`}
+        className={` rounded ${hasChanged ? "bg-yellow-50 border border-yellow-200" : ""}`}
       >
-        <div className="flex items-start justify-between">
-          <p>
-            <strong className="flex items-center gap-2">
+        <div className="flex  items-center justify-between">
+          <p className="flex items-center gap-2 flex-wrap">
+            <strong className="flex  items-center gap-2">
               {Icon && <Icon className="h-4 w-4" />}
               {label}:
             </strong>{" "}
@@ -745,7 +1070,7 @@ export default function DoctorManagement() {
           )}
         </div>
         {hasChanged && (
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-yellow-700 mt-1">
             Previous:{" "}
             {Array.isArray(hasChanged.previous)
               ? hasChanged.previous.join(", ")
@@ -962,7 +1287,22 @@ export default function DoctorManagement() {
                   className="flex items-center gap-2"
                 >
                   <FileText className="h-4 w-4" />
-                  View Prescriptions
+                  View Prescriptions (
+                  {selectedPatient.appointments.filter(
+                    (appointment) => appointment?.prescription?.reasonForVisit
+                  ).length || 0}
+                  )
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDocument(!showDocument);
+                    setShowAppointments(false);
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <File className="h-4 w-4" />
+                  View Document
                 </Button>
               </div>
 
@@ -1006,25 +1346,36 @@ export default function DoctorManagement() {
                 </div>
               )}
 
-              {/* Prescriptions Section */}
-              {showPrescriptions && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Prescriptions
-                  </h3>
-                  {selectedPatient?.prescription ? (
-                    <div className="bg-white p-3 rounded border border-gray-200">
-                      <p className="text-sm text-gray-600">
-                        Prescription details would appear here
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">
-                      No prescriptions available
-                    </p>
+              {selectedPatient.appointments.length > 0 ? (
+                <div className="space-y-2">
+                  {selectedPatient.appointments.map((apt) =>
+                    apt.prescription?.reasonForVisit ? (
+                      <div
+                        key={apt.prescription.prescriptionId}
+                        className="bg-white p-3 rounded border border-gray-200"
+                      >
+                        <button
+                          onClick={() => setIsModalOpen(true)}
+                          className="px-6 py-1 text-black rounded-lg hover:bg-gray-200 transition font-semibold"
+                        >
+                          <p className="font-medium">{apt.patientName}</p>
+                          <p className="text-sm text-gray-600">
+                            {apt.prescription.reasonForVisit} at{" "}
+                            {apt.prescription.createdAt?.split("T")[0]}
+                          </p>
+                        </button>
+                        {isModalOpen && (
+                          <PrescriptionDetailsModal
+                            prescription={apt.prescription}
+                            onClose={() => setIsModalOpen(false)}
+                          />
+                        )}
+                      </div>
+                    ) : null
                   )}
                 </div>
+              ) : (
+                <p className="text-sm text-gray-500">No prescription</p>
               )}
 
               {/* Main Content Grid */}
@@ -1032,41 +1383,99 @@ export default function DoctorManagement() {
                 {/* Contact Information */}
                 <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 mb-3">
-                    Contact Information
+                    Information
                   </h3>
                   <p>
                     <strong>Email:</strong> {selectedPatient.email}
                   </p>
+                  <p>
+                    <strong>Name:</strong> {selectedPatient.name}
+                  </p>
+                  <p>
+                    <strong>Father Name:</strong> {selectedPatient.fatherName}
+                  </p>
+                  <FieldWithChangeIndicator
+                    label="Address"
+                    value={selectedPatient.address}
+                    fieldName="contact"
+                    icon={MapPinHouse}
+                  />
                   <FieldWithChangeIndicator
                     label="Phone"
                     value={selectedPatient.contactNumber}
                     fieldName="contact"
                     icon={Phone}
                   />
+                  <p className="flex items-center gap-2">
+                    <strong className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      Date of Birth:
+                    </strong>
+                    {selectedPatient?.dateOfBirth?.split("T")[0] || "N/A"}
+                  </p>
 
-                  <p>
-                    <strong>Gender:</strong> {selectedPatient.gender}
+                  <p className="flex items-center gap-2">
+                    <strong className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      Age:
+                    </strong>
+                    <span>{selectedPatient.age || "N/A"}</span>
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <strong className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      lastTreatmentDate:
+                    </strong>
+                    <span>
+                      {selectedPatient?.lastTreatmentDate?.split("T")[0] ||
+                        "N/A"}
+                    </span>
                   </p>
                 </div>
 
                 {/* Professional Details */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <GraduationCap className="h-5 w-5" />
-                    Professional Details
-                  </h3>
-                  <p>
-                    <strong>Education:</strong> {selectedPatient.education}
-                  </p>
-
                   <p>
                     <strong>Status:</strong>{" "}
                     <span
-                      className={`inline-flex px-2 py-1 rounded text-xs ${selectedPatient.status === "Available" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
+                      className={`inline-flex px-2 py-1 rounded text-xs ${selectedPatient.status === "Active||active" ? "bg-green-100 text-green-800" : "bg-green-100 text-green-800"}`}
                     >
-                      {selectedPatient.status}
+                      {selectedPatient?.status || "Active"}
                     </span>
                   </p>
+                  <p className="flex items-center gap-2">
+                    <strong className="flex items-center gap-1">
+                      {selectedPatient.gender === "Male" ? (
+                        <Mars className="h-4 w-4" />
+                      ) : (
+                        <Venus className="h-4 w-4" />
+                      )}
+                      Gender:
+                    </strong>
+                    <span>{selectedPatient.gender || "N/A"}</span>
+                  </p>
+
+                  <FieldWithChangeIndicator
+                    label="BloodGroup"
+                    value={selectedPatient.bloodGroup}
+                    fieldName="contact"
+                    icon={Droplet}
+                  />
+
+                  <FieldWithChangeIndicator
+                    label="Height"
+                    value={selectedPatient?.height || "N/A"}
+                    fieldName="contact"
+                    icon={PersonStanding}
+                  />
+
+                  <FieldWithChangeIndicator
+                    label="Weight"
+                    value={selectedPatient.weight}
+                    fieldName="contact"
+                    icon={Anvil}
+                  />
                 </div>
 
                 {/* Additional Info */}
