@@ -1047,6 +1047,8 @@ export default function DoctorManagement() {
     icon: Icon,
   }) => {
     const hasChanged = changedFields[fieldName];
+    console.log("🧞‍♂️  fieldName --->", fieldName);
+    console.log("🧞‍♂️  hasChanged --->", hasChanged);
 
     return (
       <div
@@ -1391,36 +1393,38 @@ export default function DoctorManagement() {
                   <p>
                     <strong>Name:</strong> {selectedPatient.name}
                   </p>
-                  <p>
-                    <strong>Father Name:</strong> {selectedPatient.fatherName}
-                  </p>
+
+                  <FieldWithChangeIndicator
+                    label="Father Name"
+                    value={selectedPatient.address}
+                    fieldName="fatherName"
+                  />
                   <FieldWithChangeIndicator
                     label="Address"
                     value={selectedPatient.address}
-                    fieldName="contact"
+                    fieldName="address"
                     icon={MapPinHouse}
                   />
                   <FieldWithChangeIndicator
                     label="Phone"
                     value={selectedPatient.contactNumber}
-                    fieldName="contact"
+                    fieldName="contactNumber"
                     icon={Phone}
                   />
-                  <p className="flex items-center gap-2">
-                    <strong className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Date of Birth:
-                    </strong>
-                    {selectedPatient?.dateOfBirth?.split("T")[0] || "N/A"}
-                  </p>
 
-                  <p className="flex items-center gap-2">
-                    <strong className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      Age:
-                    </strong>
-                    <span>{selectedPatient.age || "N/A"}</span>
-                  </p>
+                  <FieldWithChangeIndicator
+                    label="Date of Birth"
+                    value={selectedPatient?.dateOfBirth?.split("T")[0] || "N/A"}
+                    fieldName="dateOfBirth"
+                    icon={Calendar}
+                  />
+
+                  <FieldWithChangeIndicator
+                    label="Age"
+                    value={selectedPatient.age || "N/A"}
+                    fieldName="age"
+                    icon={Clock}
+                  />
 
                   <p className="flex items-center gap-2">
                     <strong className="flex items-center gap-1">
@@ -1444,36 +1448,32 @@ export default function DoctorManagement() {
                       {selectedPatient?.status || "Active"}
                     </span>
                   </p>
-                  <p className="flex items-center gap-2">
-                    <strong className="flex items-center gap-1">
-                      {selectedPatient.gender === "Male" ? (
-                        <Mars className="h-4 w-4" />
-                      ) : (
-                        <Venus className="h-4 w-4" />
-                      )}
-                      Gender:
-                    </strong>
-                    <span>{selectedPatient.gender || "N/A"}</span>
-                  </p>
 
                   <FieldWithChangeIndicator
-                    label="BloodGroup"
+                    label="Gender"
+                    value={selectedPatient.gender || "N/A"}
+                    fieldName="gender"
+                    icon={selectedPatient.gender === "Male" ? Mars : Venus}
+                  />
+
+                  <FieldWithChangeIndicator
+                    label="Blood Group"
                     value={selectedPatient.bloodGroup}
-                    fieldName="contact"
+                    fieldName="bloodGroup"
                     icon={Droplet}
                   />
 
                   <FieldWithChangeIndicator
                     label="Height"
                     value={selectedPatient?.height || "N/A"}
-                    fieldName="contact"
+                    fieldName="height"
                     icon={PersonStanding}
                   />
 
                   <FieldWithChangeIndicator
                     label="Weight"
                     value={selectedPatient.weight}
-                    fieldName="contact"
+                    fieldName="weight"
                     icon={Anvil}
                   />
                 </div>
@@ -1486,7 +1486,9 @@ export default function DoctorManagement() {
                   <div className="grid grid-cols-2 gap-4">
                     <p>
                       <strong>Member Since:</strong>{" "}
-                      {formatDate(selectedPatient.createdAt)}
+                      <span className="text-blue-600">
+                        {formatDate(selectedPatient.createdAt)}
+                      </span>
                     </p>
                     <p>
                       <strong>User ID:</strong> {selectedPatient.userId}
