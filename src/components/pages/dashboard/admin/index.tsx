@@ -38,6 +38,8 @@ import Doctors from "./doctor";
 import Patients from "./patients";
 import Setting from "./settings";
 import Records from "./records";
+import Document from "./document";
+import Prescription from "./prescription";
 
 interface Prescription {
   reasonForVisit: string;
@@ -896,21 +898,21 @@ export default function Dashboard() {
         {currentPage === "prescription" && (
           <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
-              <Prescription />
+              <Prescription onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "document" && (
           <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
-              <Document />
+              <Document onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "records" && (
           <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
-              <Records />
+              <Records onNavigate={setCurrentPage} />
             </div>
           </div>
         )}

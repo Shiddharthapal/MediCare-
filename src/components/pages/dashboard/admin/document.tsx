@@ -52,7 +52,7 @@ interface DocumentCardProps {
   onInfo: () => void;
 }
 
-export default function DocumentsPage() {
+export default function Document() {
   const [documents, setDocuments] = useState<FileUpload[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<FileUpload | null>(
     null

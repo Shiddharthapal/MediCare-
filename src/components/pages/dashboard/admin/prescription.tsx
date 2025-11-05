@@ -57,7 +57,7 @@ interface PrescriptionCardProps {
   prescription: Prescription;
   onInfoClick: (prescription: Prescription) => void;
 }
-export default function PrescriptionsPage() {
+export default function Prescription() {
   const [selectedPrescription, setSelectedPrescription] =
     useState<Prescription | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
