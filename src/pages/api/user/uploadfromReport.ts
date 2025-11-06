@@ -197,6 +197,7 @@ export const POST: APIRoute = async ({ request }) => {
         // Prepare upload data
         const uploadfile = {
           patientId: userId,
+          patientName:,
           appointmentId: appointmentId,
           filename: uniqueFilename,
           originalName: originalName,

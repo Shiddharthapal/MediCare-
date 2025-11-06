@@ -192,7 +192,7 @@ export default function Document() {
     return (
       <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
         {/* Card Header with Icon or Image Preview */}
-        <div className="bg-primary/10 p-6 flex items-start justify-between">
+        <div className="bg-primary/70 p-6 flex items-start justify-between">
           <div className="flex-1">
             {isImage ? (
               <div className="relative w-full h-32 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
@@ -213,10 +213,10 @@ export default function Document() {
           </div>
           <button
             onClick={onInfo}
-            className="ml-4 p-2 hover:bg-primary/20 rounded-full transition-colors"
+            className="ml-4 p-2 hover:bg-primary/80 rounded-full transition-colors"
             aria-label="View document details"
           >
-            <InfoIcon className="w-5 h-5 text-primary" />
+            <InfoIcon className="w-5 h-5 text-white" />
           </button>
         </div>
 
@@ -513,14 +513,16 @@ export default function Document() {
               <div className="border-t border-border pt-3 flex gap-3">
                 <button
                   onClick={handleDownload}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary
+                   text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Download
                 </button>
                 <button
                   onClick={handleView}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-border text-foreground rounded-lg hover:text-primary hover:bg-secondary transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-border
+                   text-foreground rounded-lg hover:text-primary hover:bg-secondary transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open in New Tab

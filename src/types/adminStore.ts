@@ -38,9 +38,11 @@ interface Medication {
 interface FileUpload {
   _id: string;
   patientId: string;
+  patientName: string;
   doctorId: string;
   filename: string;
   originalName: string;
+  documentName: string;
   fileType: string;
   fileSize: number;
   path: string;

@@ -39,6 +39,8 @@ interface FileUpload {
   _id: string;
   patientId: string;
   doctorId: string;
+  patientName: string;
+  documentName: string;
   filename: string;
   originalName: string;
   fileType: string;

@@ -134,11 +134,17 @@ const FileUploadSchema = new mongoose.Schema({
   patientId: {
     type: String,
   },
+  patientName: {
+    type: String,
+  },
   filename: {
     type: String,
   },
 
   doctorId: {
+    type: String,
+  },
+  documentName: {
     type: String,
   },
 
