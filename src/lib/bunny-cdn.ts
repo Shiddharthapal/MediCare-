@@ -1,12 +1,12 @@
 import type { StorageObject, ApiResponse } from "@/types/bunny_cdn_type";
 
 const BUNNY_STORAGE_ZONE_NAME =
-  process.env.BUNNY_STORAGE_ZONE_NAME || "my-fukofak-darling";
+  process.env.BUNNY_STORAGE_ZONE_NAME || "lufalufikoro";
 const BUNNY_STORAGE_REGION_HOSTNAME =
   process.env.BUNNY_STORAGE_REGION_HOSTNAME || "storage.bunnycdn.com";
 const BUNNY_STORAGE_API_KEY =
   process.env.BUNNY_STORAGE_API_KEY ||
-  "f38edfbc-2ec9-45b7-98bc751beee8-eae7-4a1f";
+  "466dfc53-63c5-441e-9c6fbfed3248-ae77-43b5";
 
 export class BunnyStorageService {
   private apiKey: string;

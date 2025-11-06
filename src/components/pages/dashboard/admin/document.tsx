@@ -57,8 +57,8 @@ interface DocumentCardProps {
 }
 
 // Add your Bunny CDN configuration
-const BUNNY_CDN_HOSTNAME = "your-storage-zone.b-cdn.net"; // Replace with your actual Bunny CDN hostname
-const BUNNY_STORAGE_ZONE = "your-storage-zone"; // Replace with your storage zone name
+const BUNNY_CDN_HOSTNAME = "storage.bunnycdn.com"; // Replace with your actual Bunny CDN hostname
+const BUNNY_STORAGE_ZONE = "lufalufikoro"; // Replace with your storage zone name
 
 export default function Document() {
   const [documents, setDocuments] = useState<FileUpload[]>([]);
@@ -75,7 +75,7 @@ export default function Document() {
   const getBunnyCDNUrl = (document: FileUpload) => {
     // Construct the full path with filename
     const fullPath = `${document.path}/${document.filename}`;
-    return `https://${BUNNY_CDN_HOSTNAME}/${fullPath}`;
+    return `https://${BUNNY_CDN_HOSTNAME}/${BUNNY_STORAGE_ZONE}/${fullPath}`;
   };
 
   useEffect(() => {

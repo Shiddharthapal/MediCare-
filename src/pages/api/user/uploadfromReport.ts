@@ -84,6 +84,48 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    function generateUniqueFilename(
+      documentName: string,
+      originalFilename: string
+    ): string {
+      // Get file extension from original filename
+      const extension = originalFilename.split(".").pop()?.toLowerCase() || "";
+
+      // Clean the document name
+      const cleanName = documentName
+        .trim()
+        .replace(/[^a-zA-Z0-9_-]/g, "_")
+        .substring(0, 50);
+
+      // Generate unique ID
+      const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+      // Combine: documentName_uniqueId.extension
+      return `${cleanName}_${uniqueId}.${extension}`;
+    }
+
+    function getFileCategory(mimeType: string): string {
+      if (mimeType.startsWith("image/")) return "image";
+      if (mimeType.startsWith("application/pdf")) return "pdf";
+      if (
+        mimeType.startsWith("application/msword") ||
+        mimeType.startsWith(
+          "application/vnd.openxmlformats-officedocument.wordprocessingml"
+        )
+      ) {
+        return "document";
+      }
+      if (
+        mimeType.startsWith("application/vnd.ms-excel") ||
+        mimeType.startsWith(
+          "application/vnd.openxmlformats-officedocument.spreadsheetml"
+        )
+      ) {
+        return "spreadsheet";
+      }
+      return "other";
+    }
+
     //Take temporary array for upload and store file, report, document
     const uploadedFiles = [];
     const uploadResults = [];
@@ -123,13 +165,13 @@ export const POST: APIRoute = async ({ request }) => {
       const checksum = calculateChecksum(buffer);
 
       // Generate unique filename
-      const uniqueFilename = generateUniqueFilename(documentName);
+      const uniqueFilename = generateUniqueFilename(documentName, file.name);
+      const fileCategory = getFileCategory(file.type);
 
       // Construct destination path
-      let destinationPath = `${userId}/${file.type}`;
-      if (appointmentId) {
-        destinationPath += `/${appointmentId}`;
-      }
+      let destinationPath = `${userId}/${fileCategory}`;
+
+      //unique file name add the extension of the file
       destinationPath += `/${uniqueFilename}`;
 
       //Here use try-catch for unexpected error
