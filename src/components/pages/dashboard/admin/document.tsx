@@ -71,7 +71,7 @@ export default function Document() {
   const id = admin?._id;
 
   // Helper function to construct proper Bunny CDN URL
-  const getBunnyCDNUrl = (document: Document) => {
+  const getBunnyCDNUrl = (document: FileUpload) => {
     // Remove the storage domain and replace with pull zone
     const path = `${document?.patientId}/${document?.fileType.startsWith("image/") ? "image" : "document"}/${document?.filename}`;
 
@@ -271,7 +271,7 @@ export default function Document() {
     };
 
     const documentUrl = getBunnyCDNUrl(document);
-    const extension = documentUrl?.split(".")?.pop().toLowerCase();
+    const extension = document?.fileType.split("/")[1] || "bin";
 
     // Common image extensions
     const imageExtensions = [
