@@ -57,8 +57,7 @@ interface DocumentCardProps {
 }
 
 // Add your Bunny CDN configuration
-const BUNNY_CDN_HOSTNAME = "storage.bunnycdn.com"; // Replace with your actual Bunny CDN hostname
-const BUNNY_STORAGE_ZONE = "lufalufikoro"; // Replace with your storage zone name
+const BUNNY_CDN_PULL_ZONE = "mypull-29.b-cdn.net";
 
 export default function Document() {
   const [documents, setDocuments] = useState<FileUpload[]>([]);
@@ -72,10 +71,11 @@ export default function Document() {
   const id = admin?._id;
 
   // Helper function to construct proper Bunny CDN URL
-  const getBunnyCDNUrl = (document: FileUpload) => {
-    // Construct the full path with filename
-    const fullPath = `${document.path}/${document.filename}`;
-    return `https://${BUNNY_CDN_HOSTNAME}/${BUNNY_STORAGE_ZONE}/${fullPath}`;
+  const getBunnyCDNUrl = (document: Document) => {
+    // Remove the storage domain and replace with pull zone
+    const path = `${document?.patientId}/${document?.fileType.startsWith("image/") ? "image" : "document"}/${document?.filename}`;
+
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
   };
 
   useEffect(() => {
@@ -139,6 +139,7 @@ export default function Document() {
   }
 
   const DocumentCard = ({ document, onInfo }: DocumentCardProps) => {
+    const [imageError, setImageError] = useState(false);
     const formatFileSize = (bytes: number) => {
       if (bytes === 0) return "0 Bytes";
       const k = 1024;
@@ -174,20 +175,17 @@ export default function Document() {
         <div className="bg-primary/10 p-6 flex items-start justify-between">
           <div className="flex-1">
             {isImage ? (
-              <div className="relative w-full h-32 bg-muted rounded-lg overflow-hidden">
-                <img
-                  src={documentUrl}
-                  alt={document.originalName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = "none";
-                    target.nextElementSibling?.classList.remove("hidden");
-                  }}
-                />
-                <div className=" flex items-center justify-center w-full h-full">
-                  {getFileIcon(document.fileType)}
-                </div>
+              <div className="relative w-full h-32 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                {!imageError ? (
+                  <img
+                    src={documentUrl}
+                    alt={document.originalName}
+                    className="w-full h-full object-cover"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  getFileIcon(document.fileType)
+                )}
               </div>
             ) : (
               getFileIcon(document.fileType)
@@ -273,7 +271,20 @@ export default function Document() {
     };
 
     const documentUrl = getBunnyCDNUrl(document);
-    const isImage = document.fileType.startsWith("image/");
+    const extension = documentUrl?.split(".")?.pop().toLowerCase();
+
+    // Common image extensions
+    const imageExtensions = [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "webp",
+      "svg",
+      "bmp",
+      "ico",
+    ];
+    const isImage = imageExtensions.includes(extension);
     const isPDF = document.fileType === "application/pdf";
 
     const handleDownload = async () => {
