@@ -13,6 +13,7 @@ import {
   UserIcon,
   HardDriveIcon,
 } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
 
 interface FileUpload {
   _id: string;
@@ -60,14 +61,23 @@ export default function Document() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const admin = useAppSelector((state) => state.auth.user);
+  const id = admin?._id;
+
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/documents");
+        const response = await fetch(`./api/admin/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
         if (!response.ok) throw new Error("Failed to fetch documents");
         const data = await response.json();
-        setDocuments(data);
+
+        setDocuments(data?.adminstore?.upload);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -76,7 +86,7 @@ export default function Document() {
     };
 
     fetchDocuments();
-  }, []);
+  }, [admin]);
 
   if (loading) {
     return (
@@ -373,10 +383,10 @@ export default function Document() {
   };
 
   return (
-    <main className="min-h-screen bg-background p-6 md:p-8">
+    <main className="min-h-screen bg-background ">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-2">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
             Medical Documents
           </h1>
@@ -384,13 +394,6 @@ export default function Document() {
             View and manage patient medical documents and records
           </p>
         </div>
-
-        {/* Error State */}
-        {error && (
-          <div className="mb-6 p-4 bg-destructive/10 border border-destructive text-destructive rounded-lg">
-            <p className="font-medium">Error: {error}</p>
-          </div>
-        )}
 
         {/* Documents Grid */}
         {documents.length > 0 ? (

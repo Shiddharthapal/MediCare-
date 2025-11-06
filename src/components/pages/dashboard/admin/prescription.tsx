@@ -73,6 +73,8 @@ interface PrescriptionCardProps {
   onInfoClick: (prescription: Prescription) => void;
 }
 export default function Prescription() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPrescription, setSelectedPrescription] =
     useState<Prescription | null>(null);
   const [prescription, setPrescription] = useState<Prescription[]>([]);
@@ -82,15 +84,22 @@ export default function Prescription() {
 
   useEffect(() => {
     const fetchdata = async () => {
-      let response = await fetch(`./api/admin/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      let result = await response.json();
-      console.log("🧞‍♂️  result --->", result);
-      setPrescription(result?.adminstore?.prescription);
+      try {
+        setLoading(true);
+        let response = await fetch(`./api/admin/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) throw new Error("Failed to fetch documents");
+        let result = await response.json();
+        setPrescription(result?.adminstore?.prescription);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchdata();
   }, [admin]);
