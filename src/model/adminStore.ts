@@ -296,6 +296,9 @@ const AdminPrescriptionSchema = new mongoose.Schema({
   patientName: {
     type: String,
   },
+  patientAge: {
+    type: Number,
+  },
   doctorpatinetId: {
     type: String,
   },
@@ -560,7 +563,7 @@ const AppointmentDataDoctorSchema = new mongoose.Schema(
       type: String,
     },
     prescription: {
-      type: PrescriptionSchema,
+      type: AdminPrescriptionSchema,
       default: {},
     },
     createdAt: {
@@ -1230,7 +1233,7 @@ const adminStoreSchema = new mongoose.Schema({
     default: [],
   },
   prescription: {
-    type: [PrescriptionSchema],
+    type: [AdminPrescriptionSchema],
     default: [],
   },
   healthRecord: {

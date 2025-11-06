@@ -79,6 +79,7 @@ interface AdminPrescription {
   doctorName: string;
   patientId: string;
   patientName: string;
+  patientAge: number;
   doctorpatinetId: string;
   reasonForVisit: string;
   vitalSign: VitalSign;

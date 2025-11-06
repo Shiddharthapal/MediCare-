@@ -20,6 +20,7 @@ import {
   Calendar,
   User,
   X,
+  User2,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -51,6 +52,7 @@ interface Prescription {
   doctorId: string;
   doctorName: string;
   patientId: string;
+  patientName: string;
   doctorpatinetId: string;
   reasonForVisit: string;
   vitalSign: VitalSign;
@@ -134,7 +136,7 @@ export default function Prescription() {
           {/* Content */}
           <div className="overflow-y-auto flex-1 p-6">
             {/* Doctor and Date Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="bg-gray-100 px-4 py-1 rounded-lg">
                 <div className="flex items-center gap-2 text-gray-700 mb-2">
                   <User className="h-5 w-5" />
@@ -148,6 +150,15 @@ export default function Prescription() {
                   <span className="font-semibold">Date Issued</span>
                 </div>
                 <p className="text-lg">{formatDate(prescription?.createdAt)}</p>
+              </div>
+              <div className="bg-gray-100 px-4 py-1 rounded-lg">
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <User2 className="h-5 w-5" />
+                  <span className="font-semibold">Patient Name</span>
+                </div>
+                <p className="text-lg">
+                  {formatDate(prescription?.patientName)}
+                </p>
               </div>
             </div>
 
@@ -546,41 +557,22 @@ export default function Prescription() {
           </div>
           <Button
             variant="ghost"
-            size="icon"
             onClick={() => onInfoClick(prescription)}
             aria-label="View prescription details"
+            className="border"
           >
             <Info className="h-4 w-4" />
+            <span>About</span>
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent className="space-y-2">
+          <div className="grid grid-cols-2 gap-28">
             <div>
-              <p className="text-sm text-muted-foreground">Patient ID</p>
-              <p className="font-medium">{prescription.patientId}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Diagnosis</p>
-              <Badge variant="outline" className="mt-1">
-                {prescription.primaryDiagnosis}
-              </Badge>
-            </div>
-          </div>
-
-          <div>
-            <p className="text-sm text-muted-foreground mb-2">
-              Reason for Visit
-            </p>
-            <p className="text-sm text-foreground line-clamp-2">
-              {prescription.reasonForVisit}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 pt-2">
-            <div>
-              <p className="text-sm text-muted-foreground">Medications</p>
-              <p className="text-lg font-semibold">
-                {prescription.medication.length}
+              <p className="text-sm text-muted-foreground">
+                {prescription.patientName ? "Patient Name" : "Patient Id"}
+              </p>
+              <p className="font-medium">
+                {prescription.patientName || prescription.patientId}
               </p>
             </div>
             <div>
@@ -589,6 +581,20 @@ export default function Prescription() {
                 {new Date(prescription.followUpDate).toLocaleDateString()}
               </p>
             </div>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Diagnosis</p>
+            <Badge variant="outline" className="mt-1 bg-pink-50">
+              {prescription.primaryDiagnosis}
+            </Badge>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-0">
+              Reason for Visit
+            </p>
+            <p className="text-sm text-foreground line-clamp-2">
+              {prescription.reasonForVisit}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -606,7 +612,7 @@ export default function Prescription() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
           {prescription.map((prescription) => (
             <PrescriptionCard
               key={prescription.prescriptionId}
