@@ -185,7 +185,7 @@ export const POST: APIRoute = async ({ request }) => {
         );
 
         // Construct public URL
-        const publicUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${destinationPath}`;
+        const publicUrl = `https://${process.env.BUNNY_STORAGE_REGION_HOSTNAME}/${process.env.BUNNY_STORAGE_ZONE_NAME}/${destinationPath}`;
 
         // Prepare upload data
         const uploadfile = {
