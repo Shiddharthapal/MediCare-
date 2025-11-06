@@ -52,6 +52,7 @@ interface Prescription {
   doctorId: string;
   doctorName: string;
   patientId: string;
+  patientAge: number;
   patientName: string;
   doctorpatinetId: string;
   reasonForVisit: string;
@@ -157,7 +158,8 @@ export default function Prescription() {
                   <span className="font-semibold">Patient Name</span>
                 </div>
                 <p className="text-lg">
-                  {formatDate(prescription?.patientName)}
+                  {formatDate(prescription?.patientName)} •{" "}
+                  {prescription.patientAge}
                 </p>
               </div>
             </div>
@@ -382,7 +384,7 @@ export default function Prescription() {
                   <Clock className="h-5 w-5" />
                   <h3 className="font-semibold text-lg">Follow-up Date</h3>
                 </div>
-                <p className="text-lg text-gray-800 bg-green-50 px-3 py-2rounded border border-green-200">
+                <p className="text-lg text-gray-800 bg-green-50 px-3 py-2 rounded border border-green-200">
                   {formatDate(prescription?.followUpDate)}
                 </p>
               </div>
@@ -549,11 +551,11 @@ export default function Prescription() {
     onInfoClick,
   }: PrescriptionCardProps) => {
     return (
-      <Card className="hover:shadow-lg transition-shadow">
+      <Card className="hover:shadow-lg transition-shadow border-gray-700">
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
           <div className="flex-1">
-            <CardTitle className="text-lg">{prescription.doctorName}</CardTitle>
-            <CardDescription>{prescription.prescriptionId}</CardDescription>
+            <CardTitle className="text-lg">Appointment Id:</CardTitle>
+            <CardDescription>{prescription.doctorpatinetId}</CardDescription>
           </div>
           <Button
             variant="ghost"
@@ -566,6 +568,10 @@ export default function Prescription() {
           </Button>
         </CardHeader>
         <CardContent className="space-y-2">
+          <div>
+            <p className="text-sm text-muted-foreground">Doctor Name:</p>
+            <p className="font-medium">{prescription.doctorName}</p>
+          </div>
           <div className="grid grid-cols-2 gap-28">
             <div>
               <p className="text-sm text-muted-foreground">
@@ -576,7 +582,7 @@ export default function Prescription() {
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Follow-up</p>
+              <p className="text-sm text-muted-foreground">Follow-up Date</p>
               <p className="text-sm font-medium">
                 {new Date(prescription.followUpDate).toLocaleDateString()}
               </p>

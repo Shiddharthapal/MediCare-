@@ -4,6 +4,7 @@ import {
   Pill,
   Trash2,
   Phone,
+  User2,
   Mail,
   X,
   Languages,
@@ -742,7 +743,7 @@ export default function DoctorManagement() {
           {/* Content */}
           <div className="overflow-y-auto flex-1 p-6">
             {/* Doctor and Date Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="bg-gray-100 px-4 py-1 rounded-lg">
                 <div className="flex items-center gap-2 text-gray-700 mb-2">
                   <User className="h-5 w-5" />
@@ -756,6 +757,16 @@ export default function DoctorManagement() {
                   <span className="font-semibold">Date Issued</span>
                 </div>
                 <p className="text-lg">{formatDate(prescription.createdAt)}</p>
+              </div>
+              <div className="bg-gray-100 px-4 py-1 rounded-lg">
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <User2 className="h-5 w-5" />
+                  <span className="font-semibold">Patient Name</span>
+                </div>
+                <p className="text-lg">
+                  {formatDate(prescription?.patientName)} •{" "}
+                  {prescription.patientAge}
+                </p>
               </div>
             </div>
 
