@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,7 +9,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { Info } from "lucide-react";
+import {
+  Info,
+  Clock,
+  Pill,
+  FileText,
+  Activity,
+  AlertCircle,
+  Stethoscope,
+  Calendar,
+  User,
+  X,
+} from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
 
 interface VitalSign {
   bloodPressure?: string;
@@ -60,11 +72,37 @@ interface PrescriptionCardProps {
 export default function Prescription() {
   const [selectedPrescription, setSelectedPrescription] =
     useState<Prescription | null>(null);
+  const [prescription, setPrescription] = useState<Prescription[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const admin = useAppSelector((state) => state.auth.user);
+  const id = admin?._id;
+
+  useEffect(() => {
+    const fetchdata = async () => {
+      let response = await fetch(`./api/admin/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      let result = await response.json();
+      console.log("🧞‍♂️  result --->", result);
+      setPrescription(result?.adminstore?.prescription);
+    };
+    fetchdata();
+  }, [admin]);
 
   const handleInfoClick = (prescription: Prescription) => {
     setSelectedPrescription(prescription);
     setModalOpen(true);
+  };
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   const PrescriptionDetailsModal = ({
@@ -82,7 +120,7 @@ export default function Prescription() {
             <div>
               <h2 className="text-2xl font-bold">Prescription Details</h2>
               <p className="text-blue-100 text-sm mt-1">
-                ID: {prescription.prescriptionId}
+                ID: {prescription?.prescriptionId}
               </p>
             </div>
             <button
@@ -102,14 +140,14 @@ export default function Prescription() {
                   <User className="h-5 w-5" />
                   <span className="font-semibold">Doctor</span>
                 </div>
-                <p className="text-lg">{prescription.doctorName}</p>
+                <p className="text-lg">{prescription?.doctorName}</p>
               </div>
               <div className="bg-gray-100 px-4 py-1 rounded-lg">
                 <div className="flex items-center gap-2 text-gray-700 mb-2">
                   <Calendar className="h-5 w-5" />
                   <span className="font-semibold">Date Issued</span>
                 </div>
-                <p className="text-lg">{formatDate(prescription.createdAt)}</p>
+                <p className="text-lg">{formatDate(prescription?.createdAt)}</p>
               </div>
             </div>
 
@@ -120,52 +158,52 @@ export default function Prescription() {
                 <h3 className="font-semibold text-lg">Reason for Visit</h3>
               </div>
               <p className="text-gray-800 bg-gray-100 px-3 py-2  rounded">
-                {prescription.reasonForVisit}
+                {prescription?.reasonForVisit}
               </p>
             </div>
 
             {/* Vital Signs */}
-            {prescription.vitalSign &&
-              Object.keys(prescription.vitalSign).length > 0 && (
+            {prescription?.vitalSign &&
+              Object.keys(prescription?.vitalSign).length > 0 && (
                 <div className="mb-4">
                   <div className="flex items-center gap-2 text-gray-700 mb-1">
                     <Activity className="h-5 w-5" />
                     <h3 className="font-semibold text-lg">Vital Signs</h3>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {prescription.vitalSign.bloodPressure && (
+                    {prescription?.vitalSign?.bloodPressure && (
                       <div className="bg-blue-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Blood Pressure</p>
                         <p className="font-semibold text-blue-900">
-                          {prescription.vitalSign.bloodPressure}
+                          {prescription?.vitalSign?.bloodPressure}
                         </p>
                       </div>
                     )}
-                    {prescription.vitalSign.heartRate && (
+                    {prescription?.vitalSign?.heartRate && (
                       <div className="bg-red-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Heart Rate</p>
                         <p className="font-semibold text-red-900">
-                          {prescription.vitalSign.heartRate}
+                          {prescription?.vitalSign?.heartRate}
                         </p>
                       </div>
                     )}
-                    {prescription.vitalSign.temperature && (
+                    {prescription?.vitalSign?.temperature && (
                       <div className="bg-orange-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Temperature</p>
                         <p className="font-semibold text-orange-900">
-                          {prescription.vitalSign.temperature}
+                          {prescription?.vitalSign?.temperature}
                         </p>
                       </div>
                     )}
-                    {prescription.vitalSign.weight && (
+                    {prescription?.vitalSign?.weight && (
                       <div className="bg-green-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Weight</p>
                         <p className="font-semibold text-green-900">
-                          {prescription.vitalSign.weight}
+                          {prescription?.vitalSign?.weight}
                         </p>
                       </div>
                     )}
-                    {prescription.vitalSign.height && (
+                    {prescription?.vitalSign?.height && (
                       <div className="bg-purple-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">Height</p>
                         <p className="font-semibold text-purple-900">
@@ -183,7 +221,7 @@ export default function Prescription() {
                         </p>
                       </div>
                     )}
-                    {prescription.vitalSign.oxygenSaturation && (
+                    {prescription?.vitalSign?.oxygenSaturation && (
                       <div className="bg-indigo-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600"> Saturation</p>
                         <p className="font-semibold text-indigo-900">
@@ -191,7 +229,7 @@ export default function Prescription() {
                         </p>
                       </div>
                     )}
-                    {prescription.vitalSign.bmi && (
+                    {prescription?.vitalSign?.bmi && (
                       <div className="bg-pink-50 px-3 py-2 rounded">
                         <p className="text-xs text-gray-600">BMI</p>
                         <p className="font-semibold text-pink-900">
@@ -210,19 +248,19 @@ export default function Prescription() {
                   Primary Diagnosis
                 </h3>
                 <p className="text-gray-800 bg-red-50 px-3 py-2 rounded border border-red-200">
-                  {prescription.primaryDiagnosis}
+                  {prescription?.primaryDiagnosis}
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold text-gray-700 mb-1">Symptoms</h3>
                 <p className="text-gray-800 bg-yellow-50 px-3 py-2 rounded border border-yellow-200">
-                  {prescription.symptoms}
+                  {prescription?.symptoms}
                 </p>
               </div>
             </div>
 
             {/* Tests and Reports */}
-            {prescription.testandReport && (
+            {prescription?.testandReport && (
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-700 mb-1">
                   <FileText className="h-5 w-5" />
@@ -241,69 +279,71 @@ export default function Prescription() {
                 <h3 className="font-semibold text-lg">Medications</h3>
               </div>
               <div className="space-y-2">
-                {prescription.medication.map((med) => (
+                {prescription?.medication?.map((med) => (
                   <div
-                    key={med.id}
+                    key={med?.id}
                     className="bg-blue-50 border border-blue-200 rounded-lg p-4"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <h4 className="font-semibold text-blue-900 text-lg">
-                        {med.medecineName}
+                        {med?.medecineName}
                       </h4>
                       <span className="bg-blue-200 text-blue-900 text-xs px-2 py-1 rounded">
-                        {med.medecineDosage}
+                        {med?.medecineDosage}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                       <div>
                         <span className="text-gray-600">Frequency:</span>
                         <p className="font-medium text-gray-900">
-                          {med.frequency}
+                          {med?.frequency}
                         </p>
                       </div>
                       <div>
                         <span className="text-gray-600">Duration:</span>
                         <p className="font-medium text-gray-900">
-                          {med.duration}
+                          {med?.duration}
                         </p>
                       </div>
                       <div>
                         <span className="text-gray-600">Quantity:</span>
                         <p className="font-medium text-gray-900">
-                          {med.quantity}
+                          {med?.quantity}
                         </p>
                       </div>
-                      {med.route && med.route.length > 0 && (
+                      {med?.route && med?.route?.length > 0 && (
                         <div>
                           <span className="text-gray-600">Route:</span>
                           <p className="font-medium text-gray-900">
-                            {med.route.join(", ")}
+                            {med?.route.join(", ")}
                           </p>
                         </div>
                       )}
-                      {med.startDate && (
+                      {med?.startDate && (
                         <div>
                           <span className="text-gray-600">Start Date:</span>
                           <p className="font-medium text-gray-900">
-                            {formatDate(med.startDate)}
+                            {formatDate(med?.startDate)}
                           </p>
                         </div>
                       )}
-                      {med.endDate && (
+                      {med?.endDate && (
                         <div>
                           <span className="text-gray-600">End Date:</span>
                           <p className="font-medium text-gray-900">
-                            {formatDate(med.endDate)}
+                            {formatDate(med?.endDate)}
                           </p>
                         </div>
                       )}
                     </div>
-                    {med.instructions && (
+                    {med?.instructions && (
                       <div className="mt-3 pt-3 border-t border-blue-200">
                         <span className="text-gray-600 text-sm">
                           Instructions:
                         </span>
-                        <p className="text-gray-900 mt-1">{med.instructions}</p>
+                        <p className="text-gray-900 mt-1">
+                          {med?.instructions}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -312,40 +352,40 @@ export default function Prescription() {
             </div>
 
             {/* Restrictions */}
-            {prescription.restrictions && (
+            {prescription?.restrictions && (
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-700 mb-1">
                   <AlertCircle className="h-5 w-5 text-red-600" />
                   <h3 className="font-semibold text-lg">Restrictions</h3>
                 </div>
                 <p className="text-gray-800 bg-red-50 px-3 py-2 rounded border border-red-200">
-                  {prescription.restrictions}
+                  {prescription?.restrictions}
                 </p>
               </div>
             )}
 
             {/* Follow-up Date */}
-            {prescription.followUpDate && (
+            {prescription?.followUpDate && (
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-700 mb-1">
                   <Clock className="h-5 w-5" />
                   <h3 className="font-semibold text-lg">Follow-up Date</h3>
                 </div>
                 <p className="text-lg text-gray-800 bg-green-50 px-3 py-2rounded border border-green-200">
-                  {formatDate(prescription.followUpDate)}
+                  {formatDate(prescription?.followUpDate)}
                 </p>
               </div>
             )}
 
             {/* Additional Notes */}
-            {prescription.additionalNote && (
+            {prescription?.additionalNote && (
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-gray-700 mb-1">
                   <FileText className="h-5 w-5" />
                   <h3 className="font-semibold text-lg">Additional Notes</h3>
                 </div>
                 <p className="text-gray-800 bg-gray-50 px-3 py-2 rounded">
-                  {prescription.additionalNote}
+                  {prescription?.additionalNote}
                 </p>
               </div>
             )}
@@ -356,8 +396,8 @@ export default function Prescription() {
                   <h3 className="font-semibold text-lg">Doctor Signature</h3>
                 </div>
                 <p className="text-blue-600  px-3 py-2rounded">
-                  {prescription.doctorName} •{" "}
-                  {prescription.createdAt.split("T")[0]}
+                  {prescription?.doctorName} •{" "}
+                  {prescription?.createdAt.split("T")[0]}
                 </p>
               </div>
               <div className="h-20 w-20 pt-4">
@@ -453,7 +493,7 @@ export default function Prescription() {
                       startOffset="50%"
                       text-anchor="middle"
                     >
-                      {prescription.doctorName}
+                      {prescription?.doctorName}
                     </textPath>
                   </text>
 
@@ -557,17 +597,17 @@ export default function Prescription() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
+      <div className="mx-auto max-w-6xl px-4 md:px-6 ">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Prescriptions</h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className=" text-muted-foreground">
             View and manage medical prescriptions. Click the info icon to see
             details.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {DEMO_PRESCRIPTIONS.map((prescription) => (
+          {prescription.map((prescription) => (
             <PrescriptionCard
               key={prescription.prescriptionId}
               prescription={prescription}
@@ -577,11 +617,12 @@ export default function Prescription() {
         </div>
       </div>
 
-      <PrescriptionDetailsModal
-        prescription={selectedPrescription}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-      />
+      {modalOpen && selectedPrescription && (
+        <PrescriptionDetailsModal
+          prescription={selectedPrescription}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
     </main>
   );
 }
