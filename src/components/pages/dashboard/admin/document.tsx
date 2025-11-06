@@ -12,6 +12,9 @@ import {
   CalendarIcon,
   UserIcon,
   HardDriveIcon,
+  Image as ImageIcon,
+  FileText,
+  File,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -53,6 +56,10 @@ interface DocumentCardProps {
   onInfo: () => void;
 }
 
+// Add your Bunny CDN configuration
+const BUNNY_CDN_HOSTNAME = "your-storage-zone.b-cdn.net"; // Replace with your actual Bunny CDN hostname
+const BUNNY_STORAGE_ZONE = "your-storage-zone"; // Replace with your storage zone name
+
 export default function Document() {
   const [documents, setDocuments] = useState<FileUpload[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<FileUpload | null>(
@@ -63,6 +70,13 @@ export default function Document() {
 
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
+
+  // Helper function to construct proper Bunny CDN URL
+  const getBunnyCDNUrl = (document: FileUpload) => {
+    // Construct the full path with filename
+    const fullPath = `${document.path}/${document.filename}`;
+    return `https://${BUNNY_CDN_HOSTNAME}/${fullPath}`;
+  };
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -77,7 +91,7 @@ export default function Document() {
         if (!response.ok) throw new Error("Failed to fetch documents");
         const data = await response.json();
 
-        setDocuments(data?.adminstore?.upload);
+        setDocuments(data?.adminstore?.upload || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -86,7 +100,7 @@ export default function Document() {
     };
 
     fetchDocuments();
-  }, [admin]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -94,6 +108,16 @@ export default function Document() {
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <p className="mt-4 text-muted-foreground">Loading documents...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-lg">{error}</p>
         </div>
       </div>
     );
@@ -132,14 +156,43 @@ export default function Document() {
     };
 
     const getFileIcon = (fileType: string) => {
-      return <FileIcon className="w-12 h-12 text-primary" />;
+      if (fileType.startsWith("image/")) {
+        return <ImageIcon className="w-12 h-12 text-primary" />;
+      } else if (fileType === "application/pdf") {
+        return <FileText className="w-12 h-12 text-primary" />;
+      } else {
+        return <File className="w-12 h-12 text-primary" />;
+      }
     };
+
+    const isImage = document.fileType.startsWith("image/");
+    const documentUrl = getBunnyCDNUrl(document);
 
     return (
       <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
-        {/* Card Header with Icon */}
+        {/* Card Header with Icon or Image Preview */}
         <div className="bg-primary/10 p-6 flex items-start justify-between">
-          <div className="flex-1">{getFileIcon(document.fileType)}</div>
+          <div className="flex-1">
+            {isImage ? (
+              <div className="relative w-full h-32 bg-muted rounded-lg overflow-hidden">
+                <img
+                  src={documentUrl}
+                  alt={document.originalName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                    target.nextElementSibling?.classList.remove("hidden");
+                  }}
+                />
+                <div className=" flex items-center justify-center w-full h-full">
+                  {getFileIcon(document.fileType)}
+                </div>
+              </div>
+            ) : (
+              getFileIcon(document.fileType)
+            )}
+          </div>
           <button
             onClick={onInfo}
             className="ml-4 p-2 hover:bg-primary/20 rounded-full transition-colors"
@@ -191,6 +244,7 @@ export default function Document() {
 
   const DocumentModal = ({ document, isOpen, onClose }: DocumentModalProps) => {
     const [copied, setCopied] = useState(false);
+    const [previewError, setPreviewError] = useState(false);
 
     if (!isOpen) return null;
 
@@ -218,6 +272,32 @@ export default function Document() {
       setTimeout(() => setCopied(false), 2000);
     };
 
+    const documentUrl = getBunnyCDNUrl(document);
+    const isImage = document.fileType.startsWith("image/");
+    const isPDF = document.fileType === "application/pdf";
+
+    const handleDownload = async () => {
+      try {
+        const response = await fetch(documentUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = window.document.createElement("a");
+        a.href = url;
+        a.download = document.originalName;
+        window.document.body.appendChild(a);
+        a.click();
+        window.document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Download failed:", error);
+        alert("Failed to download file");
+      }
+    };
+
+    const handleView = () => {
+      window.open(documentUrl, "_blank");
+    };
+
     return (
       <>
         {/* Backdrop */}
@@ -228,7 +308,7 @@ export default function Document() {
 
         {/* Modal */}
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-card border border-border rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="sticky top-0 bg-card border-b border-border p-6 flex items-start justify-between">
               <div className="flex items-center gap-3 flex-1">
@@ -255,6 +335,34 @@ export default function Document() {
 
             {/* Modal Content */}
             <div className="p-6 space-y-6">
+              {/* File Preview Section */}
+              {(isImage || isPDF) && !previewError && (
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <div className="bg-muted p-4">
+                    <h3 className="text-sm font-semibold text-foreground mb-2">
+                      Preview
+                    </h3>
+                  </div>
+                  <div className="p-4 bg-background">
+                    {isImage ? (
+                      <img
+                        src={documentUrl}
+                        alt={document.originalName}
+                        className="max-w-full h-auto max-h-96 mx-auto rounded-lg"
+                        onError={() => setPreviewError(true)}
+                      />
+                    ) : isPDF ? (
+                      <iframe
+                        src={documentUrl}
+                        className="w-full h-96 rounded-lg"
+                        title={document.originalName}
+                        onError={() => setPreviewError(true)}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              )}
+
               {/* File Information Section */}
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-4">
@@ -287,7 +395,6 @@ export default function Document() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <DetailItem label="Patient ID" value={document.patientId} />
-                  <DetailItem label="Doctor ID" value={document.doctorId} />
                   <DetailItem
                     label="Doctor Name"
                     value={document.doctorName || "Not specified"}
@@ -318,9 +425,10 @@ export default function Document() {
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="flex-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">
                         Checksum (SHA-256)
+                        {/* checksum is a unique fingerprint and hash*/}
                       </p>
                       <p className="text-sm font-mono text-foreground mt-1 break-all">
                         {document.checksum}
@@ -338,6 +446,9 @@ export default function Document() {
                       )}
                     </button>
                   </div>
+                  {/* Monospace aslo called fixed width. It is a font here every character
+                  take same space horizontally */}
+                  <DetailItem label="CDN URL" value={documentUrl} isMonospace />
                 </div>
               </div>
 
@@ -366,13 +477,19 @@ export default function Document() {
 
               {/* Action Buttons */}
               <div className="border-t border-border pt-6 flex gap-3">
-                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                <button
+                  onClick={handleDownload}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
                   <Download className="w-4 h-4" />
                   Download
                 </button>
-                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-secondary transition-colors">
+                <button
+                  onClick={handleView}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-secondary transition-colors"
+                >
                   <ExternalLink className="w-4 h-4" />
-                  View
+                  Open in New Tab
                 </button>
               </div>
             </div>
@@ -383,16 +500,22 @@ export default function Document() {
   };
 
   return (
-    <main className="min-h-screen bg-background ">
+    <main className="min-h-screen bg-background px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-2">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Medical Documents
           </h1>
           <p className="text-muted-foreground">
             View and manage patient medical documents and records
           </p>
+          {documents.length > 0 && (
+            <p className="text-sm text-muted-foreground mt-2">
+              {documents.length} document{documents.length !== 1 ? "s" : ""}{" "}
+              found
+            </p>
+          )}
         </div>
 
         {/* Documents Grid */}
@@ -408,6 +531,7 @@ export default function Document() {
           </div>
         ) : (
           <div className="text-center py-12">
+            <FileIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground text-lg">No documents found</p>
           </div>
         )}
