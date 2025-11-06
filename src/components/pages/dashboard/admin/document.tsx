@@ -138,6 +138,26 @@ export default function Document() {
     );
   }
 
+  function DetailItemForFile({
+    label,
+    value,
+    isMonospace = false,
+  }: DetailItemProps) {
+    return (
+      <div className="flex flex-row items-start gap-2">
+        <p className="text-xs text-muted-foreground uppercase tracking-wide whitespace-nowrap">
+          {label}
+          {":"}
+        </p>
+        <p
+          className={`text-xs text-foreground font-semibold break-words ${isMonospace ? "font-mono text-xs" : ""}`}
+        >
+          {value}
+        </p>
+      </div>
+    );
+  }
+
   const DocumentCard = ({ document, onInfo }: DocumentCardProps) => {
     const [imageError, setImageError] = useState(false);
     const formatFileSize = (bytes: number) => {
@@ -321,7 +341,7 @@ export default function Document() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-card border-b border-border p-6 flex items-start justify-between">
+            <div className="sticky top-0 bg-card border-b border-border px-6 py-2 flex items-start justify-between">
               <div className="flex items-center gap-3 flex-1">
                 <div className="p-3 bg-primary/10 rounded-lg">
                   <FileIcon className="w-6 h-6 text-primary" />
@@ -345,11 +365,11 @@ export default function Document() {
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 space-y-6">
+            <div className="px-6 pt-3 pb-6 space-y-6">
               {/* File Preview Section */}
               {(isImage || isPDF) && !previewError && (
                 <div className="border border-border rounded-lg overflow-hidden">
-                  <div className="bg-muted p-4">
+                  <div className="bg-muted px-4 py-2">
                     <h3 className="text-sm font-semibold text-foreground mb-2">
                       Preview
                     </h3>
@@ -380,19 +400,19 @@ export default function Document() {
                   File Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <DetailItem
+                  <DetailItemForFile
                     label="File Type"
                     value={document.fileType || "Unknown"}
                   />
-                  <DetailItem
+                  <DetailItemForFile
                     label="File Size"
                     value={formatFileSize(document.fileSize)}
                   />
-                  <DetailItem
+                  <DetailItemForFile
                     label="Upload Date"
                     value={formatDate(document.uploadedAt)}
                   />
-                  <DetailItem
+                  <DetailItemForFile
                     label="Created"
                     value={formatDate(document.createdAt)}
                   />
@@ -400,28 +420,31 @@ export default function Document() {
               </div>
 
               {/* Medical Information Section */}
-              <div className="border-t border-border pt-6">
-                <h3 className="text-sm font-semibold text-foreground mb-4">
+              <div className="border-t border-border pt-1">
+                <h3 className="text-sm font-semibold text-foreground mb-3">
                   Medical Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <DetailItem label="Patient ID" value={document.patientId} />
-                  <DetailItem
+                  <DetailItemForFile
+                    label="Patient ID"
+                    value={document.patientId}
+                  />
+                  <DetailItemForFile
                     label="Doctor Name"
                     value={document.doctorName || "Not specified"}
                   />
-                  <DetailItem
+                  <DetailItemForFile
                     label="Category"
                     value={document.category || "General"}
                   />
                   {document.appointmentId && (
-                    <DetailItem
+                    <DetailItemForFile
                       label="Appointment ID"
                       value={document.appointmentId}
                     />
                   )}
                   {document.userIdWHUP && (
-                    <DetailItem
+                    <DetailItemForFile
                       label="User ID (WHUP)"
                       value={document.userIdWHUP}
                     />
@@ -430,8 +453,8 @@ export default function Document() {
               </div>
 
               {/* Security Information Section */}
-              <div className="border-t border-border pt-6">
-                <h3 className="text-sm font-semibold text-foreground mb-4">
+              <div className="border-t border-border pt-1">
+                <h3 className="text-sm font-semibold text-foreground mb-3">
                   Security & Verification
                 </h3>
                 <div className="space-y-3">
@@ -464,22 +487,22 @@ export default function Document() {
               </div>
 
               {/* Additional Metadata */}
-              <div className="border-t border-border pt-6">
-                <h3 className="text-sm font-semibold text-foreground mb-4">
+              <div className="border-t border-border pt-1">
+                <h3 className="text-sm font-semibold text-foreground mb-3">
                   Additional Details
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <DetailItem
+                  <DetailItemForFile
                     label="Document ID"
                     value={document._id}
                     isMonospace
                   />
                   <DetailItem label="Path" value={document.path} isMonospace />
-                  <DetailItem
+                  <DetailItemForFile
                     label="Updated"
                     value={formatDate(document.updatedAt)}
                   />
-                  <DetailItem
+                  <DetailItemForFile
                     label="Status"
                     value={document.deletedAt ? "Deleted" : "Active"}
                   />
@@ -487,17 +510,17 @@ export default function Document() {
               </div>
 
               {/* Action Buttons */}
-              <div className="border-t border-border pt-6 flex gap-3">
+              <div className="border-t border-border pt-3 flex gap-3">
                 <button
                   onClick={handleDownload}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Download
                 </button>
                 <button
                   onClick={handleView}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-secondary transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-border text-foreground rounded-lg hover:text-primary hover:bg-secondary transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open in New Tab
