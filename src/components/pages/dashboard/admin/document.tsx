@@ -15,6 +15,7 @@ import {
   Image as ImageIcon,
   FileText,
   File,
+  User,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -23,6 +24,8 @@ interface FileUpload {
   patientId: string;
   doctorId: string;
   filename: string;
+  patientName: string;
+  documentName: string;
   originalName: string;
   fileType: string;
   fileSize: number;
@@ -104,7 +107,7 @@ export default function Document() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <p className="mt-4 text-muted-foreground">Loading documents...</p>
@@ -190,9 +193,9 @@ export default function Document() {
     const documentUrl = getBunnyCDNUrl(document);
 
     return (
-      <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <div className="bg-card border border-primary/80 rounded-lg overflow-hidden hover:shadow-md hover:shadow-primary/20 transition-shadow duration-300">
         {/* Card Header with Icon or Image Preview */}
-        <div className="bg-primary/70 p-6 flex items-start justify-between">
+        <div className="bg-primary/70 px-6 py-5 flex items-start justify-between">
           <div className="flex-1">
             {isImage ? (
               <div className="relative w-full h-32 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
@@ -223,38 +226,39 @@ export default function Document() {
         {/* Card Content */}
         <div className="p-6">
           <h3 className="text-lg font-semibold text-foreground truncate mb-1">
-            {document.originalName}
+            {document.documentName || document.originalName}
           </h3>
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-            {document.filename}
+          <p className=" flex flex-row items-center justify-start gap-1 text-sm text-muted-foreground mb-1 line-clamp-2">
+            <User className="h-4 w-4 text-gray-700" />
+            {document.patientName || document.patientId}
           </p>
 
           {/* Meta Information */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <HardDriveIcon className="w-4 h-4" />
-              <span>{formatFileSize(document.fileSize)}</span>
+          <div className="space-y-1">
+            <div className="flex flex-row justify-between ">
+              <div className="flex  items-center gap-2 text-sm text-muted-foreground">
+                <HardDriveIcon className="w-4 h-4 text-gray-700" />
+                <span>{formatFileSize(document.fileSize)}</span>
+              </div>
+              {/* Category Badge */}
+              {document.category && (
+                <div className="mt-1 inline-block px-3 py-1 bg-primary/90 text-white text-xs rounded-full">
+                  {document.category}
+                </div>
+              )}
             </div>
-
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CalendarIcon className="w-4 h-4" />
+              <CalendarIcon className="w-4 h-4 text-gray-700" />
               <span>{formatDate(document.uploadedAt)}</span>
             </div>
 
             {document.doctorName && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <UserIcon className="w-4 h-4" />
+                <UserIcon className="w-4 h-4 text-gray-700" />
                 <span>{document.doctorName}</span>
               </div>
             )}
           </div>
-
-          {/* Category Badge */}
-          {document.category && (
-            <div className="mt-4 inline-block px-3 py-1 bg-secondary text-secondary-foreground text-xs rounded-full">
-              {document.category}
-            </div>
-          )}
         </div>
       </div>
     );
@@ -536,7 +540,7 @@ export default function Document() {
   };
 
   return (
-    <main className="min-h-screen bg-background px-6">
+    <main className="min-h-screen bg-background px-6 pb-10">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -547,7 +551,7 @@ export default function Document() {
             View and manage patient medical documents and records
           </p>
           {documents.length > 0 && (
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground mt-1">
               {documents.length} document{documents.length !== 1 ? "s" : ""}{" "}
               found
             </p>
