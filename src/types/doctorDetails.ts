@@ -60,6 +60,7 @@ interface Prescription {
   doctorId: string;
   doctorName: string;
   patientId: string;
+  patientName: string;
   doctorpatinetId: string;
   reasonForVisit: string;
   vitalSign: VitalSign;

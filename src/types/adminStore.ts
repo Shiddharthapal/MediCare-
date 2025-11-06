@@ -337,7 +337,7 @@ interface DoctorDetails {
   appointments: AppointmentDataDoctor[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
-  prescription?: Prescription;
+  prescription?: AdminPrescription;
   status?: string;
   createdAt: Date;
 }

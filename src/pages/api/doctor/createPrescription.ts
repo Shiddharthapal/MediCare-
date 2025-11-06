@@ -97,6 +97,7 @@ export const POST: APIRoute = async ({ request }) => {
     const newPrescriptionDoctor = {
       doctorpatinetId,
       patientId,
+      patientName: userdetails.patientName,
       doctorName,
       doctorId,
       vitalSign,
@@ -151,6 +152,7 @@ export const POST: APIRoute = async ({ request }) => {
           prescription: {
             doctorpatinetId,
             patientId,
+            patientName: userdetails.patientName,
             doctorName,
             doctorId,
             vitalSign,
@@ -178,6 +180,7 @@ export const POST: APIRoute = async ({ request }) => {
             doctorpatinetId,
             patientId,
             doctorName,
+            patientName: userdetails.patientName,
             doctorId,
             vitalSign,
             reasonForVisit,

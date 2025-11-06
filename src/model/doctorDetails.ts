@@ -201,6 +201,9 @@ const PrescriptionSchema = new mongoose.Schema({
   patientId: {
     type: String,
   },
+  patientName: {
+    type: String,
+  },
   doctorpatinetId: {
     type: String,
   },
