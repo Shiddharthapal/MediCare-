@@ -74,6 +74,25 @@ interface Prescription {
   createdAt: Date;
 }
 
+interface AdminPrescription {
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  patientName: string;
+  doctorpatinetId: string;
+  reasonForVisit: string;
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  symptoms: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+
 interface PracticeSettingData {
   practiceName: string;
   specialty: string;
@@ -377,7 +396,7 @@ export interface AdminStore {
   rescheduleAppointment: RescheduleAppointment[];
   cancelAppointment: Appointment[];
   upload: FileUpload[];
-  prescription: Prescription[];
+  prescription: AdminPrescription[];
   healthRecord: HealthRecord[];
   createdAt: Date;
 }
