@@ -514,7 +514,7 @@ export default function DoctorManagement() {
           </h3>
           <p className=" flex flex-row items-center justify-start gap-1 text-sm text-muted-foreground mb-1 line-clamp-2">
             <User className="h-4 w-4 text-gray-700" />
-            {document.patientName || document.patientId}
+            {selectedPatient?.name}
           </p>
 
           {/* Meta Information */}
@@ -636,10 +636,12 @@ export default function DoctorManagement() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="text-xl font-semibold text-foreground truncate">
-                    {document.originalName}
+                    {document.documentName || document.originalName}
                   </h2>
                   <p className="text-sm text-muted-foreground truncate">
-                    {document.filename}
+                    {document.documentName
+                      ? document.originalName
+                      : document.filename}
                   </p>
                 </div>
               </div>
@@ -710,7 +712,7 @@ export default function DoctorManagement() {
               {/* Medical Information Section */}
               <div className="border-t border-border pt-1">
                 <h3 className="text-sm font-semibold text-foreground mb-3">
-                  Medical Information
+                  Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <DetailItemForFile
@@ -722,6 +724,10 @@ export default function DoctorManagement() {
                     value={document.doctorName || "Not specified"}
                   />
                   <DetailItemForFile
+                    label="Patient Name"
+                    value={selectedPatient?.name || "Not specified"}
+                  />
+                  <DetailItemForFile
                     label="Category"
                     value={document.category || "General"}
                   />
@@ -729,12 +735,6 @@ export default function DoctorManagement() {
                     <DetailItemForFile
                       label="Appointment ID"
                       value={document.appointmentId}
-                    />
-                  )}
-                  {document.userIdWHUP && (
-                    <DetailItemForFile
-                      label="User ID (WHUP)"
-                      value={document.userIdWHUP}
                     />
                   )}
                 </div>
