@@ -44,6 +44,10 @@ import {
   View,
   StyleSheet,
   pdf,
+  Svg,
+  Circle,
+  Path,
+  Rect,
 } from "@react-pdf/renderer";
 
 interface VitalSign {
@@ -372,6 +376,20 @@ export default function Prescription() {
       marginLeft: 20,
       marginBottom: 15,
     },
+    stampText: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: "#1e40af",
+      marginTop: -15, // Overlaps with top of the circle
+      textAlign: "center",
+      letterSpacing: 1,
+      fontFamily: "Times-Bold",
+    },
+    stampContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      width: 120,
+    },
   });
 
   const PrescriptionPDF = ({ prescription, doctor, patient }) => (
@@ -524,7 +542,6 @@ export default function Prescription() {
 
         {/* Certification Section */}
         <View style={styles.certificationSection}>
-          <Text style={styles.separator}></Text>
           <Text style={styles.certTitle}>CERTIFICATION & AUTHENTICATION</Text>
           <Text style={styles.certText}>
             This prescription is officially issued, certified, and authenticated
@@ -548,6 +565,97 @@ export default function Prescription() {
             EST. 2025
           </Text>
           <Text style={styles.separator}></Text>
+          {/* Doctor's Stamp/Seal - Simplified for React PDF */}
+
+          <View style={styles.stampContainer}>
+            <Svg width="120" height="140" viewBox="0 0 200 220">
+              {/* Outer circles */}
+              <Circle
+                cx="100"
+                cy="100"
+                r="95"
+                fill="none"
+                stroke="#1e40af"
+                strokeWidth="3"
+              />
+              <Circle
+                cx="100"
+                cy="100"
+                r="88"
+                fill="none"
+                stroke="#1e40af"
+                strokeWidth="1.5"
+              />
+
+              {/* Medical Staff */}
+              <Rect x="98" y="55" width="4" height="70" fill="#1e40af" />
+
+              {/* Wings */}
+              <Path d="M 98,60 L 70,50 L 75,65 Z" fill="#1e40af" />
+              <Path d="M 102,60 L 130,50 L 125,65 Z" fill="#1e40af" />
+
+              {/* Serpents */}
+              <Path
+                d="M 98,70 Q 85,80 98,90 Q 85,100 98,110 Q 90,120 98,125"
+                fill="none"
+                stroke="#1e40af"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              <Path
+                d="M 102,70 Q 115,80 102,90 Q 115,100 102,110 Q 110,120 102,125"
+                fill="none"
+                stroke="#1e40af"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+
+              {/* Serpent heads */}
+              <Circle cx="98" cy="70" r="3" fill="#1e40af" />
+              <Circle cx="102" cy="70" r="3" fill="#1e40af" />
+
+              {/* === Texts inside the SVG === */}
+
+              {/* Header (Top) */}
+              <Text
+                x="100"
+                y="40"
+                fontSize="16"
+                fontWeight="bold"
+                fill="#1e40af"
+                textAnchor="middle"
+                fontFamily="Times-Bold"
+              >
+                MediCare+
+              </Text>
+
+              {/* Doctor Name (Bottom) */}
+              <Text
+                x="100"
+                y="145"
+                fontSize="20"
+                fill="#1e40af"
+                fontWeight="bold"
+                textAnchor="middle"
+                fontFamily="Times-Roman"
+              >
+                {doctor.name}
+              </Text>
+
+              {/* Year (Below Doctor Name) */}
+              <Text
+                x="100"
+                y="165"
+                fontSize="20"
+                fill="#1e40af"
+                textAnchor="middle"
+                fontWeight="bold"
+                letterSpacing="0.5"
+              >
+                EST.2025
+              </Text>
+            </Svg>
+          </View>
         </View>
 
         {/* Footer */}
