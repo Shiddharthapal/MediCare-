@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Document,
   Packer,
   Paragraph,
   Table,
@@ -38,6 +37,14 @@ import {
   Download,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  pdf,
+} from "@react-pdf/renderer";
 
 interface VitalSign {
   bloodPressure?: string;
@@ -215,6 +222,343 @@ export default function Prescription() {
     });
   };
 
+  const styles = StyleSheet.create({
+    page: {
+      padding: 40,
+      fontSize: 10,
+      fontFamily: "Helvetica",
+    },
+    header: {
+      fontSize: 32,
+      textAlign: "center",
+      color: "#1e40af",
+      fontWeight: "bold",
+      marginBottom: 10,
+    },
+    divider: {
+      borderBottom: "2px solid #333333",
+      marginBottom: 15,
+    },
+    row: {
+      flexDirection: "row",
+      marginBottom: 10,
+    },
+    column: {
+      flex: 1,
+    },
+    sectionTitle: {
+      fontSize: 12,
+      fontWeight: "bold",
+      marginBottom: 5,
+    },
+    heading: {
+      fontSize: 11,
+      fontWeight: "bold",
+      marginTop: 15,
+      marginBottom: 8,
+    },
+    text: {
+      fontSize: 9,
+      marginBottom: 3,
+      lineHeight: 1.4,
+    },
+    textBold: {
+      fontSize: 11,
+      fontWeight: "bold",
+      marginBottom: 4,
+    },
+    textIndent: {
+      fontSize: 9,
+      marginLeft: 20,
+      marginBottom: 10,
+    },
+    table: {
+      width: "100%",
+      marginTop: 10,
+      marginBottom: 10,
+    },
+    tableRow: {
+      flexDirection: "row",
+      borderBottom: "1px solid #000",
+    },
+    tableHeader: {
+      flexDirection: "row",
+      backgroundColor: "#E8E8E8",
+      borderBottom: "1px solid #000",
+      borderTop: "1px solid #000",
+    },
+    tableCell: {
+      flex: 1,
+      padding: 5,
+      fontSize: 9,
+      borderRight: "1px solid #000",
+    },
+    tableCellFirst: {
+      borderLeft: "1px solid #000",
+    },
+    tableCellHeader: {
+      flex: 1,
+      padding: 5,
+      fontSize: 9,
+      fontWeight: "bold",
+      textAlign: "center",
+      borderRight: "1px solid #000",
+    },
+    infoTable: {
+      marginBottom: 10,
+    },
+    infoRow: {
+      flexDirection: "row",
+      borderBottom: "1px solid #000",
+    },
+    infoCell: {
+      flex: 1,
+      padding: 5,
+      fontSize: 9,
+      borderRight: "1px solid #000",
+    },
+    infoCellLabel: {
+      flex: 1,
+      padding: 5,
+      fontSize: 9,
+      fontWeight: "bold",
+      borderRight: "1px solid #000",
+      borderLeft: "1px solid #000",
+    },
+    certificationSection: {
+      marginTop: 20,
+      paddingTop: 15,
+      borderTop: "1px solid #000",
+    },
+    separator: {
+      textAlign: "center",
+      fontSize: 10,
+      marginVertical: 5,
+    },
+    certTitle: {
+      fontSize: 12,
+      fontWeight: "bold",
+      textAlign: "center",
+      marginBottom: 5,
+    },
+    certText: {
+      fontSize: 10,
+      textAlign: "center",
+      marginBottom: 3,
+      fontStyle: "italic",
+    },
+    certContact: {
+      fontSize: 9,
+      textAlign: "center",
+      color: "#1e40af",
+      marginBottom: 2,
+    },
+    footer: {
+      fontSize: 8,
+      textAlign: "center",
+      fontStyle: "italic",
+      marginTop: 15,
+    },
+    followUpText: {
+      fontSize: 10,
+      fontWeight: "bold",
+      color: "#1e40af",
+      marginBottom: 3,
+    },
+    testReportText: {
+      fontSize: 10,
+      fontWeight: "bold",
+      color: "#FF0000",
+      marginLeft: 20,
+      marginBottom: 15,
+    },
+  });
+
+  const PrescriptionPDF = ({ prescription, doctor, patient }) => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Header */}
+        <Text style={styles.header}>MediCare+</Text>
+        <View style={styles.divider} />
+
+        {/* Physician & Prescription Info Row */}
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <Text style={styles.sectionTitle}>PHYSICIAN INFORMATION</Text>
+            <Text style={styles.textBold}>
+              {prescription?.doctorName || "Dr. [Name]"}
+            </Text>
+            {doctor?.degree && <Text style={styles.text}>{doctor.degree}</Text>}
+            {doctor?.hospital && (
+              <Text style={styles.text}>{doctor.hospital}</Text>
+            )}
+            {doctor?.contact && (
+              <Text style={styles.text}>Contact: {doctor.contact}</Text>
+            )}
+          </View>
+
+          <View style={styles.column}>
+            <Text style={styles.sectionTitle}>PRESCRIPTION ID & DATE</Text>
+            <Text style={styles.textBold}>
+              ID: {prescription?.prescriptionId}
+            </Text>
+            <Text style={styles.text}>
+              Date: {formatDate(prescription?.createdAt)}
+            </Text>
+            {prescription?.followUpDate && (
+              <Text style={styles.followUpText}>
+                Follow-up: {formatDate(prescription.followUpDate)}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* Patient Information */}
+        <Text style={styles.heading}>PATIENT INFORMATION</Text>
+        <View style={styles.infoTable}>
+          <View style={[styles.infoRow, { borderTop: "1px solid #000" }]}>
+            <Text style={styles.infoCellLabel}>Patient Name</Text>
+            <Text style={styles.infoCell}>
+              {prescription?.patientName || patient?.name}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoCellLabel}>Age / DOB</Text>
+            <Text style={styles.infoCell}>{patient?.age} years old</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoCellLabel}>Gender</Text>
+            <Text style={styles.infoCell}>{patient?.gender || "[Gender]"}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoCellLabel}>Contact</Text>
+            <Text style={styles.infoCell}>
+              {patient?.contactNumber || "[Contact]"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Clinical Assessment */}
+        <Text style={styles.heading}>CLINICAL ASSESSMENT</Text>
+
+        <Text style={styles.textBold}>Reason for Visit:</Text>
+        <Text style={styles.textIndent}>
+          {prescription?.reasonForVisit || "[Reason for visit]"}
+        </Text>
+
+        <Text style={styles.textBold}>Primary Diagnosis:</Text>
+        <Text style={styles.textIndent}>
+          {prescription?.primaryDiagnosis || "[Primary diagnosis]"}
+        </Text>
+
+        <Text style={styles.textBold}>Symptoms:</Text>
+        <Text style={styles.textIndent}>
+          {prescription?.symptoms || "[Symptoms]"}
+        </Text>
+
+        {prescription?.testandReport && (
+          <>
+            <Text style={styles.textBold}>Test & Reports:</Text>
+            <Text style={styles.testReportText}>
+              {prescription.testandReport}
+            </Text>
+          </>
+        )}
+
+        {/* Medications Table */}
+        <Text style={styles.heading}>MEDICATIONS & DOSAGE</Text>
+        <View style={styles.table}>
+          {/* Table Header */}
+          <View style={styles.tableHeader}>
+            <Text style={[styles.tableCellHeader, styles.tableCellFirst]}>
+              Medication
+            </Text>
+            <Text style={styles.tableCellHeader}>Dosage</Text>
+            <Text style={styles.tableCellHeader}>Frequency</Text>
+            <Text style={styles.tableCellHeader}>Duration</Text>
+            <Text style={styles.tableCellHeader}>Qty</Text>
+          </View>
+
+          {/* Table Rows */}
+          {prescription?.medication?.map((med, index) => (
+            <View key={index} style={styles.tableRow}>
+              <Text style={[styles.tableCell, styles.tableCellFirst]}>
+                {med?.medecineName || "[Drug Name]"}
+              </Text>
+              <Text style={styles.tableCell}>
+                {med?.medecineDosage || "[Dosage]"}
+              </Text>
+              <Text style={styles.tableCell}>
+                {med?.frequency || "[Frequency]"}
+              </Text>
+              <Text style={styles.tableCell}>
+                {med?.duration || "[Duration]"}
+              </Text>
+              <Text style={styles.tableCell}>{med?.quantity || "[Qty]"}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Instructions & Notes */}
+        {prescription?.medication?.some((med) => med?.instructions) && (
+          <>
+            <Text style={styles.heading}>INSTRUCTIONS & NOTES</Text>
+            {prescription.medication
+              .filter((med) => med?.instructions)
+              .map((med, index) => (
+                <View key={index}>
+                  <Text style={styles.textBold}>{med.medecineName}:</Text>
+                  <Text style={styles.textIndent}>{med.instructions}</Text>
+                </View>
+              ))}
+          </>
+        )}
+
+        {/* Restrictions & Warnings */}
+        {prescription?.restrictions && (
+          <>
+            <Text style={styles.heading}>RESTRICTIONS & WARNINGS</Text>
+            <Text style={styles.textIndent}>{prescription.restrictions}</Text>
+          </>
+        )}
+
+        {/* Certification Section */}
+        <View style={styles.certificationSection}>
+          <Text style={styles.separator}></Text>
+          <Text style={styles.certTitle}>CERTIFICATION & AUTHENTICATION</Text>
+          <Text style={styles.certText}>
+            This prescription is officially issued, certified, and authenticated
+            by
+          </Text>
+          <Text style={[styles.certText, { fontWeight: "bold" }]}>
+            MediCare+ Authorized Medical Professional
+          </Text>
+          <Text style={styles.certText}>
+            Date: {formatDate(prescription?.createdAt)}
+          </Text>
+          <Text style={styles.certContact}>
+            For authenticity verification, contact: certification@medicare.com
+          </Text>
+          <Text style={styles.certContact}>
+            Phone: +1-800-MEDICARE | License: MC-2025-001
+          </Text>
+          <Text
+            style={[styles.certContact, { fontWeight: "bold", fontSize: 10 }]}
+          >
+            EST. 2025
+          </Text>
+          <Text style={styles.separator}></Text>
+        </View>
+
+        {/* Footer */}
+        <Text style={styles.footer}>
+          This prescription is valid for 30 days from the date of issue. For any
+          queries, please contact the clinic.
+        </Text>
+      </Page>
+    </Document>
+  );
+
   const PrescriptionDetailsModal = ({
     prescription,
     onClose,
@@ -228,26 +572,24 @@ export default function Prescription() {
     >(null);
 
     const downloadAsPDF = async () => {
-      if (!contentRef.current) return;
       setDownloading("pdf");
-      console.log("pdf");
       try {
-        const canvas = await html2canvas(contentRef.current, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-        });
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF({
-          orientation: "portrait",
-          unit: "mm",
-          format: "a4",
-        });
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        console.log("🧞‍♂️  imgHeight --->", imgHeight);
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-        pdf.save(`prescription-${prescription?.prescriptionId}.pdf`);
+        const blob = await pdf(
+          <PrescriptionPDF
+            prescription={prescription}
+            doctor={doctor}
+            patient={patient}
+          />
+        ).toBlob();
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `prescription-${prescription?.prescriptionId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       } catch (error) {
         console.error("Error generating PDF:", error);
       } finally {
@@ -296,681 +638,681 @@ export default function Prescription() {
       }
     };
 
-    const downloadAsDocument = async () => {
-      setDownloading("doc");
+    // const downloadAsDocument = async () => {
+    //   setDownloading("doc");
 
-      const borderStyle = {
-        top: {
-          color: "000000",
-          space: 1,
-          style: BorderStyle.SINGLE,
-          size: 6,
-        },
-        bottom: {
-          color: "000000",
-          space: 1,
-          style: BorderStyle.SINGLE,
-          size: 6,
-        },
-        left: {
-          color: "000000",
-          space: 1,
-          style: BorderStyle.SINGLE,
-          size: 6,
-        },
-        right: {
-          color: "000000",
-          space: 1,
-          style: BorderStyle.SINGLE,
-          size: 6,
-        },
-      };
-      try {
-        const doc = new Document({
-          sections: [
-            {
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "MediCare+",
-                      bold: true,
-                      size: 64, // 48pt (half-points)
-                      color: "1e40af", // Blue color (no # needed)
-                    }),
-                  ],
-                  alignment: "center",
-                  spacing: { after: 100 },
-                }),
+    //   const borderStyle = {
+    //     top: {
+    //       color: "000000",
+    //       space: 1,
+    //       style: BorderStyle.SINGLE,
+    //       size: 6,
+    //     },
+    //     bottom: {
+    //       color: "000000",
+    //       space: 1,
+    //       style: BorderStyle.SINGLE,
+    //       size: 6,
+    //     },
+    //     left: {
+    //       color: "000000",
+    //       space: 1,
+    //       style: BorderStyle.SINGLE,
+    //       size: 6,
+    //     },
+    //     right: {
+    //       color: "000000",
+    //       space: 1,
+    //       style: BorderStyle.SINGLE,
+    //       size: 6,
+    //     },
+    //   };
+    //   try {
+    //     const doc = new Document({
+    //       sections: [
+    //         {
+    //           children: [
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "MediCare+",
+    //                   bold: true,
+    //                   size: 64, // 48pt (half-points)
+    //                   color: "1e40af", // Blue color (no # needed)
+    //                 }),
+    //               ],
+    //               alignment: "center",
+    //               spacing: { after: 100 },
+    //             }),
 
-                new Paragraph({
-                  border: {
-                    bottom: {
-                      color: "333333",
-                      space: 1,
-                      style: BorderStyle.SINGLE,
-                      size: 12,
-                    },
-                  },
-                  spacing: { after: 300 },
-                  text: "",
-                }),
+    //             new Paragraph({
+    //               border: {
+    //                 bottom: {
+    //                   color: "333333",
+    //                   space: 1,
+    //                   style: BorderStyle.SINGLE,
+    //                   size: 12,
+    //                 },
+    //               },
+    //               spacing: { after: 300 },
+    //               text: "",
+    //             }),
 
-                new Table({
-                  width: { size: 100, type: WidthType.PERCENTAGE },
-                  rows: [
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          width: { size: 50, type: WidthType.PERCENTAGE },
-                          borders: {
-                            top: { style: BorderStyle.NONE },
-                            bottom: { style: BorderStyle.NONE },
-                            left: { style: BorderStyle.NONE },
-                            right: { style: BorderStyle.NONE },
-                          },
-                          children: [
-                            new Paragraph({
-                              children: [
-                                new TextRun({
-                                  text: "PHYSICIAN INFORMATION",
-                                  bold: true,
-                                  size: 24, // 48pt (half-points)
-                                  // Blue color (no # needed)
-                                }),
-                              ],
+    //             new Table({
+    //               width: { size: 100, type: WidthType.PERCENTAGE },
+    //               rows: [
+    //                 new TableRow({
+    //                   children: [
+    //                     new TableCell({
+    //                       width: { size: 50, type: WidthType.PERCENTAGE },
+    //                       borders: {
+    //                         top: { style: BorderStyle.NONE },
+    //                         bottom: { style: BorderStyle.NONE },
+    //                         left: { style: BorderStyle.NONE },
+    //                         right: { style: BorderStyle.NONE },
+    //                       },
+    //                       children: [
+    //                         new Paragraph({
+    //                           children: [
+    //                             new TextRun({
+    //                               text: "PHYSICIAN INFORMATION",
+    //                               bold: true,
+    //                               size: 24, // 48pt (half-points)
+    //                               // Blue color (no # needed)
+    //                             }),
+    //                           ],
 
-                              spacing: { after: 100 },
-                            }),
-                            new Paragraph({
-                              text: prescription?.doctorName || "Dr. [Name]",
-                              bold: true,
-                              size: 22,
-                              spacing: { after: 80 },
-                            }),
-                            doctor?.degree &&
-                              new Paragraph({
-                                text: doctor?.degree,
-                                size: 18,
-                                spacing: { after: 60 },
-                              }),
-                            doctor?.hospital &&
-                              new Paragraph({
-                                text: doctor?.hospital,
-                                size: 18,
-                                spacing: { after: 60 },
-                              }),
-                            doctor?.contact &&
-                              new Paragraph({
-                                text: `Contact: ${doctor?.contact}`,
-                                size: 18,
-                              }),
-                          ],
-                        }),
-                        new TableCell({
-                          width: { size: 50, type: WidthType.PERCENTAGE },
-                          borders: {
-                            top: { style: BorderStyle.NONE },
-                            bottom: { style: BorderStyle.NONE },
-                            left: { style: BorderStyle.NONE },
-                            right: { style: BorderStyle.NONE },
-                          },
-                          children: [
-                            new Paragraph({
-                              children: [
-                                new TextRun({
-                                  text: "PRESCRIPTION ID & DATE",
-                                  bold: true,
-                                  size: 24, // 48pt (half-points)
-                                  // Blue color (no # needed)
-                                }),
-                              ],
+    //                           spacing: { after: 100 },
+    //                         }),
+    //                         new Paragraph({
+    //                           text: prescription?.doctorName || "Dr. [Name]",
+    //                           bold: true,
+    //                           size: 22,
+    //                           spacing: { after: 80 },
+    //                         }),
+    //                         doctor?.degree &&
+    //                           new Paragraph({
+    //                             text: doctor?.degree,
+    //                             size: 18,
+    //                             spacing: { after: 60 },
+    //                           }),
+    //                         doctor?.hospital &&
+    //                           new Paragraph({
+    //                             text: doctor?.hospital,
+    //                             size: 18,
+    //                             spacing: { after: 60 },
+    //                           }),
+    //                         doctor?.contact &&
+    //                           new Paragraph({
+    //                             text: `Contact: ${doctor?.contact}`,
+    //                             size: 18,
+    //                           }),
+    //                       ],
+    //                     }),
+    //                     new TableCell({
+    //                       width: { size: 50, type: WidthType.PERCENTAGE },
+    //                       borders: {
+    //                         top: { style: BorderStyle.NONE },
+    //                         bottom: { style: BorderStyle.NONE },
+    //                         left: { style: BorderStyle.NONE },
+    //                         right: { style: BorderStyle.NONE },
+    //                       },
+    //                       children: [
+    //                         new Paragraph({
+    //                           children: [
+    //                             new TextRun({
+    //                               text: "PRESCRIPTION ID & DATE",
+    //                               bold: true,
+    //                               size: 24, // 48pt (half-points)
+    //                               // Blue color (no # needed)
+    //                             }),
+    //                           ],
 
-                              spacing: { after: 100 },
-                            }),
-                            new Paragraph({
-                              text: `ID: ${prescription?.prescriptionId}`,
-                              bold: true,
-                              size: 22,
-                              spacing: { after: 80 },
-                            }),
-                            new Paragraph({
-                              text: `Date: ${formatDate(prescription?.createdAt)}`,
-                              size: 18,
-                              spacing: { after: 60 },
-                            }),
-                            prescription?.followUpDate &&
-                              new Paragraph({
-                                children: [
-                                  new TextRun({
-                                    text: `Follow-up: ${formatDate(prescription?.followUpDate)}`,
-                                    color: "1e40af",
-                                    size: 20,
-                                    bold: true,
-                                  }),
-                                ],
-                              }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
+    //                           spacing: { after: 100 },
+    //                         }),
+    //                         new Paragraph({
+    //                           text: `ID: ${prescription?.prescriptionId}`,
+    //                           bold: true,
+    //                           size: 22,
+    //                           spacing: { after: 80 },
+    //                         }),
+    //                         new Paragraph({
+    //                           text: `Date: ${formatDate(prescription?.createdAt)}`,
+    //                           size: 18,
+    //                           spacing: { after: 60 },
+    //                         }),
+    //                         prescription?.followUpDate &&
+    //                           new Paragraph({
+    //                             children: [
+    //                               new TextRun({
+    //                                 text: `Follow-up: ${formatDate(prescription?.followUpDate)}`,
+    //                                 color: "1e40af",
+    //                                 size: 20,
+    //                                 bold: true,
+    //                               }),
+    //                             ],
+    //                           }),
+    //                       ],
+    //                     }),
+    //                   ],
+    //                 }),
+    //               ],
+    //             }),
 
-                new Paragraph({ text: "", spacing: { after: 200 } }),
+    //             new Paragraph({ text: "", spacing: { after: 200 } }),
 
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "PATIENT INFORMATION",
-                      bold: true,
-                      size: 24, // 48pt (half-points)
-                      // Blue color (no # needed)
-                    }),
-                  ],
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "PATIENT INFORMATION",
+    //                   bold: true,
+    //                   size: 24, // 48pt (half-points)
+    //                   // Blue color (no # needed)
+    //                 }),
+    //               ],
 
-                  spacing: { after: 150 },
-                }),
+    //               spacing: { after: 150 },
+    //             }),
 
-                new Table({
-                  width: { size: 100, type: WidthType.PERCENTAGE },
-                  rows: [
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          borders: borderStyle,
-                          children: [
-                            new Paragraph({
-                              text: "Patient Name",
-                              bold: true,
-                              size: 18,
-                            }),
-                          ],
-                        }),
-                        new TableCell({
-                          borders: borderStyle,
-                          children: [
-                            new Paragraph({
-                              text: prescription?.patientName || patient?.name,
-                              size: 18,
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          borders: borderStyle,
-                          children: [
-                            new Paragraph({
-                              text: "Age / DOB",
-                              bold: true,
-                              size: 18,
-                            }),
-                          ],
-                        }),
-                        new TableCell({
-                          borders: borderStyle,
-                          children: [
-                            new Paragraph({
-                              text: `${patient?.age} years old`,
-                              size: 18,
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          borders: borderStyle,
-                          children: [
-                            new Paragraph({
-                              text: "Gender",
-                              bold: true,
-                              size: 18,
-                            }),
-                          ],
-                        }),
-                        new TableCell({
-                          borders: borderStyle,
-                          children: [
-                            new Paragraph({
-                              text: patient?.gender || "[Gender]",
-                              size: 18,
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          borders: borderStyle,
-                          children: [
-                            new Paragraph({
-                              text: "Contact",
-                              bold: true,
-                              size: 18,
-                            }),
-                          ],
-                        }),
-                        new TableCell({
-                          borders: borderStyle,
-                          children: [
-                            new Paragraph({
-                              text: patient?.contactNumber || "[Contact]",
-                              size: 18,
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
+    //             new Table({
+    //               width: { size: 100, type: WidthType.PERCENTAGE },
+    //               rows: [
+    //                 new TableRow({
+    //                   children: [
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: "Patient Name",
+    //                           bold: true,
+    //                           size: 18,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: prescription?.patientName || patient?.name,
+    //                           size: 18,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                   ],
+    //                 }),
+    //                 new TableRow({
+    //                   children: [
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: "Age / DOB",
+    //                           bold: true,
+    //                           size: 18,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: `${patient?.age} years old`,
+    //                           size: 18,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                   ],
+    //                 }),
+    //                 new TableRow({
+    //                   children: [
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: "Gender",
+    //                           bold: true,
+    //                           size: 18,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: patient?.gender || "[Gender]",
+    //                           size: 18,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                   ],
+    //                 }),
+    //                 new TableRow({
+    //                   children: [
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: "Contact",
+    //                           bold: true,
+    //                           size: 18,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: patient?.contactNumber || "[Contact]",
+    //                           size: 18,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                   ],
+    //                 }),
+    //               ],
+    //             }),
 
-                new Paragraph({ text: "", spacing: { after: 300 } }),
+    //             new Paragraph({ text: "", spacing: { after: 300 } }),
 
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "CLINICAL ASSESSMENT",
-                      bold: true,
-                      size: 24,
-                    }),
-                  ],
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "CLINICAL ASSESSMENT",
+    //                   bold: true,
+    //                   size: 24,
+    //                 }),
+    //               ],
 
-                  spacing: { after: 150 },
-                }),
+    //               spacing: { after: 150 },
+    //             }),
 
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "Reason for Visit:",
-                      bold: true,
-                      size: 22,
-                    }),
-                  ],
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "Reason for Visit:",
+    //                   bold: true,
+    //                   size: 22,
+    //                 }),
+    //               ],
 
-                  spacing: { after: 80 },
-                }),
-                new Paragraph({
-                  text: prescription?.reasonForVisit || "[Reason for visit]",
-                  size: 18,
-                  spacing: { after: 200 },
-                  indent: { left: 360 },
-                }),
+    //               spacing: { after: 80 },
+    //             }),
+    //             new Paragraph({
+    //               text: prescription?.reasonForVisit || "[Reason for visit]",
+    //               size: 18,
+    //               spacing: { after: 200 },
+    //               indent: { left: 360 },
+    //             }),
 
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "Primary Diagnosis:",
-                      bold: true,
-                      size: 22,
-                    }),
-                  ],
-                  spacing: { after: 80 },
-                }),
-                new Paragraph({
-                  text: prescription?.primaryDiagnosis || "[Primary diagnosis]",
-                  size: 18,
-                  spacing: { after: 200 },
-                  indent: { left: 360 },
-                }),
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "Primary Diagnosis:",
+    //                   bold: true,
+    //                   size: 22,
+    //                 }),
+    //               ],
+    //               spacing: { after: 80 },
+    //             }),
+    //             new Paragraph({
+    //               text: prescription?.primaryDiagnosis || "[Primary diagnosis]",
+    //               size: 18,
+    //               spacing: { after: 200 },
+    //               indent: { left: 360 },
+    //             }),
 
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "Symptoms",
-                      bold: true,
-                      size: 22,
-                    }),
-                  ],
-                  spacing: { after: 80 },
-                }),
-                new Paragraph({
-                  text: prescription?.symptoms || "[Symptoms]",
-                  size: 18,
-                  spacing: { after: 300 },
-                  indent: { left: 360 },
-                }),
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "Symptoms",
+    //                   bold: true,
+    //                   size: 22,
+    //                 }),
+    //               ],
+    //               spacing: { after: 80 },
+    //             }),
+    //             new Paragraph({
+    //               text: prescription?.symptoms || "[Symptoms]",
+    //               size: 18,
+    //               spacing: { after: 300 },
+    //               indent: { left: 360 },
+    //             }),
 
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "Test & Reports",
-                      bold: true,
-                      size: 24,
-                    }),
-                  ],
-                  spacing: { after: 80 },
-                }),
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: prescription?.testandReport || "[Test & Report]",
-                      bold: true,
-                      size: 20,
-                      color: "FF0000",
-                    }),
-                  ],
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "Test & Reports",
+    //                   bold: true,
+    //                   size: 24,
+    //                 }),
+    //               ],
+    //               spacing: { after: 80 },
+    //             }),
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: prescription?.testandReport || "[Test & Report]",
+    //                   bold: true,
+    //                   size: 20,
+    //                   color: "FF0000",
+    //                 }),
+    //               ],
 
-                  spacing: { after: 300 },
-                  indent: { left: 360 },
-                }),
+    //               spacing: { after: 300 },
+    //               indent: { left: 360 },
+    //             }),
 
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "MEDICATIONS & DOSAGE",
-                      bold: true,
-                      size: 24,
-                    }),
-                  ],
-                  spacing: { after: 150 },
-                }),
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "MEDICATIONS & DOSAGE",
+    //                   bold: true,
+    //                   size: 24,
+    //                 }),
+    //               ],
+    //               spacing: { after: 150 },
+    //             }),
 
-                new Table({
-                  width: { size: 100, type: WidthType.PERCENTAGE },
-                  rows: [
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          borders: borderStyle,
-                          shading: { type: "clear", color: "E8E8E8" },
-                          verticalAlign: VerticalAlign.CENTER,
-                          children: [
-                            new Paragraph({
-                              text: "Medication",
-                              bold: true,
-                              size: 18,
-                              alignment: AlignmentType.CENTER,
-                            }),
-                          ],
-                        }),
-                        new TableCell({
-                          borders: borderStyle,
-                          shading: { type: "clear", color: "E8E8E8" },
-                          verticalAlign: VerticalAlign.CENTER,
-                          children: [
-                            new Paragraph({
-                              text: "Dosage",
-                              bold: true,
-                              size: 18,
-                              alignment: AlignmentType.CENTER,
-                            }),
-                          ],
-                        }),
-                        new TableCell({
-                          borders: borderStyle,
-                          shading: { type: "clear", color: "E8E8E8" },
-                          verticalAlign: VerticalAlign.CENTER,
-                          children: [
-                            new Paragraph({
-                              text: "Frequency",
-                              bold: true,
-                              size: 18,
-                              alignment: AlignmentType.CENTER,
-                            }),
-                          ],
-                        }),
-                        new TableCell({
-                          borders: borderStyle,
-                          shading: { type: "clear", color: "E8E8E8" },
-                          verticalAlign: VerticalAlign.CENTER,
-                          children: [
-                            new Paragraph({
-                              text: "Duration",
-                              bold: true,
-                              size: 18,
-                              alignment: AlignmentType.CENTER,
-                            }),
-                          ],
-                        }),
-                        new TableCell({
-                          borders: borderStyle,
-                          shading: { type: "clear", color: "E8E8E8" },
-                          verticalAlign: VerticalAlign.CENTER,
-                          children: [
-                            new Paragraph({
-                              text: "Qty",
-                              bold: true,
-                              size: 18,
-                              alignment: AlignmentType.CENTER,
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                    ...(prescription?.medication?.map(
-                      (med: any) =>
-                        new TableRow({
-                          children: [
-                            new TableCell({
-                              borders: borderStyle,
-                              children: [
-                                new Paragraph({
-                                  text: med?.medecineName || "[Drug Name]",
-                                  size: 18,
-                                }),
-                              ],
-                            }),
-                            new TableCell({
-                              borders: borderStyle,
-                              children: [
-                                new Paragraph({
-                                  text: med?.medecineDosage || "[Dosage]",
-                                  size: 18,
-                                }),
-                              ],
-                            }),
-                            new TableCell({
-                              borders: borderStyle,
-                              children: [
-                                new Paragraph({
-                                  text: med?.frequency || "[Frequency]",
-                                  size: 18,
-                                }),
-                              ],
-                            }),
-                            new TableCell({
-                              borders: borderStyle,
-                              children: [
-                                new Paragraph({
-                                  text: med?.duration || "[Duration]",
-                                  size: 18,
-                                }),
-                              ],
-                            }),
-                            new TableCell({
-                              borders: borderStyle,
-                              children: [
-                                new Paragraph({
-                                  text: med?.quantity || "[Qty]",
-                                  size: 18,
-                                  alignment: AlignmentType.CENTER,
-                                }),
-                              ],
-                            }),
-                          ],
-                        })
-                    ) || []),
-                  ],
-                }),
+    //             new Table({
+    //               width: { size: 100, type: WidthType.PERCENTAGE },
+    //               rows: [
+    //                 new TableRow({
+    //                   children: [
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       shading: { type: "clear", color: "E8E8E8" },
+    //                       verticalAlign: VerticalAlign.CENTER,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: "Medication",
+    //                           bold: true,
+    //                           size: 18,
+    //                           alignment: AlignmentType.CENTER,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       shading: { type: "clear", color: "E8E8E8" },
+    //                       verticalAlign: VerticalAlign.CENTER,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: "Dosage",
+    //                           bold: true,
+    //                           size: 18,
+    //                           alignment: AlignmentType.CENTER,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       shading: { type: "clear", color: "E8E8E8" },
+    //                       verticalAlign: VerticalAlign.CENTER,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: "Frequency",
+    //                           bold: true,
+    //                           size: 18,
+    //                           alignment: AlignmentType.CENTER,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       shading: { type: "clear", color: "E8E8E8" },
+    //                       verticalAlign: VerticalAlign.CENTER,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: "Duration",
+    //                           bold: true,
+    //                           size: 18,
+    //                           alignment: AlignmentType.CENTER,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                     new TableCell({
+    //                       borders: borderStyle,
+    //                       shading: { type: "clear", color: "E8E8E8" },
+    //                       verticalAlign: VerticalAlign.CENTER,
+    //                       children: [
+    //                         new Paragraph({
+    //                           text: "Qty",
+    //                           bold: true,
+    //                           size: 18,
+    //                           alignment: AlignmentType.CENTER,
+    //                         }),
+    //                       ],
+    //                     }),
+    //                   ],
+    //                 }),
+    //                 ...(prescription?.medication?.map(
+    //                   (med: any) =>
+    //                     new TableRow({
+    //                       children: [
+    //                         new TableCell({
+    //                           borders: borderStyle,
+    //                           children: [
+    //                             new Paragraph({
+    //                               text: med?.medecineName || "[Drug Name]",
+    //                               size: 18,
+    //                             }),
+    //                           ],
+    //                         }),
+    //                         new TableCell({
+    //                           borders: borderStyle,
+    //                           children: [
+    //                             new Paragraph({
+    //                               text: med?.medecineDosage || "[Dosage]",
+    //                               size: 18,
+    //                             }),
+    //                           ],
+    //                         }),
+    //                         new TableCell({
+    //                           borders: borderStyle,
+    //                           children: [
+    //                             new Paragraph({
+    //                               text: med?.frequency || "[Frequency]",
+    //                               size: 18,
+    //                             }),
+    //                           ],
+    //                         }),
+    //                         new TableCell({
+    //                           borders: borderStyle,
+    //                           children: [
+    //                             new Paragraph({
+    //                               text: med?.duration || "[Duration]",
+    //                               size: 18,
+    //                             }),
+    //                           ],
+    //                         }),
+    //                         new TableCell({
+    //                           borders: borderStyle,
+    //                           children: [
+    //                             new Paragraph({
+    //                               text: med?.quantity || "[Qty]",
+    //                               size: 18,
+    //                               alignment: AlignmentType.CENTER,
+    //                             }),
+    //                           ],
+    //                         }),
+    //                       ],
+    //                     })
+    //                 ) || []),
+    //               ],
+    //             }),
 
-                new Paragraph({ text: "", spacing: { after: 100 } }),
+    //             new Paragraph({ text: "", spacing: { after: 100 } }),
 
-                ...(prescription?.medication?.some(
-                  (med: any) => med?.instructions
-                )
-                  ? [
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: "INSTRUCTIONS & NOTES",
-                            bold: true,
-                            size: 24,
-                          }),
-                        ],
+    //             ...(prescription?.medication?.some(
+    //               (med: any) => med?.instructions
+    //             )
+    //               ? [
+    //                   new Paragraph({
+    //                     children: [
+    //                       new TextRun({
+    //                         text: "INSTRUCTIONS & NOTES",
+    //                         bold: true,
+    //                         size: 24,
+    //                       }),
+    //                     ],
 
-                        spacing: { after: 200 },
-                      }),
-                      ...(prescription?.medication
-                        ?.filter((med: any) => med?.instructions)
-                        ?.flatMap((med: any) => [
-                          new Paragraph({
-                            text: `${med?.medecineName}:`,
-                            bold: true,
-                            size: 18,
-                            spacing: { after: 80 },
-                            indent: { left: 360 },
-                          }),
-                          new Paragraph({
-                            text: med?.instructions,
-                            size: 18,
-                            spacing: { after: 100 },
-                            indent: { left: 720 },
-                          }),
-                        ]) || []),
-                      new Paragraph({ text: "", spacing: { after: 100 } }),
-                    ]
-                  : []),
+    //                     spacing: { after: 200 },
+    //                   }),
+    //                   ...(prescription?.medication
+    //                     ?.filter((med: any) => med?.instructions)
+    //                     ?.flatMap((med: any) => [
+    //                       new Paragraph({
+    //                         text: `${med?.medecineName}:`,
+    //                         bold: true,
+    //                         size: 18,
+    //                         spacing: { after: 80 },
+    //                         indent: { left: 360 },
+    //                       }),
+    //                       new Paragraph({
+    //                         text: med?.instructions,
+    //                         size: 18,
+    //                         spacing: { after: 100 },
+    //                         indent: { left: 720 },
+    //                       }),
+    //                     ]) || []),
+    //                   new Paragraph({ text: "", spacing: { after: 100 } }),
+    //                 ]
+    //               : []),
 
-                ...(prescription?.restrictions
-                  ? [
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: "RESTRICTIONS & WARNINGS",
-                            bold: true,
-                            size: 24,
-                          }),
-                        ],
-                        spacing: { after: 100 },
-                      }),
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: prescription?.restrictions || "Restriction",
-                            size: 20,
-                          }),
-                        ],
-                        spacing: { after: 100 },
-                        indent: { left: 360 },
-                      }),
-                    ]
-                  : []),
+    //             ...(prescription?.restrictions
+    //               ? [
+    //                   new Paragraph({
+    //                     children: [
+    //                       new TextRun({
+    //                         text: "RESTRICTIONS & WARNINGS",
+    //                         bold: true,
+    //                         size: 24,
+    //                       }),
+    //                     ],
+    //                     spacing: { after: 100 },
+    //                   }),
+    //                   new Paragraph({
+    //                     children: [
+    //                       new TextRun({
+    //                         text: prescription?.restrictions || "Restriction",
+    //                         size: 20,
+    //                       }),
+    //                     ],
+    //                     spacing: { after: 100 },
+    //                     indent: { left: 360 },
+    //                   }),
+    //                 ]
+    //               : []),
 
-                new Paragraph({ text: "", spacing: { after: 100 } }),
+    //             new Paragraph({ text: "", spacing: { after: 100 } }),
 
-                new Paragraph({ text: "" }),
-                new Paragraph({
-                  text: "═══════════════════════════════════════════════════════",
-                  alignment: "center",
-                }),
-                new Paragraph({ text: "" }),
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "CERTIFICATION & AUTHENTICATION+",
-                      bold: true,
-                      size: 24,
-                    }),
-                  ],
-                  alignment: "center",
-                }),
-                new Paragraph({
-                  text: "This prescription is officially issued, certified, and authenticated by",
-                  alignment: "center",
-                  size: 20,
-                  italics: true,
-                }),
-                new Paragraph({
-                  text: "MediCare+ Authorized Medical Professional",
-                  bold: true,
-                  alignment: "center",
-                  size: 20,
-                }),
-                new Paragraph({
-                  text: `Date: ${formatDate(prescription?.createdAt)}`,
-                  alignment: "center",
-                  size: 19,
-                }),
-                new Paragraph({ text: "" }),
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "For authenticity verification, contact: certification@medicare.com",
-                      color: "1e40af",
-                      italics: true,
-                    }),
-                  ],
+    //             new Paragraph({ text: "" }),
+    //             new Paragraph({
+    //               text: "═══════════════════════════════════════════════════════",
+    //               alignment: "center",
+    //             }),
+    //             new Paragraph({ text: "" }),
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "CERTIFICATION & AUTHENTICATION+",
+    //                   bold: true,
+    //                   size: 24,
+    //                 }),
+    //               ],
+    //               alignment: "center",
+    //             }),
+    //             new Paragraph({
+    //               text: "This prescription is officially issued, certified, and authenticated by",
+    //               alignment: "center",
+    //               size: 20,
+    //               italics: true,
+    //             }),
+    //             new Paragraph({
+    //               text: "MediCare+ Authorized Medical Professional",
+    //               bold: true,
+    //               alignment: "center",
+    //               size: 20,
+    //             }),
+    //             new Paragraph({
+    //               text: `Date: ${formatDate(prescription?.createdAt)}`,
+    //               alignment: "center",
+    //               size: 19,
+    //             }),
+    //             new Paragraph({ text: "" }),
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "For authenticity verification, contact: certification@medicare.com",
+    //                   color: "1e40af",
+    //                   italics: true,
+    //                 }),
+    //               ],
 
-                  alignment: "center",
-                }),
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "Phone: +1-800-MEDICARE | License: MC-2025-001",
-                      color: "1e40af",
-                    }),
-                  ],
+    //               alignment: "center",
+    //             }),
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "Phone: +1-800-MEDICARE | License: MC-2025-001",
+    //                   color: "1e40af",
+    //                 }),
+    //               ],
 
-                  alignment: "center",
-                }),
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "EST. 2025",
-                      color: "1e40af",
-                      size: 20,
-                    }),
-                  ],
-                  alignment: "center",
-                }),
-                new Paragraph({ text: "" }),
-                new Paragraph({
-                  text: "═══════════════════════════════════════════════════════",
-                  alignment: "center",
-                }),
+    //               alignment: "center",
+    //             }),
+    //             new Paragraph({
+    //               children: [
+    //                 new TextRun({
+    //                   text: "EST. 2025",
+    //                   color: "1e40af",
+    //                   size: 20,
+    //                 }),
+    //               ],
+    //               alignment: "center",
+    //             }),
+    //             new Paragraph({ text: "" }),
+    //             new Paragraph({
+    //               text: "═══════════════════════════════════════════════════════",
+    //               alignment: "center",
+    //             }),
 
-                new Paragraph({ text: "", spacing: { after: 100 } }),
+    //             new Paragraph({ text: "", spacing: { after: 100 } }),
 
-                new Paragraph({
-                  text: "This prescription is valid for 30 days from the date of issue.",
-                  size: 16,
-                  alignment: AlignmentType.CENTER,
-                  italics: true,
-                  spacing: { before: 100 },
-                }),
+    //             new Paragraph({
+    //               text: "This prescription is valid for 30 days from the date of issue.",
+    //               size: 16,
+    //               alignment: AlignmentType.CENTER,
+    //               italics: true,
+    //               spacing: { before: 100 },
+    //             }),
 
-                new Paragraph({
-                  text: "For any queries, please contact the clinic.",
-                  size: 16,
-                  alignment: AlignmentType.CENTER,
-                  italics: true,
-                }),
-              ],
-            },
-          ],
-        });
+    //             new Paragraph({
+    //               text: "For any queries, please contact the clinic.",
+    //               size: 16,
+    //               alignment: AlignmentType.CENTER,
+    //               italics: true,
+    //             }),
+    //           ],
+    //         },
+    //       ],
+    //     });
 
-        const blob = await Packer.toBlob(doc);
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `prescription-${prescription?.prescriptionId}.docx`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error("Error generating document:", error);
-      } finally {
-        setDownloading(null);
-      }
-    };
+    //     const blob = await Packer.toBlob(doc);
+    //     const url = URL.createObjectURL(blob);
+    //     const link = document.createElement("a");
+    //     link.href = url;
+    //     link.download = `prescription-${prescription?.prescriptionId}.docx`;
+    //     document.body.appendChild(link);
+    //     link.click();
+    //     document.body.removeChild(link);
+    //     URL.revokeObjectURL(url);
+    //   } catch (error) {
+    //     console.error("Error generating document:", error);
+    //   } finally {
+    //     setDownloading(null);
+    //   }
+    // };
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1406,7 +1748,7 @@ export default function Prescription() {
                 {downloading === "image" ? "Generating Image..." : "Image"}
               </button>
               <button
-                onClick={downloadAsDocument}
+                // onClick={downloadAsDocument}
                 disabled={downloading === "doc"}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition disabled:opacity-50"
               >
