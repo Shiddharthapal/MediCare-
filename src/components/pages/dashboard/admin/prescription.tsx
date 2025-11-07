@@ -1834,17 +1834,17 @@ export default function Prescription() {
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 p-4 flex justify-between gap-3 border-t flex-wrap">
-            <div className="flex gap-2">
+          <div className="bg-gray-50 px-4 flex justify-between gap-3 border-t flex-wrap">
+            <div className="flex gap-2 p-4">
               <button
                 onClick={downloadAsPDF}
                 disabled={downloading === "pdf"}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition disabled:opacity-50"
+                className=" px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition disabled:opacity-50"
               >
                 <Download className="h-4 w-4 inline mr-2" />
                 {downloading === "pdf" ? "Generating PDF..." : "PDF"}
               </button>
-              <button
+              {/* <button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -1863,36 +1863,22 @@ export default function Prescription() {
               >
                 <FileText className="h-4 w-4 inline mr-2" />
                 {downloading === "doc" ? "Generating Doc..." : "Word Doc"}
-              </button>
+              </button> */}
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => window.print()}
-                className="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition"
-              >
-                Print
-              </button>
+            <div className="bg-gray-50 p-4 flex justify-end gap-3 border-t">
               <button
                 onClick={onClose}
                 className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
               >
                 Close
               </button>
+              <button
+                onClick={() => window.print()}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+              >
+                Print
+              </button>
             </div>
-          </div>
-          <div className="bg-gray-50 p-4 flex justify-end gap-3 border-t">
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
-            >
-              Close
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-            >
-              Print
-            </button>
           </div>
         </div>
       </div>
