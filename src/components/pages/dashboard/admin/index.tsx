@@ -157,7 +157,6 @@ const menuItems = [
   { id: "patients", icon: User, label: "Patients", active: false },
   { id: "prescription", icon: File, label: "Prescription", active: false },
   { id: "document", icon: FileText, label: "Document", active: false },
-  { id: "records", icon: SquareLibrary, label: "Records", active: false },
   { id: "settings", icon: Settings, label: "Settings", active: false },
 ];
 
@@ -909,14 +908,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        {currentPage === "records" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
-            <div className="max-w-6xl mx-auto">
-              <Records onNavigate={setCurrentPage} />
-            </div>
-          </div>
-        )}
-
+        
         {currentPage === "settings" && (
           <div className="h-screen  p-6 lg:p-6 ">
             <div className="max-w-6xl mx-auto">

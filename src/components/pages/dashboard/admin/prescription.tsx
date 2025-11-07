@@ -139,7 +139,11 @@ interface PrescriptionCardProps {
   prescription: Prescription;
   onInfoClick: (prescription: Prescription) => void;
 }
-export default function Prescription() {
+export default function PrescriptionSettings({
+  onNavigate,
+}: {
+  onNavigate?: (page: string) => void;
+}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPrescription, setSelectedPrescription] =

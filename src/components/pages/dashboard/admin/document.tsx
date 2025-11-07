@@ -62,7 +62,11 @@ interface DocumentCardProps {
 // Add your Bunny CDN configuration
 const BUNNY_CDN_PULL_ZONE = "mypull-29.b-cdn.net";
 
-export default function Document() {
+export default function DocumentSettings({
+  onNavigate,
+}: {
+  onNavigate?: (page: string) => void;
+}) {
   const [documents, setDocuments] = useState<FileUpload[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<FileUpload | null>(
     null

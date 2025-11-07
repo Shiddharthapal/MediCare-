@@ -246,7 +246,11 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
-export default function DoctorManagement() {
+export default function DoctorManagementSettings({
+  onNavigate,
+}: {
+  onNavigate?: (page: string) => void;
+}) {
   const [activeTab, setActiveTab] = useState("details");
   const [registerPatient, setRegisterPatient] = useState<UserRegister[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<UserDetails | null>(
