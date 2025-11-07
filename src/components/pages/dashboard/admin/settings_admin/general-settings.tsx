@@ -1,6 +1,3 @@
-"use client";
-
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -8,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -21,17 +19,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAppSelector } from "@/redux/hooks";
 
 interface ProfileInformation {
-  email: string;
   name: string;
-  fatherName?: string;
-  address: string;
-  dateOfBirth: Date;
-  contactNumber: string;
-  age: number;
-  gender: string;
-  bloodGroup: string;
-  weight: number;
-  height?: number;
+  email: string;
+  contact: string;
+  about: string;
 }
 
 interface SystemPreferences {
@@ -45,25 +36,17 @@ interface GeneralSettingsData {
   preferences: SystemPreferences;
 }
 
-export default function GeneralSettings() {
+export function GeneralSettings() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
-  const [userData, setUserData] = useState<GeneralSettingsData>({
+  const [formData, setFormData] = useState<GeneralSettingsData>({
     profile: {
-      email: "",
       name: "",
-      fatherName: "",
-      address: "",
-      dateOfBirth: new Date(),
-      contactNumber: "01*********",
-      age: 99,
-      gender: "",
-      bloodGroup: "",
-      weight: 0,
-      height: 0,
+      email: "",
+      contact: "",
+      about: "",
     },
-
     preferences: {
       darkMode: localStorage.getItem("darkMode") === "true",
       language: localStorage.getItem("language") || "en",
@@ -78,28 +61,36 @@ export default function GeneralSettings() {
     fetchProfileData();
   }, []);
 
+  useEffect(() => {
+    // Apply dark mode
+    document.documentElement.classList.toggle(
+      "dark",
+      formData.preferences.darkMode
+    );
+    localStorage.setItem("darkMode", formData.preferences.darkMode.toString());
+  }, [formData.preferences.darkMode]);
+
+  useEffect(() => {
+    // Save language and timezone preferences
+    localStorage.setItem("language", formData.preferences.language);
+    localStorage.setItem("timezone", formData.preferences.timezone);
+  }, [formData.preferences.language, formData.preferences.timezone]);
+
   const fetchProfileData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/admin/${id}`);
+      const response = await fetch(`/api/doctor/${id}`);
       const data = await response.json();
       console.log("🧞‍♂️  data --->", data);
 
       if (data) {
-        setUserData((prev) => ({
+        setFormData((prev) => ({
           ...prev,
           profile: {
-            email: data?.userdetails?.email || "",
-            name: data?.userdetails?.name || "",
-            fatherName: data?.userdetails?.fatherName || "",
-            address: data?.userdetails?.address || "",
-            dateOfBirth: data?.userdetails?.dateOfBirth || new Date(),
-            contactNumber: data?.userdetails?.contactNumber || "01*********",
-            age: data?.userdetails?.age || 99,
-            gender: data?.userdetails?.gender || "",
-            bloodGroup: data?.userdetails?.bloodGroup || "",
-            weight: data?.userdetails?.weight || 0,
-            height: data?.userdetails?.height || 0,
+            name: data?.doctordetails?.name || "",
+            email: data?.doctordetails?.email || "",
+            contact: data?.doctordetails?.contact || "",
+            about: data?.doctordetails?.about || "",
           },
         }));
         setHasProfile(true);
@@ -116,67 +107,46 @@ export default function GeneralSettings() {
   };
 
   const updatePreferences = (field: keyof SystemPreferences, value: any) => {
-    setUserData((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       preferences: { ...prev.preferences, [field]: value },
     }));
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="space-y-3 ">
+      <Card className=" bg-green-50 border-green-200 ">
         <CardHeader>
-          <CardTitle className="text-lg">Profile Information</CardTitle>
+          <CardTitle className="text-green-800 text-xl">
+            Profile Information
+          </CardTitle>
           <CardDescription>
-            Update your personal and contact details
+            Update your personal and professional details
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Card className="bg-green-50 border-green-200">
-            <CardHeader>
-              <CardTitle className="text-green-800">
-                Saved Practice Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <strong>Name:</strong> {userData?.profile?.name}
-                </div>
-                <div>
-                  <strong>Email Address:</strong> {userData?.profile?.email}
-                </div>
-                <div>
-                  <strong>Address:</strong> {userData?.profile?.address}
-                </div>
-
-                <div>
-                  <strong>Date of Birth:</strong>{" "}
-                  {userData?.profile?.dateOfBirth.toString().split("T")[0]}
-                </div>
-                <div>
-                  <strong>Phone Number:</strong>{" "}
-                  {userData?.profile?.contactNumber}
-                </div>
-                <div>
-                  <strong>Blood Group:</strong> {userData?.profile?.bloodGroup}
-                </div>
-
-                <div>
-                  <strong>Gender:</strong> {userData?.profile?.gender}
-                </div>
-                <div>
-                  <strong>Height:</strong> {userData?.profile?.height}
-                </div>
-                <div>
-                  <strong>Weight:</strong> {userData?.profile?.weight}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <strong>First Name:</strong>{" "}
+              {formData?.profile?.name || "Not Provided"}
+            </div>
+            <div>
+              <strong>Email:</strong>{" "}
+              {formData?.profile?.email || "Not Provided"}
+            </div>
+            <div>
+              <strong>Professional Bio:</strong>{" "}
+              {formData?.profile?.about || "Not Provided"}
+            </div>
+            <div>
+              <strong>Phone Number:</strong>{" "}
+              {formData?.profile?.contact || "Not Provided"}
+            </div>
+          </div>
         </CardContent>
       </Card>
-      <Card>
+
+      <Card className="border border-gray-400">
         <CardHeader>
           <CardTitle>System Preferences</CardTitle>
           <CardDescription>
@@ -192,7 +162,7 @@ export default function GeneralSettings() {
               </p>
             </div>
             <Switch
-              checked={userData?.preferences?.darkMode}
+              checked={formData.preferences.darkMode}
               onCheckedChange={(checked) =>
                 updatePreferences("darkMode", checked)
               }
@@ -201,10 +171,10 @@ export default function GeneralSettings() {
           <div className="space-y-2">
             <Label htmlFor="language">Language</Label>
             <Select
-              value={userData?.preferences?.language}
+              value={formData.preferences.language}
               onValueChange={(value) => updatePreferences("language", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border border-gray-400">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -217,10 +187,10 @@ export default function GeneralSettings() {
           <div className="space-y-2">
             <Label htmlFor="timezone">Timezone</Label>
             <Select
-              value={userData?.preferences?.timezone}
+              value={formData.preferences.timezone}
               onValueChange={(value) => updatePreferences("timezone", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border border-gray-400">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

@@ -38,6 +38,7 @@ import {
   X,
   Upload,
   File,
+  Check,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -263,6 +264,7 @@ export default function Reports() {
   const [uploadDocumentCategory, setUploadDocumentCategory] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
@@ -807,7 +809,7 @@ export default function Reports() {
       </Dialog>
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto  scrollbar-gutter-stable">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -830,28 +832,69 @@ export default function Reports() {
               </div>
 
               {/* Document Category Dropdown */}
-              <div className="mb-6 ">
+              <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   Document Category
                 </label>
-                <Select
-                  value={uploadDocumentCategory}
-                  onValueChange={setUploadDocumentCategory}
-                >
-                  <SelectTrigger className="w-full border-2 transition-all hover:border-primary/50 hover:shadow-lg">
-                    <SelectValue placeholder="Select document category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Laboratory">Laboratory</SelectItem>
-                    <SelectItem value="Dermatology">Dermatology</SelectItem>
-                    <SelectItem value="Neurology">Neurology</SelectItem>
-                    <SelectItem value="General">General</SelectItem>
-                    <SelectItem value="Cardiology">Cardiology</SelectItem>
-                    <SelectItem value="Radiology">Radiology</SelectItem>
-                    <SelectItem value="Medication">Medication</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-full border-2 rounded-md px-3 py-2 text-left bg-white transition-all hover:border-primary/50 hover:shadow-lg flex items-center justify-between"
+                  >
+                    <span
+                      className={
+                        uploadDocumentCategory
+                          ? "text-gray-900"
+                          : "text-gray-500"
+                      }
+                    >
+                      {uploadDocumentCategory || "Select document category"}
+                    </span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {isDropdownOpen && (
+                    <>
+                      {/* Backdrop to close dropdown */}
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setIsDropdownOpen(false)}
+                      />
+
+                      {/* Dropdown menu */}
+                      <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {[
+                          "Laboratory",
+                          "Dermatology",
+                          "Neurology",
+                          "General",
+                          "Cardiology",
+                          "Radiology",
+                          "Medication",
+                          "Other",
+                        ].map((category) => (
+                          <button
+                            key={category}
+                            type="button"
+                            onClick={() => {
+                              setUploadDocumentCategory(category);
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center justify-between transition-colors"
+                          >
+                            <span className="text-gray-900">{category}</span>
+                            {uploadDocumentCategory === category && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Upload Section */}

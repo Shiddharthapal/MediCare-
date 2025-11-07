@@ -39,6 +39,8 @@ interface FileUpload {
   _id: string;
   patientId: string;
   doctorId: string;
+  patientName: string;
+  documentName: string;
   filename: string;
   originalName: string;
   fileType: string;
@@ -60,6 +62,8 @@ interface Prescription {
   doctorId: string;
   doctorName: string;
   patientId: string;
+  patientName: string;
+  patientAge: number;
   doctorpatinetId: string;
   reasonForVisit: string;
   vitalSign: VitalSign;

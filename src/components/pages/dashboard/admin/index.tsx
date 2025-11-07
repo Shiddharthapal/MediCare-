@@ -15,6 +15,10 @@ import {
   Trash2,
   MoreVertical,
   Zap,
+  File,
+  Dock,
+  FileText,
+  SquareLibrary,
 } from "lucide-react";
 import {
   LineChart,
@@ -32,8 +36,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Appointments from "./appointments";
 import Doctors from "./doctor";
 import Patients from "./patients";
-import Setting from "./settings";
-import Records from "./records";
+import Setting from "./settings_admin/index";
+import Document from "./document";
+import Prescription from "./prescription";
 
 interface Prescription {
   reasonForVisit: string;
@@ -149,7 +154,8 @@ const menuItems = [
   { id: "appointments", icon: Calendar, label: "Appointments", active: false },
   { id: "doctors", icon: Users, label: "Doctors", active: false },
   { id: "patients", icon: User, label: "Patients", active: false },
-  { id: "records", icon: User, label: "Records", active: false },
+  { id: "prescription", icon: File, label: "Prescription", active: false },
+  { id: "document", icon: FileText, label: "Document", active: false },
   { id: "settings", icon: Settings, label: "Settings", active: false },
 ];
 
@@ -887,10 +893,17 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        {currentPage === "records" && (
+        {currentPage === "prescription" && (
           <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
             <div className="max-w-6xl mx-auto">
-              <Records />
+              <Prescription onNavigate={setCurrentPage} />
+            </div>
+          </div>
+        )}
+        {currentPage === "document" && (
+          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+            <div className="max-w-6xl mx-auto">
+              <Document onNavigate={setCurrentPage} />
             </div>
           </div>
         )}

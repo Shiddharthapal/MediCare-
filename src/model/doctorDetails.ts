@@ -104,6 +104,12 @@ const FileUploadSchema = new mongoose.Schema({
   filename: {
     type: String,
   },
+  patientName: {
+    type: String,
+  },
+  documentName: {
+    type: String,
+  },
 
   doctorId: {
     type: String,
@@ -200,6 +206,12 @@ const PrescriptionSchema = new mongoose.Schema({
   },
   patientId: {
     type: String,
+  },
+  patientName: {
+    type: String,
+  },
+  patientAge: {
+    type: Number,
   },
   doctorpatinetId: {
     type: String,

@@ -38,9 +38,11 @@ interface Medication {
 interface FileUpload {
   _id: string;
   patientId: string;
+  patientName: string;
   doctorId: string;
   filename: string;
   originalName: string;
+  documentName: string;
   fileType: string;
   fileSize: number;
   path: string;
@@ -60,6 +62,26 @@ interface Prescription {
   doctorId: string;
   doctorName: string;
   patientId: string;
+  doctorpatinetId: string;
+  reasonForVisit: string;
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  symptoms: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+
+interface AdminPrescription {
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  patientName: string;
+  patientAge: number;
   doctorpatinetId: string;
   reasonForVisit: string;
   vitalSign: VitalSign;
@@ -239,7 +261,6 @@ interface Appointment {
 
 interface RescheduleAppointment {
   _id?: string;
-
   // Doctor Information
   doctorpatinetId?: string;
   doctorUserId?: string;
@@ -319,7 +340,7 @@ interface DoctorDetails {
   appointments: AppointmentDataDoctor[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
-  prescription?: Prescription;
+  prescription?: AdminPrescription;
   status?: string;
   createdAt: Date;
 }
@@ -378,7 +399,7 @@ export interface AdminStore {
   rescheduleAppointment: RescheduleAppointment[];
   cancelAppointment: Appointment[];
   upload: FileUpload[];
-  prescription: Prescription[];
+  prescription: AdminPrescription[];
   healthRecord: HealthRecord[];
   createdAt: Date;
 }

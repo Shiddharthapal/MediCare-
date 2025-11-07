@@ -134,11 +134,17 @@ const FileUploadSchema = new mongoose.Schema({
   patientId: {
     type: String,
   },
+  patientName: {
+    type: String,
+  },
   filename: {
     type: String,
   },
 
   doctorId: {
+    type: String,
+  },
+  documentName: {
     type: String,
   },
 
@@ -282,6 +288,72 @@ const PrescriptionSchema = new mongoose.Schema({
     },
   },
 });
+
+const AdminPrescriptionSchema = new mongoose.Schema({
+  doctorId: {
+    type: String,
+  },
+  doctorName: {
+    type: String,
+  },
+  patientId: {
+    type: String,
+  },
+  patientName: {
+    type: String,
+  },
+  patientAge: {
+    type: Number,
+  },
+  doctorpatinetId: {
+    type: String,
+  },
+  vitalSign: {
+    type: VitalSignSchema,
+  },
+  reasonForVisit: {
+    type: String,
+  },
+  primaryDiagnosis: {
+    type: String,
+  },
+  symptoms: {
+    type: String,
+  },
+  testandReport: {
+    type: String,
+  },
+  medication: {
+    type: [MedicationSchema],
+    default: [],
+  },
+  restrictions: {
+    type: String,
+  },
+  followUpDate: {
+    type: String,
+  },
+  additionalNote: {
+    type: String,
+  },
+  prescriptionId: {
+    type: String,
+  },
+  createdAt: {
+    type: Date,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
+  },
+});
+
 const practiceSettingData = new mongoose.Schema({
   practiceName: {
     type: String,
@@ -497,7 +569,7 @@ const AppointmentDataDoctorSchema = new mongoose.Schema(
       type: String,
     },
     prescription: {
-      type: PrescriptionSchema,
+      type: AdminPrescriptionSchema,
       default: {},
     },
     createdAt: {
@@ -1167,7 +1239,7 @@ const adminStoreSchema = new mongoose.Schema({
     default: [],
   },
   prescription: {
-    type: [PrescriptionSchema],
+    type: [AdminPrescriptionSchema],
     default: [],
   },
   healthRecord: {

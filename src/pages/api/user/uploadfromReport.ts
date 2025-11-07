@@ -6,6 +6,13 @@ import adminStore from "@/model/adminStore";
 import connect from "@/lib/connection";
 import crypto from "crypto";
 
+const BUNNY_STORAGE_ZONE_NAME =
+  process.env.BUNNY_STORAGE_ZONE_NAME || "lufalufikoro";
+const BUNNY_STORAGE_REGION_HOSTNAME =
+  process.env.BUNNY_STORAGE_REGION_HOSTNAME || "storage.bunnycdn.com";
+const BUNNY_STORAGE_API_KEY =
+  process.env.BUNNY_STORAGE_API_KEY ||
+  "466dfc53-63c5-441e-9c6fbfed3248-ae77-43b5";
 // Max file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -84,6 +91,48 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    function generateUniqueFilename(
+      documentName: string,
+      originalFilename: string
+    ): string {
+      // Get file extension from original filename
+      const extension = originalFilename.split(".").pop()?.toLowerCase() || "";
+
+      // Clean the document name
+      const cleanName = documentName
+        .trim()
+        .replace(/[^a-zA-Z0-9_-]/g, "_")
+        .substring(0, 50);
+
+      // Generate unique ID
+      const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+      // Combine: documentName_uniqueId.extension
+      return `${cleanName}_${uniqueId}.${extension}`;
+    }
+
+    function getFileCategory(mimeType: string): string {
+      if (mimeType.startsWith("image/")) return "image";
+      if (mimeType.startsWith("application/pdf")) return "pdf";
+      if (
+        mimeType.startsWith("application/msword") ||
+        mimeType.startsWith(
+          "application/vnd.openxmlformats-officedocument.wordprocessingml"
+        )
+      ) {
+        return "document";
+      }
+      if (
+        mimeType.startsWith("application/vnd.ms-excel") ||
+        mimeType.startsWith(
+          "application/vnd.openxmlformats-officedocument.spreadsheetml"
+        )
+      ) {
+        return "spreadsheet";
+      }
+      return "other";
+    }
+
     //Take temporary array for upload and store file, report, document
     const uploadedFiles = [];
     const uploadResults = [];
@@ -123,13 +172,13 @@ export const POST: APIRoute = async ({ request }) => {
       const checksum = calculateChecksum(buffer);
 
       // Generate unique filename
-      const uniqueFilename = generateUniqueFilename(documentName);
+      const uniqueFilename = generateUniqueFilename(documentName, file.name);
+      const fileCategory = getFileCategory(file.type);
 
       // Construct destination path
-      let destinationPath = `${userId}/${file.type}`;
-      if (appointmentId) {
-        destinationPath += `/${appointmentId}`;
-      }
+      let destinationPath = `${userId}/${fileCategory}`;
+
+      //unique file name add the extension of the file
       destinationPath += `/${uniqueFilename}`;
 
       //Here use try-catch for unexpected error
@@ -143,11 +192,12 @@ export const POST: APIRoute = async ({ request }) => {
         );
 
         // Construct public URL
-        const publicUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${destinationPath}`;
+        const publicUrl = `https://${BUNNY_STORAGE_REGION_HOSTNAME}/${BUNNY_STORAGE_ZONE_NAME}/${destinationPath}`;
 
         // Prepare upload data
         const uploadfile = {
           patientId: userId,
+          patientName: userdetails.name,
           appointmentId: appointmentId,
           filename: uniqueFilename,
           originalName: originalName,
@@ -199,6 +249,7 @@ export const POST: APIRoute = async ({ request }) => {
       // You might need to generate ObjectId
       patientId: userId,
       appointmentId: appointmentId,
+      patientName: userdetails.name,
       filename: file.filename,
       url: file.url,
       fileType: file.fileType,
