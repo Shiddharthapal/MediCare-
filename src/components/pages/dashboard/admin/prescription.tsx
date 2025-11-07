@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -7,8 +7,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Document, Packer, Paragraph, Table, TableCell, TableRow } from "docx";
 import { Button } from "@/components/ui/button";
-
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
   Info,
   Clock,
@@ -21,6 +23,7 @@ import {
   User,
   X,
   User2,
+  Download,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -124,6 +127,245 @@ export default function Prescription() {
     prescription: Prescription;
     onClose: () => void;
   }) => {
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [downloading, setDownloading] = useState<
+      "pdf" | "image" | "doc" | null
+    >(null);
+
+    const downloadAsPDF = async () => {
+      if (!contentRef.current) return;
+      setDownloading("pdf");
+      console.log("pdf");
+      try {
+        const canvas = await html2canvas(contentRef.current, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: "a4",
+        });
+        const imgWidth = 210;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        console.log("🧞‍♂️  imgHeight --->", imgHeight);
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.save(`prescription-${prescription?.prescriptionId}.pdf`);
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+      } finally {
+        setDownloading(null);
+      }
+    };
+
+    const downloadAsImage = async () => {
+      console.log("image download call");
+      if (!contentRef.current) return;
+      setDownloading("image");
+      console.log("image");
+      try {
+        const canvas = await html2canvas(contentRef.current, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        });
+        // Wrap toBlob in a Promise to handle it properly
+        await new Promise<void>((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error("Failed to create blob"));
+              return;
+            }
+
+            try {
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = `prescription-${prescription?.prescriptionId || "unknown"}.png`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          });
+        });
+      } catch (error) {
+        console.error("Error generating image:", error);
+      } finally {
+        setDownloading(null);
+      }
+    };
+
+    const downloadAsDocument = async () => {
+      setDownloading("doc");
+      console.log("doc");
+      try {
+        const doc = new Document({
+          sections: [
+            {
+              children: [
+                new Paragraph({
+                  text: "PRESCRIPTION",
+                  bold: true,
+                  size: 32,
+                }),
+                new Paragraph({
+                  text: `ID: ${prescription?.prescriptionId}`,
+                  size: 20,
+                }),
+                new Paragraph({ text: "" }),
+
+                // Doctor and Patient Info
+                new Table({
+                  width: { size: 100, type: "pct" },
+                  rows: [
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          children: [
+                            new Paragraph({ text: "Doctor:", bold: true }),
+                          ],
+                        }),
+                        new TableCell({
+                          children: [
+                            new Paragraph({ text: prescription?.doctorName }),
+                          ],
+                        }),
+                      ],
+                    }),
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          children: [
+                            new Paragraph({ text: "Patient:", bold: true }),
+                          ],
+                        }),
+                        new TableCell({
+                          children: [
+                            new Paragraph({
+                              text: `${prescription?.patientName}, Age ${prescription?.patientAge}`,
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          children: [
+                            new Paragraph({ text: "Date:", bold: true }),
+                          ],
+                        }),
+                        new TableCell({
+                          children: [
+                            new Paragraph({
+                              text: formatDate(prescription?.createdAt),
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                new Paragraph({ text: "" }),
+
+                // Reason for Visit
+                new Paragraph({
+                  text: "Reason for Visit:",
+                  bold: true,
+                  size: 24,
+                }),
+                new Paragraph({ text: prescription?.reasonForVisit }),
+                new Paragraph({ text: "" }),
+
+                // Primary Diagnosis
+                new Paragraph({
+                  text: "Primary Diagnosis:",
+                  bold: true,
+                  size: 24,
+                }),
+                new Paragraph({ text: prescription?.primaryDiagnosis }),
+                new Paragraph({ text: "" }),
+
+                // Symptoms
+                new Paragraph({ text: "Symptoms:", bold: true, size: 24 }),
+                new Paragraph({ text: prescription?.symptoms }),
+                new Paragraph({ text: "" }),
+
+                // Medications
+                new Paragraph({ text: "Medications:", bold: true, size: 24 }),
+                ...(prescription?.medication
+                  ?.flatMap((med) => [
+                    new Paragraph({
+                      text: `${med?.medecineName} - ${med?.medecineDosage}`,
+                      bold: true,
+                    }),
+                    new Paragraph({
+                      text: `Frequency: ${med?.frequency} | Duration: ${med?.duration} | Quantity: ${med?.quantity}`,
+                      indent: { left: 720 },
+                    }),
+                    med?.instructions
+                      ? new Paragraph({
+                          text: `Instructions: ${med?.instructions}`,
+                          indent: { left: 720 },
+                        })
+                      : null,
+                    new Paragraph({ text: "" }),
+                  ])
+                  .filter(Boolean) || []),
+
+                // Restrictions
+                prescription?.restrictions
+                  ? [
+                      new Paragraph({
+                        text: "Restrictions:",
+                        bold: true,
+                        size: 24,
+                      }),
+                      new Paragraph({ text: prescription?.restrictions }),
+                      new Paragraph({ text: "" }),
+                    ]
+                  : [],
+
+                // Follow-up
+                prescription?.followUpDate
+                  ? [
+                      new Paragraph({
+                        text: "Follow-up Date:",
+                        bold: true,
+                        size: 24,
+                      }),
+                      new Paragraph({
+                        text: formatDate(prescription?.followUpDate),
+                      }),
+                    ]
+                  : [],
+              ].flat(),
+            },
+          ],
+        });
+
+        const blob = await Packer.toBlob(doc);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `prescription-${prescription?.prescriptionId}.docx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Error generating document:", error);
+      } finally {
+        setDownloading(null);
+      }
+    };
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -144,7 +386,7 @@ export default function Prescription() {
           </div>
 
           {/* Content */}
-          <div className="overflow-y-auto flex-1 p-6">
+          <div ref={contentRef} className="overflow-y-auto flex-1 p-6">
             {/* Doctor and Date Info */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="bg-gray-100 px-4 py-1 rounded-lg">
@@ -167,8 +409,7 @@ export default function Prescription() {
                   <span className="font-semibold">Patient Name</span>
                 </div>
                 <p className="text-lg">
-                  {formatDate(prescription?.patientName)} •{" "}
-                  {prescription.patientAge}
+                  {prescription?.patientName} • {prescription.patientAge}
                 </p>
               </div>
             </div>
@@ -536,6 +777,52 @@ export default function Prescription() {
           </div>
 
           {/* Footer */}
+          <div className="bg-gray-50 p-4 flex justify-between gap-3 border-t flex-wrap">
+            <div className="flex gap-2">
+              <button
+                onClick={downloadAsPDF}
+                disabled={downloading === "pdf"}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition disabled:opacity-50"
+              >
+                <Download className="h-4 w-4 inline mr-2" />
+                {downloading === "pdf" ? "Generating PDF..." : "PDF"}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  downloadAsImage();
+                }}
+                disabled={downloading === "image"}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition disabled:opacity-50"
+              >
+                <Download className="h-4 w-4 inline mr-2" />
+                {downloading === "image" ? "Generating Image..." : "Image"}
+              </button>
+              <button
+                onClick={downloadAsDocument}
+                disabled={downloading === "doc"}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition disabled:opacity-50"
+              >
+                <FileText className="h-4 w-4 inline mr-2" />
+                {downloading === "doc" ? "Generating Doc..." : "Word Doc"}
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => window.print()}
+                className="px-6 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition"
+              >
+                Print
+              </button>
+              <button
+                onClick={onClose}
+                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
           <div className="bg-gray-50 p-4 flex justify-end gap-3 border-t">
             <button
               onClick={onClose}
@@ -628,9 +915,9 @@ export default function Prescription() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
-          {prescription.map((prescription) => (
+          {prescription?.map((prescription) => (
             <PrescriptionCard
-              key={prescription.prescriptionId}
+              key={prescription?.prescriptionId}
               prescription={prescription}
               onInfoClick={handleInfoClick}
             />
