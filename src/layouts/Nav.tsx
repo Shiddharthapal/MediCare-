@@ -177,21 +177,17 @@ export default function Navigation() {
                     align="end"
                     className="w-56 border border-gray-700"
                   >
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to={
-                          isAdmin
-                            ? "/admin/profile"
-                            : isDoctor
-                              ? "/profilefordoctor"
-                              : "/profile"
-                        }
-                        className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
-                      >
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
+                    {!isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to={isDoctor ? "/profilefordoctor" : "/profile"}
+                          className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
+                        >
+                          <User className="mr-2 h-4 w-4" />
+                          Profile
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
 
                     {isAdmin && (
                       <DropdownMenuItem asChild>
@@ -199,7 +195,7 @@ export default function Navigation() {
                           to="/admin"
                           className="flex flex-row items-center gap-2 px-2 py-1 hover:bg-gray-200 hover:rounded-sm"
                         >
-                          <Shield className="mr-2 h-4 w-4" />
+                          <Shield className="mr-2 h-4 w-4 text-green-500" />
                           Dashboard
                         </Link>
                       </DropdownMenuItem>

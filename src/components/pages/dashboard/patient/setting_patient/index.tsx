@@ -20,29 +20,41 @@ export default function SettingPatient({
   onNavigate?: (page: string) => void;
 }) {
   return (
-    <div className="p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="w-full">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted-foreground mt-2">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="text-gray-600 mt-2">
             Manage your account settings and preferences
           </p>
         </div>
 
         {/* Tabs */}
         <Tabs defaultValue="general" className="w-full space-y-6 ">
-          <TabsList className="w-full grid grid-cols-4 gap-0 p-0 bg-gray-300 ">
-            <TabsTrigger value="general" className="flex-1 ml-1">
+          <TabsList className="w-full grid grid-cols-4 bg-gray-200 p-1 rounded-lg h-12">
+            <TabsTrigger
+              value="general"
+              className="h-full data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all font-medium"
+            >
               General
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex-1 ">
-              Notifications
+            <TabsTrigger
+              value="practice"
+              className="h-full data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all font-medium"
+            >
+              Practice
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex-1 ">
+            <TabsTrigger
+              value="security"
+              className="h-full data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all font-medium"
+            >
               Security
             </TabsTrigger>
-            <TabsTrigger value="billing" className="flex-1 mr-1">
+            <TabsTrigger
+              value="billing"
+              className="h-full data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all font-medium"
+            >
               Billing
             </TabsTrigger>
           </TabsList>

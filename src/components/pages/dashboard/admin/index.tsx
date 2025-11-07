@@ -36,8 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Appointments from "./appointments";
 import Doctors from "./doctor";
 import Patients from "./patients";
-import Setting from "./settings";
-import Records from "./records";
+import Setting from "./settings_admin/index";
 import Document from "./document";
 import Prescription from "./prescription";
 
@@ -908,7 +907,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        
+
         {currentPage === "settings" && (
           <div className="h-screen  p-6 lg:p-6 ">
             <div className="max-w-6xl mx-auto">
