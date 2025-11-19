@@ -9,7 +9,7 @@ export default function Layout() {
       </div>
 
       {/* Scrollable Content Area */}
-      <div className="flex-1  pt-16">
+      <div className="flex-1  pt-14">
         {" "}
         {/* Adjust pt-16 to match your navbar height */}
         <Outlet />

@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -66,6 +66,7 @@ interface PatientDataErrors {
   dateOfBirth?: string;
 }
 
+const BUNNY_CDN_PULL_ZONE = "my-lulu.b-cdn.net";
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 //Helper function without timezone issues
@@ -91,16 +92,18 @@ export default function PatientProfileForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<PatientData>>({});
-  const { toast } = useToast();
-  const dispatch = useAppDispatch();
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isShowingSavedData, setIsShowingSavedData] = useState(false);
   const [savedPatientId, setSavedPatientId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id || null;
-  const navigate = useNavigate();
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
   // Dummy data representing an existing patient
   const dummyPatientData: PatientData = {
     email: "",
@@ -115,6 +118,30 @@ export default function PatientProfileForm() {
     weight: "",
     height: "",
   };
+
+  //set up the avatar area when click on it open the computer to add picture
+  const handleAvatarClick = () => {
+    if (isEditing) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  //handler function to get avatar pic from bunny cdn
+  const getBunnyCDNUrl = (document) => {
+    const path = `${document.userId}/image/${document?.filename}`;
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
+  };
+
+  const images = formdata?.image;
+  let documentimage: string | undefined;
+
+  if (images && images.length > 0) {
+    const lastImage = images[images.length - 1];
+    documentimage = getBunnyCDNUrl(lastImage);
+    console.log("🧞‍♂️ documentimage --->", documentimage);
+  } else {
+    console.log("🧞‍♂️ No images available");
+  }
 
   // Update the initial formData state to use dummy data:
   const initialFormData = dummyPatientData;
@@ -161,6 +188,7 @@ export default function PatientProfileForm() {
     navigate(-1);
   };
 
+  //handler file to create profile
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -230,6 +258,41 @@ export default function PatientProfileForm() {
     }
   };
 
+  //handler function to set profile/avatar preview
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const validExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+    if (!fileExtension || !validExtensions.includes(fileExtension)) {
+      alert("Please select a valid image file");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const preview = reader.result as string;
+      setAvatarPreview(preview);
+
+      const fileData = {
+        name: file.name,
+        documentName: file.name.replace(/\.[^/.]+$/, ""),
+        size: file.size,
+        type: file.type,
+        file: file,
+        preview: preview,
+      };
+
+      setUploadedFiles([fileData]);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
   const resetForm = () => {
     setFormData(initialFormData);
     setErrors({});
@@ -275,6 +338,55 @@ export default function PatientProfileForm() {
           )}
         </CardHeader>
         <CardContent>
+          {/* <div>
+            <div className="flex flex-col items-center gap-3">
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                className={`relative w-24 h-24 rounded-full transition-opacity ${
+                  isEditing
+                    ? "hover:opacity-80 cursor-pointer"
+                    : "cursor-default opacity-90"
+                }`}
+                disabled={!isEditing}
+              >
+                {documentimage || avatarPreview ? (
+                  <img
+                    src={avatarPreview || documentimage}
+                    alt="Channel avatar"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-300 to-blue-200 flex items-center justify-center border-4 border-blue-200">
+                    <svg
+                      className="w-16 h-16 text-blue-600"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4m0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                  </div>
+                )}
+              </button>
+
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={handleAvatarClick}
+                  className="text-lg font-medium text-blue-400 hover:text-blue-300 transition-colors cursor-pointer active:scale-95"
+                >
+                  Select picture
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+          </div> */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information */}
             <div className="space-y-4">

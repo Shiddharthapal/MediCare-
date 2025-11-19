@@ -219,8 +219,7 @@ export default function Login() {
                 <div className="mt-5">
                   {error && <p className="text-sm text-red-500">{error}</p>} 
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {" "}
-                           {loading ? "Loading..." : `Login as Admin`}         
+                    {loading ? "Loading..." : `Login as Admin`}         
                   </Button>
                 </div>
                 <div className="text-center text-sm mt-2">
@@ -234,7 +233,6 @@ export default function Login() {
               </form>
             ) : (
               <form onSubmit={handleSubmit(onSubmit)} className="">
-                {" "}
                          
                 <div className="space-y-2 mb-5">
                   <Label htmlFor="email">Email</Label>   
