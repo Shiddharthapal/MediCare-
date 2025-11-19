@@ -13,13 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
   Search,
   FileText,
   FilePlus,
@@ -41,6 +34,29 @@ import {
   Check,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
+
+interface FileUpload {
+  _id: string;
+  patientId: string;
+  doctorId: string;
+  filename: string;
+  patientName: string;
+  documentName: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
+  userIdWHUP?: string;
+  appointmentId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // Mock document data
 const documentData = [
@@ -232,7 +248,7 @@ const documentData = [
 // Group documents by date
 const groupDocumentsByDate = (documents: any[]) => {
   return documents.reduce((groups: any, document) => {
-    const date = document.date;
+    const date = document.createdAt;
     if (!groups[date]) {
       groups[date] = [];
     }
@@ -262,13 +278,11 @@ export default function Reports() {
     {}
   );
   const [uploadDocumentCategory, setUploadDocumentCategory] = useState("");
-  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
-
   const filteredDocuments = documentData.filter((document) => {
     const matchesSearch =
       document.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -282,10 +296,30 @@ export default function Reports() {
     return matchesSearch && matchesCategory;
   });
 
-  const groupedDocuments = groupDocumentsByDate(filteredDocuments);
+  //to fetch userdata
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let response = await fetch(`/api/user/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        let userdata = await response.json();
+        setUploadedFiles(userdata?.userdetails?.upload);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, [user?._id]);
+
+  const groupedDocuments = groupDocumentsByDate(uploadedFiles);
   const sortedDates = Object.keys(groupedDocuments).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
+  console.log("🧞‍♂️  sortedDates --->", sortedDates);
 
   const toggleDateExpansion = (date: string) => {
     setExpandedDates((prev) => ({
@@ -400,6 +434,25 @@ export default function Reports() {
     debounceTimersRef.current[index] = timerId;
   };
 
+  //add the download handler function
+  const handleDownload = async (document: FileUpload) => {
+    try {
+      const response = await fetch(document.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = document.originalName;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file");
+    }
+  };
+
   //Handle the file when you want to save it
   const handleSaveDocuments = async () => {
     if (!uploadDocumentCategory) {
@@ -456,64 +509,97 @@ export default function Reports() {
     }
   };
 
-  const DocumentCard = ({ document }: { document: any }) => {
-    const Icon = document.icon || FileText;
+  const DocumentCard = ({ document }: { document: FileUpload }) => {
+    const [previewError, setPreviewError] = useState(false);
+    const extension = document?.fileType.split("/")[1] || "bin";
+    // Common image extensions
+    const imageExtensions = [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "webp",
+      "svg",
+      "bmp",
+      "ico",
+    ];
+    const isImage = imageExtensions.includes(extension);
+    const isPDF = document.fileType === "application/pdf";
+    const Icon = FileText;
+
     return (
       <Card className="hover:shadow-md transition-shadow duration-200">
         <CardContent className="p-4">
           <div className="flex items-start gap-4">
-            <div className="bg-gray-100 rounded-lg p-3">
-              <Icon className="h-6 w-6 text-blue-600" />
+            <div className="bg-gray-100 rounded-lg p-1">
+              {(isImage || isPDF) && !previewError ? (
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <div className="bg-muted px-4 py-2">
+                    <h3 className="text-sm font-semibold text-foreground mb-2">
+                      Preview
+                    </h3>
+                  </div>
+                  <div className="p-4 bg-background">
+                    {isImage ? (
+                      <img
+                        src={document.url}
+                        alt={document.originalName}
+                        className="max-w-full h-auto max-h-96 mx-auto rounded-lg"
+                        onError={() => setPreviewError(true)}
+                      />
+                    ) : isPDF ? (
+                      <iframe
+                        src={document.url}
+                        className="w-full h-auto max-h-96 rounded-lg"
+                        title={document.originalName}
+                        onError={() => setPreviewError(true)}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              ) : (
+                <Icon className="h-6 w-6 text-blue-600" />
+              )}
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <h3 className="font-medium text-gray-900 truncate">
-                    {document.title}
+                    {document?.documentName ||
+                      document?.filename ||
+                      document?.originalName}
                   </h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {document.description}
-                  </p>
                 </div>
-                <Badge className={getCategoryColor(document.category)}>
-                  {document.category}
+                <Badge className={getCategoryColor(document.fileType)}>
+                  {document?.category}
                 </Badge>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mt-2">
-                {document.tags.map((tag: string, index: number) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
               </div>
 
               <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Calendar className="h-4 w-4" />
-                  <span>{new Date(document.date).toLocaleDateString()}</span>
-                  <span className="text-gray-400">•</span>
-                  <span>{document.doctor}</span>
+                  <span>
+                    {new Date(document.updatedAt).toLocaleDateString()}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    onClick={() => handleViewDocument(document)}
+                    onClick={() => window.open(document.url, "_blank")}
+                    className="text-blue-600 hover:text-blue-700"
                   >
                     <Eye className="h-4 w-4 mr-1" />
                     View
                   </Button>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
-                    onClick={() => handleDownloadDocument(document)}
+                    onClick={() => handleDownload(document)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary
+                                 text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
                   >
-                    <Download className="h-4 w-4 mr-1" />
+                    <Download className="w-4 h-4" />
                     Download
                   </Button>
                 </div>
@@ -544,157 +630,6 @@ export default function Reports() {
           <FilePlus className="h-4 w-4 mr-2" />
           Upload Document
         </Button>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="space-y-4">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search documents by title, doctor, or tags..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-          </Button>
-        </div>
-
-        {showFilters && (
-          <Card className="bg-gray-50 border-gray-200">
-            <CardContent className="p-4">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Document Type
-                  </label>
-                  <Tabs
-                    value={selectedCategory}
-                    onValueChange={setSelectedCategory}
-                    className="w-full"
-                  >
-                    <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                      {categories.map((category) => (
-                        <TabsTrigger
-                          key={category.value}
-                          value={category.value}
-                          className="text-xs md:text-sm"
-                        >
-                          {category.label}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Date Range
-                    </label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="date"
-                        placeholder="From"
-                        className="flex-1"
-                      />
-                      <Input type="date" placeholder="To" className="flex-1" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Doctor
-                    </label>
-                    <select className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                      <option value="">All Doctors</option>
-                      <option value="Dr. Emily Davis">Dr. Emily Davis</option>
-                      <option value="Dr. Sarah Wilson">Dr. Sarah Wilson</option>
-                      <option value="Dr. James Rodriguez">
-                        Dr. James Rodriguez
-                      </option>
-                      <option value="Dr. Michael Chen">Dr. Michael Chen</option>
-                      <option value="Dr. Maria Garcia">Dr. Maria Garcia</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-600 font-medium">
-                  Total Documents
-                </p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {documentData.length}
-                </p>
-              </div>
-              <FileText className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-purple-600 font-medium">
-                  Lab Reports
-                </p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {documentData.filter((d) => d.type === "lab-report").length}
-                </p>
-              </div>
-              <FlaskConical className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-600 font-medium">
-                  Prescriptions
-                </p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {documentData.filter((d) => d.type === "prescription").length}
-                </p>
-              </div>
-              <Pill className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-amber-50 border-amber-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-amber-600 font-medium">Imaging</p>
-                <p className="text-2xl font-bold text-amber-900">
-                  {documentData.filter((d) => d.type === "imaging").length}
-                </p>
-              </div>
-              <FileText className="h-8 w-8 text-amber-500" />
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Documents by Date */}
