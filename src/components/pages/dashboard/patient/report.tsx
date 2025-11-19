@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -19,13 +18,6 @@ import {
   Calendar,
   Download,
   Eye,
-  Filter,
-  Pill,
-  FlaskConical,
-  Heart,
-  Brain,
-  Bone,
-  Stethoscope,
   ChevronDown,
   ChevronUp,
   X,
@@ -58,193 +50,6 @@ interface FileUpload {
   updatedAt: Date;
 }
 
-// Mock document data
-const documentData = [
-  {
-    id: 1,
-    title: "Blood Test Results",
-    type: "lab-report",
-    category: "Laboratory",
-    date: "2024-01-05",
-    doctor: "Dr. Emily Davis",
-    description: "Complete blood count (CBC) and metabolic panel results",
-    fileSize: "2.4 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Blood Test", "CBC", "Routine"],
-    icon: FlaskConical,
-  },
-  {
-    id: 2,
-    title: "Prescription - Loratadin",
-    type: "prescription",
-    category: "Medication",
-    date: "2024-01-05",
-    doctor: "Dr. Emily Davis",
-    description: "Prescription for Loratadin 5mg, twice daily for allergies",
-    fileSize: "1.1 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Allergy", "Medication"],
-    icon: Pill,
-  },
-  {
-    id: 3,
-    title: "MRI Scan Report",
-    type: "imaging",
-    category: "Radiology",
-    date: "2023-12-28",
-    doctor: "Dr. James Rodriguez",
-    description: "MRI scan of the right knee showing minor meniscus tear",
-    fileSize: "8.7 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["MRI", "Knee", "Orthopedic"],
-    icon: Bone,
-  },
-  {
-    id: 4,
-    title: "Cardiology Consultation Notes",
-    type: "consultation",
-    category: "Cardiology",
-    date: "2023-12-20",
-    doctor: "Dr. Sarah Wilson",
-    description: "Follow-up consultation notes regarding heart palpitations",
-    fileSize: "1.8 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Heart", "Consultation", "Follow-up"],
-    icon: Heart,
-  },
-  {
-    id: 5,
-    title: "Prescription - Brocopan",
-    type: "prescription",
-    category: "Medication",
-    date: "2023-12-20",
-    doctor: "Dr. Sarah Wilson",
-    description: "Prescription for Brocopan 50mg for abdominal pain",
-    fileSize: "1.0 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Medication", "Digestive"],
-    icon: Pill,
-  },
-  {
-    id: 6,
-    title: "Annual Physical Examination",
-    type: "examination",
-    category: "General",
-    date: "2023-12-15",
-    doctor: "Dr. Emily Davis",
-    description: "Annual physical examination results and recommendations",
-    fileSize: "3.2 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Annual", "Physical", "Checkup"],
-    icon: Stethoscope,
-  },
-  {
-    id: 7,
-    title: "Cholesterol Test Results",
-    type: "lab-report",
-    category: "Laboratory",
-    date: "2023-12-15",
-    doctor: "Dr. Emily Davis",
-    description: "Lipid profile showing cholesterol levels and triglycerides",
-    fileSize: "1.5 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Cholesterol", "Lipid", "Blood Test"],
-    icon: FlaskConical,
-  },
-  {
-    id: 8,
-    title: "Neurological Assessment",
-    type: "consultation",
-    category: "Neurology",
-    date: "2023-11-30",
-    doctor: "Dr. Maria Garcia",
-    description:
-      "Comprehensive neurological assessment for recurring headaches",
-    fileSize: "4.3 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Neurology", "Headache", "Assessment"],
-    icon: Brain,
-  },
-  {
-    id: 9,
-    title: "Prescription - Myticarin",
-    type: "prescription",
-    category: "Medication",
-    date: "2023-11-30",
-    doctor: "Dr. Maria Garcia",
-    description: "Prescription for Myticarin 5mg for migraine prevention",
-    fileSize: "0.9 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Medication", "Migraine", "Prevention"],
-    icon: Pill,
-  },
-  {
-    id: 10,
-    title: "Echocardiogram Report",
-    type: "imaging",
-    category: "Cardiology",
-    date: "2023-11-15",
-    doctor: "Dr. Sarah Wilson",
-    description:
-      "Echocardiogram showing normal heart function and valve movement",
-    fileSize: "7.2 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Heart", "Echo", "Imaging"],
-    icon: Heart,
-  },
-  {
-    id: 11,
-    title: "Allergy Test Results",
-    type: "lab-report",
-    category: "Laboratory",
-    date: "2023-10-28",
-    doctor: "Dr. Michael Chen",
-    description:
-      "Comprehensive allergy panel showing sensitivities to various allergens",
-    fileSize: "2.8 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Allergy", "Test", "Sensitivity"],
-    icon: FlaskConical,
-  },
-  {
-    id: 12,
-    title: "Dermatology Consultation",
-    type: "consultation",
-    category: "Dermatology",
-    date: "2023-10-15",
-    doctor: "Dr. Michael Chen",
-    description: "Consultation notes regarding skin rash and treatment plan",
-    fileSize: "2.1 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Skin", "Rash", "Dermatology"],
-    icon: FileText,
-  },
-];
-
 // Group documents by date
 const groupDocumentsByDate = (documents: any[]) => {
   return documents.reduce((groups: any, document) => {
@@ -256,16 +61,6 @@ const groupDocumentsByDate = (documents: any[]) => {
     return groups;
   }, {});
 };
-
-// Document categories
-const categories = [
-  { value: "all", label: "All Documents" },
-  { value: "lab-report", label: "Lab Reports" },
-  { value: "prescription", label: "Prescriptions" },
-  { value: "imaging", label: "Imaging" },
-  { value: "consultation", label: "Consultations" },
-  { value: "examination", label: "Examinations" },
-];
 
 export default function Reports() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -283,18 +78,6 @@ export default function Reports() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
-  const filteredDocuments = documentData.filter((document) => {
-    const matchesSearch =
-      document.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      document.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      document.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      document.tags.some((tag) =>
-        tag.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    const matchesCategory =
-      selectedCategory === "all" || document.type === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
 
   //to fetch userdata
   useEffect(() => {
@@ -315,11 +98,15 @@ export default function Reports() {
     fetchData();
   }, [user?._id]);
 
-  const groupedDocuments = groupDocumentsByDate(uploadedFiles);
-  const sortedDates = Object.keys(groupedDocuments).sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime()
-  );
-  console.log("🧞‍♂️  sortedDates --->", sortedDates);
+  const groupedDocuments = useMemo(() => {
+    return groupDocumentsByDate(uploadedFiles);
+  }, [uploadedFiles]);
+
+  const sortedDates = useMemo(() => {
+    return Object.keys(groupedDocuments).sort(
+      (a, b) => new Date(b).getTime() - new Date(a).getTime()
+    );
+  }, [groupedDocuments]);
 
   const toggleDateExpansion = (date: string) => {
     setExpandedDates((prev) => ({
