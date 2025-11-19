@@ -9,7 +9,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     //console.log("🧞‍♂️body --->", body);
-    const { email, password, registrationType } = body;
+    const { email, password, role } = body;
     //console.log("email=>", email);
     //console.log("pass=>", password);
     //console.log("registrationMethod=>", registrationType);
@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ request }) => {
     await connect();
 
     //check login for user or doctor
-    if (registrationType === "user") {
+    if (role === "user") {
       const users = await User.findOne({
         email: email,
       });

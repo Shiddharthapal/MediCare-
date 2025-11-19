@@ -80,9 +80,11 @@ export default function Register() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-200">
-      <Card className="w-[350px]">
+      <Card className="w-[450px]">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Register</CardTitle>
+          <CardTitle className="text-2xl text-center">
+            Register as User
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -93,7 +95,7 @@ export default function Register() {
                   id="email"
                   type="email"
                   placeholder="medicare+@aiuser.com"
-                  className="bordar-2 border-black shadow-md"
+                  className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                   {...register("email", {
                     required: "Email is required",
                     pattern:
@@ -114,7 +116,7 @@ export default function Register() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  className="bordar-2 border-black shadow-md"
+                  className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
@@ -149,7 +151,7 @@ export default function Register() {
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  className="bordar-2 border-black shadow-md"
+                  className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                   {...register("confirmPassword", {
                     required: "Please confirm your password",
                     validate: (value) =>
@@ -180,7 +182,7 @@ export default function Register() {
 
             <Button
               type="submit"
-              className="w-full bg-gray-800"
+              className="w-full bg-[hsl(201,51%,50%)]"
               disabled={loading}
             >
               {loading ? "Loading..." : "Register"}

@@ -78,9 +78,11 @@ export default function Register() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-200">
-      <Card className="w-[350px]">
+      <Card className="w-[450px]">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Register</CardTitle>
+          <CardTitle className="text-2xl text-center">
+            Register as Doctor
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -90,7 +92,7 @@ export default function Register() {
                 <Input
                   id="email"
                   type="email"
-                  className="bordar-2 border-black shadow-md"
+                  className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                   placeholder="medicare+@aidoctor.com"
                   {...register("email", {
                     required: "Email is required",
@@ -108,7 +110,7 @@ export default function Register() {
               <Input
                 id="registrationNo"
                 type="registrationNo"
-                className="bordar-2 border-black shadow-md"
+                className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                 placeholder="0123456..."
                 {...register("registrationNo", {
                   required: "Registration no is require",
@@ -125,7 +127,7 @@ export default function Register() {
               <div className="relative">
                 <Input
                   id="password"
-                  className="bordar-2 border-black shadow-md"
+                  className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                   type={showPassword ? "text" : "password"}
                   {...register("password", {
                     required: "Password is required",
@@ -161,7 +163,7 @@ export default function Register() {
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  className="bordar-2 border-black shadow-md"
+                  className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                   {...register("confirmPassword", {
                     required: "Please confirm your password",
                     validate: (value) =>
@@ -192,17 +194,14 @@ export default function Register() {
 
             <Button
               type="submit"
-              className="w-full bg-gray-800"
+              className="w-full bg-[hsl(201,51%,50%)]"
               disabled={loading}
             >
               {loading ? "Loading..." : "Register"}
             </Button>
 
             <div className="text-center text-sm">
-              <Link
-                to="/loginasDoctor"
-                className="text-primary hover:underline"
-              >
+              <Link to="/loginasUser" className="text-primary hover:underline">
                 Already have an account? Login
               </Link>
             </div>
