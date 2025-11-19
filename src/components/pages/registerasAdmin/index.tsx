@@ -236,10 +236,7 @@ export default function Register() {
 
               {/* Login Link */}
               <div className="text-center text-sm">
-                <Link
-                  to="/loginasUser"
-                  className="text-primary hover:underline"
-                >
+                <Link to="/login" className="text-primary hover:underline">
                   Already have an account? Login
                 </Link>
               </div>

@@ -4,9 +4,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "@/redux/store";
 import Home from "./pages/home";
 import Layout from "../layouts/Layout";
-import LoginAsUser from "./pages/loginasUser";
-import LoginAsDoctor from "./pages/loginasdoctor";
-import LoginAsAdmin from "./pages/loginasAdmin";
+import LoginAsUser from "./pages/login";
 import RegisterAsUser from "./pages/registerasUser";
 import RegisterAsDoctor from "./pages/registerasDoctor";
 import RegisterAsAdmin from "./pages/registerasAdmin";
@@ -29,9 +27,7 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/loginasUser" element={<LoginAsUser />} />
-              <Route path="/loginasDoctor" element={<LoginAsDoctor />} />
-              <Route path="/loginasAdmin" element={<LoginAsAdmin />} />
+              <Route path="/login" element={<LoginAsUser />} />
               <Route path="/registerasUser" element={<RegisterAsUser />} />
               <Route path="/registerasDoctor" element={<RegisterAsDoctor />} />
               <Route path="/registerasAdmin" element={<RegisterAsAdmin />} />

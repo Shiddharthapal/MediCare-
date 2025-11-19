@@ -234,10 +234,7 @@ export default function Navigation() {
             ) : (
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <Link
-                    to="/loginasUser"
-                    className="flex items-center text-gray-900"
-                  >
+                  <Link to="/login" className="flex items-center text-gray-900">
                     <Button
                       variant="outline"
                       className="flex items-center gap-2"
