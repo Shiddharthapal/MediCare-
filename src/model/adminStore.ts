@@ -844,6 +844,72 @@ const AdminAppointmentSchema = new mongoose.Schema(
   { _id: true }
 );
 
+//schema for profile picture of user
+const UserImageSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+  },
+  userName: {
+    type: String,
+  },
+  filename: {
+    type: String,
+  },
+  documentName: {
+    type: String,
+  },
+  originalName: {
+    type: String,
+  },
+  fileType: {
+    type: String,
+  },
+  fileSize: {
+    type: Number,
+  },
+  path: {
+    type: String,
+  },
+  url: {
+    type: String,
+  },
+  checksum: {
+    type: String,
+  },
+  uploadedAt: {
+    type: Date,
+  },
+  deletedAt: {
+    type: Date,
+  },
+  createdAt: {
+    type: Date,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
+  },
+  updatedAt: {
+    type: Date,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
+  },
+});
+
 const RescheduleAppointmentSchema = new mongoose.Schema(
   {
     // Doctor Information
@@ -1232,6 +1298,14 @@ const adminStoreSchema = new mongoose.Schema({
   },
   cancelAppointment: {
     type: [AdminAppointmentSchema],
+    default: [],
+  },
+  userImage: {
+    type: [UserImageSchema],
+    default: [],
+  },
+  doctorImage: {
+    type: [UserImageSchema],
     default: [],
   },
   upload: {

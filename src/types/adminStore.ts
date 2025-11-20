@@ -317,6 +317,24 @@ interface RescheduleAppointment {
   createdAt?: Date;
 }
 
+interface UserImage {
+  userId: string;
+  userName: string;
+  email: string;
+  filename: string;
+  documentName: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: string;
+  deletedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface DoctorDetails {
   _id: string;
   userId: string;
@@ -399,6 +417,8 @@ export interface AdminStore {
   rescheduleAppointment: RescheduleAppointment[];
   cancelAppointment: Appointment[];
   upload: FileUpload[];
+  userImage: UserImage[];
+  doctorImage: UserImage[];
   prescription: AdminPrescription[];
   healthRecord: HealthRecord[];
   createdAt: Date;

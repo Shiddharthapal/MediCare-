@@ -318,6 +318,7 @@ const PrescriptionSchema = new mongoose.Schema(
   },
   { _id: true }
 );
+
 // Define the appointment data schema as a subdocument
 const appointmentDataSchema = new mongoose.Schema(
   {
@@ -435,6 +436,69 @@ const appointmentDataSchema = new mongoose.Schema(
   { _id: true }
 ); // This will auto-generate _id for each appointment
 
+//schema for profile picture of user
+const UserImageSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+  },
+  filename: {
+    type: String,
+  },
+  documentName: {
+    type: String,
+  },
+  originalName: {
+    type: String,
+  },
+  fileType: {
+    type: String,
+  },
+  fileSize: {
+    type: Number,
+  },
+  path: {
+    type: String,
+  },
+  url: {
+    type: String,
+  },
+  checksum: {
+    type: String,
+  },
+  uploadedAt: {
+    type: Date,
+  },
+  deletedAt: {
+    type: Date,
+  },
+  createdAt: {
+    type: Date,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
+  },
+  updatedAt: {
+    type: Date,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
+  },
+});
+
 const userDetailsSchema = new mongoose.Schema({
   userId: {
     type: String,
@@ -475,6 +539,9 @@ const userDetailsSchema = new mongoose.Schema({
   },
   height: {
     type: Number,
+  },
+  image: {
+    type: UserImageSchema,
   },
   appointments: {
     type: [appointmentDataSchema], // Changed from [String] to [appointmentDataSchema]

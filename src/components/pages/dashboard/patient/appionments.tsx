@@ -242,7 +242,7 @@ interface UploadedFile extends File {
 }
 
 // Add your Bunny CDN configuration
-const BUNNY_CDN_PULL_ZONE = "mypull-29.b-cdn.net";
+const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
 
 export default function Appointments({
   onNavigate,

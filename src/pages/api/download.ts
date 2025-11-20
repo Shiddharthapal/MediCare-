@@ -7,12 +7,12 @@ import connect from "@/lib/connection";
 import crypto from "crypto";
 
 const BUNNY_STORAGE_ZONE_NAME =
-  process.env.BUNNY_STORAGE_ZONE_NAME || "lufalufikoro";
+  process.env.BUNNY_STORAGE_ZONE_NAME || "side-effects";
 const BUNNY_STORAGE_REGION_HOSTNAME =
   process.env.BUNNY_STORAGE_REGION_HOSTNAME || "storage.bunnycdn.com";
 const BUNNY_STORAGE_API_KEY =
   process.env.BUNNY_STORAGE_API_KEY ||
-  "466dfc53-63c5-441e-9c6fbfed3248-ae77-43b5";
+  "9beb8922-fe4f-436f-8a74be6eea5e-a625-4332";
 // Max file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
