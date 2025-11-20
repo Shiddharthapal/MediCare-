@@ -41,6 +41,22 @@ import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 
+interface UserImage {
+  userId?: string;
+  filename?: string;
+  documentName?: string;
+  originalName?: string;
+  fileType?: string;
+  fileSize?: number;
+  path?: string;
+  url?: string;
+  checksum?: string;
+  uploadedAt?: string;
+  deletedAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 interface PatientData {
   email?: string;
   name: string;
@@ -50,6 +66,7 @@ interface PatientData {
   age: string;
   dateOfBirth: Date;
   bloodGroup: string;
+  image: UserImage;
   weight: string;
   height: string;
   gender: string;
@@ -86,6 +103,7 @@ export default function PatientProfileForm() {
     age: "",
     dateOfBirth: new Date("2016-03-24"),
     gender: " ",
+    image: {},
     weight: "",
     height: "",
     bloodGroup: "",
@@ -113,6 +131,7 @@ export default function PatientProfileForm() {
     contactNumber: "",
     age: "",
     dateOfBirth: new Date("2016-03-24"),
+    image: {},
     gender: "",
     bloodGroup: "",
     weight: "",
@@ -125,23 +144,6 @@ export default function PatientProfileForm() {
       fileInputRef.current?.click();
     }
   };
-
-  //handler function to get avatar pic from bunny cdn
-  const getBunnyCDNUrl = (document) => {
-    const path = `${document.userId}/image/${document?.filename}`;
-    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
-  };
-
-  const images = formdata?.image;
-  let documentimage: string | undefined;
-
-  if (images && images.length > 0) {
-    const lastImage = images[images.length - 1];
-    documentimage = getBunnyCDNUrl(lastImage);
-    console.log("🧞‍♂️ documentimage --->", documentimage);
-  } else {
-    console.log("🧞‍♂️ No images available");
-  }
 
   // Update the initial formData state to use dummy data:
   const initialFormData = dummyPatientData;
@@ -175,6 +177,22 @@ export default function PatientProfileForm() {
     };
     fetchData();
   }, [user]);
+
+  //handler function to get avatar pic from bunny cdn
+  const getBunnyCDNUrl = (document: UserImage) => {
+    const path = `${document.userId}/image/${document?.filename}`;
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
+  };
+
+  const images = formData?.image;
+  let documentimage: string | undefined;
+
+  if (images) {
+    documentimage = getBunnyCDNUrl(images);
+    console.log("🧞‍♂️ documentimage --->", documentimage);
+  } else {
+    console.log("🧞‍♂️ No images available");
+  }
 
   const handleInputChange = (field: keyof PatientData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -338,12 +356,12 @@ export default function PatientProfileForm() {
           )}
         </CardHeader>
         <CardContent>
-          {/* <div>
+          <div>
             <div className="flex flex-col items-center gap-3">
               <button
                 type="button"
                 onClick={handleAvatarClick}
-                className={`relative w-24 h-24 rounded-full transition-opacity ${
+                className={`relative w-28 h-28 rounded-full transition-opacity ${
                   isEditing
                     ? "hover:opacity-80 cursor-pointer"
                     : "cursor-default opacity-90"
@@ -359,7 +377,7 @@ export default function PatientProfileForm() {
                 ) : (
                   <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-300 to-blue-200 flex items-center justify-center border-4 border-blue-200">
                     <svg
-                      className="w-16 h-16 text-blue-600"
+                      className="w-18 h-18 text-blue-600"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -386,7 +404,7 @@ export default function PatientProfileForm() {
                 className="hidden"
               />
             </div>
-          </div> */}
+          </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information */}
             <div className="space-y-4">
