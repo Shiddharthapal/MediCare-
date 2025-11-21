@@ -157,6 +157,25 @@ export default function Reports() {
     }
   };
 
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowUploadModal(false);
+      }
+    };
+
+    // Add event listener when modal is shown
+    if (showUploadModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showUploadModal]);
+
   const handleFileUpload = (files: FileList) => {
     const newFiles = Array.from(files).map((file) => {
       const fileData: any = {
@@ -300,7 +319,7 @@ export default function Reports() {
           </p>
         </div>
         <Button
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          className="bg-blue-600 hover:bg-blue-700 text-white focus:ring-0"
           onClick={() => setShowUploadModal(true)}
         >
           <FilePlus className="h-4 w-4 mr-2" />
@@ -735,7 +754,7 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
                     document?.originalName}
                 </h3>
               </div>
-              <Badge className={getCategoryColor(document.fileType)}>
+              <Badge className={getCategoryColor(document?.category)}>
                 {document?.category}
               </Badge>
             </div>
