@@ -540,9 +540,6 @@ const userDetailsSchema = new mongoose.Schema({
   height: {
     type: Number,
   },
-  image: {
-    type: UserImageSchema,
-  },
   appointments: {
     type: [appointmentDataSchema], // Changed from [String] to [appointmentDataSchema]
     default: [], // Optional: set default empty array

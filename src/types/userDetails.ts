@@ -159,7 +159,6 @@ export interface UserDetails {
   appointments: AppointmentData[];
   payment: PaymentMethods;
   upload: FileUpload[];
-  image: UserImage;
   healthRecord: HealthRecord[];
   lastTreatmentDate?: Date;
   createdAt: Date;

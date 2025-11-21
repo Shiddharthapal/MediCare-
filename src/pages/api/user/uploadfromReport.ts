@@ -31,6 +31,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Parse FormData
     const formData = await request.formData();
+    console.log("🧞‍♂️  formData --->", formData);
 
     // Extract fields
     const userId = formData.get("userId") as string;
@@ -169,6 +170,7 @@ export const POST: APIRoute = async ({ request }) => {
 
       //unique file name add the extension of the file
       destinationPath += `/${uniqueFilename}`;
+      console.log("🧞‍♂️  destinationPath --->", destinationPath);
 
       //Here use try-catch for unexpected error
       try {
@@ -179,9 +181,11 @@ export const POST: APIRoute = async ({ request }) => {
           file.type,
           checksum
         );
+        console.log("🧞‍♂️  response --->", response);
 
         // Construct public URL
         const publicUrl = `https://${BUNNY_STORAGE_REGION_HOSTNAME}/${BUNNY_STORAGE_ZONE_NAME}/${destinationPath}`;
+        console.log("🧞‍♂️  publicUrl --->", publicUrl);
 
         // Prepare upload data
         const uploadfile = {

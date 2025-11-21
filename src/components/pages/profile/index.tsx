@@ -36,7 +36,7 @@ import { loginSuccess } from "@/redux/slices/authSlice";
 
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CalendarIcon } from "lucide-react";
+import { Loader2, CalendarIcon, Check } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -114,6 +114,7 @@ export default function PatientProfileForm() {
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isShowingSavedData, setIsShowingSavedData] = useState(false);
   const [savedPatientId, setSavedPatientId] = useState<string | null>(null);
+  const [showBloodDropdown, setShowBloodDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
   const navigate = useNavigate();
@@ -319,6 +320,11 @@ export default function PatientProfileForm() {
     setIsEditing(false);
   };
 
+  const handleBloodGroupSelect = (group: string) => {
+    handleInputChange("gender", group);
+    setShowBloodDropdown(false);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <Card className="border border-gray-700 mt-2 mb-5">
@@ -356,7 +362,7 @@ export default function PatientProfileForm() {
           )}
         </CardHeader>
         <CardContent>
-          <div>
+          {/* <div>
             <div className="flex flex-col items-center gap-3">
               <button
                 type="button"
@@ -404,7 +410,7 @@ export default function PatientProfileForm() {
                 className="hidden"
               />
             </div>
-          </div>
+          </div> */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information */}
             <div className="space-y-4">
@@ -841,34 +847,24 @@ export default function PatientProfileForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="weight">
-                    Weight (kg) <span className="text-red-500">*</span>
+                  <Label>
+                    Gender <span className="text-red-500">*</span>
                   </Label>
                   {isEditing ? (
-                    <>
-                      <Input
-                        id="weight"
-                        type="number"
-                        value={formData?.weight}
-                        onChange={(e) =>
-                          handleInputChange("weight", e.target.value)
-                        }
-                        placeholder="Enter weight"
-                        min="1"
-                        step="0.1"
-                        className={
-                          errors.weight ? "border-red-500" : "bg-white"
-                        }
-                      />
-                      {errors.weight && (
-                        <p className="text-sm text-red-500">{errors.weight}</p>
-                      )}
-                    </>
+                    <select
+                      value={formData?.gender}
+                      onChange={(e) =>
+                        handleInputChange("gender", e.target.value)
+                      }
+                      className={`border border-gray-200 p-1.5 mx-2  rounded-md ${errors.gender} ? "border-red-500" : ""`}
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
                   ) : (
                     <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                      {formData?.weight
-                        ? `${formData.weight} kg`
-                        : "Not provided"}
+                      {formData?.gender || "Not provided"}
                     </p>
                   )}
                 </div>
@@ -906,39 +902,34 @@ export default function PatientProfileForm() {
                   )}
                 </div>
                 <div className="space-y-2 ">
-                  <Label>
-                    Gender <span className="text-red-500">*</span>
+                  <Label htmlFor="weight">
+                    Weight (kg) <span className="text-red-500">*</span>
                   </Label>
                   {isEditing ? (
                     <>
-                      <Select
-                        value={formData?.gender}
-                        onValueChange={(value) =>
-                          handleInputChange("gender", value)
+                      <Input
+                        id="weight"
+                        type="number"
+                        value={formData?.weight}
+                        onChange={(e) =>
+                          handleInputChange("weight", e.target.value)
                         }
-                      >
-                        <SelectTrigger
-                          className={
-                            errors.gender
-                              ? "border-red-500 bg-white"
-                              : "bg-white"
-                          }
-                        >
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent className=" max-h-[200px]">
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.gender && (
-                        <p className="text-sm text-red-500">{errors.gender}</p>
+                        placeholder="Enter weight"
+                        min="1"
+                        step="0.1"
+                        className={
+                          errors.weight ? "border-red-500" : "bg-white"
+                        }
+                      />
+                      {errors.weight && (
+                        <p className="text-sm text-red-500">{errors.weight}</p>
                       )}
                     </>
                   ) : (
                     <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                      {formData?.gender || "Not provided"}
+                      {formData?.weight
+                        ? `${formData.weight} kg`
+                        : "Not provided"}
                     </p>
                   )}
                 </div>

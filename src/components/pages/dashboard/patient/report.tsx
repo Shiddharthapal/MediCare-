@@ -74,6 +74,7 @@ export default function Reports() {
   );
   const [uploadDocumentCategory, setUploadDocumentCategory] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([]);
+  const [uploadedFilesData, setUploadedFilesData] = useState<FileUpload[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
@@ -90,7 +91,7 @@ export default function Reports() {
           },
         });
         let userdata = await response.json();
-        setUploadedFiles(userdata?.userdetails?.upload);
+        setUploadedFilesData(userdata?.userdetails?.upload);
       } catch (err) {
         console.log(err);
       }
@@ -99,8 +100,8 @@ export default function Reports() {
   }, [user?._id]);
 
   const groupedDocuments = useMemo(() => {
-    return groupDocumentsByDate(uploadedFiles);
-  }, [uploadedFiles]);
+    return groupDocumentsByDate(uploadedFilesData);
+  }, [uploadedFilesData]);
 
   const sortedDates = useMemo(() => {
     return Object.keys(groupedDocuments).sort(
@@ -188,11 +189,14 @@ export default function Reports() {
 
   //Handle to get file icon
   const getFileIcon = (file: any) => {
-    if (file.type.includes("pdf")) {
+    if (file?.fileType?.includes("pdf")) {
       return <FileText className="h-8 w-8 text-red-500" />;
-    } else if (file.type.includes("image")) {
+    } else if (file?.fileType?.includes("image")) {
       return <FileText className="h-8 w-8 text-blue-500" />;
-    } else if (file.type.includes("document") || file.type.includes("word")) {
+    } else if (
+      file?.fileType?.includes("document") ||
+      file?.fileType?.includes("word")
+    ) {
       return <File className="h-8 w-8 text-blue-600" />;
     }
     return <FileText className="h-8 w-8 text-gray-500" />;
@@ -200,6 +204,11 @@ export default function Reports() {
 
   //Handle the file rename function with Debouncing
   const debounceTimersRef = useRef<Record<number, NodeJS.Timeout>>({});
+  useEffect(() => {
+    return () => {
+      Object.values(debounceTimersRef.current).forEach(clearTimeout);
+    };
+  }, []);
   const handleDocumentNameChange = (index: number, newName: string) => {
     // Clear existing timer for this index
     if (debounceTimersRef.current[index]) {
@@ -218,26 +227,8 @@ export default function Reports() {
       // This is where you could make an API call if needed
       console.log(`Document name updated for index ${index}: ${newName}`);
     }, 500); // 500ms delay
-    debounceTimersRef.current[index] = timerId;
-  };
 
-  //add the download handler function
-  const handleDownload = async (document: FileUpload) => {
-    try {
-      const response = await fetch(document.url);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = window.document.createElement("a");
-      a.href = url;
-      a.download = document.originalName;
-      window.document.body.appendChild(a);
-      a.click();
-      window.document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download failed:", error);
-      alert("Failed to download file");
-    }
+    debounceTimersRef.current[index] = timerId;
   };
 
   //Handle the file when you want to save it
@@ -282,7 +273,7 @@ export default function Reports() {
 
       setIsUploading(false);
       setShowUploadModal(false);
-      setUploadedFiles([]);
+      setUploadedFiles([...uploadedFilesData, result.data]);
       setUploadDocumentCategory("");
       alert(`Successfully uploaded ${uploadedFiles.length} document(s)!`);
     } catch (error) {
@@ -294,108 +285,6 @@ export default function Reports() {
           : "Failed to upload documents. Please try again."
       );
     }
-  };
-
-  const DocumentCard = ({ document }: { document: FileUpload }) => {
-    const [previewError, setPreviewError] = useState(false);
-    const extension = document?.fileType.split("/")[1] || "bin";
-    // Common image extensions
-    const imageExtensions = [
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "webp",
-      "svg",
-      "bmp",
-      "ico",
-    ];
-    const isImage = imageExtensions.includes(extension);
-    const isPDF = document.fileType === "application/pdf";
-    const Icon = FileText;
-
-    return (
-      <Card className="hover:shadow-md transition-shadow duration-200">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-4">
-            <div className="bg-gray-100 rounded-lg p-1">
-              {(isImage || isPDF) && !previewError ? (
-                <div className="border border-border rounded-lg overflow-hidden">
-                  <div className="bg-muted px-4 py-2">
-                    <h3 className="text-sm font-semibold text-foreground mb-2">
-                      Preview
-                    </h3>
-                  </div>
-                  <div className="p-4 bg-background">
-                    {isImage ? (
-                      <img
-                        src={document.url}
-                        alt={document.originalName}
-                        className="max-w-full h-auto max-h-96 mx-auto rounded-lg"
-                        onError={() => setPreviewError(true)}
-                      />
-                    ) : isPDF ? (
-                      <iframe
-                        src={document.url}
-                        className="w-full h-auto max-h-96 rounded-lg"
-                        title={document.originalName}
-                        onError={() => setPreviewError(true)}
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              ) : (
-                <Icon className="h-6 w-6 text-blue-600" />
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h3 className="font-medium text-gray-900 truncate">
-                    {document?.documentName ||
-                      document?.filename ||
-                      document?.originalName}
-                  </h3>
-                </div>
-                <Badge className={getCategoryColor(document.fileType)}>
-                  {document?.category}
-                </Badge>
-              </div>
-
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    {new Date(document.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.open(document.url, "_blank")}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
-                  <Button
-                    onClick={() => handleDownload(document)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary
-                                 text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
   };
 
   return (
@@ -743,3 +632,143 @@ export default function Reports() {
     </div>
   );
 }
+
+const DocumentCard = ({ document }: { document: FileUpload }) => {
+  const [previewError, setPreviewError] = useState(false);
+  const extension = document?.fileType?.split("/")[1] || "bin";
+  // Common image extensions
+  const imageExtensions = [
+    "jpg",
+    "jpeg",
+    "png",
+    "gif",
+    "webp",
+    "svg",
+    "bmp",
+    "ico",
+  ];
+  const isImage = imageExtensions.includes(extension);
+  const isPDF = document.fileType === "application/pdf";
+  const Icon = FileText;
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "Laboratory":
+        return "bg-purple-100 text-purple-800";
+      case "Medication":
+        return "bg-blue-100 text-blue-800";
+      case "Radiology":
+        return "bg-amber-100 text-amber-800";
+      case "Cardiology":
+        return "bg-red-100 text-red-800";
+      case "General":
+        return "bg-green-100 text-green-800";
+      case "Neurology":
+        return "bg-indigo-100 text-indigo-800";
+      case "Dermatology":
+        return "bg-pink-100 text-pink-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  //add the download handler function
+  const handleDownload = async (document: FileUpload) => {
+    try {
+      const response = await fetch(document.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = document.originalName;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file");
+    }
+  };
+
+  return (
+    <Card className="hover:shadow-md transition-shadow duration-200">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-4">
+          <div className="bg-gray-100 rounded-lg p-1">
+            {(isImage || isPDF) && !previewError ? (
+              <div className="border border-border rounded-lg overflow-hidden">
+                <div className="bg-muted px-4 py-2">
+                  <h3 className="text-sm font-semibold text-foreground mb-2">
+                    Preview
+                  </h3>
+                </div>
+                <div className="p-4 bg-background">
+                  {isImage ? (
+                    <img
+                      src={document.url}
+                      alt={document.originalName}
+                      className="max-w-full h-auto max-h-96 mx-auto rounded-lg"
+                      onError={() => setPreviewError(true)}
+                    />
+                  ) : isPDF ? (
+                    <iframe
+                      src={document.url}
+                      className="w-full h-auto max-h-96 rounded-lg"
+                      title={document.originalName}
+                      onError={() => setPreviewError(true)}
+                    />
+                  ) : null}
+                </div>
+              </div>
+            ) : (
+              <Icon className="h-6 w-6 text-blue-600" />
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="font-medium text-gray-900 truncate">
+                  {document?.documentName ||
+                    document?.filename ||
+                    document?.originalName}
+                </h3>
+              </div>
+              <Badge className={getCategoryColor(document.fileType)}>
+                {document?.category}
+              </Badge>
+            </div>
+
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <span>{new Date(document.updatedAt).toLocaleDateString()}</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.open(document.url, "_blank")}
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  View
+                </Button>
+                <Button
+                  onClick={() => handleDownload(document)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary
+                                 text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};

@@ -417,8 +417,6 @@ export interface AdminStore {
   rescheduleAppointment: RescheduleAppointment[];
   cancelAppointment: Appointment[];
   upload: FileUpload[];
-  userImage: UserImage[];
-  doctorImage: UserImage[];
   prescription: AdminPrescription[];
   healthRecord: HealthRecord[];
   createdAt: Date;

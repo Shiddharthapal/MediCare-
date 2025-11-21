@@ -1300,14 +1300,6 @@ const adminStoreSchema = new mongoose.Schema({
     type: [AdminAppointmentSchema],
     default: [],
   },
-  userImage: {
-    type: [UserImageSchema],
-    default: [],
-  },
-  doctorImage: {
-    type: [UserImageSchema],
-    default: [],
-  },
   upload: {
     type: [FileUploadSchema],
     default: [],
