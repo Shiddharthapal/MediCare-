@@ -55,17 +55,7 @@ interface PaymentMethods {
 
 export default function BillingSettings() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethods>({
-    cardMethods: [
-      {
-        cardholderName: "John Doe",
-        type: "VISA",
-        cardNumber: "4242424242424242",
-        expiryMonth: "12",
-        expiryYear: "2025",
-        cvv: "123",
-        isPrimary: true,
-      },
-    ],
+    cardMethods: [],
     mobileBankingMethods: [],
   });
 
@@ -101,8 +91,8 @@ export default function BillingSettings() {
       try {
         const response = await fetch(`/api/user/${id}`);
         const responsedata = await response.json();
-        if (responsedata.paymentMethods) {
-          setPaymentMethods(responsedata.paymentMethods);
+        if (responsedata?.userdetails?.payment) {
+          setPaymentMethods(responsedata?.userdetails?.payment);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -317,8 +307,8 @@ export default function BillingSettings() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background round p-2">
+      <div className="max-w-4xl mx-auto space-y-4">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">
             Billing Settings
@@ -454,7 +444,10 @@ export default function BillingSettings() {
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="w-full bg-transparent">
+                <Button
+                  variant="outline"
+                  className="w-full bg-transparent hover:text-[hsl(201,72%,39%)]"
+                >
                   Add New Payment Method
                 </Button>
               </DialogTrigger>

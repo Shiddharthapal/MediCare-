@@ -789,7 +789,7 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
                   onClick={() =>
                     window.open(getBunnyCDNUrl(document), "_blank")
                   }
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-[hsl(201,72%,39%)] hover:text-blue-700"
                 >
                   <Eye className="h-4 w-4 mr-1" />
                   View

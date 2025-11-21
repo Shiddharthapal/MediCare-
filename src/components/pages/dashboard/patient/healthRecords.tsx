@@ -139,7 +139,7 @@ export default function HealthRecords({
   };
 
   return (
-    <div className="min-h-screen  px-6 pb-6">
+    <div className="min-h-screen  px-0 pb-6">
       <div className="mx-auto max-w-6xl space-y-4">
         {/* Header */}
         <div className="space-y-2">
