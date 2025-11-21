@@ -527,6 +527,44 @@ export default function Appointments({
     };
   }, [showDetailsModal]);
 
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowPrescriptionModal(false);
+      }
+    };
+
+    // Add event listener when modal is shown
+    if (showPrescriptionModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showPrescriptionModal]);
+
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowReportsModal(false);
+      }
+    };
+
+    // Add event listener when modal is shown
+    if (showReportsModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showReportsModal]);
+
   //user trying to save document
   const handleSaveDocuments = async () => {
     if (!selectedAppointment) return;

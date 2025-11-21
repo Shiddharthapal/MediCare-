@@ -62,6 +62,9 @@ const groupDocumentsByDate = (documents: any[]) => {
   }, {});
 };
 
+// Add your Bunny CDN configuration
+const BUNNY_CDN_PULL_ZONE = "mypull-29.b-cdn.net";
+
 export default function Reports() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -670,6 +673,16 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
   const isPDF = document.fileType === "application/pdf";
   const Icon = FileText;
 
+  // Helper function to construct proper Bunny CDN URL
+  const getBunnyCDNUrl = (document: FileUpload) => {
+    // Remove the storage domain and replace with pull zone
+    const path = `${document?.patientId}/${document?.fileType.startsWith("image/") ? "image" : "document"}/${document?.filename}`;
+
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
+  };
+
+  const documentUrl = getBunnyCDNUrl(document);
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "Laboratory":
@@ -725,15 +738,15 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
                 <div className="p-4 bg-background">
                   {isImage ? (
                     <img
-                      src={document.url}
+                      src={documentUrl}
                       alt={document.originalName}
                       className="max-w-full h-auto max-h-96 mx-auto rounded-lg"
                       onError={() => setPreviewError(true)}
                     />
                   ) : isPDF ? (
                     <iframe
-                      src={document.url}
-                      className="w-full h-auto max-h-96 rounded-lg"
+                      src={documentUrl}
+                      className="w-full h-96 rounded-lg"
                       title={document.originalName}
                       onError={() => setPreviewError(true)}
                     />
