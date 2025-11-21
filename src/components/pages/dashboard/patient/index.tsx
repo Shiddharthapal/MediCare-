@@ -543,6 +543,63 @@ export default function Dashboard() {
     }
   };
 
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowDetailsModal(false);
+      }
+    };
+
+    // Add event listener when modal is shown
+    if (showDetailsModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showDetailsModal]);
+
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowReportsModal(false);
+      }
+    };
+
+    // Add event listener when modal is shown
+    if (showReportsModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showReportsModal]);
+
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowPrescriptionModal(false);
+      }
+    };
+
+    // Add event listener when modal is shown
+    if (showPrescriptionModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showPrescriptionModal]);
+
   //set file icon
   const getFileIcon = (file: File) => {
     if (file.type.startsWith("image/")) {

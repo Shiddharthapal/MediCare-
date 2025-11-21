@@ -63,7 +63,7 @@ const groupDocumentsByDate = (documents: any[]) => {
 };
 
 // Add your Bunny CDN configuration
-const BUNNY_CDN_PULL_ZONE = "mypull-29.b-cdn.net";
+const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
 
 export default function Reports() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -310,10 +310,10 @@ export default function Reports() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className=" pb-10">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
+        <div className="pb-6">
           <h1 className="text-2xl font-semibold text-gray-900">
             Medical Records
           </h1>
@@ -331,7 +331,7 @@ export default function Reports() {
       </div>
 
       {/* Documents by Date */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {sortedDates.length > 0 ? (
           sortedDates.map((date) => (
             <div key={date} className="space-y-3">
@@ -357,7 +357,7 @@ export default function Reports() {
               </div>
 
               {expandedDates[date] !== false && (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {groupedDocuments[date].map((document: any) => (
                     <DocumentCard key={document.id} document={document} />
                   ))}
@@ -725,38 +725,31 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
 
   return (
     <Card className="hover:shadow-md transition-shadow duration-200">
-      <CardContent className="p-4">
+      <CardContent className="px-4 py-0">
         <div className="flex items-start gap-4">
-          <div className="bg-gray-100 rounded-lg p-1">
-            {(isImage || isPDF) && !previewError ? (
-              <div className="border border-border rounded-lg overflow-hidden">
-                <div className="bg-muted px-4 py-2">
-                  <h3 className="text-sm font-semibold text-foreground mb-2">
-                    Preview
-                  </h3>
-                </div>
-                <div className="p-4 bg-background">
-                  {isImage ? (
-                    <img
-                      src={documentUrl}
-                      alt={document.originalName}
-                      className="max-w-full h-auto max-h-96 mx-auto rounded-lg"
-                      onError={() => setPreviewError(true)}
-                    />
-                  ) : isPDF ? (
-                    <iframe
-                      src={documentUrl}
-                      className="w-full h-96 rounded-lg"
-                      title={document.originalName}
-                      onError={() => setPreviewError(true)}
-                    />
-                  ) : null}
-                </div>
+          {(isImage || isPDF) && !previewError ? (
+            <div className="border border-border rounded-lg overflow-hidden">
+              <div className=" bg-background">
+                {isImage ? (
+                  <img
+                    src={getBunnyCDNUrl(document)}
+                    alt={document.originalName}
+                    className="max-w-full h-32 max-h-96 mx-auto rounded-lg"
+                    onError={() => setPreviewError(true)}
+                  />
+                ) : isPDF ? (
+                  <iframe
+                    src={documentUrl}
+                    className="w-full h-96 rounded-lg"
+                    title={document.originalName}
+                    onError={() => setPreviewError(true)}
+                  />
+                ) : null}
               </div>
-            ) : (
-              <Icon className="h-6 w-6 text-blue-600" />
-            )}
-          </div>
+            </div>
+          ) : (
+            <Icon className="h-6 w-6 text-blue-600" />
+          )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
@@ -782,7 +775,9 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => window.open(document.url, "_blank")}
+                  onClick={() =>
+                    window.open(getBunnyCDNUrl(document), "_blank")
+                  }
                   className="text-blue-600 hover:text-blue-700"
                 >
                   <Eye className="h-4 w-4 mr-1" />
@@ -791,7 +786,7 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
                 <Button
                   onClick={() => handleDownload(document)}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary
-                                 text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
+                  text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Download
