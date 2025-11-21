@@ -515,12 +515,10 @@ export default function Appointments({
         setShowDetailsModal(false);
       }
     };
-
     // Add event listener when modal is shown
     if (showDetailsModal) {
       document.addEventListener("keydown", handleEscapeKey);
     }
-
     // Cleanup: remove event listener when component unmounts or modal closes
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
@@ -534,12 +532,10 @@ export default function Appointments({
         setShowPrescriptionModal(false);
       }
     };
-
     // Add event listener when modal is shown
     if (showPrescriptionModal) {
       document.addEventListener("keydown", handleEscapeKey);
     }
-
     // Cleanup: remove event listener when component unmounts or modal closes
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
@@ -553,12 +549,10 @@ export default function Appointments({
         setShowReportsModal(false);
       }
     };
-
     // Add event listener when modal is shown
     if (showReportsModal) {
       document.addEventListener("keydown", handleEscapeKey);
     }
-
     // Cleanup: remove event listener when component unmounts or modal closes
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
@@ -568,14 +562,11 @@ export default function Appointments({
   //user trying to save document
   const handleSaveDocuments = async () => {
     if (!selectedAppointment) return;
-
     if (uploadedFiles.length === 0) {
       alert("Please select at least one file to upload");
       return;
     }
-
     setIsUploading(true);
-
     try {
       // Create FormData to send files
       const formData = new FormData();
@@ -585,20 +576,17 @@ export default function Appointments({
       formData.append("consultedType", selectedAppointment.consultedType);
       formData.append("userIdWHUP", selectedAppointment.doctorUserId);
       formData.append("userId", id || user?._id || "");
-
       // Append all files
       uploadedFiles.forEach((fileData, index) => {
         formData.append(`files`, fileData.file);
         formData.append(`documentNames`, fileData.documentName);
         formData.append(`originalNames`, fileData.name);
       });
-
       // Call the upload API
       const response = await fetch("/api/user/upload", {
         method: "POST",
         body: formData,
       });
-
       if (!response.ok) {
         throw new Error("Upload failed");
       }

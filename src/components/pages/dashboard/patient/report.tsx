@@ -259,19 +259,15 @@ export default function Reports() {
       alert("Please select a document category");
       return;
     }
-
     if (uploadedFiles.length === 0) {
       alert("Please select at least one file to upload");
       return;
     }
     setIsUploading(true);
-
     try {
       const formData = new FormData();
-
       // Add category to form data
       formData.append("category", uploadDocumentCategory);
-
       // Add each file with its metadata
       formData.append("userId", id || "");
       uploadedFiles.forEach((fileData, index) => {
@@ -279,17 +275,14 @@ export default function Reports() {
         formData.append(`documentNames`, fileData.documentName);
         formData.append(`originalNames`, fileData.name);
       });
-
       const response = await fetch("/api/user/uploadfromReport", {
         method: "POST",
         body: formData,
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to upload documents");
       }
-
       const result = await response.json();
       console.log("[v0] Upload successful:", result);
 
@@ -680,9 +673,9 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
 
     return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
   };
-
   const documentUrl = getBunnyCDNUrl(document);
 
+  //handler function to set the badge colour
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "Laboratory":
@@ -723,6 +716,24 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
     }
   };
 
+  //handler function to set the initial
+  const getPatientInitials = (patientName: string) => {
+    if (!patientName) return "AB";
+    const cleanName = patientName.trim();
+    if (!cleanName) return "AB";
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow duration-200">
       <CardContent className="px-4 py-0">
@@ -733,7 +744,7 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
                 {isImage ? (
                   <img
                     src={getBunnyCDNUrl(document)}
-                    alt={document.originalName}
+                    alt={getPatientInitials(document?.patientName)}
                     className="max-w-full h-32 max-h-96 mx-auto rounded-lg"
                     onError={() => setPreviewError(true)}
                   />
@@ -741,7 +752,7 @@ const DocumentCard = ({ document }: { document: FileUpload }) => {
                   <iframe
                     src={documentUrl}
                     className="w-full h-96 rounded-lg"
-                    title={document.originalName}
+                    title={document?.originalName}
                     onError={() => setPreviewError(true)}
                   />
                 ) : null}

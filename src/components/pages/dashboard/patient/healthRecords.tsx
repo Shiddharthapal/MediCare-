@@ -139,8 +139,8 @@ export default function HealthRecords({
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <div className="min-h-screen  px-6 pb-6">
+      <div className="mx-auto max-w-6xl space-y-4">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-4xl font-bold tracking-tight text-balance">
@@ -155,7 +155,7 @@ export default function HealthRecords({
         <div className="flex gap-2 bg-gray-300 rounded-lg bg-muted p-1">
           <button
             onClick={() => setActiveTab("add")}
-            className={`flex-1 rounded-md px-6 py-3 text-sm font-medium transition-all ${
+            className={`flex-1 rounded-md px-6 py-2 text-sm font-medium transition-all ${
               activeTab === "add"
                 ? "bg-background text-foreground shadow-sm border-2 border-primary/50"
                 : "hover:text-muted-foreground text-foreground"
@@ -165,7 +165,7 @@ export default function HealthRecords({
           </button>
           <button
             onClick={() => setActiveTab("previous")}
-            className={`flex-1 rounded-md px-6 py-3 text-sm font-medium transition-all ${
+            className={`flex-1 rounded-md px-6 py-2 text-sm font-medium transition-all ${
               activeTab === "previous"
                 ? "bg-background text-foreground shadow-sm border-2 border-primary/50"
                 : "hover:text-muted-foreground text-foreground"
@@ -294,7 +294,7 @@ export default function HealthRecords({
         )}
 
         {activeTab === "previous" && (
-          <div className="space-y-6">
+          <div className="space-y-2">
             <h2 className="text-2xl font-semibold tracking-tight">
               Previous Records
             </h2>

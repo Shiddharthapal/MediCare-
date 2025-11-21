@@ -453,6 +453,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       console.error("Error cancelling appointment:", error);
     }
   };
+
   const getPatientInitials = (patientName: string) => {
     if (!patientName) return "AB";
 
