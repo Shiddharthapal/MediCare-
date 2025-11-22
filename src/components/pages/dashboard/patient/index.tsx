@@ -27,6 +27,8 @@ import {
   MapPin,
   ImageIcon,
   File,
+  Download,
+  Eye,
 } from "lucide-react";
 import Appointments from "./appionments";
 import Doctors from "./doctors";
@@ -43,6 +45,29 @@ const menuItems = [
   { id: "healthrecords", icon: Heart, label: "Health Records", active: false },
   { id: "settings", icon: Settings, label: "Settings", active: false }, // Changed to "settings"
 ];
+
+interface FileUpload {
+  _id: string;
+  patientId: string;
+  doctorId: string;
+  filename: string;
+  patientName: string;
+  documentName: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
+  userIdWHUP?: string;
+  appointmentId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 interface appointmentdata {
   _id: string;
@@ -67,6 +92,7 @@ interface appointmentdata {
   paymentMethod: string;
   specialRequests: string;
   status: string;
+  document: FileUpload[];
 }
 
 interface UserDetails {
@@ -259,6 +285,9 @@ interface UploadedFile extends File {
   preview?: string;
 }
 
+// Add your Bunny CDN configuration
+const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
+
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
@@ -316,16 +345,22 @@ export default function Dashboard() {
     return Object.keys(groupedAppointments).sort();
   }, [groupedAppointments]);
 
+  //Helper function to  construct proper bunny cdn url for fetch document
+  const getBunnyCDNUrl = (document: FileUpload) => {
+    // Remove the storage domain and replace with pull zone
+    const path = `${document?.patientId}/${document?.fileType.startsWith("image/") ? "image" : "document"}/${document?.filename}`;
+
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
+  };
+
   //Get intial of doctor
   const getDoctorInitials = (doctorName: string) => {
     if (!doctorName) return "DR";
-
     // Remove DR/Dr prefix and clean the name
     const cleanName = doctorName
       .replace(/^(DR\.?|Dr\.?)\s*/i, "") // Remove DR/Dr at the beginning
       .trim();
     if (!cleanName) return "DR";
-
     // Split the cleaned name and get first 2 words
     const words = cleanName.split(" ").filter((word) => word.length > 0);
     if (words.length >= 2) {
@@ -385,6 +420,7 @@ export default function Dashboard() {
       ...appointment,
       status: status,
     };
+    console.log("🧞‍♂️  appointmentWithStatus --->", appointmentWithStatus);
     setSelectedAppointment(appointmentWithStatus);
     setShowDetailsModal(true);
   };
@@ -608,6 +644,25 @@ export default function Dashboard() {
       return <FileText className="h-5 w-5 text-red-500" />;
     } else {
       return <File className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  //add the download handler function
+  const handleDownload = async (document: FileUpload) => {
+    try {
+      const response = await fetch(document.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = document.originalName;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file");
     }
   };
 
@@ -1149,6 +1204,81 @@ export default function Dashboard() {
                               <strong>Special Requests:</strong>{" "}
                               {selectedAppointment.specialRequests}
                             </p>
+                          </div>
+                          {/* New Section: Uploaded Documents/Reports */}
+                          <div className="md:col-span-2 mt-4">
+                            <h3 className="font-semibold text-gray-900 mb-3">
+                              Uploaded Documents & Reports
+                            </h3>
+                            {selectedAppointment?.document &&
+                            selectedAppointment?.document?.length > 0 ? (
+                              <div className="space-y-2">
+                                {selectedAppointment?.document?.map(
+                                  (file, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-blue-100 rounded">
+                                          <FileText className="h-5 w-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                          <p className="font-medium text-gray-900">
+                                            {file?.documentName}
+                                          </p>
+                                          <p className="text-xs text-gray-500">
+                                            {file.fileSize &&
+                                              `${(file.fileSize / 1024).toFixed(2)} KB`}{" "}
+                                            • Uploaded on{" "}
+                                            {file?.updatedAt
+                                              ? new Date(
+                                                  file.updatedAt
+                                                ).toLocaleDateString("en-US", {
+                                                  year: "numeric",
+                                                  month: "short",
+                                                  day: "numeric",
+                                                })
+                                              : "N/A"}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() =>
+                                            window.open(
+                                              getBunnyCDNUrl(file),
+                                              "_blank"
+                                            )
+                                          }
+                                          className="text-blue-600 hover:text-blue-700"
+                                        >
+                                          <Eye className="h-4 w-4 mr-1" />
+                                          View
+                                        </Button>
+                                        <button
+                                          onClick={() => handleDownload(file)}
+                                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary
+                                 text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
+                                        >
+                                          <Download className="w-4 h-4" />
+                                          Download
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-center py-6 bg-gray-50 rounded-lg border border-gray-200">
+                                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                                <p className="text-gray-500 text-sm">
+                                  No documents uploaded for this appointment
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
