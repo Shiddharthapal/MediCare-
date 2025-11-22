@@ -355,14 +355,15 @@ export default function BillingSettings() {
               <div key={`card-${index}`} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-6 bg-primary rounded flex items-center justify-center">
+                    <div className="w-auto h-6 px-2 bg-primary rounded flex items-center justify-center">
                       <span className="text-xs text-primary-foreground font-bold">
                         {method.type}
                       </span>
                     </div>
                     <div>
-                      <p className="font-medium">
-                        •••• •••• •••• {method.cardNumber.slice(-4)}
+                      <p className="font-medium">{method.type}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {method.cardNumber}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         Expires {method.expiryMonth}/{method.expiryYear}
@@ -401,7 +402,7 @@ export default function BillingSettings() {
               <div key={`mobile-${index}`} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
+                    {/* <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="20"
@@ -424,6 +425,11 @@ export default function BillingSettings() {
                         />
                         <path d="M12 18h.01" />
                       </svg>
+                    </div> */}
+                    <div className="w-auto h-6 px-2 bg-primary rounded flex items-center justify-center">
+                      <span className="text-xs text-primary-foreground font-bold">
+                        {method.provider}
+                      </span>
                     </div>
                     <div>
                       <p className="font-medium">{method.provider}</p>
