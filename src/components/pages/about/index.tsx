@@ -3,13 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background py-20 md:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background py-10">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-4xl text-center">
             <Badge
@@ -43,7 +43,7 @@ export default function AboutPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="border-y bg-muted/30 py-12">
+      <section className="border-y bg-muted/30 py-10">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             <div className="text-center">
@@ -75,7 +75,7 @@ export default function AboutPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 md:py-32">
+      <section className="py-20 ">
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-5xl text-balance">
@@ -180,7 +180,7 @@ export default function AboutPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-muted/30 py-20 md:py-32">
+      <section className="bg-muted/30 py-5">
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-5xl text-balance">
@@ -243,7 +243,7 @@ export default function AboutPage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-20 md:py-32">
+      <section className="py-28 ">
         <div className="container mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
             <div>
@@ -311,7 +311,7 @@ export default function AboutPage() {
               <Card className="bg-primary text-primary-foreground">
                 <CardContent className="p-6">
                   <span className="text-4xl mb-4 block">⏱️</span>
-                  <div className="mb-2 text-3xl font-bold">15 min</div>
+                  <div className="mb-2 text-3xl font-bold">20 min</div>
                   <p className="text-sm text-primary-foreground/90">
                     Average wait time for consultations
                   </p>
@@ -321,7 +321,7 @@ export default function AboutPage() {
               <Card className="bg-accent text-accent-foreground">
                 <CardContent className="p-6">
                   <span className="text-4xl mb-4 block">👥</span>
-                  <div className="mb-2 text-3xl font-bold">200K+</div>
+                  <div className="mb-2 text-3xl font-bold">50K+</div>
                   <p className="text-sm text-accent-foreground/90">
                     Successful consultations completed
                   </p>
@@ -331,7 +331,7 @@ export default function AboutPage() {
               <Card className="bg-secondary text-secondary-foreground">
                 <CardContent className="p-6">
                   <span className="text-4xl mb-4 block">🏆</span>
-                  <div className="mb-2 text-3xl font-bold">4.9/5</div>
+                  <div className="mb-2 text-3xl font-bold">4.6/5</div>
                   <p className="text-sm text-secondary-foreground/90">
                     Average patient rating
                   </p>
@@ -355,7 +355,7 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-br from-primary to-secondary py-20 text-primary-foreground md:py-32">
+      <section className="bg-gradient-to-br from-primary to-secondary py-20 text-primary-foreground">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
             <span className="text-6xl mb-6 block">🩺</span>
@@ -389,38 +389,43 @@ export default function AboutPage() {
           <div className="grid gap-8 md:grid-cols-4">
             <div>
               <h3 className="mb-4 text-lg font-semibold">Medicare</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-sm text-gray-600 leading-relaxed">
                 Revolutionizing healthcare through technology and compassion.
               </p>
             </div>
             <div>
               <h4 className="mb-4 text-sm font-semibold">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <ul className="space-y-2 text-sm">
                 <li>
-                  <Link to="/" className="hover:text-primary transition-colors">
+                  <Link
+                    to="/"
+                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                  >
                     Home
                   </Link>
                 </li>
                 <li>
                   <Link
                     to="/about"
-                    className="hover:text-primary transition-colors"
+                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
                   >
                     About
                   </Link>
                 </li>
                 <li>
                   <Link
-                    to="/doctors"
-                    className="hover:text-primary transition-colors"
+                    to="/patient"
+                    state={{ file: "settings", id: 123 }}
+                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
                   >
                     Find Doctors
                   </Link>
                 </li>
                 <li>
                   <Link
-                    to="/appointments"
-                    className="hover:text-primary transition-colors"
+                    to="/patient"
+                    state={{ file: "appointments", id: 123 }}
+                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
                   >
                     Appointments
                   </Link>
@@ -429,11 +434,11 @@ export default function AboutPage() {
             </div>
             <div>
               <h4 className="mb-4 text-sm font-semibold">Support</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <ul className="space-y-2 text-sm">
                 <li>
                   <Link
                     to="/help"
-                    className="hover:text-primary transition-colors"
+                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
                   >
                     Help Center
                   </Link>
@@ -441,7 +446,7 @@ export default function AboutPage() {
                 <li>
                   <Link
                     to="/contact"
-                    className="hover:text-primary transition-colors"
+                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
                   >
                     Contact Us
                   </Link>
@@ -449,7 +454,7 @@ export default function AboutPage() {
                 <li>
                   <Link
                     to="/faq"
-                    className="hover:text-primary transition-colors"
+                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
                   >
                     FAQ
                   </Link>
@@ -457,7 +462,7 @@ export default function AboutPage() {
                 <li>
                   <Link
                     to="/privacy"
-                    className="hover:text-primary transition-colors"
+                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
                   >
                     Privacy Policy
                   </Link>
@@ -466,14 +471,14 @@ export default function AboutPage() {
             </div>
             <div>
               <h4 className="mb-4 text-sm font-semibold">Contact</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <ul className="space-y-2 text-sm text-gray-800">
                 <li>support@medicare.com</li>
                 <li>1-800-MEDICARE</li>
                 <li>Available 24/7</li>
               </ul>
             </div>
           </div>
-          <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
+          <div className="mt-8 border-t pt-8 text-center text-sm text-gray-600">
             <p>&copy; 2025 Medicare. All rights reserved.</p>
           </div>
         </div>
