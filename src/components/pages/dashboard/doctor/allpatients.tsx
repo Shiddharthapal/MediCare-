@@ -796,11 +796,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     if (!selectedPatient) {
       return [];
     }
+    console.log("🧞‍♂️  selectedPatient --->", selectedPatient);
 
     // Safely extract prescriptions
     return selectedPatient?.appointments.map((appointments) => {
       const prescription = appointments.prescription;
-      console.log("🧞‍♂️  prescription --->", selectedPatient);
 
       const document = Array.isArray(appointments.document)
         ? appointments.document
@@ -836,6 +836,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       };
     });
   }, [selectedPatient]);
+
+  console.log("result=>", result);
 
   return (
     <div className="flex h-screen bg-white overflow-hidden">
@@ -956,10 +958,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden ">
           <div className="flex h-full">
             {/* Scrollable Content */}
-            <main className="flex-1 w-full overflow-y-auto ">
+            <main className="flex-1 w-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
               {activeTab === "overview" && (
                 <div className="py-3">
                   {/* Personal Information */}
@@ -1490,96 +1492,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      {/* Document Filters */}
-                      <div className="flex border border-gray-400 items-center gap-4 mb-1 p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <span className="text-sm font-semibold text-gray-700">
-                            Filter by type:
-                          </span>
-                          <Button
-                            size="sm"
-                            className="text-xs bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
-                          >
-                            All
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs hover:bg-blue-50"
-                          >
-                            Prescriptions
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs hover:bg-blue-50"
-                          >
-                            Lab Reports
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs hover:bg-blue-50"
-                          >
-                            Imaging
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs hover:bg-blue-50"
-                          >
-                            Consultation
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Document Statistics */}
-                      <div className="mt-2 mb-6 p-2 bg-gradient-to-r from-gray-100 via-slate-100 to-gray-100 rounded-xl border border-gray-400 shadow-sm">
-                        <h4 className="font-bold mb-1 text-gray-900 text-lg">
-                          Document Summary
-                        </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-blue-600 ">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Prescription"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Prescriptions
-                            </p>
-                          </div>
-                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-green-600 ">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Lab Report"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Lab Reports
-                            </p>
-                          </div>
-                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-purple-600 ">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Imaging Report"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Imaging Reports
-                            </p>
-                          </div>
-                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-gray-600 ">
-                              {selectedPatient.documents?.length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Total Documents
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Documents List */}
                       <div className="space-y-4">
                         {result?.map((document, index) => (

@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useAppSelector } from "@/redux/hooks";
 
 export default function AboutPage() {
+  const user = useAppSelector((state) => state.auth.user);
+  const role = user?.role;
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -384,105 +387,207 @@ export default function AboutPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div>
-              <h3 className="mb-4 text-lg font-semibold">Medicare</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Revolutionizing healthcare through technology and compassion.
-              </p>
+      {role === "user" ? (
+        <footer className="border-t py-12">
+          <div className="container mx-auto px-4">
+            <div className="grid gap-8 md:grid-cols-4">
+              <div>
+                <h3 className="mb-4 text-lg font-semibold">Medicare</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Revolutionizing healthcare through technology and compassion.
+                </p>
+              </div>
+              <div>
+                <h4 className="mb-4 text-sm font-semibold">Quick Links</h4>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <Link
+                      to="/"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/about"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      About
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/patient"
+                      state={{ file: "doctors", id: 123 }}
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Find Doctors
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/patient"
+                      state={{ file: "appointments", id: 123 }}
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Appointments
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="mb-4 text-sm font-semibold">Support</h4>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <Link
+                      to="/help"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Help Center
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/contact"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Contact Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/faq"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      FAQ
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/privacy"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="mb-4 text-sm font-semibold">Contact</h4>
+                <ul className="space-y-2 text-sm text-gray-800">
+                  <li>support@medicare.com</li>
+                  <li>1-800-MEDICARE</li>
+                  <li>Available 24/7</li>
+                </ul>
+              </div>
             </div>
-            <div>
-              <h4 className="mb-4 text-sm font-semibold">Quick Links</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link
-                    to="/"
-                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/about"
-                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
-                  >
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/patient"
-                    state={{ file: "settings", id: 123 }}
-                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
-                  >
-                    Find Doctors
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/patient"
-                    state={{ file: "appointments", id: 123 }}
-                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
-                  >
-                    Appointments
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 text-sm font-semibold">Support</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link
-                    to="/help"
-                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
-                  >
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/contact"
-                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
-                  >
-                    Contact Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/faq"
-                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
-                  >
-                    FAQ
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/privacy"
-                    className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
-                  >
-                    Privacy Policy
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 text-sm font-semibold">Contact</h4>
-              <ul className="space-y-2 text-sm text-gray-800">
-                <li>support@medicare.com</li>
-                <li>1-800-MEDICARE</li>
-                <li>Available 24/7</li>
-              </ul>
+            <div className="mt-8 border-t pt-8 text-center text-sm text-gray-600">
+              <p>&copy; 2025 Medicare. All rights reserved.</p>
             </div>
           </div>
-          <div className="mt-8 border-t pt-8 text-center text-sm text-gray-600">
-            <p>&copy; 2025 Medicare. All rights reserved.</p>
+        </footer>
+      ) : (
+        <footer className="border-t py-12">
+          <div className="container mx-auto px-4">
+            <div className="grid gap-8 md:grid-cols-4">
+              <div>
+                <h3 className="mb-4 text-lg font-semibold">Medicare</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Revolutionizing healthcare through technology and compassion.
+                </p>
+              </div>
+              <div>
+                <h4 className="mb-4 text-sm font-semibold">Quick Links</h4>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <Link
+                      to="/"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/about"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      About
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/doctor"
+                      state={{ file: "patients", id: 123 }}
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Find Patient
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/doctor"
+                      state={{ file: "appointments", id: 123 }}
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Appointments
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="mb-4 text-sm font-semibold">Support</h4>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <Link
+                      to="/help"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Help Center
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/contact"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Contact Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/faq"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      FAQ
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/privacy"
+                      className="text-gray-800 hover:text-[hsl(201,96%,32%)] transition-colors hover:underline"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="mb-4 text-sm font-semibold">Contact</h4>
+                <ul className="space-y-2 text-sm text-gray-800">
+                  <li>support@medicare.com</li>
+                  <li>1-800-MEDICARE</li>
+                  <li>Available 24/7</li>
+                </ul>
+              </div>
+            </div>
+            <div className="mt-8 border-t pt-8 text-center text-sm text-gray-600">
+              <p>&copy; 2025 Medicare. All rights reserved.</p>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

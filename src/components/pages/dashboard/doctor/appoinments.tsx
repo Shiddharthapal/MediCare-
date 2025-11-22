@@ -662,14 +662,14 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   return (
     <div className="flex-1 flex flex-col mx-auto px-10 pb-5 w-full max-w-7xl overflow-hidden min-h-screen bg-white">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 pb-3 pt-4 bg-white ">
+      <header className="flex items-center justify-between px-6 pb-2 pt-4 bg-white ">
         <div className="flex flex-col md:flex-row justify-between gap-4 md:gap-8 w-full">
           <div className="relative border border-gray-400 rounded-md transition-all hover:border-primary/50 hover:shadow-lg flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-500 " />
             <input
               type="text"
               placeholder="Search appointments..."
-              className="pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10 pr-4 py-2  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -769,7 +769,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
               <CardHeader className="py-2 bg-gradient-to-r  from-green-100 to-emerald-100">
                 <CardTitle className="flex items-center text-2xl gap-2 font-semibold">
                   <Calendar className="h-5 w-5 text-[hsl(273,100%,60%)]" />
-                  {`Today's Appointments - ${new Date().toISOString().split("T")}`}
+                  {`Today's Appointments - ${new Date().toISOString().split("T")[0]}`}
                 </CardTitle>
               </CardHeader>
               <CardContent>

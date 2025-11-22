@@ -16,7 +16,7 @@ interface LoginFormData {
   password: string;
 }
 
-type UserRole = "user" | "teacher" | "admin";
+type UserRole = "user" | "doctor" | "admin";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -128,11 +128,11 @@ export default function Login() {
                        
               <Button
                 type="button"
-                variant={activeTab === "teacher" ? "default" : "outline"}
+                variant={activeTab === "doctor" ? "default" : "outline"}
                 className="flex-1"
-                onClick={() => handleTabChange("teacher")}
+                onClick={() => handleTabChange("doctor")}
               >
-                Teacher
+                Doctor
               </Button>
               <Button
                 type="button"
@@ -302,7 +302,7 @@ export default function Login() {
                            
                     {loading
                       ? "Loading..."
-                      : `Login as ${activeTab === "user" ? "User" : "Teacher"}`}
+                      : `Login as ${activeTab === "user" ? "User" : "Doctor"}`}
                              
                   </Button>
                 </div>

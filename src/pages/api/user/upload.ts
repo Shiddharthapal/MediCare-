@@ -7,43 +7,16 @@ import crypto from "crypto";
 import doctorDetails from "@/model/doctorDetails";
 import adminStore from "@/model/adminStore";
 
-// Allowed file types with their MIME types
-const ALLOWED_FILE_TYPES: { [key: string]: string } = {
-  // Images
-  "image/jpeg": ".jpg",
-  "image/jpg": ".jpg",
-  "image/png": ".png",
-  "image/gif": ".gif",
-  "image/webp": ".webp",
-  "image/svg+xml": ".svg",
-
-  // Documents
-  "application/pdf": ".pdf",
-  "application/msword": ".doc",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-    ".docx",
-  "application/vnd.ms-excel": ".xls",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
-  "text/plain": ".txt",
-  "text/csv": ".csv",
-
-  // Medical Reports (DICOM)
-  "application/dicom": ".dcm",
-};
+const BUNNY_STORAGE_ZONE_NAME =
+  process.env.BUNNY_STORAGE_ZONE_NAME || "side-effects";
+const BUNNY_STORAGE_REGION_HOSTNAME =
+  process.env.BUNNY_STORAGE_REGION_HOSTNAME || "storage.bunnycdn.com";
+const BUNNY_STORAGE_API_KEY =
+  process.env.BUNNY_STORAGE_API_KEY ||
+  "9beb8922-fe4f-436f-8a74be6eea5e-a625-4332";
 
 // Max file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-// Helper function to generate unique filename
-function generateUniqueFilename(originalName: string): string {
-  const timestamp = Date.now();
-  const randomString = crypto.randomBytes(8).toString("hex");
-  const extension = originalName.substring(originalName.lastIndexOf("."));
-  const nameWithoutExt = originalName
-    .substring(0, originalName.lastIndexOf("."))
-    .replace(/[^a-zA-Z0-9]/g, "_");
-  return `${nameWithoutExt}_${timestamp}_${randomString}${extension}`;
-}
 
 // Helper function to calculate SHA256 checksum
 function calculateChecksum(buffer: Buffer): string {
@@ -125,6 +98,50 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    //create unique file
+    function generateUniqueFilename(
+      documentName: string,
+      originalFilename: string
+    ): string {
+      // Get file extension from original filename
+      const extension = originalFilename.split(".").pop()?.toLowerCase() || "";
+
+      // Clean the document name
+      const cleanName = documentName
+        .trim()
+        .replace(/[^a-zA-Z0-9_-]/g, "_")
+        .substring(0, 50);
+
+      // Generate unique ID
+      const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+      // Combine: documentName_uniqueId.extension
+      return `${cleanName}_${uniqueId}.${extension}`;
+    }
+
+    //findout the file category
+    function getFileCategory(mimeType: string): string {
+      if (mimeType.startsWith("image/")) return "image";
+      if (mimeType.startsWith("application/pdf")) return "pdf";
+      if (
+        mimeType.startsWith("application/msword") ||
+        mimeType.startsWith(
+          "application/vnd.openxmlformats-officedocument.wordprocessingml"
+        )
+      ) {
+        return "document";
+      }
+      if (
+        mimeType.startsWith("application/vnd.ms-excel") ||
+        mimeType.startsWith(
+          "application/vnd.openxmlformats-officedocument.spreadsheetml"
+        )
+      ) {
+        return "spreadsheet";
+      }
+      return "other";
+    }
+
     //Take temporary array for upload and store file, report, document
     const uploadedFiles = [];
     const uploadResults = [];
@@ -166,14 +183,14 @@ export const POST: APIRoute = async ({ request }) => {
       const checksum = calculateChecksum(buffer);
 
       // Generate unique filename
-      const uniqueFilename = generateUniqueFilename(documentName);
+      const uniqueFilename = generateUniqueFilename(documentName, file.name);
+      const fileCategory = getFileCategory(file.type);
 
       // Construct destination path
-      let destinationPath = `${userId}/${file.type}`;
-      if (doctorpatinetId) {
-        destinationPath += `/${appointmentId}`;
-      }
-      destinationPath += `/${appointmentId}`;
+      let destinationPath = `${userId}/${fileCategory}`;
+
+      //unique file name add the extension of the file
+      destinationPath += `/${uniqueFilename}`;
 
       //Here use try-catch for unexpected error
       try {
@@ -187,11 +204,12 @@ export const POST: APIRoute = async ({ request }) => {
         console.log("🧞‍♂️  response --->", response);
 
         // Construct public URL
-        const publicUrl = `https://${process.env.BUNNY_CDN_HOSTNAME}/${destinationPath}`;
+        const publicUrl = `https://${BUNNY_STORAGE_REGION_HOSTNAME}/${BUNNY_STORAGE_ZONE_NAME}/${destinationPath}`;
 
         // Prepare upload data
         const uploadfileforboth = {
           patientId: userId,
+          patientName: userdetails.name,
           doctorId: doctorId,
           filename: uniqueFilename,
           originalName: originalName,
@@ -256,9 +274,9 @@ export const POST: APIRoute = async ({ request }) => {
     // Save all successfully uploaded files to DB
     if (uploadedFiles.length > 0) {
       await userDetails.findOneAndUpdate(
-        { userId: userId, doctorpatinetId: doctorpatinetId },
+        { userId: userId, "appointments.doctorpatinetId": doctorpatinetId },
         {
-          $push: { "appoinments.$.document": { $each: uploadedFiles } },
+          $push: { "appointments.$.document": { $each: uploadedFiles } },
         },
         {
           new: true,
@@ -267,7 +285,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
 
       await doctorDetails.findOneAndUpdate(
-        { userId: doctorId, doctorpatinetId: doctorpatinetId },
+        { userId: doctorId, "appointments.doctorpatinetId": doctorpatinetId },
         {
           $push: { "appointments.$.document": { $each: uploadedFiles } },
         },
@@ -338,53 +356,53 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
 
-      //upload single document into patientdetails of adminStore
-      await adminStore.updateOne(
-        { "patientDetails.userId": userId },
-        {
-          $push: {
-            "patientDetails.$[patient].appointments.$[appointment].document": {
-              $each: uploadedSingleFiles,
-            },
-          },
-        },
-        {
-          arrayFilters: [
-            { "patient.userId": userId }, // Match all patients with this ID
-            { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
-          ],
-        }
-      );
+      // //upload single document into patientdetails of adminStore
+      // await adminStore.updateOne(
+      //   { "patientDetails.userId": userId },
+      //   {
+      //     $push: {
+      //       "patientDetails.$[patient].appointments.$[appointment].document": {
+      //         $each: uploadedSingleFiles,
+      //       },
+      //     },
+      //   },
+      //   {
+      //     arrayFilters: [
+      //       { "patient.userId": userId }, // Match all patients with this ID
+      //       { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
+      //     ],
+      //   }
+      // );
 
-      //upload multiple document into doctordetails of adminStore
-      await adminStore.updateOne(
-        { "doctorDetails.userId": doctorId },
-        {
-          $push: {
-            "doctorDetails.$[doctor].appointments.$[appointment].document": {
-              $each: uploadedSingleFiles,
-            },
-          },
-        },
-        {
-          arrayFilters: [
-            { "doctor.userId": doctorId }, // Match all patients with this ID
-            { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
-          ],
-        }
-      );
+      // //upload multiple document into doctordetails of adminStore
+      // await adminStore.updateOne(
+      //   { "doctorDetails.userId": doctorId },
+      //   {
+      //     $push: {
+      //       "doctorDetails.$[doctor].appointments.$[appointment].document": {
+      //         $each: uploadedSingleFiles,
+      //       },
+      //     },
+      //   },
+      //   {
+      //     arrayFilters: [
+      //       { "doctor.userId": doctorId }, // Match all patients with this ID
+      //       { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
+      //     ],
+      //   }
+      // );
 
-      //upload single document into adminStore upload interface
-      await adminStore.updateMany(
-        {}, // Update all admin documents
-        {
-          $push: {
-            upload: {
-              $each: uploadedSingleFiles,
-            },
-          },
-        }
-      );
+      // //upload single document into adminStore upload interface
+      // await adminStore.updateMany(
+      //   {}, // Update all admin documents
+      //   {
+      //     $push: {
+      //       upload: {
+      //         $each: uploadedSingleFiles,
+      //       },
+      //     },
+      //   }
+      // );
     }
 
     //Return response

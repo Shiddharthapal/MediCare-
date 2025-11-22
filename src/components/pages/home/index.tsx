@@ -137,9 +137,9 @@ export default function MedicationLandingPage() {
   const totalWidth = services.length * cardWidth;
 
   return (
-    <div className=" bg-gradient-to-br from-primary to-secondary   ">
+    <div className="bg-gradient-to-br from-primary to-secondary">
       <div className=" ">
-        <section className="relative py-20 lg:py-32  ">
+        <section className="relative py-20 lg:py-32">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center">
               <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
