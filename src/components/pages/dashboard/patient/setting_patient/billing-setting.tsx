@@ -92,6 +92,7 @@ export default function BillingSettings() {
         const response = await fetch(`/api/user/${id}`);
         const responsedata = await response.json();
         if (responsedata?.userdetails?.payment) {
+          console.log("payment method=>", responsedata?.userdetails?.payment);
           setPaymentMethods(responsedata?.userdetails?.payment);
         }
       } catch (error) {
@@ -161,10 +162,7 @@ export default function BillingSettings() {
         },
         body: JSON.stringify({ paymentData, id }),
       });
-
       const result = await response.json();
-      console.log("🧞‍♂️  result -", result);
-
       if (!response.ok) {
         throw new Error(result.error || "Failed to add payment method");
       }
@@ -231,35 +229,62 @@ export default function BillingSettings() {
     }
   };
 
-  const handleSetPrimary = (
-    index: number,
-    methodType: "card" | "mobile-banking"
-  ) => {
-    if (methodType === "card") {
+  const handleSetPrimary = async (index: number, methodType: string) => {
+    console.log("🧞‍♂️  index --->", index, methodType);
+    try {
+      const method =
+        methodType === "card"
+          ? paymentMethods.cardMethods[index]
+          : paymentMethods.mobileBankingMethods[index];
+      console.log("🧞‍♂️  method --->", method);
+
+      const response = await fetch("/api/user/setPrimaryAsBilling", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          methodType,
+          identifier:
+            methodType === "card" ? method?.cardNumber : method?.mobileNumber,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Failed to set primary payment method"
+        );
+      }
+
+      // Update local state after successful API call
       setPaymentMethods({
-        cardMethods: paymentMethods.cardMethods.map((method, i) => ({
-          ...method,
-          isPrimary: i === index,
+        cardMethods: paymentMethods.cardMethods.map((m, i) => ({
+          ...m,
+          isPrimary: methodType === "card" ? i === index : false,
         })),
         mobileBankingMethods: paymentMethods.mobileBankingMethods.map(
-          (method) => ({
-            ...method,
-            isPrimary: false,
+          (m, i) => ({
+            ...m,
+            isPrimary: methodType === "mobile-banking" ? i === index : false,
           })
         ),
       });
-    } else {
-      setPaymentMethods({
-        cardMethods: paymentMethods.cardMethods.map((method) => ({
-          ...method,
-          isPrimary: false,
-        })),
-        mobileBankingMethods: paymentMethods.mobileBankingMethods.map(
-          (method, i) => ({
-            ...method,
-            isPrimary: i === index,
-          })
-        ),
+
+      toast({
+        title: "Success",
+        description: "Primary payment method updated",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update primary payment method",
+        variant: "destructive",
       });
     }
   };
