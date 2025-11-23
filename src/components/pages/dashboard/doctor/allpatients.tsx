@@ -1029,7 +1029,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between pt-3 pl-3 pr-6 pb-3 border-b border-gray-100 bg-white">
+        <header className="flex items-center justify-between pt-3 pl-3 pr-6 pb-3 bg-white">
           <div className="flex items-center gap-4">
             <Avatar className="w-10 h-10 ring-4 ring-blue-200">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
@@ -1057,7 +1057,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           <button
             className={`pb-2 border-b-4 transition-colors font-semibold ${
               activeTab === "overview"
-                ? "border-blue-500 text-blue-600"
+                ? "border-[hsl(201,96%,32%)] text-[hsl(201,96%,32%)]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setActiveTab("overview")}
@@ -1067,7 +1067,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           <button
             className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "history"
-                ? "border-blue-500 text-blue-600"
+                ? "border-[hsl(201,96%,32%)] text-[hsl(201,96%,32%)]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setActiveTab("history")}
@@ -1077,7 +1077,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           <button
             className={` border-b-4 font-semibold transition-colors ${
               activeTab === "appointments"
-                ? "border-blue-500 text-blue-600"
+                ? "border-[hsl(201,96%,32%)] text-[hsl(201,96%,32%)]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setActiveTab("appointments")}
@@ -1087,7 +1087,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           <button
             className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "documents"
-                ? "border-blue-500 text-blue-600"
+                ? "border-[hsl(201,96%,32%)] text-[hsl(201,96%,32%)]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setActiveTab("documents")}
@@ -1371,7 +1371,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                 }
                               </p>
                             </div>
-                            <Badge className="text-sm text-gray-900 bg-green-600">
+                            <Badge className="text-sm text-gray-100 bg-green-600">
                               {new Date(
                                 selectedPatient?.latestAppointment?.appointmentDate
                               ).toLocaleDateString()}

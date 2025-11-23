@@ -44,7 +44,9 @@ export function PracticeSettings() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isHas, setIsHas] = useState(false);
   const [savedData, setSavedData] = useState<PracticeData | null>(null);
+
   const doctor = useAppSelector((state) => state.auth.user);
 
   useEffect(() => {
@@ -62,7 +64,11 @@ export function PracticeSettings() {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log("🧞‍♂️  data --->", data);
         setSavedData(data?.doctordetails?.practiceSettingData);
+        if (data?.doctordetails?.practiceSettingData) {
+          setIsHas(true);
+        }
         setFormData({
           practiceName: "",
           specialty: "",
@@ -92,6 +98,7 @@ export function PracticeSettings() {
       if (response.ok) {
         const savedData = await response.json();
         setSavedData(savedData?.data?.practiceSettingData);
+        setIsHas(true);
         alert("Practice settings saved successfully!");
       } else {
         alert("Failed to save practice settings");
@@ -121,7 +128,7 @@ export function PracticeSettings() {
 
   return (
     <div className="space-y-6 mb-6 bg-white">
-      {savedData && (
+      {isHas && (
         <Card className="bg-green-50 border-green-200">
           <CardHeader>
             <CardTitle className="text-green-800">
@@ -131,19 +138,19 @@ export function PracticeSettings() {
           <CardContent>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <strong>Practice Name:</strong> {savedData.practiceName}
+                <strong>Practice Name:</strong> {savedData?.practiceName}
               </div>
               <div>
-                <strong>Medical Specialty:</strong> {savedData.specialty}
+                <strong>Medical Specialty:</strong> {savedData?.specialty}
               </div>
               <div>
-                <strong>Practice Address:</strong> {savedData.address}
+                <strong>Practice Address:</strong> {savedData?.address}
               </div>
               <div>
-                <strong>Practice Institute Phone:</strong> {savedData.phone}
+                <strong>Practice Institute Phone:</strong> {savedData?.phone}
               </div>
               <div>
-                <strong>Fax:</strong> {savedData.fax}
+                <strong>Fax:</strong> {savedData?.fax}
               </div>
             </div>
           </CardContent>
@@ -176,21 +183,13 @@ export function PracticeSettings() {
             <Label htmlFor="specialty" className="text-md">
               Medical Specialty
             </Label>
-            <Select
+            <Input
+              id="specialty"
               value={formData.specialty}
-              onValueChange={(value) => handleInputChange("specialty", value)}
-            >
-              <SelectTrigger className="border border-gray-400 hover:border-primary/50">
-                <SelectValue placeholder="Family Medicine" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="family">Family Medicine</SelectItem>
-                <SelectItem value="internal">Internal Medicine</SelectItem>
-                <SelectItem value="pediatrics">Pediatrics</SelectItem>
-                <SelectItem value="cardiology">Cardiology</SelectItem>
-                <SelectItem value="dermatology">Dermatology</SelectItem>
-              </SelectContent>
-            </Select>
+              placeholder="Internal Medicine"
+              onChange={(e) => handleInputChange("specialty", e.target.value)}
+              className="border border-gray-400 hover:border-primary/50"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="address" className="text-md">

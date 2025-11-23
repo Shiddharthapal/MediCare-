@@ -546,7 +546,6 @@ const doctorDetailsSchema = new mongoose.Schema({
 
   practiceSettingData: {
     type: practiceSettingData,
-    default: () => ({}),
   },
 
   createdAt: {
