@@ -89,31 +89,31 @@ interface Prescription {
 }
 
 export interface Pescriptiondata {
-  patientId: string;
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
-  patientGender: string;
-  patientdateOfBirth: string;
-  consultationType: string;
-  consultedType: string;
-  reasonForVisit: string;
-  symptoms: string;
-  previousVisit: string;
-  paymentMethod: string;
-  specialRequests: string;
-  vitalSign: VitalSign;
-  primaryDiagnosis: string;
-  testandReport: string;
-  medication: Medication[];
-  restrictions: string;
-  followUpDate: string;
-  additionalNote: string;
-  doctorName: string;
-  doctorContact: string;
-  hospital: string;
-  specialist: string;
-  date: string;
+  patientId?: string;
+  patientName?: string;
+  patientEmail?: string;
+  patientPhone?: string;
+  patientGender?: string;
+  patientdateOfBirth?: string;
+  consultationType?: string;
+  consultedType?: string;
+  reasonForVisit?: string;
+  symptoms?: string;
+  previousVisit?: string;
+  paymentMethod?: string;
+  specialRequests?: string;
+  vitalSign?: VitalSign;
+  primaryDiagnosis?: string;
+  testandReport?: string;
+  medication?: Medication[];
+  restrictions?: string;
+  followUpDate?: string;
+  additionalNote?: string;
+  doctorName?: string;
+  doctorContact?: string;
+  hospital?: string;
+  specialist?: string;
+  date?: string;
   licenseNumber: string;
 }
 
@@ -178,6 +178,7 @@ export default function Prescription({
   edit,
   onSave,
 }: PrescriptionProps) {
+  console.log("🧞‍♂️  patientData --->", patientData);
   const [prescriptionForm, setPrescriptionForm] =
     useState<Pescriptiondata>(mockPescriptiondata);
   const [isSaved, setIsSaved] = useState(!!savedPrescription);

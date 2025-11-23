@@ -37,6 +37,8 @@ import {
   Droplet,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
+import PrescriptionShow from "./prescriptionShow";
+
 interface VitalSign {
   bloodPressure?: string;
   heartRate?: string;
@@ -63,7 +65,7 @@ interface Medication {
 interface Prescription {
   vitalSign: VitalSign;
   doctorName: string;
-  reasonForVisit: String;
+  reasonForVisit: string;
   primaryDiagnosis: string;
   testandReport: string;
   medication: Medication[];
@@ -109,6 +111,7 @@ interface AppointmentDataPatient {
 
 interface AppointmentData {
   _id: string;
+  doctorpatinetId: string;
   doctorName: string;
   doctorSpecialist: string;
   doctorEmail: string;
@@ -309,7 +312,7 @@ interface GroupedPatientData {
       patientGender: string;
       patientAddress: string;
       patientBithofday: Date;
-      patientAge: string;
+      patientAge: number; // Changed from string to number
       patientBloodgroup: string;
       symptoms: string;
       emergencyContact: string;
@@ -322,6 +325,7 @@ interface GroupedPatientData {
     previousAppointments: AppointmentData[];
   };
 }
+
 interface PatientData {
   id: string;
   patientInfo: {
@@ -332,7 +336,7 @@ interface PatientData {
     patientGender: string;
     patientAddress: string;
     patientBithofday: Date;
-    patientAge: string;
+    patientAge: number; // Changed from string to number
     patientBloodgroup: string;
     symptoms: string;
     emergencyContact: string;
@@ -344,6 +348,7 @@ interface PatientData {
   upcomingAppointments: AppointmentData[];
   previousAppointments: AppointmentData[];
 }
+
 const mockPatientData: PatientData = {
   id: "",
   patientInfo: {
@@ -354,7 +359,7 @@ const mockPatientData: PatientData = {
     patientGender: "",
     patientAddress: "",
     patientBithofday: new Date("08-08-1900"),
-    patientAge: "",
+    patientAge: 0,
     patientBloodgroup: "",
     symptoms: "",
     emergencyContact: "",
@@ -442,12 +447,10 @@ const groupAppointmentsByDate = (
       grouped[date] = [];
     }
     grouped[date].push(appointment);
-
     // Sort appointments within the same date by time
     grouped[date].sort((a, b) =>
       a.appointmentTime.localeCompare(b.appointmentTime)
     );
-
     return grouped;
   }, {});
 };
@@ -465,6 +468,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     useState<PatientData>(mockPatientData);
   const [showPatientList, setShowPatientList] = useState(true);
   const [activeDocTab, setActiveDocTab] = useState("documents");
+  const [edit, setEdit] = useState(false);
+  const [showPrescription, setShowPrescription] = useState(false);
+  const [prescriptionDocument, setPrescriptionDocument] = useState(null);
+  const [document, setDocument] = useState<Prescription | null>(null);
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
   const [doctorData, setDoctorData] = useState<DoctorDetails | null>(null);
   const [appointmentData, setAppointmentData] = useState<any[]>([]);
@@ -500,10 +507,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             patientAddress: appointment.patientAddress,
             patientBithofday: appointment.patientBithofday,
             patientBloodgroup: appointment.patientBloodgroup,
-            patientAge: (
+            patientAge:
               new Date().getFullYear() -
-              new Date(appointment.patientBithofday).getFullYear()
-            ).toString(),
+              new Date(appointment.patientBithofday).getFullYear(),
             symptoms: appointment.symptoms,
             emergencyContact: appointment.emergencyContact,
           },
@@ -568,10 +574,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         return appointmentDate < today;
       });
     });
-
     // Update the state with grouped data
     setPatientData(groupedData);
   };
+
+  // If prescription is shown, render only the prescription component
 
   // // Safely extract documents
   // const documents = Array.isArray(appointment.document)
@@ -857,6 +864,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         // Only add prescription if it has a prescriptionId
         if (prescription?.prescriptionId) {
           prescriptions.push({
+            doctorpatinetId: appointment?.doctorpatinetId,
             prescriptionId: prescription.prescriptionId,
             vitalSign: prescription.vitalSign || {},
             primaryDiagnosis: prescription.primaryDiagnosis || "",
@@ -911,6 +919,61 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       alert("Failed to download file");
     }
   };
+
+  const seePrescription = (document) => {
+    console.log("🧞‍♂️  document --->", document);
+    setDocument(document);
+    setShowPrescription(true);
+  };
+
+  const handleClosePrescription = () => {
+    setShowPrescription(false);
+    setPrescriptionDocument(null);
+    setSelectedPatient(mockPatientData);
+  };
+
+  if (showPrescription && document) {
+    return (
+      <PrescriptionShow
+        patientData={{
+          // Patient info
+          patientId: selectedPatient?.patientInfo?.patientId || "",
+          patientName: selectedPatient?.patientInfo?.patientName || "",
+          patientEmail: selectedPatient?.patientInfo?.patientEmail || "",
+          patientPhone: selectedPatient?.patientInfo?.patientPhone || "",
+          patientGender: selectedPatient?.patientInfo?.patientGender || "",
+          patientAge: selectedPatient?.patientInfo?.patientAge || 0,
+          patientBloodgroup:
+            selectedPatient?.patientInfo?.patientBloodgroup || "",
+
+          // Visit info
+          reasonForVisit: document?.reasonForVisit || "",
+          symptoms: document?.symptoms || "",
+          // previousVisit: selectedPatient?.patientInfo?.previousVisit,
+
+          // Medical data
+          vitalSign: document?.vitalSign || {},
+          primaryDiagnosis: document?.primaryDiagnosis || "",
+          testandReport: document?.testandReport || "",
+          medication: document?.medication || [],
+          restrictions: document?.restrictions || "",
+          followUpDate: document?.followUpDate || "",
+          additionalNote: document?.additionalNote || "",
+
+          // Doctor info
+          doctorName: doctorData?.name || "",
+          doctorContact: doctorData?.contact || "",
+          doctorEmail: doctorData?.email || "",
+          doctorGender: doctorData?.gender || "",
+          doctorSpecialist: doctorData?.specialist || "",
+          hospital: doctorData?.hospital || "",
+          doctorId: doctor?._id || "",
+          licenseNumber: doctorData?.registrationNo || "",
+        }}
+        onClose={handleClosePrescription}
+      />
+    );
+  }
 
   return (
     <div className="flex h-screen bg-white overflow-hidden">
@@ -1806,7 +1869,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                                   {/* Action Buttons */}
                                   <div className="flex flex-col gap-2 ml-4">
-                                    <button className="px-3 py-2 text-xs border border-gray-400 bg-green-100 hover:bg-green-200 rounded-md flex items-center gap-1">
+                                    <button
+                                      onClick={() =>
+                                        seePrescription(prescription)
+                                      }
+                                      className="px-3 py-2 text-xs border border-gray-400 bg-green-100 hover:bg-green-200 rounded-md flex items-center gap-1"
+                                    >
                                       <Eye className="h-3 w-3 text-green-600" />
                                       View
                                     </button>
