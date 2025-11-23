@@ -216,7 +216,7 @@ export default function SecuritySettings() {
                 }}
                 disabled={isLoading}
                 className={`focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none ${
-                  isSamePassword && newPassword !== ""
+                  isSamePassword && confirmPassword !== ""
                     ? "border-red-500 focus:border-red-500"
                     : ""
                 }`}

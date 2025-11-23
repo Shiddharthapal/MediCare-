@@ -1,4 +1,5 @@
 import connect from "@/lib/connection";
+import adminStore from "@/model/adminStore";
 import doctorDetails from "@/model/doctorDetails";
 import type { APIRoute } from "astro";
 
@@ -41,12 +42,34 @@ export const POST: APIRoute = async ({ request }) => {
       { $set: { payment: formData } },
       { new: true, runValidators: true }
     );
-    console.log("🧞‍♂️  updatedDoctor --->", updatePaymentMethod);
 
     if (!updatePaymentMethod) {
       return new Response(
         JSON.stringify({
           message: "Doctor not found",
+        }),
+        { status: 404, headers }
+      );
+    }
+
+    const updateAdmin = await adminStore.updateOne(
+      { "doctorDetails.userId": id }, // Find the document containing the doctor
+      {
+        $set: {
+          "doctorDetails.$[doctor].payment": formData, // Update payment for matched doctor
+        },
+      },
+      {
+        arrayFilters: [
+          { "doctor.userId": id }, // Match the specific doctor in the array
+        ],
+      }
+    );
+
+    if (!updateAdmin) {
+      return new Response(
+        JSON.stringify({
+          message: "Can't upload admin",
         }),
         { status: 404, headers }
       );
