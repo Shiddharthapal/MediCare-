@@ -10,7 +10,7 @@ import {
   Search,
   Calendar,
   Users,
-  UserRoundPlus,
+  ClipboardList,
   ChevronRight,
   CheckCircle,
   FileText,
@@ -72,6 +72,38 @@ interface Prescription {
   followUpDate: string;
   additionalNote: string;
   prescriptionId: string;
+  createdAt: Date;
+}
+
+interface AppointmentDataPatient {
+  doctorpatinetId: string;
+  doctorUserId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorGender: string;
+  doctorEmail: string;
+  hospital: string;
+  patientName: string;
+  patientId: string;
+  patientEmail: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  prescription: Prescription;
+  document?: FileUpload[];
+  cancelledBy?: string;
+  cancelledAt?: Date;
+  updatedAt: Date;
   createdAt: Date;
 }
 
@@ -305,7 +337,7 @@ interface PatientData {
     symptoms: string;
     emergencyContact: string;
   };
-  appointments: AppointmentData[];
+  appointments: AppointmentDataPatient[];
   reasonForVisit: ReasonForVisit[];
   totalAppointments: number;
   latestAppointment: AppointmentData;
@@ -424,23 +456,34 @@ interface PatientsPageProps {
   onNavigate: (page: string) => void;
 }
 
+// Add your Bunny CDN configuration
+const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
+
 //Starting portion of the function
 export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [selectedPatient, setSelectedPatient] =
     useState<PatientData>(mockPatientData);
   const [showPatientList, setShowPatientList] = useState(true);
+  const [activeDocTab, setActiveDocTab] = useState("documents");
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
+  const [doctorData, setDoctorData] = useState<DoctorDetails | null>(null);
   const [appointmentData, setAppointmentData] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
+
+  //Helper function to  construct proper bunny cdn url for fetch document
+  const getBunnyCDNUrl = (document: FileUpload) => {
+    // Remove the storage domain and replace with pull zone
+    const path = `${document?.patientId}/${document?.fileType.startsWith("image/") ? "image" : "document"}/${document?.filename}`;
+
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
+  };
 
   let doctor = useAppSelector((state) => state.auth.user);
   //Group appointment by patientid
   const groupAppointmentsByPatientId = (responseData: DoctorDetails) => {
     if (!responseData.appointments || responseData.appointments.length === 0)
       return;
-
     const groupedData: GroupedPatientData = {};
-
     responseData.appointments.forEach((appointment: AppointmentData) => {
       const { patientId } = appointment;
 
@@ -558,6 +601,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       });
 
       let responseData = await response.json();
+      setDoctorData(responseData?.doctordetails);
       groupAppointmentsByPatientId(responseData.doctordetails);
     };
     fetchData();
@@ -794,55 +838,84 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
   let result = useMemo(() => {
     if (!selectedPatient) {
-      return [];
+      return { prescriptions: [], documents: [] };
     }
     console.log("🧞‍♂️  selectedPatient --->", selectedPatient);
 
-    // Safely extract prescriptions
-    return selectedPatient?.appointments.map((appointments) => {
-      const prescription = appointments.prescription;
+    const prescriptions = [];
+    const documents = [];
 
-      const document = Array.isArray(appointments.document)
-        ? appointments.document
-        : [];
+    // Filter appointments where doctorId matches doctor._id
+    doctorData?.appointments
+      .filter(
+        (appointment) =>
+          appointment?.patientId === selectedPatient?.patientInfo?.patientId
+      )
+      .forEach((appointment) => {
+        const prescription = appointment.prescription;
 
-      return {
-        prescriptions: prescription
-          ? {
-              prescriptionId: prescription.prescriptionId || "",
-              vitalSign: prescription.vitalSign || {},
-              primaryDiagnosis: prescription.primaryDiagnosis || "",
-              symptoms: prescription.symptoms || "",
-              testandReport: prescription.testandReport || "",
-              medication: prescription.medication || [],
-              restrictions: prescription.restrictions || "",
-              followUpDate: prescription.followUpDate || null,
-              additionalNote: prescription.additionalNote || "",
-              createdAt: prescription.createdAt || null,
-            }
-          : null,
+        // Only add prescription if it has a prescriptionId
+        if (prescription?.prescriptionId) {
+          prescriptions.push({
+            prescriptionId: prescription.prescriptionId,
+            vitalSign: prescription.vitalSign || {},
+            primaryDiagnosis: prescription.primaryDiagnosis || "",
+            symptoms: prescription.symptoms || "",
+            testandReport: prescription.testandReport || "",
+            medication: prescription.medication || [],
+            restrictions: prescription.restrictions || "",
+            followUpDate: prescription.followUpDate || null,
+            additionalNote: prescription.additionalNote || "",
+            createdAt: prescription.createdAt || null,
+          });
+        }
 
-        // Documents
-        documents: document.map((d) => ({
-          documentId: d._id || "",
-          filename: d.filename || "",
-          originalName: d.originalName || "",
-          fileType: d.fileType || "",
-          fileSize: d.fileSize || 0,
-          url: d.url || "",
-          uploadedAt: d.uploadedAt || null,
-          category: d.category || "",
-        })),
-      };
-    });
-  }, [selectedPatient]);
+        // Add all documents
+        const appointmentDocuments = Array.isArray(appointment.document)
+          ? appointment.document
+          : [];
 
-  console.log("result=>", result);
+        appointmentDocuments.forEach((d) => {
+          documents.push({
+            documentId: d._id || "",
+            filename: d.filename || "",
+            patientId: selectedPatient?.patientInfo?.patientId || " ",
+            originalName: d.originalName || "",
+            fileType: d.fileType || "",
+            fileSize: d.fileSize || 0,
+            url: d.url || "",
+            uploadedAt: d.uploadedAt || null,
+            category: d.category || "",
+          });
+        });
+      });
+
+    return { prescriptions, documents };
+  }, [selectedPatient, doctor?._id]);
+
+  //add the download handler function
+  const handleDownload = async (document: FileUpload) => {
+    try {
+      const response = await fetch(document.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = document.originalName;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file");
+    }
+  };
 
   return (
     <div className="flex h-screen bg-white overflow-hidden">
       {/* Left Sidebar - Fixed */}
-      <aside className="w-min-44 border-r bg-white ">
+      <aside className="w-min-44  bg-white ">
         {/* Patient List */}
         {showPatientList && (
           <div className="p-2 overflow-y-auto">
@@ -1478,145 +1551,286 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
               {activeTab === "documents" && (
                 <div className="space-y-6 my-2 px-1">
-                  <Card className="border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r py-2 from-violet-100 to-purple-100 border-b border-gray-200/60">
+                  <div className="border border-gray-400 rounded-lg">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r py-3 px-6 from-violet-100 to-purple-100 border-b border-gray-200/60 rounded-t-lg">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <FileText className="h-5 w-5 text-violet-600" />
-                          Patient Documents
-                        </CardTitle>
-                        <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
-                          <Download className="h-4 w-4 mr-2" />
+                          Patient Documents & Prescriptions
+                        </h2>
+                        <button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md px-4 py-2 rounded-md flex items-center gap-2">
+                          <Download className="h-4 w-4" />
                           Download All
-                        </Button>
+                        </button>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      {/* Documents List */}
-                      <div className="space-y-4">
-                        {result?.map((document, index) => (
-                          <div
-                            key={index}
-                            className="border border-gray-400 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-4 flex-1">
-                                {/* Document Icon */}
-                                <div className="p-3 rounded-lg bg-blue-100">
-                                  {document.prescriptions && (
-                                    <Pill className="h-6 w-6 text-blue-600" />
-                                  )}
-                                  {/* {document.type === "Lab Report" && (
-                                      <ClipboardList className="h-6 w-6 text-green-600" />
-                                    )}
-                                    {document.type === "Imaging Report" && (
-                                      <ImageIcon className="h-6 w-6 text-purple-600" />
-                                    )}
-                                    {document.type ===
-                                      "Consultation Report" && (
-                                      <FileText className="h-6 w-6 text-orange-600" />
-                                    )}
-                                    {document.type === "Study Report" && (
-                                      <ClipboardList className="h-6 w-6 text-indigo-600" />
-                                    )}
-                                    {document.type === "Treatment Plan" && (
-                                      <FileText className="h-6 w-6 text-teal-600" />
-                                    )} */}
-                                  {/* {![
-                                      "Prescription",
-                                      "Lab Report",
-                                      "Imaging Report",
-                                      "Consultation Report",
-                                      "Study Report",
-                                      "Treatment Plan",
-                                    ].includes(document.type) && (
-                                      <FileText className="h-6 w-6 text-gray-600" />
-                                    )} */}
-                                </div>
+                    </div>
 
-                                {/* Document Details */}
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <h3 className="font-semibold text-lg">
-                                      {document?.prescriptions?.reasonForVisit}
-                                    </h3>
-                                    <Badge
-                                      variant={
-                                        document?.prescriptions
-                                          ? "default"
-                                          : "secondary"
-                                      }
-                                      className={
-                                        document?.prescriptions
-                                          ? "bg-green-100 text-green-800"
-                                          : "bg-gray-100 text-gray-800"
-                                      }
-                                    >
-                                      {document?.prescriptions
-                                        ? "Active"
-                                        : "Reviewed"}
-                                    </Badge>
-                                  </div>
-                                  <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                                    <div className="flex items-center gap-1">
-                                      <FileText className="h-4 w-4" />
-                                      <span className="font-semibold">
-                                        Prescription
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Calendar className="h-4 w-4" />
-                                      <span>
-                                        {new Date(
-                                          document?.prescriptions?.createdAt
-                                        ).toLocaleDateString()}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Clock className="h-4 w-4" />
-                                      <span>
-                                        {formatInTimeZone(
-                                          document?.prescriptions?.createdAt,
-                                          "Etc/UTC",
-                                          "hh:mm a"
-                                        )}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <UserRoundPlus className="h-5 w-5" />
-                                      <span>
-                                        {document?.prescriptions?.doctorName}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <p className="text-sm text-gray-700 mb-2">
-                                    <strong>Description:</strong>{" "}
-                                    {document?.prescriptions?.primaryDiagnosis}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="flex flex-col  gap-2 ml-4 mt-6">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-transparent border border-gray-400 bg-blue-100 hover:border-primary/50"
-                                >
-                                  <Eye className="h-3 w-3 mr-1 text-blue-600" />
-                                  View
-                                </Button>
-                                <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
-                                  <Download className="h-3 w-3 mr-1" />
-                                  Download
-                                </Button>
-                              </div>
-                            </div>
+                    {/* Tabs */}
+                    <div className="border-b border-gray-200 bg-gray-50 px-6">
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => setActiveDocTab("documents")}
+                          className={`px-6 py-3 font-medium text-sm transition-all ${
+                            activeDocTab === "documents"
+                              ? "border-b-2 border-blue-600 text-blue-600 bg-white"
+                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Documents
+                            <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">
+                              {result?.documents?.length || 0}
+                            </span>
                           </div>
-                        ))}
+                        </button>
+                        <button
+                          onClick={() => setActiveDocTab("prescriptions")}
+                          className={`px-6 py-3 font-medium text-sm transition-all ${
+                            activeDocTab === "prescriptions"
+                              ? "border-b-2 border-green-600 text-green-600 bg-white"
+                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Pill className="h-4 w-4" />
+                            Prescriptions
+                            <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">
+                              {result?.prescriptions?.length || 0}
+                            </span>
+                          </div>
+                        </button>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6">
+                      {/* Documents Tab Content */}
+                      {activeDocTab === "documents" && (
+                        <div className="space-y-4">
+                          {result?.documents && result.documents.length > 0 ? (
+                            result.documents.map((document, index) => (
+                              <div
+                                key={index}
+                                className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-start gap-4 flex-1">
+                                    {/* Document Icon */}
+                                    <div className="p-3 rounded-lg bg-blue-100">
+                                      {document.category === "Lab Report" && (
+                                        <ClipboardList className="h-6 w-6 text-green-600" />
+                                      )}
+                                      {!document.category && (
+                                        <FileText className="h-6 w-6 text-blue-600" />
+                                      )}
+                                    </div>
+
+                                    {/* Document Details */}
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <h3 className="font-semibold text-lg">
+                                          {document.filename ||
+                                            document.originalName}
+                                        </h3>
+                                        <span className="px-2 py-1 text-xs rounded-md bg-blue-100 text-blue-800">
+                                          {document.category || "Document"}
+                                        </span>
+                                      </div>
+                                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-3">
+                                        <div className="flex items-center gap-1">
+                                          <FileText className="h-4 w-4" />
+                                          <span className="font-semibold">
+                                            {document.fileType || "File"}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Calendar className="h-4 w-4" />
+                                          <span>
+                                            {document.uploadedAt
+                                              ? new Date(
+                                                  document.uploadedAt
+                                                ).toLocaleDateString()
+                                              : "N/A"}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Clock className="h-4 w-4" />
+                                          <span>
+                                            {document.uploadedAt
+                                              ? new Date(
+                                                  document.uploadedAt
+                                                ).toLocaleTimeString()
+                                              : "N/A"}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <p className="text-sm text-gray-700">
+                                        <strong>File Size:</strong>{" "}
+                                        {(document.fileSize / 1024).toFixed(2)}{" "}
+                                        KB
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  <div className="flex flex-col gap-2 ml-4">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() =>
+                                        window.open(
+                                          getBunnyCDNUrl(document),
+                                          "_blank"
+                                        )
+                                      }
+                                      className="text-blue-600 hover:text-blue-700"
+                                    >
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      View
+                                    </Button>
+                                    <button
+                                      onClick={() => handleDownload(document)}
+                                      className="px-3 py-2 text-xs bg-gradient-to-r from-blue-500
+                                     to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-md flex items-center gap-1"
+                                    >
+                                      <Download className="h-3 w-3" />
+                                      Download
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-12 text-gray-500">
+                              <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                              <p className="text-lg">No documents found</p>
+                              <p className="text-sm">
+                                Documents will appear here once uploaded
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Prescriptions Tab Content */}
+                      {activeDocTab === "prescriptions" && (
+                        <div className="space-y-4">
+                          {result?.prescriptions &&
+                          result.prescriptions.length > 0 ? (
+                            result.prescriptions.map((prescription, index) => (
+                              <div
+                                key={index}
+                                className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-green-50 to-emerald-50"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-start gap-4 flex-1">
+                                    {/* Prescription Icon */}
+                                    <div className="p-3 rounded-lg bg-green-100">
+                                      <Pill className="h-6 w-6 text-green-600" />
+                                    </div>
+
+                                    {/* Prescription Details */}
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <h3 className="font-semibold text-lg">
+                                          {prescription.primaryDiagnosis ||
+                                            "Prescription"}
+                                        </h3>
+                                        <span className="px-2 py-1 text-xs rounded-md bg-green-100 text-green-800">
+                                          Active
+                                        </span>
+                                      </div>
+                                      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                                        <div className="flex items-center gap-1">
+                                          <FileText className="h-4 w-4" />
+                                          <span className="font-semibold">
+                                            Prescription
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Calendar className="h-4 w-4" />
+                                          <span>
+                                            {prescription.createdAt
+                                              ? new Date(
+                                                  prescription.createdAt
+                                                ).toLocaleDateString()
+                                              : "N/A"}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Clock className="h-4 w-4" />
+                                          <span>
+                                            {prescription.createdAt
+                                              ? new Date(
+                                                  prescription.createdAt
+                                                ).toLocaleTimeString()
+                                              : "N/A"}
+                                          </span>
+                                        </div>
+                                        {prescription.followUpDate && (
+                                          <div className="flex items-center gap-1">
+                                            <Calendar className="h-4 w-4" />
+                                            <span>
+                                              Follow-up:{" "}
+                                              {new Date(
+                                                prescription.followUpDate
+                                              ).toLocaleDateString()}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      {prescription.symptoms && (
+                                        <p className="text-sm text-gray-700 mb-2">
+                                          <strong>Symptoms:</strong>{" "}
+                                          {prescription.symptoms}
+                                        </p>
+                                      )}
+                                      {prescription.medication &&
+                                        prescription.medication.length > 0 && (
+                                          <p className="text-sm text-gray-700 mb-2">
+                                            <strong>Medications:</strong>{" "}
+                                            {prescription.medication.length}{" "}
+                                            prescribed
+                                          </p>
+                                        )}
+                                      {prescription.additionalNote && (
+                                        <p className="text-sm text-gray-700">
+                                          <strong>Notes:</strong>{" "}
+                                          {prescription.additionalNote}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  <div className="flex flex-col gap-2 ml-4">
+                                    <button className="px-3 py-2 text-xs border border-gray-400 bg-green-100 hover:bg-green-200 rounded-md flex items-center gap-1">
+                                      <Eye className="h-3 w-3 text-green-600" />
+                                      View
+                                    </button>
+                                    <button className="px-3 py-2 text-xs bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-md flex items-center gap-1">
+                                      <Download className="h-3 w-3" />
+                                      Download
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-12 text-gray-500">
+                              <Pill className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                              <p className="text-lg">No prescriptions found</p>
+                              <p className="text-sm">
+                                Prescriptions will appear here once created
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </main>
