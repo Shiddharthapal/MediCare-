@@ -960,12 +960,14 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           followUpDate: document?.followUpDate || "",
           additionalNote: document?.additionalNote || "",
           date: document?.createdAt,
+          prescriptionId: document.prescriptionId,
 
           // Doctor info
           doctorName: doctorData?.name || "",
           doctorContact: doctorData?.contact || "",
           doctorEmail: doctorData?.email || "",
           doctorGender: doctorData?.gender || "",
+          doctorEducation: doctorData?.education || "",
           doctorSpecialist: doctorData?.specialist || "",
           hospital: doctorData?.hospital || "",
           doctorId: doctor?._id || "",

@@ -1,17 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { ArrowLeft, Printer, Download } from "lucide-react";
 import {
-  ArrowLeft,
-  CheckCircle,
-  XCircle,
-  Plus,
-  Edit,
-  Printer,
-} from "lucide-react";
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  pdf,
+  Svg,
+  Circle,
+  Path,
+  Rect,
+} from "@react-pdf/renderer";
 
 interface VitalSign {
   bloodPressure?: string;
@@ -55,6 +59,8 @@ interface PrescriptionProps {
     vitalSign?: VitalSign;
     primaryDiagnosis?: string;
     testandReport?: string;
+    prescriptionId: string;
+    doctorEducation: string;
     medication?: Medication[];
     restrictions?: string;
     followUpDate?: string;
@@ -72,15 +78,500 @@ interface PrescriptionProps {
   };
   onClose: () => void;
 }
+const styles = StyleSheet.create({
+  page: {
+    padding: 40,
+    fontSize: 10,
+    fontFamily: "Helvetica",
+  },
+  header: {
+    fontSize: 32,
+    textAlign: "center",
+    color: "#1e40af",
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  divider: {
+    borderBottom: "2px solid #333333",
+    marginBottom: 15,
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  column: {
+    flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  heading: {
+    fontSize: 11,
+    fontWeight: "bold",
+    marginTop: 15,
+    marginBottom: 8,
+  },
+  text: {
+    fontSize: 9,
+    marginBottom: 3,
+    lineHeight: 1.4,
+  },
+  textBold: {
+    fontSize: 11,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  textIndent: {
+    fontSize: 9,
+    marginLeft: 20,
+    marginBottom: 10,
+  },
+  table: {
+    width: "100%",
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottom: "1px solid #000",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#E8E8E8",
+    borderBottom: "1px solid #000",
+    borderTop: "1px solid #000",
+  },
+  tableCell: {
+    flex: 1,
+    padding: 5,
+    fontSize: 9,
+    borderRight: "1px solid #000",
+  },
+  tableCellFirst: {
+    borderLeft: "1px solid #000",
+  },
+  tableCellHeader: {
+    flex: 1,
+    padding: 5,
+    fontSize: 9,
+    fontWeight: "bold",
+    textAlign: "center",
+    borderRight: "1px solid #000",
+  },
+  infoTable: {
+    marginBottom: 10,
+  },
+  infoRow: {
+    flexDirection: "row",
+    borderBottom: "1px solid #000",
+  },
+  infoCell: {
+    flex: 1,
+    padding: 5,
+    fontSize: 9,
+    borderRight: "1px solid #000",
+  },
+  infoCellLabel: {
+    flex: 1,
+    padding: 5,
+    fontSize: 9,
+    fontWeight: "bold",
+    borderRight: "1px solid #000",
+    borderLeft: "1px solid #000",
+  },
+  certificationSection: {
+    marginTop: 20,
+    paddingTop: 15,
+    borderTop: "1px solid #000",
+  },
+  separator: {
+    textAlign: "center",
+    fontSize: 10,
+    marginVertical: 5,
+  },
+  certTitle: {
+    fontSize: 12,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  certText: {
+    fontSize: 10,
+    textAlign: "center",
+    marginBottom: 3,
+    fontStyle: "italic",
+  },
+  certContact: {
+    fontSize: 9,
+    textAlign: "center",
+    color: "#1e40af",
+    marginBottom: 2,
+  },
+  footer: {
+    fontSize: 8,
+    textAlign: "center",
+    fontStyle: "italic",
+    marginTop: 15,
+  },
+  followUpText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#1e40af",
+    marginBottom: 3,
+  },
+  testReportText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#FF0000",
+    marginLeft: 20,
+    marginBottom: 15,
+  },
+  stampText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1e40af",
+    marginTop: -15, // Overlaps with top of the circle
+    textAlign: "center",
+    letterSpacing: 1,
+    fontFamily: "Times-Bold",
+  },
+  stampContainer: {
+    position: "absolute",
+    top: 5, // Distance from top edge of the page
+    right: 10, // Distance from right edge
+    width: 100,
+    height: 100,
+  },
+});
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
 export default function PrescriptionShow({
   patientData,
   onClose,
 }: PrescriptionProps) {
-  console.log("🧞‍♂️  patientData --->", patientData);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState<
+    "pdf" | "image" | "doc" | null
+  >(null);
 
   const handlePrint = () => {
     window.print();
+  };
+
+  console.log("🧞‍♂️  patientData --->", patientData);
+  const PrescriptionPDF = ({ patientData }) => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Header */}
+        <View style={styles.stampContainer}>
+          <Svg width="120" height="140" viewBox="0 0 200 220">
+            {/* Outer circles */}
+            <Circle
+              cx="100"
+              cy="100"
+              r="95"
+              fill="none"
+              stroke="#1e40af"
+              strokeWidth="3"
+            />
+            <Circle
+              cx="100"
+              cy="100"
+              r="88"
+              fill="none"
+              stroke="#1e40af"
+              strokeWidth="1.5"
+            />
+
+            {/* Medical Staff */}
+            <Rect x="98" y="55" width="4" height="70" fill="#1e40af" />
+
+            {/* Wings */}
+            <Path d="M 98,60 L 70,50 L 75,65 Z" fill="#1e40af" />
+            <Path d="M 102,60 L 130,50 L 125,65 Z" fill="#1e40af" />
+
+            {/* Serpents */}
+            <Path
+              d="M 98,70 Q 85,80 98,90 Q 85,100 98,110 Q 90,120 98,125"
+              fill="none"
+              stroke="#1e40af"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <Path
+              d="M 102,70 Q 115,80 102,90 Q 115,100 102,110 Q 110,120 102,125"
+              fill="none"
+              stroke="#1e40af"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+
+            {/* Serpent heads */}
+            <Circle cx="98" cy="70" r="3" fill="#1e40af" />
+            <Circle cx="102" cy="70" r="3" fill="#1e40af" />
+
+            {/* === Texts inside the SVG === */}
+
+            {/* Header (Top) */}
+            <Text
+              x="100"
+              y="40"
+              fontSize="16"
+              fontWeight="bold"
+              fill="#1e40af"
+              textAnchor="middle"
+              fontFamily="Times-Bold"
+            >
+              MediCare+
+            </Text>
+
+            {/* Doctor Name (Bottom) */}
+            <Text
+              x="100"
+              y="145"
+              fontSize="20"
+              fill="#1e40af"
+              fontWeight="bold"
+              textAnchor="middle"
+              fontFamily="Times-Roman"
+            >
+              {patientData.doctorName}
+            </Text>
+
+            {/* Year (Below Doctor Name) */}
+            <Text
+              x="100"
+              y="165"
+              fontSize="20"
+              fill="#1e40af"
+              textAnchor="middle"
+              fontWeight="bold"
+              letterSpacing="0.5"
+            >
+              EST.2025
+            </Text>
+          </Svg>
+        </View>
+        <Text style={styles.header}>MediCare+</Text>
+        <View style={styles.divider} />
+
+        {/* Physician & Prescription Info Row */}
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <Text style={styles.sectionTitle}>PHYSICIAN INFORMATION</Text>
+            <Text style={styles.textBold}>
+              {patientData?.doctorName || "Dr. [Name]"}
+            </Text>
+            {patientData?.doctorEducation && (
+              <Text style={styles.text}>{patientData.doctorEducation}</Text>
+            )}
+            {patientData?.hospital && (
+              <Text style={styles.text}>{patientData.hospital}</Text>
+            )}
+            {patientData.doctorContact && (
+              <Text style={styles.text}>
+                Contact: {patientData.doctorContact}
+              </Text>
+            )}
+          </View>
+
+          <View style={styles.column}>
+            <Text style={styles.sectionTitle}>PRESCRIPTION ID & DATE</Text>
+            <Text style={styles.textBold}>
+              ID: {patientData?.prescriptionId}
+            </Text>
+            <Text style={styles.text}>
+              Date: {formatDate(patientData?.date)}
+            </Text>
+            {patientData?.followUpDate && (
+              <Text style={styles.followUpText}>
+                Follow-up: {formatDate(patientData.followUpDate)}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* Patient Information */}
+        <Text style={styles.heading}>PATIENT INFORMATION</Text>
+        <View style={styles.infoTable}>
+          <View style={[styles.infoRow, { borderTop: "1px solid #000" }]}>
+            <Text style={styles.infoCellLabel}>Patient Name</Text>
+            <Text style={styles.infoCell}>{patientData?.patientName}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoCellLabel}>Age / DOB</Text>
+            <Text style={styles.infoCell}>
+              {patientData?.patientAge} years old
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoCellLabel}>Gender</Text>
+            <Text style={styles.infoCell}>
+              {patientData?.patientGender || "[Gender]"}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoCellLabel}>Contact</Text>
+            <Text style={styles.infoCell}>
+              {patientData?.patientPhone || "[Contact]"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Clinical Assessment */}
+        <Text style={styles.heading}>CLINICAL ASSESSMENT</Text>
+        {/*Use fragment to write html inside react/typescript */}
+        {patientData?.reasonForVisit && (
+          <>
+            <Text style={styles.textBold}>Reason for Visit:</Text>
+            <Text style={styles.textIndent}>
+              {patientData?.reasonForVisit || "[Reason for visit]"}
+            </Text>
+          </>
+        )}
+
+        <Text style={styles.textBold}>Primary Diagnosis:</Text>
+        <Text style={styles.textIndent}>
+          {patientData?.primaryDiagnosis || "[Primary diagnosis]"}
+        </Text>
+
+        <Text style={styles.textBold}>Symptoms:</Text>
+        <Text style={styles.textIndent}>
+          {patientData?.symptoms || "[Symptoms]"}
+        </Text>
+
+        {patientData?.testandReport && (
+          <>
+            <Text style={styles.textBold}>Test & Reports:</Text>
+            <Text style={styles.testReportText}>
+              {patientData.testandReport}
+            </Text>
+          </>
+        )}
+
+        {/* Medications Table */}
+        <Text style={styles.heading}>MEDICATIONS & DOSAGE</Text>
+        <View style={styles.table}>
+          {/* Table Header */}
+          <View style={styles.tableHeader}>
+            <Text style={[styles.tableCellHeader, styles.tableCellFirst]}>
+              Medication
+            </Text>
+            <Text style={styles.tableCellHeader}>Dosage</Text>
+            <Text style={styles.tableCellHeader}>Frequency</Text>
+            <Text style={styles.tableCellHeader}>Duration</Text>
+            <Text style={styles.tableCellHeader}>Qty</Text>
+          </View>
+
+          {/* Table Rows */}
+          {patientData?.medication?.map((med, index) => (
+            <View key={index} style={styles.tableRow}>
+              <Text style={[styles.tableCell, styles.tableCellFirst]}>
+                {med?.medecineName || "[Drug Name]"}
+              </Text>
+              <Text style={styles.tableCell}>
+                {med?.medecineDosage || "[Dosage]"}
+              </Text>
+              <Text style={styles.tableCell}>
+                {med?.frequency || "[Frequency]"}
+              </Text>
+              <Text style={styles.tableCell}>
+                {med?.duration || "[Duration]"}
+              </Text>
+              <Text style={styles.tableCell}>{med?.quantity || "[Qty]"}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Instructions & Notes */}
+        {patientData?.medication?.some((med) => med?.instructions) && (
+          <>
+            <Text style={styles.heading}>INSTRUCTIONS & NOTES</Text>
+            {patientData.medication
+              .filter((med) => med?.instructions)
+              .map((med, index) => (
+                <View key={index}>
+                  <Text style={styles.textBold}>{med.medecineName}:</Text>
+                  <Text style={styles.textIndent}>{med.instructions}</Text>
+                </View>
+              ))}
+          </>
+        )}
+
+        {/* Restrictions & Warnings */}
+        {patientData?.restrictions && (
+          <>
+            <Text style={styles.heading}>RESTRICTIONS & WARNINGS</Text>
+            <Text style={styles.textIndent}>{patientData.restrictions}</Text>
+          </>
+        )}
+
+        {/* Certification Section */}
+        <View style={styles.certificationSection}>
+          <Text style={styles.certTitle}>CERTIFICATION & AUTHENTICATION</Text>
+          <Text style={styles.certText}>
+            This prescription is officially issued, certified, and authenticated
+            by
+          </Text>
+          <Text style={[styles.certText, { fontWeight: "bold" }]}>
+            MediCare+ Authorized Medical Professional
+          </Text>
+          <Text style={styles.certText}>
+            Date: {formatDate(patientData?.date)}
+          </Text>
+          <Text style={styles.certContact}>
+            For authenticity verification, contact: certification@medicare.com
+          </Text>
+          <Text style={styles.certContact}>
+            Phone: +1-800-MEDICARE | License: MC-2025-001
+          </Text>
+          <Text
+            style={[styles.certContact, { fontWeight: "bold", fontSize: 10 }]}
+          >
+            EST. 2025
+          </Text>
+          <Text style={styles.separator}></Text>
+          {/* Doctor's Stamp/Seal - Simplified for React PDF */}
+        </View>
+
+        {/* Footer */}
+        <Text style={styles.footer}>
+          This prescription is valid for 30 days from the date of issue. For any
+          queries, please contact the clinic.
+        </Text>
+      </Page>
+    </Document>
+  );
+
+  const downloadAsPDF = async () => {
+    setDownloading("pdf");
+    try {
+      const blob = await pdf(
+        <PrescriptionPDF patientData={patientData} />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `prescription-${patientData?.prescriptionId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    } finally {
+      setDownloading(null);
+    }
   };
 
   const getPatientInitials = (patientName: string) => {
@@ -115,6 +606,14 @@ export default function PrescriptionShow({
           Back to Dashboard
         </Button>
         <div className="flex flex-row gap-2">
+          <button
+            onClick={downloadAsPDF}
+            disabled={downloading === "pdf"}
+            className=" px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition disabled:opacity-50"
+          >
+            <Download className="h-4 w-4 inline mr-2" />
+            {downloading === "pdf" ? "Generating PDF..." : "PDF"}
+          </button>
           <Button onClick={handlePrint} className="w-full sm:w-auto">
             <Printer className="h-4 w-4 mr-2" />
             Print Prescription
