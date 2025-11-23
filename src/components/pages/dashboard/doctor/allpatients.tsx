@@ -959,6 +959,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           restrictions: document?.restrictions || "",
           followUpDate: document?.followUpDate || "",
           additionalNote: document?.additionalNote || "",
+          date: document?.createdAt,
 
           // Doctor info
           doctorName: doctorData?.name || "",

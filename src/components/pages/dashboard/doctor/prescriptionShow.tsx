@@ -66,7 +66,7 @@ interface PrescriptionProps {
     hospital?: string;
     doctorSpecialist?: string;
     specialist?: string;
-    date?: string;
+    date?: Date;
     licenseNumber?: string;
     doctorId?: string;
   };
@@ -337,18 +337,132 @@ export default function PrescriptionShow({
                 {patientData.doctorName || "Dr. Name"}
               </div>
               <p className="text-xs text-blue-700">
-                Digitally signed on {new Date().toLocaleDateString()}
+                Digitally signed on{" "}
+                {patientData?.date?.split("T")[0] ||
+                  new Date().toLocaleDateString()}
               </p>
             </div>
-            <div className="text-right text-xs text-gray-500">
-              {patientData?.followUpDate && (
-                <div className="mb-3">
-                  <h3 className="font-semibold text-lg text-blue-600">
-                    Follow up date
-                  </h3>
-                  <p className="text-sm">{patientData?.followUpDate}</p>
-                </div>
-              )}
+            <div className="flex flex-row gap-5">
+              <div className="h-20 w-20 pt-0">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                  {/* <!-- Outer circle --> */}
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="95"
+                    fill="none"
+                    stroke="#1e40af"
+                    stroke-width="3"
+                  />
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="88"
+                    fill="none"
+                    stroke="#1e40af"
+                    stroke-width="1.5"
+                  />
+
+                  {/* <!-- Medical caduceus symbol in center --> */}
+                  <g transform="translate(100, 100)">
+                    {/* <!-- Staff --> */}
+                    <rect x="-2" y="-45" width="4" height="70" fill="#1e40af" />
+
+                    {/* <!-- Wings --> */}
+                    <path
+                      d="M -2,-40 Q -25,-50 -35,-35 Q -30,-25 -2,-35 Z"
+                      fill="#1e40af"
+                    />
+                    <path
+                      d="M 2,-40 Q 25,-50 35,-35 Q 30,-25 2,-35 Z"
+                      fill="#1e40af"
+                    />
+
+                    {/* <!-- Serpents --> */}
+                    <path
+                      d="M -2,-30 Q -15,-20 -2,-10 Q -15,0 -2,10 Q -10,20 -2,25"
+                      fill="none"
+                      stroke="#1e40af"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M 2,-30 Q 15,-20 2,-10 Q 15,0 2,10 Q 10,20 2,25"
+                      fill="none"
+                      stroke="#1e40af"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+
+                    {/* <!-- Serpent heads --> */}
+                    <circle cx="-2" cy="-30" r="3" fill="#1e40af" />
+                    <circle cx="2" cy="-30" r="3" fill="#1e40af" />
+                  </g>
+
+                  {/* <!-- Top text curve --> */}
+                  <path
+                    id="topCurve"
+                    d="M 30,100 A 70,70 0 0,1 170,100"
+                    fill="none"
+                  />
+                  <text
+                    font-family="Georgia, serif"
+                    font-size="16"
+                    font-weight="bold"
+                    fill="#1e40af"
+                  >
+                    <textPath
+                      href="#topCurve"
+                      startOffset="50%"
+                      text-anchor="middle"
+                    >
+                      MediCare+
+                    </textPath>
+                  </text>
+
+                  {/* <!-- Bottom text curve --> */}
+                  <path
+                    id="bottomCurve"
+                    d="M 30,100 A 70,70 0 0,0 170,100"
+                    fill="none"
+                  />
+                  <text
+                    font-family="Georgia, serif"
+                    font-size="14"
+                    fill="#1e40af"
+                  >
+                    <textPath
+                      href="#bottomCurve"
+                      startOffset="50%"
+                      text-anchor="middle"
+                    >
+                      {patientData?.doctorName}
+                    </textPath>
+                  </text>
+
+                  {/* <!-- Bottom straight text --> */}
+                  <text
+                    x="100"
+                    y="145"
+                    font-family="Georgia, serif"
+                    font-size="11"
+                    fill="#1e40af"
+                    text-anchor="middle"
+                  >
+                    EST. 2025
+                  </text>
+                </svg>
+              </div>
+              <div className="text-right text-xs text-gray-500">
+                {patientData?.followUpDate && (
+                  <div className="mb-3">
+                    <h3 className="font-semibold text-lg text-blue-600">
+                      Follow up date
+                    </h3>
+                    <p className="text-sm">{patientData?.followUpDate}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
