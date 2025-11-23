@@ -56,7 +56,7 @@ export const POST: APIRoute = async ({ request }) => {
       { "doctorDetails.userId": id }, // Find the document containing the doctor
       {
         $set: {
-          "doctorDetails.$[doctor].payment": formData, // Update payment for matched doctor
+          "doctorDetails.$[doctor].payment": formData,
         },
       },
       {
