@@ -21,9 +21,11 @@ import {
   Target,
   BookText,
   User,
+  Clock,
+  Eye,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
-
+import PrescriptionShow from "./prescriptionShow";
 interface VitalSign {
   bloodPressure?: string;
   heartRate?: string;
@@ -276,6 +278,8 @@ export default function DoctorManagementSettings({
           result?.adminstore?.doctorDetails
         );
 
+        console.log("doctordata=>", doctorData);
+
         // Shuffle latest doctor data
         const shuffledLatestDocs = shuffleArray(latestDocs);
         setLatestDoctorData(shuffledLatestDocs);
@@ -285,6 +289,57 @@ export default function DoctorManagementSettings({
     };
     fetchDataofAdmin();
   }, [admin]);
+
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowDetailsModal(false);
+      }
+    };
+    // Add event listener when modal is shown
+    if (showDetailsModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showDetailsModal]);
+
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowPrescriptions(false);
+      }
+    };
+    // Add event listener when modal is shown
+    if (showPrescriptions) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showPrescriptions]);
+
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowAppointments(false);
+      }
+    };
+    // Add event listener when modal is shown
+    if (showAppointments) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showAppointments]);
 
   // Function to get latest doctor details grouped by userId
   const getLatestDoctorsByUserId = (doctors: DoctorDetails[]) => {
@@ -406,6 +461,8 @@ export default function DoctorManagementSettings({
     appointment: AppointmentDataDoctor;
     onClose: () => void;
   }) => {
+    const [document, setDocument] = useState<Prescription | null>(null);
+    const [showPrescription, setShowPrescription] = useState(false);
     const getStatusColor = (status: string) => {
       switch (status.toLowerCase()) {
         case "confirmed":
@@ -420,6 +477,61 @@ export default function DoctorManagementSettings({
           return "bg-gray-100 text-gray-800";
       }
     };
+
+    const seePrescription = (document) => {
+      setDocument(document);
+      setShowPrescription(true);
+    };
+
+    const handleClosePrescription = () => {
+      setShowPrescription(false);
+      setDocument(null);
+    };
+
+    if (showPrescription && document) {
+      return (
+        <PrescriptionShow
+          patientData={{
+            // Patient info
+            patientId: appointment?.patientId || "",
+            patientName: appointment?.patientName || "",
+            patientEmail: appointment?.patientEmail || "",
+            patientPhone: appointment?.patientPhone || "",
+            patientGender: appointment?.patientGender || "",
+            patientAge: appointment?.patientAge || 0,
+            patientBloodgroup: appointment?.patientBloodgroup || "",
+
+            // Visit info
+            reasonForVisit: appointment?.reasonForVisit || "",
+            symptoms: appointment?.symptoms || "",
+            // previousVisit: selectedPatient?.patientInfo?.previousVisit,
+
+            // Medical data
+            vitalSign: appointment?.prescription?.vitalSign || {},
+            primaryDiagnosis: appointment?.prescription?.primaryDiagnosis || "",
+            testandReport: appointment?.prescription?.testandReport || "",
+            medication: appointment?.prescription?.medication || [],
+            restrictions: appointment?.prescription?.restrictions || "",
+            followUpDate: appointment?.prescription?.followUpDate || "",
+            additionalNote: appointment?.prescription?.additionalNote || "",
+            date: appointment?.prescription?.createdAt,
+            prescriptionId: appointment?.prescription?.prescriptionId,
+
+            // Doctor info
+            doctorName: appointment?.doctorName || "",
+            doctorContact: selectedDoctor?.contact || "",
+            doctorEmail: appointment?.doctorEmail || "",
+            doctorGender: selectedDoctor?.gender || "",
+            doctorEducation: selectedDoctor?.education || "",
+            doctorSpecialist: appointment?.doctorSpecialist || "",
+            hospital: selectedDoctor?.hospital || "",
+            doctorId: selectedDoctor?._id || "",
+            licenseNumber: selectedDoctor?.registrationNo || "",
+          }}
+          onClose={handleClosePrescription}
+        />
+      );
+    }
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -493,9 +605,9 @@ export default function DoctorManagementSettings({
                   <p className="text-sm text-gray-600">Specialist</p>
                   <p className="font-medium">{appointment.doctorSpecialist}</p>
                 </div>
-                <div className="md:col-span-2">
+                <div className="">
                   <p className="text-sm text-gray-600">Email</p>
-                  <p className="font-medium">{appointment.doctorEmail}</p>
+                  <p className="font-medium">{selectedDoctor?.email}</p>
                 </div>
               </div>
             </div>
@@ -569,22 +681,32 @@ export default function DoctorManagementSettings({
             </div>
 
             {/* Emergency Contact */}
-            <div className="bg-red-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-red-600" />
-                Emergency Contact
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Contact Name</p>
-                  <p className="font-medium">{appointment.emergencyContact}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Phone Number</p>
-                  <p className="font-medium">{appointment.emergencyPhone}</p>
+            {(appointment.emergencyContact || appointment.emergencyPhone) && (
+              <div className="bg-red-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                  Emergency Contact
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {appointment.emergencyContact && (
+                    <div>
+                      <p className="text-sm text-gray-600">Contact Name</p>
+                      <p className="font-medium">
+                        {appointment.emergencyContact}
+                      </p>
+                    </div>
+                  )}
+                  {appointment.emergencyPhone && (
+                    <div>
+                      <p className="text-sm text-gray-600">Phone Number</p>
+                      <p className="font-medium">
+                        {appointment.emergencyPhone}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Prescription */}
             {/* Prescription */}
@@ -594,40 +716,123 @@ export default function DoctorManagementSettings({
                   <Pill className="w-5 h-5 text-indigo-600" />
                   Prescription
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-0">
                   {appointment?.prescription?.medication && (
                     <div>
                       <p className="text-sm text-gray-600">Medications</p>
                       <div className="space-y-3">
-                        {appointment.prescription.medication.map((med) => (
-                          <div key={med.id} className="font-medium">
-                            <p className="font-semibold">{med.medecineName}</p>
-                            <div className="text-sm text-gray-700 space-y-1">
-                              <p>Dosage: {med.medecineDosage}</p>
-                              <p>Frequency: {med.frequency}</p>
-                              <p>Duration: {med.duration}</p>
-                              <p>Quantity: {med.quantity}</p>
-                              {med.route && med.route.length > 0 && (
-                                <p>Route: {med.route.join(", ")}</p>
-                              )}
-                              {med.instructions && (
-                                <p>Instructions: {med.instructions}</p>
-                              )}
-                              {med.startDate && (
-                                <p>
-                                  Start Date:{" "}
-                                  {new Date(med.startDate).toLocaleDateString()}
-                                </p>
-                              )}
-                              {med.endDate && (
-                                <p>
-                                  End Date:{" "}
-                                  {new Date(med.endDate).toLocaleDateString()}
-                                </p>
-                              )}
+                        {appointment?.prescription?.prescriptionId ? (
+                          <div className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-green-50 to-emerald-50">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-4 flex-1">
+                                {/* Prescription Icon */}
+                                <div className="p-3 rounded-lg bg-green-100">
+                                  <Pill className="h-6 w-6 text-green-600" />
+                                </div>
+
+                                {/* Prescription Details */}
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-semibold text-lg">
+                                      {appointment?.prescription
+                                        ?.primaryDiagnosis || "Prescription"}
+                                    </h3>
+                                    <span className="px-2 py-1 text-xs rounded-md bg-green-100 text-green-800">
+                                      Active
+                                    </span>
+                                  </div>
+                                  <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                                    <div className="flex items-center gap-1">
+                                      <FileText className="h-4 w-4" />
+                                      <span className="font-semibold">
+                                        Prescription
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4" />
+                                      <span>
+                                        {appointment?.prescription?.createdAt
+                                          ? new Date(
+                                              appointment?.prescription?.createdAt
+                                            ).toLocaleDateString()
+                                          : "N/A"}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4" />
+                                      <span>
+                                        {appointment?.prescription?.createdAt
+                                          ? new Date(
+                                              appointment?.prescription?.createdAt
+                                            ).toLocaleTimeString()
+                                          : "N/A"}
+                                      </span>
+                                    </div>
+                                    {appointment?.prescription
+                                      ?.followUpDate && (
+                                      <div className="flex items-center gap-1">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>
+                                          Follow-up:{" "}
+                                          {new Date(
+                                            appointment?.prescription?.followUpDate
+                                          ).toLocaleDateString()}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                  {appointment?.prescription?.symptoms && (
+                                    <p className="text-sm text-gray-700 mb-2">
+                                      <strong>Symptoms:</strong>{" "}
+                                      {appointment?.prescription?.symptoms}
+                                    </p>
+                                  )}
+                                  {appointment?.prescription?.medication &&
+                                    appointment?.prescription?.medication
+                                      .length > 0 && (
+                                      <p className="text-sm text-gray-700 mb-2">
+                                        <strong>Medications:</strong>{" "}
+                                        {
+                                          appointment?.prescription?.medication
+                                            .length
+                                        }{" "}
+                                        prescribed
+                                      </p>
+                                    )}
+                                  {appointment?.prescription
+                                    ?.additionalNote && (
+                                    <p className="text-sm text-gray-700">
+                                      <strong>Notes:</strong>{" "}
+                                      {
+                                        appointment?.prescription
+                                          ?.additionalNote
+                                      }
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex flex-col gap-2 ml-4">
+                                <button
+                                  onClick={() => seePrescription(prescription)}
+                                  className="px-3 py-2 text-xs border border-gray-400 bg-green-100 hover:bg-green-200 rounded-md flex items-center gap-1"
+                                >
+                                  <Eye className="h-3 w-3 text-green-600" />
+                                  View
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        ))}
+                        ) : (
+                          <div className="text-center py-4 text-gray-500">
+                            <Pill className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                            <p className="text-lg">No prescriptions found</p>
+                            <p className="text-sm">
+                              Prescriptions will appear here once created
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

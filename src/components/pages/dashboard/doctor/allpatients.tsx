@@ -1881,10 +1881,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                       <Eye className="h-3 w-3 text-green-600" />
                                       View
                                     </button>
-                                    <button className="px-3 py-2 text-xs bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-md flex items-center gap-1">
-                                      <Download className="h-3 w-3" />
-                                      Download
-                                    </button>
                                   </div>
                                 </div>
                               </div>
