@@ -89,6 +89,8 @@ interface Prescription {
   doctorName: string;
   patientId: string;
   doctorpatinetId: string;
+  patientName?: String;
+  patientAge?: string;
   reasonForVisit: string;
   vitalSign: VitalSign;
   primaryDiagnosis: string;
@@ -175,7 +177,7 @@ interface DoctorDetails {
   appointments: AppointmentDataDoctor[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
-  prescription?: Prescription;
+  prescription?: Prescription[];
   status?: string;
   createdAt: Date;
 }
@@ -784,7 +786,7 @@ export default function DoctorManagementSettings({
                     Appointments
                   </h3>
                   {selectedDoctor.appointments.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
                       {selectedDoctor.appointments.map((apt) => (
                         <div
                           key={apt.doctorpatinetId}
@@ -818,10 +820,21 @@ export default function DoctorManagementSettings({
                     Prescriptions
                   </h3>
                   {selectedDoctor.prescription ? (
-                    <div className="bg-white p-3 rounded border border-gray-200">
-                      <p className="text-sm text-gray-600">
-                        Prescription details would appear here
-                      </p>
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                      {selectedDoctor.prescription.map((apt) => (
+                        <div
+                          key={apt.doctorpatinetId}
+                          className="bg-white p-3 rounded border border-gray-200"
+                        >
+                          <button className="px-6 py-1  text-black rounded-lg hover:bg-gray-200 transition font-semibold">
+                            <p className="font-medium">{apt.patientName}</p>
+                            <p className="text-sm text-gray-600">
+                              {new Date(apt.createdAt).toLocaleDateString()} at{" "}
+                              {new Date(apt.createdAt).toLocaleTimeString()}
+                            </p>
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <p className="text-sm text-gray-500">

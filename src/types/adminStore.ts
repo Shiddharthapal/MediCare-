@@ -80,8 +80,15 @@ interface AdminPrescription {
   doctorId: string;
   doctorName: string;
   patientId: string;
+  doctorHospital: string;
+  doctorContact: string;
+  patientSpecializations: string;
+  patientSpecialist: string;
   patientName: string;
   patientAge: number;
+  patientGender: string;
+  patientContact: string;
+  patientBloodGroup: string;
   doctorpatinetId: string;
   reasonForVisit: string;
   vitalSign: VitalSign;
@@ -358,7 +365,7 @@ interface DoctorDetails {
   appointments: AppointmentDataDoctor[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
-  prescription?: AdminPrescription;
+  prescription?: AdminPrescription[];
   status?: string;
   createdAt: Date;
 }

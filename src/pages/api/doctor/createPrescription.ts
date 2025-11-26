@@ -153,10 +153,17 @@ export const POST: APIRoute = async ({ request }) => {
           prescription: {
             doctorpatinetId,
             patientId,
+            doctorName: doctordetails.name,
+            doctorId,
+            doctorHospital: doctordetails.hospital,
+            doctorContact: doctordetails.contact,
+            patientSpecializations: doctordetails.specializations,
+            patientSpecialist: doctordetails.specialist,
             patientName: userdetails.name,
             patientAge: userdetails.age,
-            doctorName,
-            doctorId,
+            patientGender: userdetails.gender,
+            patientContact: userdetails.contactNumber,
+            patientBloodGroup: userdetails.bloodGroup,
             vitalSign,
             reasonForVisit,
             primaryDiagnosis,
@@ -182,8 +189,6 @@ export const POST: APIRoute = async ({ request }) => {
             doctorpatinetId,
             patientId,
             doctorName,
-            patientName: userdetails.name,
-            patientAge: userdetails.age,
             doctorId,
             vitalSign,
             reasonForVisit,
@@ -204,6 +209,40 @@ export const POST: APIRoute = async ({ request }) => {
           { "doctor.userId": doctorId }, // Match all patients with this ID
           { "appointment.doctorpatinetId": doctorpatinetId }, // Match all patients with this ID
         ],
+      }
+    );
+
+    await adminStore.updateOne(
+      { "doctorDetails.userId": doctorId },
+      {
+        $push: {
+          prescription: {
+            doctorpatinetId,
+            patientId,
+            doctorName: doctordetails.name,
+            doctorId,
+            doctorHospital: doctordetails.hospital,
+            doctorContact: doctordetails.contact,
+            patientSpecializations: doctordetails.specializations,
+            patientSpecialist: doctordetails.specialist,
+            patientName: userdetails.name,
+            patientAge: userdetails.age,
+            patientGender: userdetails.gender,
+            patientContact: userdetails.contactNumber,
+            patientBloodGroup: userdetails.bloodGroup,
+            vitalSign,
+            reasonForVisit,
+            primaryDiagnosis,
+            testandReport,
+            medication,
+            symptoms,
+            restrictions,
+            followUpDate,
+            additionalNote,
+            prescriptionId,
+            createdAt: new Date(),
+          },
+        },
       }
     );
 

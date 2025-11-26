@@ -243,6 +243,12 @@ const PrescriptionSchema = new mongoose.Schema({
   doctorpatinetId: {
     type: String,
   },
+  patientName: {
+    type: String,
+  },
+  patientAge: {
+    type: String,
+  },
   vitalSign: {
     type: VitalSignSchema,
   },
@@ -299,11 +305,32 @@ const AdminPrescriptionSchema = new mongoose.Schema({
   patientId: {
     type: String,
   },
+  doctorHospital: {
+    type: String,
+  },
+  doctorContact: {
+    type: String,
+  },
+  patientSpecializations: {
+    type: String,
+  },
+  patientSpecialist: {
+    type: String,
+  },
   patientName: {
     type: String,
   },
   patientAge: {
     type: Number,
+  },
+  patientGender: {
+    type: String,
+  },
+  patientContact: {
+    type: String,
+  },
+  patientBloodGroup: {
+    type: String,
   },
   doctorpatinetId: {
     type: String,
@@ -1082,7 +1109,6 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
   prescription: {
     type: [PrescriptionSchema],
-    default: [],
   },
 
   practiceSettingData: {
