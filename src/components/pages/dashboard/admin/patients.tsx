@@ -202,9 +202,6 @@ interface DocumentCardProps {
   onInfo: () => void;
 }
 
-// Add your Bunny CDN configuration
-const BUNNY_CDN_PULL_ZONE = "mypull-29.b-cdn.net";
-
 const Button = ({
   children,
   variant = "default",
@@ -245,6 +242,9 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   }
   return shuffled;
 };
+
+// Add your Bunny CDN configuration
+const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
 
 export default function DoctorManagementSettings({
   onNavigate,
@@ -428,6 +428,27 @@ export default function DoctorManagementSettings({
       day: "numeric",
     });
   };
+
+  //handler escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowDetailsModal(false);
+        setShowPrescriptions(false);
+        setShowAppointments(false);
+      }
+    };
+
+    // Only add listener if any modal is open
+    if (showDetailsModal || showPrescriptions || showAppointments) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showDetailsModal, showPrescriptions, showAppointments]);
 
   //Get function that return name initial of patient
   const getPatientInitials = (patientName: string) => {
@@ -864,7 +885,10 @@ export default function DoctorManagementSettings({
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div
+          className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin
+         scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500"
+        >
           {/* Header */}
           <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-800">
@@ -1119,7 +1143,7 @@ export default function DoctorManagementSettings({
                   {appointment.document.map((doc, index) => (
                     <a
                       key={index}
-                      href={doc.url}
+                      href={getBunnyCDNUrl(doc)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline"
@@ -1887,7 +1911,7 @@ export default function DoctorManagementSettings({
                     Appointments
                   </h3>
                   {selectedPatient.appointments.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
                       {selectedPatient.appointments.map((apt) => (
                         <div
                           key={apt.doctorpatinetId}
@@ -1925,36 +1949,38 @@ export default function DoctorManagementSettings({
                     <File className="h-5 w-5" />
                     Prescription
                   </h3>
-                  {selectedPatient.appointments.map((apt) =>
-                    apt.prescription?.reasonForVisit ? (
-                      <div
-                        key={apt.prescription.prescriptionId}
-                        className="bg-white p-3 rounded border border-gray-200"
-                      >
-                        <button
-                          onClick={() => setIsModalOpen(true)}
-                          className="px-6 py-1 text-black rounded-lg hover:bg-gray-200 transition font-semibold"
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                    {selectedPatient.appointments.map((apt) =>
+                      apt.prescription?.reasonForVisit ? (
+                        <div
+                          key={apt.prescription.prescriptionId}
+                          className="bg-white p-3 rounded border border-gray-200"
                         >
-                          <p className="font-medium">{apt.patientName}</p>
-                          <p className="text-sm text-gray-600">
-                            {apt.prescription.reasonForVisit} at{" "}
-                            {apt.prescription.createdAt?.split("T")[0]}
-                          </p>
-                        </button>
-                        {isModalOpen && (
-                          <PrescriptionDetailsModal
-                            prescription={apt.prescription}
-                            onClose={() => setIsModalOpen(false)}
-                          />
-                        )}
-                      </div>
-                    ) : null
-                  )}
+                          <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="px-6 py-1 text-black rounded-lg hover:bg-gray-200 transition font-semibold"
+                          >
+                            <p className="font-medium">{apt.patientName}</p>
+                            <p className="text-sm text-gray-600">
+                              {apt.prescription.reasonForVisit} at{" "}
+                              {apt.prescription.createdAt?.split("T")[0]}
+                            </p>
+                          </button>
+                          {isModalOpen && (
+                            <PrescriptionDetailsModal
+                              prescription={apt.prescription}
+                              onClose={() => setIsModalOpen(false)}
+                            />
+                          )}
+                        </div>
+                      ) : null
+                    )}
+                  </div>
                 </div>
               )}
 
-              {showDocument && selectedPatient?.upload?.length > 0 && (
-                <div className="space-y-2 mb-6 px-4 ">
+              {showDocument && selectedPatient?.upload?.length > 0 ? (
+                <div className="space-y-2 mb-6 px-4 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <File className="h-5 w-5" />
                     Document
@@ -1976,6 +2002,8 @@ export default function DoctorManagementSettings({
                     />
                   )}
                 </div>
+              ) : (
+                <div>No document available</div>
               )}
 
               {/* Main Content Grid */}

@@ -329,56 +329,26 @@ export default function DoctorManagementSettings({
     fetchDataofAdmin();
   }, [admin]);
 
-  //For escape button
+  // Single escape button handler for all modals
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setShowDetailsModal(false);
-      }
-    };
-    // Add event listener when modal is shown
-    if (showDetailsModal) {
-      document.addEventListener("keydown", handleEscapeKey);
-    }
-    // Cleanup: remove event listener when component unmounts or modal closes
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-    };
-  }, [showDetailsModal]);
-
-  //For escape button
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
         setShowPrescriptions(false);
-      }
-    };
-    // Add event listener when modal is shown
-    if (showPrescriptions) {
-      document.addEventListener("keydown", handleEscapeKey);
-    }
-    // Cleanup: remove event listener when component unmounts or modal closes
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-    };
-  }, [showPrescriptions]);
-
-  //For escape button
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
         setShowAppointments(false);
       }
     };
-    // Add event listener when modal is shown
-    if (showAppointments) {
+
+    // Only add listener if any modal is open
+    if (showDetailsModal || showPrescriptions || showAppointments) {
       document.addEventListener("keydown", handleEscapeKey);
     }
-    // Cleanup: remove event listener when component unmounts or modal closes
+
+    // Cleanup
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [showAppointments]);
+  }, [showDetailsModal, showPrescriptions, showAppointments]);
 
   // Function to get latest doctor details grouped by userId
   const getLatestDoctorsByUserId = (doctors: DoctorDetails[]) => {
