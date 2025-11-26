@@ -600,7 +600,7 @@ export default function PrescriptionShow({
         <Button
           variant="outline"
           onClick={onClose}
-          className="border border-gray-400"
+          className="border border-gray-400 bg-transparent"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Dashboard
@@ -629,7 +629,7 @@ export default function PrescriptionShow({
             <div className="flex-1">
               <div className="flex items-center mb-2">
                 <div className="w-7 h-7 bg-emerald-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-2xl leading-none">
+                  <span className="text-white font-bold  text-3xl leading-none mb-2">
                     +
                   </span>
                 </div>
@@ -851,7 +851,7 @@ export default function PrescriptionShow({
                     r="95"
                     fill="none"
                     stroke="#1e40af"
-                    stroke-width="3"
+                    strokeWidth="3"
                   />
                   <circle
                     cx="100"
@@ -859,7 +859,7 @@ export default function PrescriptionShow({
                     r="88"
                     fill="none"
                     stroke="#1e40af"
-                    stroke-width="1.5"
+                    strokeWidth="1.5"
                   />
 
                   {/* <!-- Medical caduceus symbol in center --> */}
@@ -882,15 +882,15 @@ export default function PrescriptionShow({
                       d="M -2,-30 Q -15,-20 -2,-10 Q -15,0 -2,10 Q -10,20 -2,25"
                       fill="none"
                       stroke="#1e40af"
-                      stroke-width="3"
-                      stroke-linecap="round"
+                      strokeWidth="3"
+                      strokeLinecap="round"
                     />
                     <path
                       d="M 2,-30 Q 15,-20 2,-10 Q 15,0 2,10 Q 10,20 2,25"
                       fill="none"
                       stroke="#1e40af"
-                      stroke-width="3"
-                      stroke-linecap="round"
+                      strokeWidth="3"
+                      strokeLinecap="round"
                     />
 
                     {/* <!-- Serpent heads --> */}
@@ -905,15 +905,15 @@ export default function PrescriptionShow({
                     fill="none"
                   />
                   <text
-                    font-family="Georgia, serif"
-                    font-size="16"
-                    font-weight="bold"
+                    fontFamily="Georgia, serif"
+                    fontSize="16"
+                    fontWeight="bold"
                     fill="#1e40af"
                   >
                     <textPath
                       href="#topCurve"
                       startOffset="50%"
-                      text-anchor="middle"
+                      textAnchor="middle"
                     >
                       MediCare+
                     </textPath>
@@ -926,14 +926,14 @@ export default function PrescriptionShow({
                     fill="none"
                   />
                   <text
-                    font-family="Georgia, serif"
-                    font-size="14"
+                    fontFamily="Georgia, serif"
+                    fontSize="14"
                     fill="#1e40af"
                   >
                     <textPath
                       href="#bottomCurve"
                       startOffset="50%"
-                      text-anchor="middle"
+                      textAnchor="middle"
                     >
                       {patientData?.doctorName}
                     </textPath>
@@ -943,10 +943,10 @@ export default function PrescriptionShow({
                   <text
                     x="100"
                     y="145"
-                    font-family="Georgia, serif"
-                    font-size="11"
+                    fontFamily="Georgia, serif"
+                    fontSize="11"
                     fill="#1e40af"
-                    text-anchor="middle"
+                    textAnchor="middle"
                   >
                     EST. 2025
                   </text>
