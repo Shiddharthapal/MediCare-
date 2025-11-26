@@ -657,7 +657,7 @@ export default function PrescriptionShow({
                 {patientData?.hospital || "Hospital"}
               </p>
               <p className="text-xs text-gray-600">
-                {patientData?.doctorContact || "Contact"}
+                {patientData?.doctorContact || patientData?.doctorEmail}
               </p>
             </div>
           </div>

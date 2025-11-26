@@ -193,6 +193,8 @@ interface AppointmentData {
   doctorSpecialist: string;
   doctorGender: string;
   doctorEmail: string;
+  doctorContact: string;
+  doctorRegistrationNo: string;
   hospital: string;
   patientName: string;
   patientId: string;
@@ -226,6 +228,8 @@ interface Appointment {
   doctorGender?: string;
   doctorEmail?: string;
   hospital?: string;
+  doctorContact: string;
+  doctorRegistrationNo: string;
 
   // Patient Information
   patientId?: string;
@@ -276,6 +280,8 @@ interface RescheduleAppointment {
   doctorGender?: string;
   doctorEmail?: string;
   hospital?: string;
+  doctorContact: string;
+  doctorRegistrationNo: string;
 
   // Patient Information
   patientId?: string;
@@ -390,6 +396,7 @@ interface UserDetails {
   healthRecord: HealthRecord[];
   lastTreatmentDate?: Date;
   status?: string;
+  prescription?: AdminPrescription[];
   createdAt: Date;
 }
 interface UserRegister {
