@@ -82,8 +82,8 @@ interface AdminPrescription {
   patientId: string;
   doctorHospital: string;
   doctorContact: string;
-  patientSpecializations: string;
-  patientSpecialist: string;
+  doctorSpecializations: string;
+  doctorSpecialist: string;
   patientName: string;
   patientAge: number;
   patientGender: string;

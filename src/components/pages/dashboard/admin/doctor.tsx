@@ -104,6 +104,33 @@ interface Prescription {
   createdAt: Date;
 }
 
+interface AdminPrescription {
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  doctorHospital: string;
+  doctorContact: string;
+  doctorSpecializations: string;
+  doctorSpecialist: string;
+  patientName: string;
+  patientAge: number;
+  patientGender: string;
+  patientContact: string;
+  patientBloodGroup: string;
+  doctorpatinetId: string;
+  reasonForVisit: string;
+  vitalSign: VitalSign;
+  primaryDiagnosis: string;
+  symptoms: string;
+  testandReport: string;
+  medication: Medication[];
+  restrictions: string;
+  followUpDate: string;
+  additionalNote: string;
+  prescriptionId: string;
+  createdAt: Date;
+}
+
 interface AppointmentDataDoctor {
   doctorpatinetId: string;
   doctorName: string;
@@ -177,7 +204,7 @@ interface DoctorDetails {
   appointments: AppointmentDataDoctor[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
-  prescription?: Prescription[];
+  prescription?: AdminPrescription[];
   status?: string;
   createdAt: Date;
 }
@@ -248,8 +275,10 @@ export default function DoctorManagementSettings({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showPrescriptions, setShowPrescriptions] = useState(false);
   const [showAppointments, setShowAppointments] = useState(false);
-  const [selectedPrescription, setSelectedPrescription] =
-    useState<Prescription | null>(null);
+
+  const [selectedPrescriptionWA, setSelectedPrescriptionWA] =
+    useState<AdminPrescription | null>(null);
+  const [showPrescriptionWA, setShowPrescriptionWA] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentDataDoctor | null>(null);
   const [changedFields, setChangedFields] = useState({});
@@ -467,6 +496,17 @@ export default function DoctorManagementSettings({
   //handler function to open the appointment details modal for specefic appointment
   const handleAppointmentClick = (apt) => {
     setSelectedAppointment(apt);
+  };
+
+  //handler function to open the prescription details  for specefic prescription
+  const handlePrescriptionClick = (apt) => {
+    setSelectedPrescriptionWA(apt);
+    setShowPrescriptionWA(true);
+  };
+
+  const handleClosePrescriptionCompo = () => {
+    setSelectedPrescriptionWA(null);
+    setShowPrescriptionWA(false);
   };
 
   //handler function to close the appointment details modal for specefic appointment
@@ -819,14 +859,18 @@ export default function DoctorManagementSettings({
                     <FileText className="h-5 w-5" />
                     Prescriptions
                   </h3>
-                  {selectedDoctor.prescription ? (
+                  {selectedDoctor?.prescription &&
+                  selectedDoctor?.prescription?.length > 0 ? (
                     <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
                       {selectedDoctor.prescription.map((apt) => (
                         <div
                           key={apt.doctorpatinetId}
                           className="bg-white p-3 rounded border border-gray-200"
                         >
-                          <button className="px-6 py-1  text-black rounded-lg hover:bg-gray-200 transition font-semibold">
+                          <button
+                            onClick={() => handlePrescriptionClick(apt)}
+                            className="px-6 py-1  text-black rounded-lg hover:bg-gray-200 transition font-semibold"
+                          >
                             <p className="font-medium">{apt.patientName}</p>
                             <p className="text-sm text-gray-600">
                               {new Date(apt.createdAt).toLocaleDateString()} at{" "}
@@ -1322,6 +1366,51 @@ export default function DoctorManagementSettings({
               />
             </div>
           )}
+        </div>
+      )}
+      {showPrescriptionWA && selectedPrescriptionWA && (
+        <div className="fixed inset-0 z-50 bg-white overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+          <PrescriptionShow
+            patientData={{
+              // Patient info
+              patientId: selectedPrescriptionWA?.patientId || "",
+              patientName: selectedPrescriptionWA?.patientName || "",
+              patientEmail: selectedAppointment?.patientEmail || "",
+              patientPhone: selectedPrescriptionWA?.patientContact || "",
+              patientGender: selectedPrescriptionWA?.patientGender || "",
+              patientAge: selectedPrescriptionWA?.patientAge || 0,
+              patientBloodgroup:
+                selectedPrescriptionWA?.patientBloodGroup || "",
+
+              // Visit info
+              reasonForVisit: selectedPrescriptionWA?.reasonForVisit || "",
+              symptoms: selectedPrescriptionWA?.symptoms || "",
+              // previousVisit: selectedPatient?.patientInfo?.previousVisit,
+
+              // Medical data
+              vitalSign: selectedPrescriptionWA?.vitalSign || {},
+              primaryDiagnosis: selectedPrescriptionWA?.primaryDiagnosis || "",
+              testandReport: selectedPrescriptionWA?.testandReport || "",
+              medication: selectedPrescriptionWA?.medication || [],
+              restrictions: selectedPrescriptionWA?.restrictions || "",
+              followUpDate: selectedPrescriptionWA?.followUpDate || "",
+              additionalNote: selectedPrescriptionWA?.additionalNote || "",
+              date: selectedPrescriptionWA?.createdAt,
+              prescriptionId: selectedPrescriptionWA?.prescriptionId || " ",
+
+              // Doctor info
+              doctorName: selectedPrescriptionWA?.doctorName || "",
+              doctorContact: selectedPrescriptionWA?.doctorContact || "",
+              doctorEmail: selectedAppointment?.doctorEmail || "",
+              doctorGender: selectedDoctor?.gender || "",
+              doctorEducation: selectedDoctor?.education || "",
+              doctorSpecialist: selectedDoctor?.specialist || "",
+              hospital: selectedPrescriptionWA?.doctorHospital || "",
+              doctorId: selectedDoctor?._id || "",
+              licenseNumber: selectedDoctor?.registrationNo || "",
+            }}
+            onClose={handleClosePrescriptionCompo}
+          />
         </div>
       )}
     </div>

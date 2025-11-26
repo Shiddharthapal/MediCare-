@@ -311,10 +311,10 @@ const AdminPrescriptionSchema = new mongoose.Schema({
   doctorContact: {
     type: String,
   },
-  patientSpecializations: {
+  doctorSpecializations: {
     type: String,
   },
-  patientSpecialist: {
+  doctorSpecialist: {
     type: String,
   },
   patientName: {
