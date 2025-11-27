@@ -261,7 +261,7 @@ export default function Dashboard() {
     fetchData();
 
     // Then fetch every 30 seconds
-    const interval = setInterval(fetchData, 60000);
+    const interval = setInterval(fetchData, 2400000);
 
     // Cleanup: clear interval when component unmounts
     return () => clearInterval(interval);
