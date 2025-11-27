@@ -568,7 +568,7 @@ export default function DoctorManagementSettings({
         <h1 className="text-3xl font-bold text-slate-900">Doctors</h1>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 bg-white p-2 rounded-lg shadow-sm">
+      <div className="grid grid-cols-2 gap-2 bg-white py-2 rounded-lg shadow-sm">
         <Button
           variant={activeTab === "register" ? "default" : "ghost"}
           className={`${activeTab === "register" ? "bg-blue-500 text-white shadow-sm" : "border-2 border-gray-300"}`}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Info,
   Pill,
@@ -34,7 +34,17 @@ import {
   Image as ImageIcon,
   Eye,
   Printer,
+  HeartPlus,
+  Heart,
+  Scale,
 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useAppSelector } from "@/redux/hooks";
 import PrescriptionShow from "./prescriptionShow";
 
@@ -263,9 +273,11 @@ export default function DoctorManagementSettings({
   );
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
   const [latestPatientData, setLatestPatientData] = useState<UserDetails[]>([]);
+  const [healthrecord, setHealthrecord] = useState<HealthRecord[]>([]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showPrescriptions, setShowPrescriptions] = useState(false);
   const [showDocument, setShowDocument] = useState(false);
+  const [showHealthRecord, setShowHealthRecord] = useState(false);
   const [showAppointments, setShowAppointments] = useState(false);
   const [changedFields, setChangedFields] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -338,6 +350,25 @@ export default function DoctorManagementSettings({
     };
     fetchDataofAdmin();
   }, [admin]);
+
+  // Group records by date
+  const groupedRecords = useMemo(() => {
+    return healthrecord?.reduce(
+      (acc, record) => {
+        // Extract date from createdAt, fallback to date field if createdAt doesn't exist
+        const dateKey = record.createdAt
+          ? new Date(record.createdAt).toISOString().split("T")[0]
+          : record.date;
+
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(record);
+        return acc;
+      },
+      {} as Record<string, HealthRecord[]>
+    );
+  }, [healthrecord]);
 
   //show the details of document
   function DetailItem({ label, value, isMonospace = false }: DetailItemProps) {
@@ -901,6 +932,7 @@ export default function DoctorManagementSettings({
     const changes = detectChangedFields(currentVersion, previousVersion);
 
     setSelectedPatient(currentVersion);
+    setHealthrecord(currentVersion?.healthRecord);
     setChangedFields(changes);
     setShowDetailsModal(true);
   };
@@ -1020,7 +1052,7 @@ export default function DoctorManagementSettings({
         <h1 className="text-3xl font-bold text-slate-900">Patients</h1>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 bg-white p-2 rounded-lg shadow-sm">
+      <div className="grid grid-cols-2 gap-2 bg-white py-2 rounded-lg shadow-sm">
         <Button
           variant={activeTab === "register" ? "default" : "ghost"}
           className={`${activeTab === "register" ? "bg-blue-500 text-white shadow-sm" : "border-2 border-gray-300"}`}
@@ -1161,7 +1193,7 @@ export default function DoctorManagementSettings({
           >
             <div className="p-6">
               {/* Header */}
-              <div className="flex items-start justify-between mb-6">
+              <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
                     <User className="h-8 w-8 text-blue-600" />
@@ -1186,7 +1218,7 @@ export default function DoctorManagementSettings({
 
               {/* Change Indicator */}
               {Object.keys(changedFields).length > 0 && (
-                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="mb-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <div className="flex items-center gap-2 text-yellow-800">
                     <AlertCircle className="h-5 w-5" />
                     <p className="font-medium">
@@ -1201,7 +1233,7 @@ export default function DoctorManagementSettings({
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3 mb-6">
+              <div className="flex gap-1 mb-6">
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -1221,6 +1253,7 @@ export default function DoctorManagementSettings({
                     setShowPrescriptions(!showPrescriptions);
                     setShowAppointments(false);
                     setShowDocument(false);
+                    setShowHealthRecord(false);
                   }}
                   className="flex items-center gap-2"
                 >
@@ -1237,11 +1270,25 @@ export default function DoctorManagementSettings({
                     setShowDocument(!showDocument);
                     setShowAppointments(false);
                     setShowPrescriptions(false);
+                    setShowHealthRecord(false);
                   }}
                   className="flex items-center gap-2 "
                 >
                   <File className="h-4 w-4" />
                   View Document ({selectedPatient.upload.length})
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowHealthRecord(!showHealthRecord);
+                    setShowDocument(false);
+                    setShowAppointments(false);
+                    setShowPrescriptions(false);
+                  }}
+                  className="flex items-center gap-2 "
+                >
+                  <HeartPlus className="h-4 w-4" />
+                  Health Record ({selectedPatient.healthRecord.length})
                 </Button>
               </div>
 
@@ -1279,6 +1326,7 @@ export default function DoctorManagementSettings({
                 </div>
               )}
 
+              {/*Prescription section */}
               {showPrescriptions && selectedPatient.appointments.length > 0 && (
                 <div className="space-y-2 mb-2 px-4">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -1318,6 +1366,7 @@ export default function DoctorManagementSettings({
                 </div>
               )}
 
+              {/*Document section */}
               {showDocument && selectedPatient?.upload?.length > 0 ? (
                 <div className="space-y-2 mb-4 px-4 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -1344,6 +1393,105 @@ export default function DoctorManagementSettings({
               ) : (
                 <div>No document available</div>
               )}
+
+              {/*Heath Record section */}
+              {showHealthRecord &&
+                selectedPatient?.healthRecord?.length > 0 && (
+                  <div className="space-y-2 mb-4 px-4 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <File className="h-5 w-5" />
+                      Document ({selectedPatient?.healthRecord?.length})
+                    </h3>
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                      {groupedRecords ? (
+                        Object?.entries(groupedRecords || "")?.map(
+                          ([date, dateRecords]) => (
+                            <div key={date} className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-5 w-5 text-muted-foreground text-[hsl(273,100%,60%)]" />
+                                <h3 className="text-sm text-gray-600 font-medium">
+                                  {formatDate(date)}
+                                </h3>
+                              </div>
+
+                              <div className=" ">
+                                {dateRecords.map((record) => (
+                                  <Card
+                                    key={record._id}
+                                    className="hover:shadow-lg shadow-gray-200 bg-[hsl(270,100%,96%)]"
+                                  >
+                                    <CardContent className="">
+                                      <div className="grid gap-4">
+                                        <div className="grid grid-cols-2 gap-0">
+                                          <div className="flex flex-row items-baseline gap-3">
+                                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                              <Scale className="h-3 w-3" />
+                                              Weight:
+                                            </p>
+                                            <p className="text-lg font-semibold">
+                                              {record.weight} kg
+                                            </p>
+                                          </div>
+
+                                          <div className="flex flex-row items-baseline gap-3">
+                                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                              <Activity className="h-3 w-3 text-red-600" />
+                                              Blood Pressure
+                                            </p>
+                                            <p className="text-lg font-semibold">
+                                              {record.bloodPressure}
+                                            </p>
+                                          </div>
+
+                                          <div className="flex flex-row items-baseline gap-3">
+                                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                              <Heart className="h-3 w-3 text-red-600" />
+                                              Heart Rate
+                                            </p>
+                                            <p className="text-lg font-semibold">
+                                              {record.heartRate} bpm
+                                            </p>
+                                          </div>
+
+                                          <div className="flex flex-row items-baseline gap-3">
+                                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                              <Stethoscope className="h-3 w-3 text-amber-600" />
+                                              Temperature
+                                            </p>
+                                            <p className="text-lg font-semibold">
+                                              {record.temperature}°F
+                                            </p>
+                                          </div>
+                                        </div>
+
+                                        {record.notes && (
+                                          <div className="flex flex-row items-baseline gap-3">
+                                            <p className="text-sm font-medium">
+                                              Notes:
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                              {record.notes}
+                                            </p>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        )
+                      ) : (
+                        <Card>
+                          <div className="text-red-600 text-center py-4">
+                            No health records are available
+                          </div>
+                        </Card>
+                      )}
+                    </div>
+                  </div>
+                )}
 
               {/* Main Content Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">

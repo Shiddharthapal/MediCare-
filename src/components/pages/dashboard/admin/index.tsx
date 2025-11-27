@@ -611,7 +611,7 @@ export default function Dashboard() {
         className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
         {currentPage === "dashboard" && (
-          <div className="flex-1 flex items-center mx-10 pt-5 flex-col ">
+          <div className=" container flex-1 flex items-center mx-auto pt-5 flex-col ">
             <main className="flex-1 overflow-y-auto px-6 pb-6 pt-2 w-full">
               <div className="max-w-6xl mx-auto space-y-6">
                 {/* Header */}

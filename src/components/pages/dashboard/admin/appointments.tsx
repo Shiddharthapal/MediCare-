@@ -810,7 +810,7 @@ export default function Appointments({
   );
 
   return (
-    <div className="container px-6 space-y-4 w-full max-w-4xl mx-auto">
+    <div className="container px-auto space-y-4 w-full  mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
       </div>
