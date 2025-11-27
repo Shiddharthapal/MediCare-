@@ -1155,7 +1155,10 @@ export default function DoctorManagementSettings({
       {/* Details Modal */}
       {showDetailsModal && selectedPatient && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div
+            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin
+           scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500"
+          >
             <div className="p-6">
               {/* Header */}
               <div className="flex items-start justify-between mb-6">
@@ -1235,10 +1238,10 @@ export default function DoctorManagementSettings({
                     setShowAppointments(false);
                     setShowPrescriptions(false);
                   }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 "
                 >
                   <File className="h-4 w-4" />
-                  View Document
+                  View Document ({selectedPatient.upload.length})
                 </Button>
               </div>
 
@@ -1254,11 +1257,11 @@ export default function DoctorManagementSettings({
                       {selectedPatient.appointments.map((apt) => (
                         <div
                           key={apt.doctorpatinetId}
-                          className="bg-white p-3 rounded border border-gray-200"
+                          className="bg-white px-3 py-1 rounded border border-gray-200"
                         >
                           <button
                             onClick={() => handleOpenAppointment(apt)}
-                            className="px-6 py-1  text-black rounded-lg hover:bg-gray-200 transition font-semibold"
+                            className="px-6 py-1 w-full text-left  text-black rounded-lg hover:bg-gray-200 transition font-semibold"
                           >
                             <p className="font-medium">{apt.patientName}</p>
                             <p className="text-sm text-gray-600">
@@ -1277,7 +1280,7 @@ export default function DoctorManagementSettings({
               )}
 
               {showPrescriptions && selectedPatient.appointments.length > 0 && (
-                <div className="space-y-2 mb-6 p-4">
+                <div className="space-y-2 mb-2 px-4">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <File className="h-5 w-5" />
                     Prescription
@@ -1287,11 +1290,11 @@ export default function DoctorManagementSettings({
                       apt.prescription?.reasonForVisit ? (
                         <div
                           key={apt.prescription.prescriptionId}
-                          className="bg-white p-3  rounded border border-gray-200"
+                          className="bg-white px-3 py-1  rounded border border-gray-200"
                         >
                           <button
                             onClick={() => setIsModalOpen(true)}
-                            className="px-6 py-2 w-full text-left text-black rounded-lg hover:bg-gray-200 transition"
+                            className="px-3 py-1 w-full text-left text-black rounded-lg hover:bg-gray-200 transition"
                           >
                             <p className="font-semibold text-base mb-1">
                               {apt.doctorName}
@@ -1316,10 +1319,10 @@ export default function DoctorManagementSettings({
               )}
 
               {showDocument && selectedPatient?.upload?.length > 0 ? (
-                <div className="space-y-2 mb-6 px-4 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                <div className="space-y-2 mb-4 px-4 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <File className="h-5 w-5" />
-                    Document
+                    Document ({selectedPatient.upload.length})
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {selectedPatient.upload.map((apt) => (

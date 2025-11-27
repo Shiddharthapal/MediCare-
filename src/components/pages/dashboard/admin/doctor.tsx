@@ -481,10 +481,10 @@ export default function DoctorManagementSettings({
 
   //handler function to close the appointment details modal for specefic appointment
   const handleCloseModal = () => {
-    console.log("Closing appointment details modal");
     setSelectedAppointment(null);
     setShowPrescriptionComponent(false);
   };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "confirmed":
