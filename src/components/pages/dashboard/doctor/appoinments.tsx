@@ -36,7 +36,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { RoomCreationForm } from "./roomCreationForm";
-import { MessageModal } from "../message-modal";
+import { MessageModal } from "./message-modal";
 
 interface AppointmentData {
   _id: string;
@@ -710,9 +710,9 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       <MessageModal
         open={showMessageModal}
         onOpenChange={setShowMessageModal}
-        doctorName={appointment.doctorName}
+        doctorName={appointment?.doctorName}
         patientName={appointment.patientName}
-        doctorEmail={appointment.doctorEmail}
+        doctorEmail={appointment?.doctorEmail || email}
         patientEmail={appointment.patientEmail}
         senderRole="doctor"
       />

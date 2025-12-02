@@ -25,7 +25,7 @@ import {
 import { useAppSelector } from "@/redux/hooks";
 import RescheduleBookAppointments from "./rescheduleBookAppointment";
 import { RoomCreationForm } from "./roomCreationForm";
-import { MessageModal } from "../message-modal";
+import { MessageModal } from "./message-modal";
 import {
   Dialog,
   DialogContent,
