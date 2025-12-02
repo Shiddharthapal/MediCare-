@@ -20,10 +20,12 @@ import {
   Info,
   Eye,
   Download,
+  MessageCircle,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import RescheduleBookAppointments from "./rescheduleBookAppointment";
 import { RoomCreationForm } from "./roomCreationForm";
+import { MessageModal } from "./message-modal";
 import {
   Dialog,
   DialogContent,
@@ -274,6 +276,7 @@ export default function Appointments({
   const [appointmentsData, setAppointmentsData] =
     useState<appointmentdata | null>(null);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
 
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
@@ -660,6 +663,7 @@ export default function Appointments({
     }
   };
 
+  //handler function to view details of appointment
   const handleViewDetails = (appointment: appointmentdata, status: string) => {
     let appointmentWithStatus = {
       ...appointment,
@@ -669,14 +673,22 @@ export default function Appointments({
     setShowDetailsModal(true);
   };
 
+  //handler function to view prescription of appointment
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);
   };
 
+  //handler function to view report of appointment
   const handleViewReports = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowReportsModal(true);
+  };
+
+  //handler function to send message
+  const handleSendMessage = (message: string) => {
+    console.log("Message sent:", message);
+    setShowMessageModal(false);
   };
 
   const getDoctorInitials = (doctorName: string) => {
@@ -760,14 +772,24 @@ export default function Appointments({
                 <>
                   {status === "confirmed" &&
                     appointment.consultationType === "video" && (
-                      <Button
-                        size="sm"
-                        className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
-                        onClick={() => setShowRoomDialog(true)}
-                      >
-                        <Video className="h-3 w-3 mr-1" />
-                        Start
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
+                          onClick={() => setShowRoomDialog(true)}
+                        >
+                          <Video className="h-3 w-3 mr-1" />
+                          Start
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600 hover:bg-purple-50 text-purple-700 mt-1 bg-transparent"
+                          onClick={() => setShowMessageModal(true)}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                      </>
                     )}
                   {status === "pending" && (
                     <>
@@ -778,6 +800,14 @@ export default function Appointments({
                       >
                         <Video className="h-3 w-3 mr-1" />
                         Start
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600 hover:bg-purple-50 text-purple-700 bg-transparent"
+                        onClick={() => setShowMessageModal(true)}
+                      >
+                        <MessageCircle className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
@@ -841,6 +871,14 @@ export default function Appointments({
           />
         </DialogContent>
       </Dialog>
+      {/* Message Modal */}
+      <MessageModal
+        open={showMessageModal}
+        onOpenChange={setShowMessageModal}
+        doctorName={appointment.doctorName}
+        patientName={appointment.patientName}
+        onSendMessage={handleSendMessage}
+      />
     </>
   );
 

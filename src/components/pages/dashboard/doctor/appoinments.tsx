@@ -23,6 +23,7 @@ import {
   Download,
   Video,
   FileEdit,
+  MessageCircle,
 } from "lucide-react";
 import Prescription from "./prescription";
 import Document from "./document";
@@ -35,6 +36,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { RoomCreationForm } from "./roomCreationForm";
+import { MessageModal } from "../patient/message-modal";
 
 interface AppointmentData {
   _id: string;
@@ -282,6 +284,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const doctor = useAppSelector((state) => state.auth.user);
   // console.log("🧞‍♂️doctor --->", doctor);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const email = user?.email;
 
@@ -404,31 +407,42 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     }
   };
 
+  //handler function to show prescription
   const handleCreatePrescription = (patient: any) => {
     setSelectedPatient(patient);
     setShowPrescription(true);
     setEdit(true);
   };
 
+  //handler function to show document
   const handleSeeDocument = (patient: any) => {
     setSelectedPatient(patient);
     setShowDocument(true);
   };
 
+  //handler function to show prescription
   const handleShowPrescription = (patient: any) => {
     setSelectedPatient(patient);
     setShowPrescription(true);
     setEdit(false);
   };
 
+  //handler function to close prescription
   const handleClosePrescription = () => {
     setShowPrescription(false);
     setSelectedPatient(null);
   };
 
+  //handler function to close document
   const handleCloseDocument = () => {
     setShowDocument(false);
     setSelectedPatient(null);
+  };
+
+  //handler function to send message
+  const handleSendMessage = (message: string) => {
+    console.log("Message sent:", message);
+    setShowMessageModal(false);
   };
 
   const handleCancelAppointment = async (appointment: any) => {
@@ -641,6 +655,14 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                       Create
                     </Button>
                   </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600 hover:bg-purple-50 text-purple-700 bg-transparent"
+                    onClick={() => setShowMessageModal(true)}
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
                   {status === "pending" && (
                     <Button
                       size="sm"
@@ -684,6 +706,14 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           />
         </DialogContent>
       </Dialog>
+
+      <MessageModal
+        open={showMessageModal}
+        onOpenChange={setShowMessageModal}
+        doctorName={appointment.doctorName}
+        patientName={appointment.patientName}
+        onSendMessage={handleSendMessage}
+      />
     </>
   );
 
