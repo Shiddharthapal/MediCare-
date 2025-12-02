@@ -25,7 +25,7 @@ import {
 import { useAppSelector } from "@/redux/hooks";
 import RescheduleBookAppointments from "./rescheduleBookAppointment";
 import { RoomCreationForm } from "./roomCreationForm";
-import { MessageModal } from "./message-modal";
+import { MessageModal } from "../message-modal";
 import {
   Dialog,
   DialogContent,
@@ -877,7 +877,9 @@ export default function Appointments({
         onOpenChange={setShowMessageModal}
         doctorName={appointment.doctorName}
         patientName={appointment.patientName}
-        onSendMessage={handleSendMessage}
+        doctorEmail={appointment.doctorEmail}
+        patientEmail={appointment.patientEmail}
+        senderRole="patient"
       />
     </>
   );

@@ -16,8 +16,9 @@ const io = new Server(server, {
   transports: ["websocket", "polling"],
 });
 
-// Store room participants
+// Store room participants and chat history (in-memory)
 const rooms = new Map();
+const chatHistory = new Map();
 
 io.on("connection", (socket) => {
   console.log(`[Socket] User connected: ${socket.id}`);
@@ -70,6 +71,53 @@ io.on("connection", (socket) => {
       socketId: socket.id,
       emailId,
     });
+  });
+
+  // Chat: join a conversation room (doctorEmail + patientEmail => deterministic room)
+  socket.on("chat:join", ({ roomId, userEmail, userRole }) => {
+    if (!roomId || !userEmail || !userRole) {
+      socket.emit("chat:error", { message: "roomId, userEmail, and userRole are required" });
+      return;
+    }
+
+    socket.join(roomId);
+
+    if (!chatHistory.has(roomId)) {
+      chatHistory.set(roomId, []);
+    }
+
+    // Send existing history to the joining client
+    socket.emit("chat:history", {
+      roomId,
+      messages: chatHistory.get(roomId),
+    });
+  });
+
+  // Chat: broadcast a message to the room and persist in memory
+  socket.on("chat:message", ({ roomId, text, senderEmail, senderRole }) => {
+    if (!roomId || !text || !senderEmail || !senderRole) {
+      socket.emit("chat:error", { message: "roomId, text, senderEmail, and senderRole are required" });
+      return;
+    }
+
+    const history = chatHistory.get(roomId) || [];
+    const message = {
+      id: `${Date.now()}-${socket.id}`,
+      roomId,
+      text,
+      senderEmail,
+      senderRole,
+      timestamp: Date.now(),
+    };
+
+    // Keep a bounded history (e.g., last 200 messages)
+    history.push(message);
+    if (history.length > 200) {
+      history.shift();
+    }
+    chatHistory.set(roomId, history);
+
+    io.to(roomId).emit("chat:message", message);
   });
 
   // Handle WebRTC signaling - Offer
