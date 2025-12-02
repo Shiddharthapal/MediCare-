@@ -7,7 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "socket:dev": "tsx server/server.ts"
+    "socket:dev": "tsx src/server/server.ts"
   },
   "dependencies": {
     "@astrojs/node": "^9.4.3",

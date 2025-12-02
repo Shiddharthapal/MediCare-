@@ -23,6 +23,14 @@ import {
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import RescheduleBookAppointments from "./rescheduleBookAppointment";
+import { RoomCreationForm } from "./roomCreationForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface FileUpload {
   _id: string;
@@ -265,9 +273,11 @@ export default function Appointments({
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [appointmentsData, setAppointmentsData] =
     useState<appointmentdata | null>(null);
+  const [showRoomDialog, setShowRoomDialog] = useState(false);
 
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
+  const email = user?.email;
   const categorizedAppointments = useMemo(() => {
     return categorizeAppointments(
       appointmentsData
@@ -701,112 +711,137 @@ export default function Appointments({
     appointment: any;
     showActions?: boolean;
   }) => (
-    <Card
-      className={`mb-4  border-l-4 ${getBorderColor(status)} hover:shadow-md transition-shadow`}
-    >
-      <CardContent className="p-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                {getDoctorInitials(appointment.doctorName)}
-              </AvatarFallback>
-            </Avatar>
+    <>
+      <Card
+        className={`mb-4  border-l-4 ${getBorderColor(status)} hover:shadow-md transition-shadow`}
+      >
+        <CardContent className="p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src="/placeholder.svg?height=48&width=48" />
+                <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                  {getDoctorInitials(appointment.doctorName)}
+                </AvatarFallback>
+              </Avatar>
 
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-gray-900">
-                  {appointment.reasonForVisit}
-                </h3>
-                <Badge className={getStatusColor(status)}>{status}</Badge>
-              </div>
-
-              <p className="text-sm text-gray-600 mb-1">
-                {appointment.doctorName} • {appointment.doctorSpecialist}
-              </p>
-
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {appointment.appointmentTime}
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-gray-900">
+                    {appointment.reasonForVisit}
+                  </h3>
+                  <Badge className={getStatusColor(status)}>{status}</Badge>
                 </div>
-                <div className="flex items-center gap-1">
-                  {getModeIcon(appointment.consultationType)}
-                  {appointment.consultationType === "in-person"
-                    ? "In-person"
-                    : appointment.consultationType === "video"
-                      ? "Video Call"
-                      : "Phone Call"}
+
+                <p className="text-sm text-gray-600 mb-1">
+                  {appointment.doctorName} • {appointment.doctorSpecialist}
+                </p>
+
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {appointment.appointmentTime}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {getModeIcon(appointment.consultationType)}
+                    {appointment.consultationType === "in-person"
+                      ? "In-person"
+                      : appointment.consultationType === "video"
+                        ? "Video Call"
+                        : "Phone Call"}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex gap-2 flex-wrap">
-            {/* Appointment Management Actions (only for upcoming/today) */}
-            {showActions && (
-              <>
-                {status === "confirmed" &&
-                  appointment.consultationType === "video" && (
-                    <Button
-                      className="bg-pink-500 hover:bg-pink-600 text-white"
-                      onClick={() => handleJoinSession(appointment)}
-                    >
-                      <Video className="h-4 w-4 mr-2" />
-                      {appointment.meetLink ? "Join" : "Create & Join"}
-                    </Button>
+            <div className="flex gap-2 flex-wrap">
+              {/* Appointment Management Actions (only for upcoming/today) */}
+              {showActions && (
+                <>
+                  {status === "confirmed" &&
+                    appointment.consultationType === "video" && (
+                      <Button
+                        size="sm"
+                        className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
+                        onClick={() => setShowRoomDialog(true)}
+                      >
+                        <Video className="h-3 w-3 mr-1" />
+                        Start
+                      </Button>
+                    )}
+                  {status === "pending" && (
+                    <>
+                      <Button
+                        size="sm"
+                        className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
+                        onClick={() => setShowRoomDialog(true)}
+                      >
+                        <Video className="h-3 w-3 mr-1" />
+                        Start
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
+                        onClick={() => handleCancelAppointment(appointment._id)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
+                        onClick={() => handleRescheduleAppointment(appointment)}
+                      >
+                        Reschedule
+                      </Button>
+                    </>
                   )}
-                {status === "pending" && (
-                  <>
-                    <Button
-                      variant="outline"
-                      className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                      onClick={() => handleCancelAppointment(appointment._id)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                      onClick={() => handleRescheduleAppointment(appointment)}
-                    >
-                      Reschedule
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
+                </>
+              )}
 
-            {/* Prescription and Reports options (always visible) */}
-            <Button
-              variant="outline"
-              className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-              onClick={() => handleViewPrescription(appointment)}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Prescription
-            </Button>
-            <Button
-              variant="outline"
-              className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-              onClick={() => handleViewDetails(appointment, status)}
-            >
-              <Info className="h-4 w-4 mr-2" />
-              See Details
-            </Button>
-            <Button
-              variant="outline"
-              className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-              onClick={() => handleViewReports(appointment)}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Reports
-            </Button>
+              {/* Prescription and Reports options (always visible) */}
+              <Button
+                variant="outline"
+                className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                onClick={() => handleViewPrescription(appointment)}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Prescription
+              </Button>
+              <Button
+                variant="outline"
+                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                onClick={() => handleViewDetails(appointment, status)}
+              >
+                <Info className="h-4 w-4 mr-2" />
+                See Details
+              </Button>
+              <Button
+                variant="outline"
+                className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                onClick={() => handleViewReports(appointment)}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Reports
+              </Button>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <Dialog open={showRoomDialog} onOpenChange={setShowRoomDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Room</DialogTitle>
+            <DialogDescription>
+              Enter a room number to start the consultation
+            </DialogDescription>
+          </DialogHeader>
+          <RoomCreationForm
+            onSuccess={() => setShowRoomDialog(false)}
+            emailId={email || ""}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 
   const CancelledAppointmentCard = ({ appointment }: { appointment: any }) => (

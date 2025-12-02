@@ -22,11 +22,21 @@ const rooms = new Map();
 io.on("connection", (socket) => {
   console.log(`[Socket] User connected: ${socket.id}`);
 
-  // Join a video call room
-  socket.on("join-room", ({ roomId, userId, userName }) => {
-    console.log(`[Socket] User ${userId} joining room ${roomId}`);
+  // Join a video call room (roomId + emailId from client)
+  socket.on("join-room", ({ roomId, emailId }) => {
+    if (!roomId || !emailId) {
+      socket.emit("join-room-error", {
+        message: "roomId and emailId are required",
+      });
+      return;
+    }
+
+    console.log(`[Socket] User ${emailId} joining room ${roomId}`);
 
     socket.join(roomId);
+
+    // confirm to the joining client
+    socket.emit("joined-room", { roomId });
 
     // Initialize room if it doesn't exist
     if (!rooms.has(roomId)) {
@@ -37,8 +47,7 @@ io.on("connection", (socket) => {
     room.add(socket.id);
 
     // Store user info on socket
-    socket.userId = userId;
-    socket.userName = userName;
+    socket.emailId = emailId;
     socket.roomId = roomId;
 
     // Get other users in the room
@@ -50,8 +59,8 @@ io.on("connection", (socket) => {
         const userSocket = io.sockets.sockets.get(id);
         return {
           socketId: id,
-          userId: userSocket?.userId,
-          userName: userSocket?.userName,
+          emailId: userSocket?.emailId,
+          roomId: userSocket?.roomId,
         };
       }),
     });
@@ -59,33 +68,36 @@ io.on("connection", (socket) => {
     // Notify other users about the new participant
     socket.to(roomId).emit("user-joined", {
       socketId: socket.id,
-      userId,
-      userName,
+      emailId,
     });
   });
 
   // Handle WebRTC signaling - Offer
-  socket.on("offer", ({ target, sdp, callerId }) => {
+  socket.on("offer", ({ target, sdp }) => {
+    if (!target || !sdp) return;
     console.log(`[Socket] Offer from ${socket.id} to ${target}`);
     io.to(target).emit("offer", {
       sdp,
       callerId: socket.id,
-      callerUserId: socket.userId,
-      callerName: socket.userName,
+      roomId: socket.roomId,
+      emailId: socket.emailId,
     });
   });
 
   // Handle WebRTC signaling - Answer
   socket.on("answer", ({ target, sdp }) => {
+    if (!target || !sdp) return;
     console.log(`[Socket] Answer from ${socket.id} to ${target}`);
     io.to(target).emit("answer", {
       sdp,
       calleeId: socket.id,
+      emailId: socket.emailId,
     });
   });
 
   // Handle ICE candidates
   socket.on("ice-candidate", ({ target, candidate }) => {
+    if (!target || !candidate) return;
     console.log(`[Socket] ICE candidate from ${socket.id} to ${target}`);
     io.to(target).emit("ice-candidate", {
       candidate,
@@ -142,7 +154,7 @@ function handleUserLeaving(socket, roomId) {
   // Notify other users
   socket.to(roomId).emit("user-left", {
     socketId: socket.id,
-    userId: socket.userId,
+    emailId: socket.emailId,
   });
 }
 

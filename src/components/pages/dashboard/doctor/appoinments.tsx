@@ -680,7 +680,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           </DialogHeader>
           <RoomCreationForm
             onSuccess={() => setShowRoomDialog(false)}
-            emailId={email}
+            emailId={email || ""}
           />
         </DialogContent>
       </Dialog>

@@ -3,9 +3,9 @@ import ReactPlayer from "react-player";
 import { useSocket } from "@/components/provider/socket";
 import { usePeer } from "@/components/provider/peer";
 
+// Client signaling aligned with server: offer/answer/ice-candidate targeting socketId
 const RoomPage = () => {
   const { socket } = useSocket();
-  console.log("client socket state", socket.id, socket.connected);
   const {
     peer,
     createOffer,
@@ -15,34 +15,55 @@ const RoomPage = () => {
     remoteStream,
   } = usePeer();
   const [myStream, setMyStream] = useState(null);
-  const [remoteEmailId, setRemoteEmailId] = useState(null);
+  const [remoteEmailId, setRemoteEmailId] = useState<string | null>(null);
+  const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
 
-  const handleNewUserJoined = useCallback(
-    async (data) => {
-      const { emailId } = data;
-      console.log("userEMailid", emailId);
+  const callUser = useCallback(
+    async ({ socketId, emailId }: { socketId: string; emailId?: string }) => {
+      setRemoteSocketId(socketId);
+      setRemoteEmailId(emailId || null);
       const offer = await createOffer();
-      socket.emit("call-user", { emailId, offer });
-      setRemoteEmailId(emailId);
+      socket.emit("offer", { target: socketId, sdp: offer });
     },
     [createOffer, socket]
   );
 
-  const handleIncommingCall = useCallback(
+  const handleExistingUsers = useCallback(
+    async ({ users }) => {
+      if (!users || users.length === 0) return;
+      // Call the first existing user
+      const first = users[0];
+      await callUser({ socketId: first.socketId, emailId: first.emailId });
+    },
+    [callUser]
+  );
+
+  const handleNewUserJoined = useCallback(
     async (data) => {
-      const { from, offer } = data;
-      console.log("Incomming Call from", from, offer);
-      const ans = await createAnswer(offer);
-      socket.emit("call-accepted", { emailId: from, ans });
-      setRemoteEmailId(from);
+      const { socketId, emailId } = data;
+      console.log("User joined:", socketId, emailId);
+      await callUser({ socketId, emailId });
+    },
+    [callUser]
+  );
+
+  const handleIncomingOffer = useCallback(
+    async (data) => {
+      const { sdp, callerId, emailId } = data;
+      console.log("Incoming offer from", callerId, emailId);
+      setRemoteSocketId(callerId);
+      setRemoteEmailId(emailId || null);
+      const ans = await createAnswer(sdp);
+      socket.emit("answer", { target: callerId, sdp: ans });
     },
     [createAnswer, socket]
   );
-  const handleCallAccepted = useCallback(
+
+  const handleAnswer = useCallback(
     async (data) => {
-      const { ans } = data;
-      console.log("Call-got-accepted", ans);
-      await setRemoteAns(ans);
+      const { sdp, calleeId } = data;
+      console.log("Answer received from", calleeId);
+      await setRemoteAns(sdp);
     },
     [setRemoteAns]
   );
@@ -52,16 +73,15 @@ const RoomPage = () => {
       audio: true,
       video: true,
     });
-
     setMyStream(stream);
   }, []);
 
   const handleNegotiation = useCallback(() => {
     const localOffer = peer.localDescription;
-    if (localOffer && remoteEmailId) {
-      socket.emit("call-user", { emailId: remoteEmailId, offer: localOffer });
+    if (localOffer && remoteSocketId) {
+      socket.emit("offer", { target: remoteSocketId, sdp: localOffer });
     }
-  }, [peer, remoteEmailId, socket]);
+  }, [peer, remoteSocketId, socket]);
 
   useEffect(() => {
     const logStatus = (label: string) => {
@@ -77,22 +97,23 @@ const RoomPage = () => {
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
 
+    socket.on("existing-users", handleExistingUsers);
     socket.on("user-joined", handleNewUserJoined);
-    socket.on("incoming-call", handleIncommingCall);
-    socket.on("call-accepted", handleCallAccepted);
+    socket.on("offer", handleIncomingOffer);
+    socket.on("answer", handleAnswer);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+      socket.off("existing-users", handleExistingUsers);
       socket.off("user-joined", handleNewUserJoined);
-      socket.off("incoming-call", handleIncommingCall);
-      socket.off("call-accepted", handleCallAccepted);
+      socket.off("offer", handleIncomingOffer);
+      socket.off("answer", handleAnswer);
     };
-  }, [handleNewUserJoined, handleIncommingCall, handleCallAccepted, socket]);
+  }, [handleAnswer, handleExistingUsers, handleIncomingOffer, handleNewUserJoined, socket]);
 
   useEffect(() => {
     peer.addEventListener("negotiationneeded", handleNegotiation);
-
     return () => {
       peer.removeEventListener("negotiationneeded", handleNegotiation);
     };
@@ -100,16 +121,17 @@ const RoomPage = () => {
 
   useEffect(() => {
     const handleIceCandidate = (event: RTCPeerConnectionIceEvent) => {
-      if (event.candidate && remoteEmailId) {
+      if (event.candidate && remoteSocketId) {
         socket.emit("ice-candidate", {
-          emailId: remoteEmailId,
+          target: remoteSocketId,
           candidate: event.candidate,
         });
       }
     };
 
-    const handleRemoteIce = (data: { candidate: RTCIceCandidateInit }) => {
+    const handleRemoteIce = (data: { candidate: RTCIceCandidateInit; from: string }) => {
       if (data?.candidate) {
+        setRemoteSocketId((prev) => prev || data.from);
         peer.addIceCandidate(new RTCIceCandidate(data.candidate));
       }
     };
@@ -121,17 +143,16 @@ const RoomPage = () => {
       peer.removeEventListener("icecandidate", handleIceCandidate);
       socket.off("ice-candidate", handleRemoteIce);
     };
-  }, [peer, remoteEmailId, socket]);
+  }, [peer, remoteSocketId, socket]);
 
   useEffect(() => {
     getUserMediaStream();
   }, [getUserMediaStream]);
+
   return (
     <div>
       <h1>Room Page</h1>
-      <button onClick={(e) => myStream && sendStream(myStream)}>
-        Send My Video
-      </button>
+      <button onClick={() => myStream && sendStream(myStream)}>Send My Video</button>
       <ReactPlayer url={myStream} playing />
       <ReactPlayer url={remoteStream} playing />
     </div>

@@ -17,7 +17,7 @@ import ProfileofDoctor from "./pages/profile/profilefordoctor";
 import About from "./pages/about";
 import ScrollToTop from "./ScrollToTop";
 import ProtectedRoute from "./ProctedRoute";
-import ProtectedDashboard from "./protectDashboard";
+import Room from "./pages/room";
 import { SocketProvider } from "./provider/socket";
 import { PeerProvider } from "./provider/peer";
 export default function App() {
@@ -33,6 +33,7 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<LoginAsUser />} />
                   <Route path="/registerasUser" element={<RegisterAsUser />} />
+                  <Route path="/room/:roomId" element={<Room />} />
                   <Route
                     path="/registerasDoctor"
                     element={<RegisterAsDoctor />}
