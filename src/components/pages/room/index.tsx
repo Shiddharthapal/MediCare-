@@ -296,11 +296,28 @@ const RoomPage = () => {
     // Cleanup all resources
     cleanupCall();
 
-    // Navigate back to appointments after a short delay
-    setTimeout(() => {
-      navigate("/appointments");
-    }, 500);
+    // // Navigate back to appointments after a short delay
+    // setTimeout(() => {
+    //   navigate("/");
+    // }, 500);
   }, [remoteSocketId, socket, roomId, emailId, cleanupCall, navigate]);
+
+  // If doctor ends the call, remote peers should leave and return to appointments
+  useEffect(() => {
+    const handleRemoteEnd = ({ emailId: endedBy }: { emailId?: string }) => {
+      console.log("Call ended by creator:", endedBy);
+      if (roomId) {
+        socket.emit("leave-room", { roomId, emailId });
+      }
+      cleanupCall();
+      navigate("/");
+    };
+
+    socket.on("end-call-by-creator", handleRemoteEnd);
+    return () => {
+      socket.off("end-call-by-creator", handleRemoteEnd);
+    };
+  }, [cleanupCall, emailId, navigate, roomId, socket]);
 
   //hook for give the socket status
   useEffect(() => {

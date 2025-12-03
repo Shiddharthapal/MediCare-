@@ -148,8 +148,12 @@ io.on("connection", (socket) => {
   });
   // Server-side Socket.IO handlers
   socket.on("end-call-by-creator", ({ target, roomId, emailId }) => {
-    // Notify the target user that creator ended the call
-    io.to(target).emit("end-call-by-creator", { emailId });
+    // Notify everyone in the room (including target) that the creator ended the call
+    if (roomId) {
+      io.to(roomId).emit("end-call-by-creator", { emailId });
+    } else if (target) {
+      io.to(target).emit("end-call-by-creator", { emailId });
+    }
   });
 
   socket.on("user-leaving", ({ target, roomId, emailId }) => {
