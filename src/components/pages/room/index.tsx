@@ -46,6 +46,53 @@ const RoomPage = () => {
     return stream;
   }, []);
 
+  // Cleanup function to stop all tracks and reset state
+  const cleanupCall = useCallback(() => {
+    console.log("Cleaning up call...");
+
+    // Stop all local media tracks
+    if (myStream) {
+      myStream.getTracks().forEach((track) => {
+        track.stop();
+        console.log(`Stopped ${track.kind} track`);
+      });
+      setMyStream(null);
+    }
+
+    // Clear video elements
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+
+    // Close peer connection
+    if (peer) {
+      peer.getSenders().forEach((sender) => {
+        if (sender.track) {
+          sender.track.stop();
+        }
+      });
+      // Note: We don't close the peer connection here as it's managed by PeerProvider
+      // But we remove all tracks
+      peer.getSenders().forEach((sender) => {
+        try {
+          peer.removeTrack(sender);
+        } catch (err) {
+          console.error("Error removing track:", err);
+        }
+      });
+    }
+
+    // Reset state
+    setRemoteSocketId(null);
+    setRemoteEmailId(null);
+    setPendingCall(null);
+    setCallActive(false);
+    pendingIceRef.current = [];
+  }, [myStream, peer]);
+
   // Ensure we always have a local stream before sending offers/answers
   const ensureLocalStream = useCallback(async () => {
     if (myStream) return myStream;
@@ -53,6 +100,7 @@ const RoomPage = () => {
     return stream;
   }, [getUserMediaStream, myStream]);
 
+  //use useCallback to call the user before media was ready
   const callUser = useCallback(
     async ({ socketId, emailId }: { socketId: string; emailId?: string }) => {
       const stream = await ensureLocalStream();
@@ -62,12 +110,12 @@ const RoomPage = () => {
       setRemoteEmailId(emailId || null);
       await sendStream(stream);
       const offer = await createOffer();
-      if (!offer) return;
       socket.emit("offer", { target: socketId, sdp: offer });
     },
     [createOffer, ensureLocalStream, sendStream, socket]
   );
 
+  //handler function for existing user
   const handleExistingUsers = useCallback(
     async ({ users }) => {
       if (!users || users.length === 0) return;
@@ -82,6 +130,7 @@ const RoomPage = () => {
     [callUser, isDoctor]
   );
 
+  //handler function for new user join
   const handleNewUserJoined = useCallback(
     async (data) => {
       const { socketId, emailId } = data;
@@ -95,6 +144,7 @@ const RoomPage = () => {
     [callUser, isDoctor]
   );
 
+  //handler function for incomming offer
   const handleIncomingOffer = useCallback(
     async (data) => {
       const { sdp, callerId, emailId } = data;
@@ -131,6 +181,7 @@ const RoomPage = () => {
     [createAnswer, ensureLocalStream, isMakingOffer, peer, sendStream, socket]
   );
 
+  //use useCallback function to handle the answer of video call
   const handleAnswer = useCallback(
     async (data) => {
       const { sdp, calleeId } = data;
@@ -147,8 +198,10 @@ const RoomPage = () => {
     [peer, setRemoteAns]
   );
 
+  // handler function that negotiate  the local stream, offer
   const handleNegotiation = useCallback(async () => {
     if (!remoteSocketId) return;
+    if (peer.signalingState !== "stable") return;
     const stream = await ensureLocalStream();
     if (stream) {
       await sendStream(stream);
@@ -164,6 +217,7 @@ const RoomPage = () => {
     }
   }, [createOffer, ensureLocalStream, remoteSocketId, sendStream, socket]);
 
+  //handler function for doing on/off toggle audio
   const toggleAudio = () => {
     if (myStream) {
       myStream.getAudioTracks().forEach((track) => {
@@ -173,6 +227,7 @@ const RoomPage = () => {
     }
   };
 
+  //handler function for doing on/off video
   const toggleVideo = () => {
     if (myStream) {
       myStream.getVideoTracks().forEach((track) => {
@@ -182,6 +237,7 @@ const RoomPage = () => {
     }
   };
 
+  //handler function to share screen
   const handleScreenShare = async () => {
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
@@ -207,14 +263,46 @@ const RoomPage = () => {
     }
   };
 
-  const handleEndCall = () => {
-    if (myStream) {
-      myStream.getTracks().forEach((track) => track.stop());
-    }
-    socket.emit("end-call", { target: remoteSocketId });
-    setCallActive(false);
-  };
+  //handler function to end the call
+  const handleEndCall = useCallback(() => {
+    console.log("Ending call...");
+    // Determine if this user is the call creator (doctor in your case)
+    const isCallCreator = isDoctor;
 
+    if (isCallCreator) {
+      // Creator ends call - notify remote peer to also leave
+      if (remoteSocketId) {
+        socket.emit("end-call-by-creator", {
+          target: remoteSocketId,
+          roomId,
+          emailId,
+        });
+      }
+    } else {
+      // Non-creator leaves - just notify they're leaving
+      if (remoteSocketId) {
+        socket.emit("user-leaving", {
+          target: remoteSocketId,
+          roomId,
+          emailId,
+        });
+      }
+    }
+    // Leave the room
+    if (roomId) {
+      socket.emit("leave-room", { roomId, emailId });
+    }
+
+    // Cleanup all resources
+    cleanupCall();
+
+    // Navigate back to appointments after a short delay
+    setTimeout(() => {
+      navigate("/appointments");
+    }, 500);
+  }, [remoteSocketId, socket, roomId, emailId, cleanupCall, navigate]);
+
+  //hook for give the socket status
   useEffect(() => {
     const logStatus = (label: string) => {
       console.log("Socket status:", label, {
@@ -279,6 +367,7 @@ const RoomPage = () => {
     };
   }, [emailId, roomId, socket]);
 
+  //Hook that emit the ice candidate to the socket server
   useEffect(() => {
     const handleIceCandidate = (event: RTCPeerConnectionIceEvent) => {
       if (event.candidate && remoteSocketId) {
@@ -312,6 +401,7 @@ const RoomPage = () => {
     };
   }, [peer, remoteSocketId, socket]);
 
+  //hook to get the media stream of device
   useEffect(() => {
     getUserMediaStream();
   }, [getUserMediaStream]);

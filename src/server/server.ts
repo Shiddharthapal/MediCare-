@@ -76,7 +76,9 @@ io.on("connection", (socket) => {
   // Chat: join a conversation room (doctorEmail + patientEmail => deterministic room)
   socket.on("chat:join", ({ roomId, userEmail, userRole }) => {
     if (!roomId || !userEmail || !userRole) {
-      socket.emit("chat:error", { message: "roomId, userEmail, and userRole are required" });
+      socket.emit("chat:error", {
+        message: "roomId, userEmail, and userRole are required",
+      });
       return;
     }
 
@@ -96,7 +98,9 @@ io.on("connection", (socket) => {
   // Chat: broadcast a message to the room and persist in memory
   socket.on("chat:message", ({ roomId, text, senderEmail, senderRole }) => {
     if (!roomId || !text || !senderEmail || !senderRole) {
-      socket.emit("chat:error", { message: "roomId, text, senderEmail, and senderRole are required" });
+      socket.emit("chat:error", {
+        message: "roomId, text, senderEmail, and senderRole are required",
+      });
       return;
     }
 
@@ -141,6 +145,16 @@ io.on("connection", (socket) => {
       calleeId: socket.id,
       emailId: socket.emailId,
     });
+  });
+  // Server-side Socket.IO handlers
+  socket.on("end-call-by-creator", ({ target, roomId, emailId }) => {
+    // Notify the target user that creator ended the call
+    io.to(target).emit("end-call-by-creator", { emailId });
+  });
+
+  socket.on("user-leaving", ({ target, roomId, emailId }) => {
+    // Notify only the specific target user that someone left
+    io.to(target).emit("user-leaving", { emailId });
   });
 
   // Handle ICE candidates
