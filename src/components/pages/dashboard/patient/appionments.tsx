@@ -878,7 +878,7 @@ export default function Appointments({
         doctorName={appointment.doctorName}
         patientName={appointment.patientName}
         doctorEmail={appointment.doctorEmail}
-        patientEmail={appointment.patientEmail}
+        patientEmail={appointment.patientEmail || email}
         senderRole="patient"
       />
     </>

@@ -10,6 +10,7 @@ const RoomPage = () => {
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.auth.user);
   const emailId = user?.email;
+  const isDoctor = user?.role === "doctor";
   const { socket } = useSocket();
   const {
     peer,
@@ -26,70 +27,11 @@ const RoomPage = () => {
     socketId: string;
     emailId?: string;
   } | null>(null);
+  const [isMakingOffer, setIsMakingOffer] = useState(false);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const hasJoinedRef = useRef(false);
-
-  const callUser = useCallback(
-    async ({ socketId, emailId }: { socketId: string; emailId?: string }) => {
-      if (!myStream) {
-        // Defer call until we have local media; otherwise offers contain no tracks
-        setPendingCall({ socketId, emailId });
-        console.warn("Local stream not ready, deferring call to", socketId);
-        return;
-      }
-      setPendingCall(null);
-      setRemoteSocketId(socketId);
-      setRemoteEmailId(emailId || null);
-      await sendStream(myStream);
-      const offer = await createOffer();
-      socket.emit("offer", { target: socketId, sdp: offer });
-    },
-    [createOffer, myStream, sendStream, socket]
-  );
-
-  const handleExistingUsers = useCallback(
-    async ({ users }) => {
-      if (!users || users.length === 0) return;
-      // Call the first existing user
-      const first = users[0];
-      await callUser({ socketId: first.socketId, emailId: first.emailId });
-    },
-    [callUser]
-  );
-
-  const handleNewUserJoined = useCallback(
-    async (data) => {
-      const { socketId, emailId } = data;
-      console.log("User joined:", socketId, emailId);
-      await callUser({ socketId, emailId });
-    },
-    [callUser]
-  );
-
-  const handleIncomingOffer = useCallback(
-    async (data) => {
-      const { sdp, callerId, emailId } = data;
-      console.log("Incoming offer from", callerId, emailId);
-      setRemoteSocketId(callerId);
-      setRemoteEmailId(emailId || null);
-      if (myStream) {
-        await sendStream(myStream);
-      }
-      const ans = await createAnswer(sdp);
-      socket.emit("answer", { target: callerId, sdp: ans });
-    },
-    [createAnswer, myStream, sendStream, socket]
-  );
-
-  const handleAnswer = useCallback(
-    async (data) => {
-      const { sdp, calleeId } = data;
-      console.log("Answer received from", calleeId);
-      await setRemoteAns(sdp);
-    },
-    [setRemoteAns]
-  );
+  const pendingIceRef = useRef<RTCIceCandidateInit[]>([]);
 
   const getUserMediaStream = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -100,14 +42,137 @@ const RoomPage = () => {
     return stream;
   }, []);
 
+  // Ensure we always have a local stream before sending offers/answers
+  const ensureLocalStream = useCallback(async () => {
+    if (myStream) return myStream;
+    const stream = await getUserMediaStream();
+    return stream;
+  }, [getUserMediaStream, myStream]);
+
+  const callUser = useCallback(
+    async ({ socketId, emailId }: { socketId: string; emailId?: string }) => {
+      const stream = await ensureLocalStream();
+      if (!stream) return;
+      setPendingCall(null);
+      setRemoteSocketId(socketId);
+      setRemoteEmailId(emailId || null);
+      await sendStream(stream);
+      const offer = await createOffer();
+      if (!offer) return;
+      socket.emit("offer", { target: socketId, sdp: offer });
+    },
+    [createOffer, ensureLocalStream, sendStream, socket]
+  );
+
+  const handleExistingUsers = useCallback(
+    async ({ users }) => {
+      if (!users || users.length === 0) return;
+      if (!isDoctor) {
+        console.log("Patient role: waiting for doctor to start call");
+        return;
+      }
+      // Call the first existing user
+      const first = users[0];
+      await callUser({ socketId: first.socketId, emailId: first.emailId });
+    },
+    [callUser, isDoctor]
+  );
+
+  const handleNewUserJoined = useCallback(
+    async (data) => {
+      const { socketId, emailId } = data;
+      console.log("User joined:", socketId, emailId);
+      if (!isDoctor) {
+        console.log("Patient role: waiting for doctor to start call");
+        return;
+      }
+      await callUser({ socketId, emailId });
+    },
+    [callUser, isDoctor]
+  );
+
+  const handleIncomingOffer = useCallback(
+    async (data) => {
+      const { sdp, callerId, emailId } = data;
+      console.log("Incoming offer from", callerId, emailId);
+      const offerCollision =
+        isMakingOffer || peer.signalingState !== "stable";
+      const polite = true; // doctor/patient can both behave politely to avoid glare drops
+      if (offerCollision && polite) {
+        try {
+          await peer.setLocalDescription({ type: "rollback" } as any);
+        } catch (err) {
+          console.error("Rollback failed", err);
+        }
+      }
+      setRemoteSocketId(callerId);
+      setRemoteEmailId(emailId || null);
+      const stream = await ensureLocalStream();
+      if (stream) {
+        await sendStream(stream);
+      }
+      const ans = await createAnswer(sdp);
+      socket.emit("answer", { target: callerId, sdp: ans });
+      // flush any buffered ICE now that remote description is set
+      if (pendingIceRef.current.length) {
+        for (const cand of pendingIceRef.current) {
+          try {
+            await peer.addIceCandidate(new RTCIceCandidate(cand));
+          } catch (err) {
+            console.error("Error adding buffered ICE", err);
+          }
+        }
+        pendingIceRef.current = [];
+      }
+    },
+    [
+      createAnswer,
+      ensureLocalStream,
+      isMakingOffer,
+      peer,
+      sendStream,
+      socket,
+    ]
+  );
+
+  const handleAnswer = useCallback(
+    async (data) => {
+      const { sdp, calleeId } = data;
+      console.log("Answer received from", calleeId);
+      if (peer.signalingState !== "have-local-offer") {
+        console.warn(
+          "Skipping answer because signaling state is",
+          peer.signalingState
+        );
+        return;
+      }
+      await setRemoteAns(sdp);
+    },
+    [peer, setRemoteAns]
+  );
+
   const handleNegotiation = useCallback(async () => {
     if (!remoteSocketId) return;
-    if (myStream) {
-      await sendStream(myStream);
+    const stream = await ensureLocalStream();
+    if (stream) {
+      await sendStream(stream);
     }
-    const freshOffer = await createOffer();
-    socket.emit("offer", { target: remoteSocketId, sdp: freshOffer });
-  }, [createOffer, myStream, remoteSocketId, sendStream, socket]);
+    setIsMakingOffer(true);
+    try {
+      const freshOffer = await createOffer();
+      if (freshOffer) {
+        socket.emit("offer", { target: remoteSocketId, sdp: freshOffer });
+      }
+    } finally {
+      setIsMakingOffer(false);
+    }
+  }, [
+    createOffer,
+    ensureLocalStream,
+    remoteSocketId,
+    sendStream,
+    socket,
+  ]);
 
   useEffect(() => {
     const logStatus = (label: string) => {
@@ -189,6 +254,10 @@ const RoomPage = () => {
     }) => {
       if (data?.candidate) {
         setRemoteSocketId((prev) => prev || data.from);
+        if (!peer.remoteDescription) {
+          pendingIceRef.current.push(data.candidate);
+          return;
+        }
         peer.addIceCandidate(new RTCIceCandidate(data.candidate));
       }
     };

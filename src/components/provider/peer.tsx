@@ -22,6 +22,13 @@ export const PeerProvider = (props) => {
   );
 
   const createOffer = async () => {
+    if (peer.signalingState !== "stable") {
+      console.warn(
+        "[peer] Skipping createOffer because signalingState is",
+        peer.signalingState
+      );
+      return null;
+    }
     const offer = await peer.createOffer();
     await peer?.setLocalDescription(offer);
     return offer;
