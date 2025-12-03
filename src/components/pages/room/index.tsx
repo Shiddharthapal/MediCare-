@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
 import { useSocket } from "@/components/provider/socket";
 import { usePeer } from "@/components/provider/peer";
+import { Mic, MicOff, Phone, Share2, Video, VideoOff } from "lucide-react";
 
 // Client signaling aligned with server: offer/answer/ice-candidate targeting socketId
 const RoomPage = () => {
@@ -28,6 +29,9 @@ const RoomPage = () => {
     emailId?: string;
   } | null>(null);
   const [isMakingOffer, setIsMakingOffer] = useState(false);
+  const [isAudioOn, setIsAudioOn] = useState(true);
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [callActive, setCallActive] = useState(true);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const hasJoinedRef = useRef(false);
@@ -95,8 +99,7 @@ const RoomPage = () => {
     async (data) => {
       const { sdp, callerId, emailId } = data;
       console.log("Incoming offer from", callerId, emailId);
-      const offerCollision =
-        isMakingOffer || peer.signalingState !== "stable";
+      const offerCollision = isMakingOffer || peer.signalingState !== "stable";
       const polite = true; // doctor/patient can both behave politely to avoid glare drops
       if (offerCollision && polite) {
         try {
@@ -125,14 +128,7 @@ const RoomPage = () => {
         pendingIceRef.current = [];
       }
     },
-    [
-      createAnswer,
-      ensureLocalStream,
-      isMakingOffer,
-      peer,
-      sendStream,
-      socket,
-    ]
+    [createAnswer, ensureLocalStream, isMakingOffer, peer, sendStream, socket]
   );
 
   const handleAnswer = useCallback(
@@ -166,13 +162,58 @@ const RoomPage = () => {
     } finally {
       setIsMakingOffer(false);
     }
-  }, [
-    createOffer,
-    ensureLocalStream,
-    remoteSocketId,
-    sendStream,
-    socket,
-  ]);
+  }, [createOffer, ensureLocalStream, remoteSocketId, sendStream, socket]);
+
+  const toggleAudio = () => {
+    if (myStream) {
+      myStream.getAudioTracks().forEach((track) => {
+        track.enabled = !track.enabled;
+      });
+      setIsAudioOn(!isAudioOn);
+    }
+  };
+
+  const toggleVideo = () => {
+    if (myStream) {
+      myStream.getVideoTracks().forEach((track) => {
+        track.enabled = !track.enabled;
+      });
+      setIsVideoOn(!isVideoOn);
+    }
+  };
+
+  const handleScreenShare = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+      });
+      const screenTrack = screenStream.getVideoTracks()[0];
+      const sender = peer
+        .getSenders()
+        .find((s: RTCRtpSender) => s.track?.kind === "video");
+      if (sender) {
+        await sender.replaceTrack(screenTrack);
+        screenTrack.onended = async () => {
+          if (myStream) {
+            const videoTrack = myStream.getVideoTracks()[0];
+            if (videoTrack && sender) {
+              await sender.replaceTrack(videoTrack);
+            }
+          }
+        };
+      }
+    } catch (err) {
+      console.error("Screen share failed:", err);
+    }
+  };
+
+  const handleEndCall = () => {
+    if (myStream) {
+      myStream.getTracks().forEach((track) => track.stop());
+    }
+    socket.emit("end-call", { target: remoteSocketId });
+    setCallActive(false);
+  };
 
   useEffect(() => {
     const logStatus = (label: string) => {
@@ -311,28 +352,89 @@ const RoomPage = () => {
   }, [navigate, roomId]);
 
   return (
-    <div>
-      <h1>Room Page</h1>
-      <div className="flex gap-4">
-        <div>
-          <p>Me</p>
+    <div className="w-full h-full bg-slate-900 flex flex-col relative overflow-hidden">
+      {/* Main Video Area */}
+      <div className="flex-1 relative">
+        {/* Remote Video - Full Screen */}
+        <video
+          ref={remoteVideoRef}
+          autoPlay
+          playsInline
+          className="w-full h-full object-cover"
+        />
+
+        {/* Local Video - Circular PiP Bottom Right */}
+        <div className="absolute top-5 right-5 w-44 h-44 rounded-full overflow-hidden border-4 border-white shadow-lg">
           <video
             ref={localVideoRef}
             autoPlay
             playsInline
             muted
-            className="w-64 h-48 bg-black"
+            className="w-full h-full object-cover"
           />
         </div>
-        <div>
-          <p>Remote</p>
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            playsInline
-            className="w-64 h-48 bg-black"
-          />
+
+        {/* Call Info Overlay */}
+        <div className="absolute top-8 left-8 text-white">
+          <p className="text-sm font-medium">
+            {remoteEmailId || "Waiting for participant..."}
+          </p>
         </div>
+      </div>
+
+      {/* Control Bar - Bottom Center */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-6 items-center">
+        {/* Audio Toggle */}
+        <button
+          onClick={toggleAudio}
+          className={`p-4 rounded-full transition-all ${
+            isAudioOn
+              ? "bg-slate-700 hover:bg-slate-600"
+              : "bg-red-600 hover:bg-red-700"
+          }`}
+          title={isAudioOn ? "Mute" : "Unmute"}
+        >
+          {isAudioOn ? (
+            <Mic className="w-6 h-6 text-white" />
+          ) : (
+            <MicOff className="w-6 h-6 text-white" />
+          )}
+        </button>
+
+        {/* Video Toggle */}
+        <button
+          onClick={toggleVideo}
+          className={`p-4 rounded-full transition-all ${
+            isVideoOn
+              ? "bg-slate-700 hover:bg-slate-600"
+              : "bg-red-600 hover:bg-red-700"
+          }`}
+          title={isVideoOn ? "Turn off camera" : "Turn on camera"}
+        >
+          {isVideoOn ? (
+            <Video className="w-6 h-6 text-white" />
+          ) : (
+            <VideoOff className="w-6 h-6 text-white" />
+          )}
+        </button>
+
+        {/* Screen Share */}
+        <button
+          onClick={handleScreenShare}
+          className="p-4 rounded-full bg-slate-700 hover:bg-slate-600 transition-all"
+          title="Share screen"
+        >
+          <Share2 className="w-6 h-6 text-white" />
+        </button>
+
+        {/* End Call */}
+        <button
+          onClick={handleEndCall}
+          className="p-4 rounded-full bg-red-600 hover:bg-red-700 transition-all"
+          title="End call"
+        >
+          <Phone className="w-6 h-6 text-white rotate-[135deg]" />
+        </button>
       </div>
     </div>
   );
