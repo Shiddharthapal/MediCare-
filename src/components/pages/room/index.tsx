@@ -1,10 +1,15 @@
-import React, { useEffect, useCallback, useState } from "react";
-import ReactPlayer from "react-player";
+import React, { useEffect, useCallback, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAppSelector } from "@/redux/hooks";
 import { useSocket } from "@/components/provider/socket";
 import { usePeer } from "@/components/provider/peer";
 
 // Client signaling aligned with server: offer/answer/ice-candidate targeting socketId
 const RoomPage = () => {
+  const { roomId } = useParams<{ roomId: string }>();
+  const navigate = useNavigate();
+  const user = useAppSelector((state) => state.auth.user);
+  const emailId = user?.email;
   const { socket } = useSocket();
   const {
     peer,
@@ -14,18 +19,33 @@ const RoomPage = () => {
     sendStream,
     remoteStream,
   } = usePeer();
-  const [myStream, setMyStream] = useState(null);
+  const [myStream, setMyStream] = useState<MediaStream | null>(null);
   const [remoteEmailId, setRemoteEmailId] = useState<string | null>(null);
   const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
+  const [pendingCall, setPendingCall] = useState<{
+    socketId: string;
+    emailId?: string;
+  } | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const hasJoinedRef = useRef(false);
 
   const callUser = useCallback(
     async ({ socketId, emailId }: { socketId: string; emailId?: string }) => {
+      if (!myStream) {
+        // Defer call until we have local media; otherwise offers contain no tracks
+        setPendingCall({ socketId, emailId });
+        console.warn("Local stream not ready, deferring call to", socketId);
+        return;
+      }
+      setPendingCall(null);
       setRemoteSocketId(socketId);
       setRemoteEmailId(emailId || null);
+      await sendStream(myStream);
       const offer = await createOffer();
       socket.emit("offer", { target: socketId, sdp: offer });
     },
-    [createOffer, socket]
+    [createOffer, myStream, sendStream, socket]
   );
 
   const handleExistingUsers = useCallback(
@@ -53,10 +73,13 @@ const RoomPage = () => {
       console.log("Incoming offer from", callerId, emailId);
       setRemoteSocketId(callerId);
       setRemoteEmailId(emailId || null);
+      if (myStream) {
+        await sendStream(myStream);
+      }
       const ans = await createAnswer(sdp);
       socket.emit("answer", { target: callerId, sdp: ans });
     },
-    [createAnswer, socket]
+    [createAnswer, myStream, sendStream, socket]
   );
 
   const handleAnswer = useCallback(
@@ -74,14 +97,17 @@ const RoomPage = () => {
       video: true,
     });
     setMyStream(stream);
+    return stream;
   }, []);
 
-  const handleNegotiation = useCallback(() => {
-    const localOffer = peer.localDescription;
-    if (localOffer && remoteSocketId) {
-      socket.emit("offer", { target: remoteSocketId, sdp: localOffer });
+  const handleNegotiation = useCallback(async () => {
+    if (!remoteSocketId) return;
+    if (myStream) {
+      await sendStream(myStream);
     }
-  }, [peer, remoteSocketId, socket]);
+    const freshOffer = await createOffer();
+    socket.emit("offer", { target: remoteSocketId, sdp: freshOffer });
+  }, [createOffer, myStream, remoteSocketId, sendStream, socket]);
 
   useEffect(() => {
     const logStatus = (label: string) => {
@@ -110,7 +136,13 @@ const RoomPage = () => {
       socket.off("offer", handleIncomingOffer);
       socket.off("answer", handleAnswer);
     };
-  }, [handleAnswer, handleExistingUsers, handleIncomingOffer, handleNewUserJoined, socket]);
+  }, [
+    handleAnswer,
+    handleExistingUsers,
+    handleIncomingOffer,
+    handleNewUserJoined,
+    socket,
+  ]);
 
   useEffect(() => {
     peer.addEventListener("negotiationneeded", handleNegotiation);
@@ -118,6 +150,28 @@ const RoomPage = () => {
       peer.removeEventListener("negotiationneeded", handleNegotiation);
     };
   }, [handleNegotiation, peer]);
+
+  // Auto-join the room from URL with current user's email
+  useEffect(() => {
+    if (!socket || !roomId || !emailId || hasJoinedRef.current) return;
+
+    const joinRoom = () => {
+      if (!roomId || !emailId) return;
+      console.log("Joining room from URL", roomId, "as", emailId);
+      socket.emit("join-room", { roomId, emailId });
+      hasJoinedRef.current = true;
+    };
+
+    if (socket.connected) {
+      joinRoom();
+    } else {
+      socket.once("connect", joinRoom);
+    }
+
+    return () => {
+      socket.off("connect", joinRoom);
+    };
+  }, [emailId, roomId, socket]);
 
   useEffect(() => {
     const handleIceCandidate = (event: RTCPeerConnectionIceEvent) => {
@@ -129,7 +183,10 @@ const RoomPage = () => {
       }
     };
 
-    const handleRemoteIce = (data: { candidate: RTCIceCandidateInit; from: string }) => {
+    const handleRemoteIce = (data: {
+      candidate: RTCIceCandidateInit;
+      from: string;
+    }) => {
       if (data?.candidate) {
         setRemoteSocketId((prev) => prev || data.from);
         peer.addIceCandidate(new RTCIceCandidate(data.candidate));
@@ -149,12 +206,65 @@ const RoomPage = () => {
     getUserMediaStream();
   }, [getUserMediaStream]);
 
+  // Attach local stream to video element
+  useEffect(() => {
+    if (localVideoRef.current && myStream) {
+      localVideoRef.current.srcObject = myStream;
+    }
+  }, [myStream]);
+
+  // Attach remote stream to video element
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
+
+  // Auto-send local tracks once we have them
+  useEffect(() => {
+    if (myStream) {
+      sendStream(myStream);
+    }
+  }, [myStream, sendStream]);
+
+  // If we queued a call before media was ready, place it now
+  useEffect(() => {
+    if (pendingCall && myStream) {
+      callUser(pendingCall);
+    }
+  }, [callUser, myStream, pendingCall]);
+
+  // Redirect back if required params are missing
+  useEffect(() => {
+    if (!roomId) {
+      navigate("/appointments");
+    }
+  }, [navigate, roomId]);
+
   return (
     <div>
       <h1>Room Page</h1>
-      <button onClick={() => myStream && sendStream(myStream)}>Send My Video</button>
-      <ReactPlayer url={myStream} playing />
-      <ReactPlayer url={remoteStream} playing />
+      <div className="flex gap-4">
+        <div>
+          <p>Me</p>
+          <video
+            ref={localVideoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-64 h-48 bg-black"
+          />
+        </div>
+        <div>
+          <p>Remote</p>
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            playsInline
+            className="w-64 h-48 bg-black"
+          />
+        </div>
+      </div>
     </div>
   );
 };

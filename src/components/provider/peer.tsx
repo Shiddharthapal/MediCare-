@@ -40,8 +40,16 @@ export const PeerProvider = (props) => {
 
   const sendStream = async (stream) => {
     const tracks = stream.getTracks();
+    const senders = peer.getSenders();
+
     for (const track of tracks) {
-      peer.addTrack(track, stream);
+      const existing = senders.find((s) => s.track && s.track.id === track.id);
+      if (existing) {
+        // Replace to avoid "sender already exists for track" errors
+        await existing.replaceTrack(track);
+      } else {
+        peer.addTrack(track, stream);
+      }
     }
   };
 
