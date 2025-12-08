@@ -125,20 +125,17 @@ export const MessageModal = ({
         </DialogHeader>
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea className="flex-1 pr-4 overflow-y-auto scrollbar-track-white">
           <div className="space-y-3">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${
-                  message.senderRole === "patient"
-                    ? "justify-end"
-                    : "justify-start"
-                }`}
+                className={`flex ${message.senderEmail === senderEmail ? "justify-end" : "justify-start"}`}
               >
+                {/* Right-align my messages, left-align the other user */}
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-lg ${
-                    message.senderRole === "patient"
+                  className={`max-w-xs px-4 pt-2 pb-1 rounded-lg  ${
+                    message.senderEmail === senderEmail
                       ? "bg-blue-500 text-white rounded-br-none"
                       : "bg-gray-200 text-gray-900 rounded-bl-none"
                   }`}
@@ -146,7 +143,7 @@ export const MessageModal = ({
                   <p className="text-sm">{message.text}</p>
                   <span
                     className={`text-xs ${
-                      message.senderRole === "patient"
+                      message.senderEmail === senderEmail
                         ? "text-blue-100"
                         : "text-gray-600"
                     }`}
@@ -163,28 +160,30 @@ export const MessageModal = ({
         </ScrollArea>
 
         {/* Input Area */}
-        <div className="flex gap-2 mt-4">
-          <Input
-            placeholder="Type your message..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-              }
-            }}
-            disabled={isSending}
-            className="flex-1"
-          />
-          <Button
-            size="sm"
-            onClick={handleSendMessage}
-            disabled={isSending || !canSend}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+        <div className="px-2 py-1  bg-white">
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Type your message..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              disabled={isSending}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <Button
+              onClick={handleSendMessage}
+              disabled={isSending || !canSend}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
