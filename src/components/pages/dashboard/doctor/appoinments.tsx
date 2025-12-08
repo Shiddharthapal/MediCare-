@@ -637,32 +637,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   >
                     Document
                   </Button>
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
-                      onClick={() => setShowRoomDialog(true)}
-                    >
-                      <Video className="h-3 w-3 mr-1" />
-                      Start
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="text-xs bg-green-500 hover:bg-green-600 hover:text-black text-white flex-1"
-                      onClick={() => handleCreatePrescription(appointment)}
-                    >
-                      <FileEdit className="h-3 w-3 mr-1" />
-                      Create
-                    </Button>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600 hover:bg-purple-50 text-purple-700 bg-transparent"
-                    onClick={() => setShowMessageModal(true)}
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                  </Button>
+
                   {status === "pending" && (
                     <Button
                       size="sm"
@@ -684,6 +659,32 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                     >
                       <Eye className="h-3 w-3 mr-1" />
                       See Prescription
+                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
+                        onClick={() => setShowRoomDialog(true)}
+                      >
+                        <Video className="h-3 w-3 mr-1" />
+                        Start
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="text-xs bg-green-500 hover:bg-green-600 hover:text-black text-white flex-1"
+                        onClick={() => handleCreatePrescription(appointment)}
+                      >
+                        <FileEdit className="h-3 w-3 mr-1" />
+                        Create
+                      </Button>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600 hover:bg-purple-50 text-purple-700 bg-transparent"
+                      onClick={() => setShowMessageModal(true)}
+                    >
+                      <MessageCircle className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
