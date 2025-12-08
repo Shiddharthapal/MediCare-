@@ -293,6 +293,7 @@ const RoomPage = () => {
         });
       }
     }
+
     // Leave the room
     if (roomId) {
       socket.emit("leave-room", { roomId, emailId });
@@ -489,7 +490,7 @@ const RoomPage = () => {
   }, [navigate, roomId]);
 
   return (
-    <div className="w-full h-full bg-slate-900 flex flex-col relative overflow-hidden">
+    <div className="fixed inset-0 bg-slate-900 mt-16 mb-2 xl:mt-16 xl:mb-4 flex flex-col">
       {/* Main Video Area */}
       <div className="flex-1 relative">
         {/* Remote Video - Full Screen */}
