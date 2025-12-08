@@ -632,7 +632,7 @@ export default function MedicationLandingPage() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-[hsl(201,96%,32%)]">
+        <section className=" container py-16 bg-[hsl(201,96%,32%)]">
           <div className="max-w-7xl mx-auto px-4 ">
             <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
               <div className="text-center">
