@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -13,26 +12,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
   Search,
   FileText,
   FilePlus,
   Calendar,
   Download,
   Eye,
-  Filter,
-  Pill,
-  FlaskConical,
-  Heart,
-  Brain,
-  Bone,
-  Stethoscope,
   ChevronDown,
   ChevronUp,
   X,
@@ -42,197 +27,33 @@ import {
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 
-// Mock document data
-const documentData = [
-  {
-    id: 1,
-    title: "Blood Test Results",
-    type: "lab-report",
-    category: "Laboratory",
-    date: "2024-01-05",
-    doctor: "Dr. Emily Davis",
-    description: "Complete blood count (CBC) and metabolic panel results",
-    fileSize: "2.4 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Blood Test", "CBC", "Routine"],
-    icon: FlaskConical,
-  },
-  {
-    id: 2,
-    title: "Prescription - Loratadin",
-    type: "prescription",
-    category: "Medication",
-    date: "2024-01-05",
-    doctor: "Dr. Emily Davis",
-    description: "Prescription for Loratadin 5mg, twice daily for allergies",
-    fileSize: "1.1 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Allergy", "Medication"],
-    icon: Pill,
-  },
-  {
-    id: 3,
-    title: "MRI Scan Report",
-    type: "imaging",
-    category: "Radiology",
-    date: "2023-12-28",
-    doctor: "Dr. James Rodriguez",
-    description: "MRI scan of the right knee showing minor meniscus tear",
-    fileSize: "8.7 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["MRI", "Knee", "Orthopedic"],
-    icon: Bone,
-  },
-  {
-    id: 4,
-    title: "Cardiology Consultation Notes",
-    type: "consultation",
-    category: "Cardiology",
-    date: "2023-12-20",
-    doctor: "Dr. Sarah Wilson",
-    description: "Follow-up consultation notes regarding heart palpitations",
-    fileSize: "1.8 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Heart", "Consultation", "Follow-up"],
-    icon: Heart,
-  },
-  {
-    id: 5,
-    title: "Prescription - Brocopan",
-    type: "prescription",
-    category: "Medication",
-    date: "2023-12-20",
-    doctor: "Dr. Sarah Wilson",
-    description: "Prescription for Brocopan 50mg for abdominal pain",
-    fileSize: "1.0 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Medication", "Digestive"],
-    icon: Pill,
-  },
-  {
-    id: 6,
-    title: "Annual Physical Examination",
-    type: "examination",
-    category: "General",
-    date: "2023-12-15",
-    doctor: "Dr. Emily Davis",
-    description: "Annual physical examination results and recommendations",
-    fileSize: "3.2 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Annual", "Physical", "Checkup"],
-    icon: Stethoscope,
-  },
-  {
-    id: 7,
-    title: "Cholesterol Test Results",
-    type: "lab-report",
-    category: "Laboratory",
-    date: "2023-12-15",
-    doctor: "Dr. Emily Davis",
-    description: "Lipid profile showing cholesterol levels and triglycerides",
-    fileSize: "1.5 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Cholesterol", "Lipid", "Blood Test"],
-    icon: FlaskConical,
-  },
-  {
-    id: 8,
-    title: "Neurological Assessment",
-    type: "consultation",
-    category: "Neurology",
-    date: "2023-11-30",
-    doctor: "Dr. Maria Garcia",
-    description:
-      "Comprehensive neurological assessment for recurring headaches",
-    fileSize: "4.3 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Neurology", "Headache", "Assessment"],
-    icon: Brain,
-  },
-  {
-    id: 9,
-    title: "Prescription - Myticarin",
-    type: "prescription",
-    category: "Medication",
-    date: "2023-11-30",
-    doctor: "Dr. Maria Garcia",
-    description: "Prescription for Myticarin 5mg for migraine prevention",
-    fileSize: "0.9 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Medication", "Migraine", "Prevention"],
-    icon: Pill,
-  },
-  {
-    id: 10,
-    title: "Echocardiogram Report",
-    type: "imaging",
-    category: "Cardiology",
-    date: "2023-11-15",
-    doctor: "Dr. Sarah Wilson",
-    description:
-      "Echocardiogram showing normal heart function and valve movement",
-    fileSize: "7.2 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Heart", "Echo", "Imaging"],
-    icon: Heart,
-  },
-  {
-    id: 11,
-    title: "Allergy Test Results",
-    type: "lab-report",
-    category: "Laboratory",
-    date: "2023-10-28",
-    doctor: "Dr. Michael Chen",
-    description:
-      "Comprehensive allergy panel showing sensitivities to various allergens",
-    fileSize: "2.8 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Allergy", "Test", "Sensitivity"],
-    icon: FlaskConical,
-  },
-  {
-    id: 12,
-    title: "Dermatology Consultation",
-    type: "consultation",
-    category: "Dermatology",
-    date: "2023-10-15",
-    doctor: "Dr. Michael Chen",
-    description: "Consultation notes regarding skin rash and treatment plan",
-    fileSize: "2.1 MB",
-    fileType: "PDF",
-    thumbnailUrl: "/placeholder.svg",
-    url: "#",
-    tags: ["Skin", "Rash", "Dermatology"],
-    icon: FileText,
-  },
-];
+interface FileUpload {
+  _id: string;
+  patientId: string;
+  doctorId: string;
+  filename: string;
+  patientName: string;
+  documentName: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
+  userIdWHUP?: string;
+  appointmentId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // Group documents by date
 const groupDocumentsByDate = (documents: any[]) => {
   return documents.reduce((groups: any, document) => {
-    const date = document.date;
+    const date = document.createdAt;
     if (!groups[date]) {
       groups[date] = [];
     }
@@ -241,15 +62,8 @@ const groupDocumentsByDate = (documents: any[]) => {
   }, {});
 };
 
-// Document categories
-const categories = [
-  { value: "all", label: "All Documents" },
-  { value: "lab-report", label: "Lab Reports" },
-  { value: "prescription", label: "Prescriptions" },
-  { value: "imaging", label: "Imaging" },
-  { value: "consultation", label: "Consultations" },
-  { value: "examination", label: "Examinations" },
-];
+// Add your Bunny CDN configuration
+const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
 
 export default function Reports() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -262,30 +76,41 @@ export default function Reports() {
     {}
   );
   const [uploadDocumentCategory, setUploadDocumentCategory] = useState("");
-  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([]);
+  const [uploadedFilesData, setUploadedFilesData] = useState<FileUpload[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
 
-  const filteredDocuments = documentData.filter((document) => {
-    const matchesSearch =
-      document.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      document.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      document.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      document.tags.some((tag) =>
-        tag.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    const matchesCategory =
-      selectedCategory === "all" || document.type === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  //to fetch userdata
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let response = await fetch(`/api/user/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        let userdata = await response.json();
+        setUploadedFilesData(userdata?.userdetails?.upload);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, [user?._id]);
 
-  const groupedDocuments = groupDocumentsByDate(filteredDocuments);
-  const sortedDates = Object.keys(groupedDocuments).sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime()
-  );
+  const groupedDocuments = useMemo(() => {
+    return groupDocumentsByDate(uploadedFilesData);
+  }, [uploadedFilesData]);
+
+  const sortedDates = useMemo(() => {
+    return Object.keys(groupedDocuments).sort(
+      (a, b) => new Date(b).getTime() - new Date(a).getTime()
+    );
+  }, [groupedDocuments]);
 
   const toggleDateExpansion = (date: string) => {
     setExpandedDates((prev) => ({
@@ -335,6 +160,25 @@ export default function Reports() {
     }
   };
 
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowUploadModal(false);
+      }
+    };
+
+    // Add event listener when modal is shown
+    if (showUploadModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showUploadModal]);
+
   const handleFileUpload = (files: FileList) => {
     const newFiles = Array.from(files).map((file) => {
       const fileData: any = {
@@ -367,11 +211,14 @@ export default function Reports() {
 
   //Handle to get file icon
   const getFileIcon = (file: any) => {
-    if (file.type.includes("pdf")) {
+    if (file?.fileType?.includes("pdf")) {
       return <FileText className="h-8 w-8 text-red-500" />;
-    } else if (file.type.includes("image")) {
+    } else if (file?.fileType?.includes("image")) {
       return <FileText className="h-8 w-8 text-blue-500" />;
-    } else if (file.type.includes("document") || file.type.includes("word")) {
+    } else if (
+      file?.fileType?.includes("document") ||
+      file?.fileType?.includes("word")
+    ) {
       return <File className="h-8 w-8 text-blue-600" />;
     }
     return <FileText className="h-8 w-8 text-gray-500" />;
@@ -379,6 +226,11 @@ export default function Reports() {
 
   //Handle the file rename function with Debouncing
   const debounceTimersRef = useRef<Record<number, NodeJS.Timeout>>({});
+  useEffect(() => {
+    return () => {
+      Object.values(debounceTimersRef.current).forEach(clearTimeout);
+    };
+  }, []);
   const handleDocumentNameChange = (index: number, newName: string) => {
     // Clear existing timer for this index
     if (debounceTimersRef.current[index]) {
@@ -397,6 +249,7 @@ export default function Reports() {
       // This is where you could make an API call if needed
       console.log(`Document name updated for index ${index}: ${newName}`);
     }, 500); // 500ms delay
+
     debounceTimersRef.current[index] = timerId;
   };
 
@@ -406,19 +259,15 @@ export default function Reports() {
       alert("Please select a document category");
       return;
     }
-
     if (uploadedFiles.length === 0) {
       alert("Please select at least one file to upload");
       return;
     }
     setIsUploading(true);
-
     try {
       const formData = new FormData();
-
       // Add category to form data
       formData.append("category", uploadDocumentCategory);
-
       // Add each file with its metadata
       formData.append("userId", id || "");
       uploadedFiles.forEach((fileData, index) => {
@@ -426,23 +275,20 @@ export default function Reports() {
         formData.append(`documentNames`, fileData.documentName);
         formData.append(`originalNames`, fileData.name);
       });
-
       const response = await fetch("/api/user/uploadfromReport", {
         method: "POST",
         body: formData,
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to upload documents");
       }
-
       const result = await response.json();
       console.log("[v0] Upload successful:", result);
 
       setIsUploading(false);
       setShowUploadModal(false);
-      setUploadedFiles([]);
+      setUploadedFiles([...uploadedFilesData, result.data]);
       setUploadDocumentCategory("");
       alert(`Successfully uploaded ${uploadedFiles.length} document(s)!`);
     } catch (error) {
@@ -456,80 +302,11 @@ export default function Reports() {
     }
   };
 
-  const DocumentCard = ({ document }: { document: any }) => {
-    const Icon = document.icon || FileText;
-    return (
-      <Card className="hover:shadow-md transition-shadow duration-200">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-4">
-            <div className="bg-gray-100 rounded-lg p-3">
-              <Icon className="h-6 w-6 text-blue-600" />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h3 className="font-medium text-gray-900 truncate">
-                    {document.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {document.description}
-                  </p>
-                </div>
-                <Badge className={getCategoryColor(document.category)}>
-                  {document.category}
-                </Badge>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mt-2">
-                {document.tags.map((tag: string, index: number) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(document.date).toLocaleDateString()}</span>
-                  <span className="text-gray-400">•</span>
-                  <span>{document.doctor}</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    onClick={() => handleViewDocument(document)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
-                    onClick={() => handleDownloadDocument(document)}
-                  >
-                    <Download className="h-4 w-4 mr-1" />
-                    Download
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
   return (
-    <div className="space-y-6">
+    <div className=" pb-10">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
+        <div className="pb-6">
           <h1 className="text-2xl font-semibold text-gray-900">
             Medical Records
           </h1>
@@ -538,7 +315,7 @@ export default function Reports() {
           </p>
         </div>
         <Button
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          className="bg-blue-600 hover:bg-blue-700 text-white focus:ring-0"
           onClick={() => setShowUploadModal(true)}
         >
           <FilePlus className="h-4 w-4 mr-2" />
@@ -546,159 +323,8 @@ export default function Reports() {
         </Button>
       </div>
 
-      {/* Search and Filters */}
-      <div className="space-y-4">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search documents by title, doctor, or tags..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-          </Button>
-        </div>
-
-        {showFilters && (
-          <Card className="bg-gray-50 border-gray-200">
-            <CardContent className="p-4">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Document Type
-                  </label>
-                  <Tabs
-                    value={selectedCategory}
-                    onValueChange={setSelectedCategory}
-                    className="w-full"
-                  >
-                    <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                      {categories.map((category) => (
-                        <TabsTrigger
-                          key={category.value}
-                          value={category.value}
-                          className="text-xs md:text-sm"
-                        >
-                          {category.label}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Date Range
-                    </label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="date"
-                        placeholder="From"
-                        className="flex-1"
-                      />
-                      <Input type="date" placeholder="To" className="flex-1" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Doctor
-                    </label>
-                    <select className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                      <option value="">All Doctors</option>
-                      <option value="Dr. Emily Davis">Dr. Emily Davis</option>
-                      <option value="Dr. Sarah Wilson">Dr. Sarah Wilson</option>
-                      <option value="Dr. James Rodriguez">
-                        Dr. James Rodriguez
-                      </option>
-                      <option value="Dr. Michael Chen">Dr. Michael Chen</option>
-                      <option value="Dr. Maria Garcia">Dr. Maria Garcia</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-600 font-medium">
-                  Total Documents
-                </p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {documentData.length}
-                </p>
-              </div>
-              <FileText className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-purple-600 font-medium">
-                  Lab Reports
-                </p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {documentData.filter((d) => d.type === "lab-report").length}
-                </p>
-              </div>
-              <FlaskConical className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-600 font-medium">
-                  Prescriptions
-                </p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {documentData.filter((d) => d.type === "prescription").length}
-                </p>
-              </div>
-              <Pill className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-amber-50 border-amber-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-amber-600 font-medium">Imaging</p>
-                <p className="text-2xl font-bold text-amber-900">
-                  {documentData.filter((d) => d.type === "imaging").length}
-                </p>
-              </div>
-              <FileText className="h-8 w-8 text-amber-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Documents by Date */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {sortedDates.length > 0 ? (
           sortedDates.map((date) => (
             <div key={date} className="space-y-3">
@@ -724,7 +350,7 @@ export default function Reports() {
               </div>
 
               {expandedDates[date] !== false && (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {groupedDocuments[date].map((document: any) => (
                     <DocumentCard key={document.id} document={document} />
                   ))}
@@ -1021,3 +647,166 @@ export default function Reports() {
     </div>
   );
 }
+
+const DocumentCard = ({ document }: { document: FileUpload }) => {
+  const [previewError, setPreviewError] = useState(false);
+  const extension = document?.fileType?.split("/")[1] || "bin";
+  // Common image extensions
+  const imageExtensions = [
+    "jpg",
+    "jpeg",
+    "png",
+    "gif",
+    "webp",
+    "svg",
+    "bmp",
+    "ico",
+  ];
+  const isImage = imageExtensions.includes(extension);
+  const isPDF = document.fileType === "application/pdf";
+  const Icon = FileText;
+
+  // Helper function to construct proper Bunny CDN URL
+  const getBunnyCDNUrl = (document: FileUpload) => {
+    // Remove the storage domain and replace with pull zone
+    const path = `${document?.patientId}/${document?.fileType.startsWith("image/") ? "image" : "document"}/${document?.filename}`;
+
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
+  };
+  const documentUrl = getBunnyCDNUrl(document);
+
+  //handler function to set the badge colour
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "Laboratory":
+        return "bg-purple-100 text-purple-800";
+      case "Medication":
+        return "bg-blue-100 text-blue-800";
+      case "Radiology":
+        return "bg-amber-100 text-amber-800";
+      case "Cardiology":
+        return "bg-red-100 text-red-800";
+      case "General":
+        return "bg-green-100 text-green-800";
+      case "Neurology":
+        return "bg-indigo-100 text-indigo-800";
+      case "Dermatology":
+        return "bg-pink-100 text-pink-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  //add the download handler function
+  const handleDownload = async (document: FileUpload) => {
+    try {
+      const response = await fetch(document.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = document.originalName;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file");
+    }
+  };
+
+  //handler function to set the initial
+  const getPatientInitials = (patientName: string) => {
+    if (!patientName) return "AB";
+    const cleanName = patientName.trim();
+    if (!cleanName) return "AB";
+    // Split the cleaned name and get first 2 words
+    const words = cleanName.split(" ").filter((word) => word.length > 0);
+    if (words.length >= 2) {
+      // Get first letter of first 2 words
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1) {
+      // If only one word, get first 2 letters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      return "AB";
+    }
+  };
+
+  return (
+    <Card className="hover:shadow-md transition-shadow duration-200">
+      <CardContent className="px-4 py-0">
+        <div className="flex items-start gap-4">
+          {(isImage || isPDF) && !previewError ? (
+            <div className="border border-border rounded-lg overflow-hidden">
+              <div className=" bg-background">
+                {isImage ? (
+                  <img
+                    src={getBunnyCDNUrl(document)}
+                    alt={getPatientInitials(document?.patientName)}
+                    className="max-w-full h-32 max-h-96 mx-auto rounded-lg"
+                    onError={() => setPreviewError(true)}
+                  />
+                ) : isPDF ? (
+                  <iframe
+                    src={documentUrl}
+                    className="w-full h-96 rounded-lg"
+                    title={document?.originalName}
+                    onError={() => setPreviewError(true)}
+                  />
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <Icon className="h-6 w-6 text-blue-600" />
+          )}
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="font-medium text-gray-900 truncate">
+                  {document?.documentName ||
+                    document?.filename ||
+                    document?.originalName}
+                </h3>
+              </div>
+              <Badge className={getCategoryColor(document?.category)}>
+                {document?.category}
+              </Badge>
+            </div>
+
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <span>{new Date(document.updatedAt).toLocaleDateString()}</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    window.open(getBunnyCDNUrl(document), "_blank")
+                  }
+                  className="text-[hsl(201,72%,39%)] hover:text-blue-700"
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  View
+                </Button>
+                <Button
+                  onClick={() => handleDownload(document)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary
+                  text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};

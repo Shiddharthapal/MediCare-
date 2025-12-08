@@ -7,25 +7,14 @@ import connect from "@/lib/connection";
 import crypto from "crypto";
 
 const BUNNY_STORAGE_ZONE_NAME =
-  process.env.BUNNY_STORAGE_ZONE_NAME || "lufalufikoro";
+  process.env.BUNNY_STORAGE_ZONE_NAME || "side-effects";
 const BUNNY_STORAGE_REGION_HOSTNAME =
   process.env.BUNNY_STORAGE_REGION_HOSTNAME || "storage.bunnycdn.com";
 const BUNNY_STORAGE_API_KEY =
   process.env.BUNNY_STORAGE_API_KEY ||
-  "466dfc53-63c5-441e-9c6fbfed3248-ae77-43b5";
+  "9beb8922-fe4f-436f-8a74be6eea5e-a625-4332";
 // Max file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-// Helper function to generate unique filename
-function generateUniqueFilename(originalName: string): string {
-  const timestamp = Date.now();
-  const randomString = crypto.randomBytes(8).toString("hex");
-  const extension = originalName.substring(originalName.lastIndexOf("."));
-  const nameWithoutExt = originalName
-    .substring(0, originalName.lastIndexOf("."))
-    .replace(/[^a-zA-Z0-9]/g, "_");
-  return `${nameWithoutExt}_${timestamp}_${randomString}${extension}`;
-}
 
 // Helper function to calculate SHA256 checksum
 function calculateChecksum(buffer: Buffer): string {
@@ -42,6 +31,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Parse FormData
     const formData = await request.formData();
+    console.log("🧞‍♂️  formData --->", formData);
 
     // Extract fields
     const userId = formData.get("userId") as string;
@@ -180,6 +170,7 @@ export const POST: APIRoute = async ({ request }) => {
 
       //unique file name add the extension of the file
       destinationPath += `/${uniqueFilename}`;
+      console.log("🧞‍♂️  destinationPath --->", destinationPath);
 
       //Here use try-catch for unexpected error
       try {
@@ -190,9 +181,11 @@ export const POST: APIRoute = async ({ request }) => {
           file.type,
           checksum
         );
+        console.log("🧞‍♂️  response --->", response);
 
         // Construct public URL
         const publicUrl = `https://${BUNNY_STORAGE_REGION_HOSTNAME}/${BUNNY_STORAGE_ZONE_NAME}/${destinationPath}`;
+        console.log("🧞‍♂️  publicUrl --->", publicUrl);
 
         // Prepare upload data
         const uploadfile = {

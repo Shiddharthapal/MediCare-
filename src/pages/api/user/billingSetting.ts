@@ -1,5 +1,6 @@
 import connect from "@/lib/connection";
 import userDetails from "@/model/userDetails";
+import adminStore from "@/model/adminStore";
 import type { APIRoute } from "astro";
 
 // CREATE - Add new payment method
@@ -65,11 +66,38 @@ export const POST: APIRoute = async ({ request }) => {
           { userId: id },
           { $set: { "payment.cardMethods.$[].isPrimary": false } }
         );
+
+        await adminStore.updateOne(
+          { "patientDetails.userId": id },
+          {
+            $set: {
+              "patientDetails.$[patient].payment.cardMethods.$[].isPrimary":
+                false,
+            },
+          },
+          {
+            arrayFilters: [{ "patient.userId": id }],
+          }
+        );
       }
 
       updateQuery = {
         $push: { "payment.cardMethods": cardMethod },
       };
+
+      await adminStore.updateOne(
+        { "patientDetails.userId": id },
+        {
+          $push: {
+            "patientDetails.$[patient].payment.cardMethods": cardMethod,
+          },
+        },
+        {
+          arrayFilters: [
+            { "patient.userId": id }, // Match all patients with this ID
+          ],
+        }
+      );
     } else if (paymentData.methodType === "mobile-banking") {
       const mobileMethod = {
         provider: paymentData.provider,
@@ -88,11 +116,39 @@ export const POST: APIRoute = async ({ request }) => {
             },
           }
         );
+        // Reset isPrimary in adminStore
+        await adminStore.updateOne(
+          { "patientDetails.userId": id },
+          {
+            $set: {
+              "patientDetails.$[patient].payment.mobileBankingMethods.$[].isPrimary":
+                false,
+            },
+          },
+          {
+            arrayFilters: [{ "patient.userId": id }],
+          }
+        );
       }
 
       updateQuery = {
         $push: { "payment.mobileBankingMethods": mobileMethod },
       };
+
+      await adminStore.updateOne(
+        { "patientDetails.userId": id },
+        {
+          $push: {
+            "patientDetails.$[patient].payment.mobileBankingMethods":
+              mobileMethod,
+          },
+        },
+        {
+          arrayFilters: [
+            { "patient.userId": id }, // Match all patients with this ID
+          ],
+        }
+      );
 
       //   console.log("🧞‍♂️  updateQuery --->", updateQuery);
     } else {

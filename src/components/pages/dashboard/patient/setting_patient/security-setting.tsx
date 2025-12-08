@@ -149,6 +149,7 @@ export default function SecuritySettings() {
                   checkIfSamePassword(e.target.value, newPassword);
                 }}
                 disabled={isLoading}
+                className="focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none"
               />
               <Button
                 type="button"
@@ -177,11 +178,11 @@ export default function SecuritySettings() {
                   checkIfSamePassword(currentPassword, e.target.value);
                 }}
                 disabled={isLoading}
-                className={
+                className={`focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none ${
                   isSamePassword && newPassword !== ""
                     ? "border-red-500 focus:border-red-500"
                     : ""
-                }
+                }`}
               />
               <Button
                 type="button"
@@ -214,11 +215,11 @@ export default function SecuritySettings() {
                   checkPasswordsMatch(newPassword, e.target.value);
                 }}
                 disabled={isLoading}
-                className={
-                  !passwordsMatch && confirmPassword !== ""
+                className={`focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none ${
+                  isSamePassword && confirmPassword !== ""
                     ? "border-red-500 focus:border-red-500"
                     : ""
-                }
+                }`}
               />
               <Button
                 type="button"

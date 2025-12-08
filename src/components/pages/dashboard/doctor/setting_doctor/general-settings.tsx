@@ -23,6 +23,9 @@ interface ProfileInformation {
   email: string;
   contact: string;
   about: string;
+  hospital: string;
+  education: string;
+  degree: string;
 }
 
 interface SystemPreferences {
@@ -46,6 +49,9 @@ export function GeneralSettings() {
       email: "",
       contact: "",
       about: "",
+      hospital: " ",
+      education: " ",
+      degree: " ",
     },
     preferences: {
       darkMode: localStorage.getItem("darkMode") === "true",
@@ -91,6 +97,9 @@ export function GeneralSettings() {
             email: data?.doctordetails?.email || "",
             contact: data?.doctordetails?.contact || "",
             about: data?.doctordetails?.about || "",
+            hospital: data?.doctordetails?.hospital || " ",
+            education: data?.doctordetails?.education || " ",
+            degree: data?.doctordetails?.degree || " ",
           },
         }));
         setHasProfile(true);
@@ -135,18 +144,30 @@ export function GeneralSettings() {
               {formData?.profile?.email || "Not Provided"}
             </div>
             <div>
-              <strong>Professional Bio:</strong>{" "}
-              {formData?.profile?.about || "Not Provided"}
+              <strong>Hospital:</strong>{" "}
+              {formData?.profile?.hospital || "Not Provided"}
             </div>
             <div>
               <strong>Phone Number:</strong>{" "}
               {formData?.profile?.contact || "Not Provided"}
             </div>
+            <div>
+              <strong>Education:</strong>{" "}
+              {formData?.profile?.education || "Not Provided"}
+            </div>
+            <div>
+              <strong>Degree:</strong>{" "}
+              {formData?.profile?.degree || "Not Provided"}
+            </div>
+            <div>
+              <strong>Professional Bio:</strong>{" "}
+              {formData?.profile?.about || "Not Provided"}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border border-gray-400">
+      {/* <Card className="border border-gray-400">
         <CardHeader>
           <CardTitle>System Preferences</CardTitle>
           <CardDescription>
@@ -209,7 +230,7 @@ export function GeneralSettings() {
             </Select>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function SettingPatient({
   onNavigate?: (page: string) => void;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 px-0 pb-6">
       <div className="w-full">
         {/* Header */}
         <div className="mb-6">
@@ -31,20 +31,15 @@ export default function SettingPatient({
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="general" className="w-full space-y-6 ">
-          <TabsList className="w-full grid grid-cols-4 bg-gray-200 p-1 rounded-lg h-12">
+        <Tabs defaultValue="general" className="w-full space-y-0 ">
+          <TabsList className="w-full grid grid-cols-3 bg-gray-200 p-1 rounded-lg h-10">
             <TabsTrigger
               value="general"
               className="h-full data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all font-medium"
             >
               General
             </TabsTrigger>
-            <TabsTrigger
-              value="practice"
-              className="h-full data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all font-medium"
-            >
-              Practice
-            </TabsTrigger>
+
             <TabsTrigger
               value="security"
               className="h-full data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all font-medium"

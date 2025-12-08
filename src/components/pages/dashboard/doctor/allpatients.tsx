@@ -10,7 +10,7 @@ import {
   Search,
   Calendar,
   Users,
-  UserRoundPlus,
+  ClipboardList,
   ChevronRight,
   CheckCircle,
   FileText,
@@ -37,6 +37,8 @@ import {
   Droplet,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
+import PrescriptionShow from "./prescriptionShow";
+
 interface VitalSign {
   bloodPressure?: string;
   heartRate?: string;
@@ -63,7 +65,7 @@ interface Medication {
 interface Prescription {
   vitalSign: VitalSign;
   doctorName: string;
-  reasonForVisit: String;
+  reasonForVisit: string;
   primaryDiagnosis: string;
   testandReport: string;
   medication: Medication[];
@@ -75,8 +77,41 @@ interface Prescription {
   createdAt: Date;
 }
 
+interface AppointmentDataPatient {
+  doctorpatinetId: string;
+  doctorUserId: string;
+  doctorName: string;
+  doctorSpecialist: string;
+  doctorGender: string;
+  doctorEmail: string;
+  hospital: string;
+  patientName: string;
+  patientId: string;
+  patientEmail: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  consultationType: string;
+  consultedType: string;
+  reasonForVisit: string;
+  symptoms: string;
+  previousVisit: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  paymentMethod: string;
+  specialRequests: string;
+  prescription: Prescription;
+  document?: FileUpload[];
+  cancelledBy?: string;
+  cancelledAt?: Date;
+  updatedAt: Date;
+  createdAt: Date;
+}
+
 interface AppointmentData {
   _id: string;
+  doctorpatinetId: string;
   doctorName: string;
   doctorSpecialist: string;
   doctorEmail: string;
@@ -277,7 +312,7 @@ interface GroupedPatientData {
       patientGender: string;
       patientAddress: string;
       patientBithofday: Date;
-      patientAge: string;
+      patientAge: number; // Changed from string to number
       patientBloodgroup: string;
       symptoms: string;
       emergencyContact: string;
@@ -290,6 +325,7 @@ interface GroupedPatientData {
     previousAppointments: AppointmentData[];
   };
 }
+
 interface PatientData {
   id: string;
   patientInfo: {
@@ -300,18 +336,19 @@ interface PatientData {
     patientGender: string;
     patientAddress: string;
     patientBithofday: Date;
-    patientAge: string;
+    patientAge: number; // Changed from string to number
     patientBloodgroup: string;
     symptoms: string;
     emergencyContact: string;
   };
-  appointments: AppointmentData[];
+  appointments: AppointmentDataPatient[];
   reasonForVisit: ReasonForVisit[];
   totalAppointments: number;
   latestAppointment: AppointmentData;
   upcomingAppointments: AppointmentData[];
   previousAppointments: AppointmentData[];
 }
+
 const mockPatientData: PatientData = {
   id: "",
   patientInfo: {
@@ -322,7 +359,7 @@ const mockPatientData: PatientData = {
     patientGender: "",
     patientAddress: "",
     patientBithofday: new Date("08-08-1900"),
-    patientAge: "",
+    patientAge: 0,
     patientBloodgroup: "",
     symptoms: "",
     emergencyContact: "",
@@ -410,12 +447,10 @@ const groupAppointmentsByDate = (
       grouped[date] = [];
     }
     grouped[date].push(appointment);
-
     // Sort appointments within the same date by time
     grouped[date].sort((a, b) =>
       a.appointmentTime.localeCompare(b.appointmentTime)
     );
-
     return grouped;
   }, {});
 };
@@ -424,23 +459,38 @@ interface PatientsPageProps {
   onNavigate: (page: string) => void;
 }
 
+// Add your Bunny CDN configuration
+const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
+
 //Starting portion of the function
 export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [selectedPatient, setSelectedPatient] =
     useState<PatientData>(mockPatientData);
   const [showPatientList, setShowPatientList] = useState(true);
+  const [activeDocTab, setActiveDocTab] = useState("documents");
+  const [edit, setEdit] = useState(false);
+  const [showPrescription, setShowPrescription] = useState(false);
+  const [prescriptionDocument, setPrescriptionDocument] = useState(null);
+  const [document, setDocument] = useState<Prescription | null>(null);
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
+  const [doctorData, setDoctorData] = useState<DoctorDetails | null>(null);
   const [appointmentData, setAppointmentData] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
+
+  //Helper function to  construct proper bunny cdn url for fetch document
+  const getBunnyCDNUrl = (document: FileUpload) => {
+    // Remove the storage domain and replace with pull zone
+    const path = `${document?.patientId}/${document?.fileType.startsWith("image/") ? "image" : "document"}/${document?.filename}`;
+
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
+  };
 
   let doctor = useAppSelector((state) => state.auth.user);
   //Group appointment by patientid
   const groupAppointmentsByPatientId = (responseData: DoctorDetails) => {
     if (!responseData.appointments || responseData.appointments.length === 0)
       return;
-
     const groupedData: GroupedPatientData = {};
-
     responseData.appointments.forEach((appointment: AppointmentData) => {
       const { patientId } = appointment;
 
@@ -457,10 +507,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
             patientAddress: appointment.patientAddress,
             patientBithofday: appointment.patientBithofday,
             patientBloodgroup: appointment.patientBloodgroup,
-            patientAge: (
+            patientAge:
               new Date().getFullYear() -
-              new Date(appointment.patientBithofday).getFullYear()
-            ).toString(),
+              new Date(appointment.patientBithofday).getFullYear(),
             symptoms: appointment.symptoms,
             emergencyContact: appointment.emergencyContact,
           },
@@ -525,10 +574,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         return appointmentDate < today;
       });
     });
-
     // Update the state with grouped data
     setPatientData(groupedData);
   };
+
+  // If prescription is shown, render only the prescription component
 
   // // Safely extract documents
   // const documents = Array.isArray(appointment.document)
@@ -558,6 +608,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       });
 
       let responseData = await response.json();
+      setDoctorData(responseData?.doctordetails);
       groupAppointmentsByPatientId(responseData.doctordetails);
     };
     fetchData();
@@ -794,53 +845,143 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
   let result = useMemo(() => {
     if (!selectedPatient) {
-      return [];
+      return { prescriptions: [], documents: [] };
     }
+    console.log("🧞‍♂️  selectedPatient --->", selectedPatient);
 
-    // Safely extract prescriptions
-    return selectedPatient?.appointments.map((appointments) => {
-      const prescription = appointments.prescription;
-      console.log("🧞‍♂️  prescription --->", selectedPatient);
+    const prescriptions = [];
+    const documents = [];
 
-      const document = Array.isArray(appointments.document)
-        ? appointments.document
-        : [];
+    // Filter appointments where doctorId matches doctor._id
+    doctorData?.appointments
+      .filter(
+        (appointment) =>
+          appointment?.patientId === selectedPatient?.patientInfo?.patientId
+      )
+      .forEach((appointment) => {
+        const prescription = appointment.prescription;
 
-      return {
-        prescriptions: prescription
-          ? {
-              prescriptionId: prescription.prescriptionId || "",
-              vitalSign: prescription.vitalSign || {},
-              primaryDiagnosis: prescription.primaryDiagnosis || "",
-              symptoms: prescription.symptoms || "",
-              testandReport: prescription.testandReport || "",
-              medication: prescription.medication || [],
-              restrictions: prescription.restrictions || "",
-              followUpDate: prescription.followUpDate || null,
-              additionalNote: prescription.additionalNote || "",
-              createdAt: prescription.createdAt || null,
-            }
-          : null,
+        // Only add prescription if it has a prescriptionId
+        if (prescription?.prescriptionId) {
+          prescriptions.push({
+            doctorpatinetId: appointment?.doctorpatinetId,
+            prescriptionId: prescription.prescriptionId,
+            vitalSign: prescription.vitalSign || {},
+            primaryDiagnosis: prescription.primaryDiagnosis || "",
+            symptoms: prescription.symptoms || "",
+            testandReport: prescription.testandReport || "",
+            medication: prescription.medication || [],
+            restrictions: prescription.restrictions || "",
+            followUpDate: prescription.followUpDate || null,
+            additionalNote: prescription.additionalNote || "",
+            createdAt: prescription.createdAt || null,
+          });
+        }
 
-        // Documents
-        documents: document.map((d) => ({
-          documentId: d._id || "",
-          filename: d.filename || "",
-          originalName: d.originalName || "",
-          fileType: d.fileType || "",
-          fileSize: d.fileSize || 0,
-          url: d.url || "",
-          uploadedAt: d.uploadedAt || null,
-          category: d.category || "",
-        })),
-      };
-    });
-  }, [selectedPatient]);
+        // Add all documents
+        const appointmentDocuments = Array.isArray(appointment.document)
+          ? appointment.document
+          : [];
+
+        appointmentDocuments.forEach((d) => {
+          documents.push({
+            documentId: d._id || "",
+            filename: d.filename || "",
+            patientId: selectedPatient?.patientInfo?.patientId || " ",
+            originalName: d.originalName || "",
+            fileType: d.fileType || "",
+            fileSize: d.fileSize || 0,
+            url: d.url || "",
+            uploadedAt: d.uploadedAt || null,
+            category: d.category || "",
+          });
+        });
+      });
+
+    return { prescriptions, documents };
+  }, [selectedPatient, doctor?._id]);
+
+  //add the download handler function
+  const handleDownload = async (document: FileUpload) => {
+    try {
+      const response = await fetch(document.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = document.originalName;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file");
+    }
+  };
+
+  const seePrescription = (document) => {
+    console.log("🧞‍♂️  document --->", document);
+    setDocument(document);
+    setShowPrescription(true);
+  };
+
+  const handleClosePrescription = () => {
+    setShowPrescription(false);
+    setPrescriptionDocument(null);
+    setSelectedPatient(mockPatientData);
+  };
+
+  if (showPrescription && document) {
+    return (
+      <PrescriptionShow
+        patientData={{
+          // Patient info
+          patientId: selectedPatient?.patientInfo?.patientId || "",
+          patientName: selectedPatient?.patientInfo?.patientName || "",
+          patientEmail: selectedPatient?.patientInfo?.patientEmail || "",
+          patientPhone: selectedPatient?.patientInfo?.patientPhone || "",
+          patientGender: selectedPatient?.patientInfo?.patientGender || "",
+          patientAge: selectedPatient?.patientInfo?.patientAge || 0,
+          patientBloodgroup:
+            selectedPatient?.patientInfo?.patientBloodgroup || "",
+
+          // Visit info
+          reasonForVisit: document?.reasonForVisit || "",
+          symptoms: document?.symptoms || "",
+          // previousVisit: selectedPatient?.patientInfo?.previousVisit,
+
+          // Medical data
+          vitalSign: document?.vitalSign || {},
+          primaryDiagnosis: document?.primaryDiagnosis || "",
+          testandReport: document?.testandReport || "",
+          medication: document?.medication || [],
+          restrictions: document?.restrictions || "",
+          followUpDate: document?.followUpDate || "",
+          additionalNote: document?.additionalNote || "",
+          date: document?.createdAt,
+          prescriptionId: document.prescriptionId,
+
+          // Doctor info
+          doctorName: doctorData?.name || "",
+          doctorContact: doctorData?.contact || "",
+          doctorEmail: doctorData?.email || "",
+          doctorGender: doctorData?.gender || "",
+          doctorEducation: doctorData?.education || "",
+          doctorSpecialist: doctorData?.specialist || "",
+          hospital: doctorData?.hospital || "",
+          doctorId: doctor?._id || "",
+          licenseNumber: doctorData?.registrationNo || "",
+        }}
+        onClose={handleClosePrescription}
+      />
+    );
+  }
 
   return (
     <div className="flex h-screen bg-white overflow-hidden">
       {/* Left Sidebar - Fixed */}
-      <aside className="w-min-44 border-r bg-white ">
+      <aside className="w-min-44  bg-white ">
         {/* Patient List */}
         {showPatientList && (
           <div className="p-2 overflow-y-auto">
@@ -888,7 +1029,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between pt-3 pl-3 pr-6 pb-3 border-b border-gray-100 bg-white">
+        <header className="flex items-center justify-between pt-3 pl-3 pr-6 pb-3 bg-white">
           <div className="flex items-center gap-4">
             <Avatar className="w-10 h-10 ring-4 ring-blue-200">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
@@ -916,7 +1057,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           <button
             className={`pb-2 border-b-4 transition-colors font-semibold ${
               activeTab === "overview"
-                ? "border-blue-500 text-blue-600"
+                ? "border-[hsl(201,96%,32%)] text-[hsl(201,96%,32%)]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setActiveTab("overview")}
@@ -926,7 +1067,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           <button
             className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "history"
-                ? "border-blue-500 text-blue-600"
+                ? "border-[hsl(201,96%,32%)] text-[hsl(201,96%,32%)]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setActiveTab("history")}
@@ -936,7 +1077,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           <button
             className={` border-b-4 font-semibold transition-colors ${
               activeTab === "appointments"
-                ? "border-blue-500 text-blue-600"
+                ? "border-[hsl(201,96%,32%)] text-[hsl(201,96%,32%)]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setActiveTab("appointments")}
@@ -946,7 +1087,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
           <button
             className={`pb-2 border-b-4 font-semibold transition-colors ${
               activeTab === "documents"
-                ? "border-blue-500 text-blue-600"
+                ? "border-[hsl(201,96%,32%)] text-[hsl(201,96%,32%)]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setActiveTab("documents")}
@@ -956,10 +1097,10 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden ">
           <div className="flex h-full">
             {/* Scrollable Content */}
-            <main className="flex-1 w-full overflow-y-auto ">
+            <main className="flex-1 w-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
               {activeTab === "overview" && (
                 <div className="py-3">
                   {/* Personal Information */}
@@ -1230,7 +1371,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                 }
                               </p>
                             </div>
-                            <Badge className="text-sm text-gray-900 bg-green-600">
+                            <Badge className="text-sm text-gray-100 bg-green-600">
                               {new Date(
                                 selectedPatient?.latestAppointment?.appointmentDate
                               ).toLocaleDateString()}
@@ -1476,235 +1617,287 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
               {activeTab === "documents" && (
                 <div className="space-y-6 my-2 px-1">
-                  <Card className="border border-gray-400">
-                    <CardHeader className="bg-gradient-to-r py-2 from-violet-100 to-purple-100 border-b border-gray-200/60">
+                  <div className="border border-gray-400 rounded-lg">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r py-3 px-6 from-violet-100 to-purple-100 border-b border-gray-200/60 rounded-t-lg">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <FileText className="h-5 w-5 text-violet-600" />
-                          Patient Documents
-                        </CardTitle>
-                        <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
-                          <Download className="h-4 w-4 mr-2" />
+                          Patient Documents & Prescriptions
+                        </h2>
+                        <button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md px-4 py-2 rounded-md flex items-center gap-2">
+                          <Download className="h-4 w-4" />
                           Download All
-                        </Button>
+                        </button>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      {/* Document Filters */}
-                      <div className="flex border border-gray-400 items-center gap-4 mb-1 p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <span className="text-sm font-semibold text-gray-700">
-                            Filter by type:
-                          </span>
-                          <Button
-                            size="sm"
-                            className="text-xs bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
-                          >
-                            All
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs hover:bg-blue-50"
-                          >
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="border-b border-gray-200 bg-gray-50 px-6">
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => setActiveDocTab("documents")}
+                          className={`px-6 py-3 font-medium text-sm transition-all ${
+                            activeDocTab === "documents"
+                              ? "border-b-2 border-blue-600 text-blue-600 bg-white"
+                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Documents
+                            <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">
+                              {result?.documents?.length || 0}
+                            </span>
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => setActiveDocTab("prescriptions")}
+                          className={`px-6 py-3 font-medium text-sm transition-all ${
+                            activeDocTab === "prescriptions"
+                              ? "border-b-2 border-green-600 text-green-600 bg-white"
+                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Pill className="h-4 w-4" />
                             Prescriptions
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs hover:bg-blue-50"
-                          >
-                            Lab Reports
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs hover:bg-blue-50"
-                          >
-                            Imaging
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs hover:bg-blue-50"
-                          >
-                            Consultation
-                          </Button>
-                        </div>
+                            <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">
+                              {result?.prescriptions?.length || 0}
+                            </span>
+                          </div>
+                        </button>
                       </div>
+                    </div>
 
-                      {/* Document Statistics */}
-                      <div className="mt-2 mb-6 p-2 bg-gradient-to-r from-gray-100 via-slate-100 to-gray-100 rounded-xl border border-gray-400 shadow-sm">
-                        <h4 className="font-bold mb-1 text-gray-900 text-lg">
-                          Document Summary
-                        </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-blue-600 ">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Prescription"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Prescriptions
-                            </p>
-                          </div>
-                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-green-600 ">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Lab Report"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Lab Reports
-                            </p>
-                          </div>
-                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-purple-600 ">
-                              {selectedPatient.documents?.filter(
-                                (d) => d.type === "Imaging Report"
-                              ).length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Imaging Reports
-                            </p>
-                          </div>
-                          <div className="text-center p-1 bg-white rounded-lg shadow-sm">
-                            <p className="font-bold text-2xl text-gray-600 ">
-                              {selectedPatient.documents?.length || 0}
-                            </p>
-                            <p className="text-gray-600 font-medium">
-                              Total Documents
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                    {/* Content */}
+                    <div className="p-6">
+                      {/* Documents Tab Content */}
+                      {activeDocTab === "documents" && (
+                        <div className="space-y-4">
+                          {result?.documents && result.documents.length > 0 ? (
+                            result.documents.map((document, index) => (
+                              <div
+                                key={index}
+                                className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-start gap-4 flex-1">
+                                    {/* Document Icon */}
+                                    <div className="p-3 rounded-lg bg-blue-100">
+                                      {document.category === "Lab Report" && (
+                                        <ClipboardList className="h-6 w-6 text-green-600" />
+                                      )}
+                                      {!document.category && (
+                                        <FileText className="h-6 w-6 text-blue-600" />
+                                      )}
+                                    </div>
 
-                      {/* Documents List */}
-                      <div className="space-y-4">
-                        {result?.map((document, index) => (
-                          <div
-                            key={index}
-                            className="border border-gray-400 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-4 flex-1">
-                                {/* Document Icon */}
-                                <div className="p-3 rounded-lg bg-blue-100">
-                                  {document.prescriptions && (
-                                    <Pill className="h-6 w-6 text-blue-600" />
-                                  )}
-                                  {/* {document.type === "Lab Report" && (
-                                      <ClipboardList className="h-6 w-6 text-green-600" />
-                                    )}
-                                    {document.type === "Imaging Report" && (
-                                      <ImageIcon className="h-6 w-6 text-purple-600" />
-                                    )}
-                                    {document.type ===
-                                      "Consultation Report" && (
-                                      <FileText className="h-6 w-6 text-orange-600" />
-                                    )}
-                                    {document.type === "Study Report" && (
-                                      <ClipboardList className="h-6 w-6 text-indigo-600" />
-                                    )}
-                                    {document.type === "Treatment Plan" && (
-                                      <FileText className="h-6 w-6 text-teal-600" />
-                                    )} */}
-                                  {/* {![
-                                      "Prescription",
-                                      "Lab Report",
-                                      "Imaging Report",
-                                      "Consultation Report",
-                                      "Study Report",
-                                      "Treatment Plan",
-                                    ].includes(document.type) && (
-                                      <FileText className="h-6 w-6 text-gray-600" />
-                                    )} */}
-                                </div>
+                                    {/* Document Details */}
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <h3 className="font-semibold text-lg">
+                                          {document.filename ||
+                                            document.originalName}
+                                        </h3>
+                                        <span className="px-2 py-1 text-xs rounded-md bg-blue-100 text-blue-800">
+                                          {document.category || "Document"}
+                                        </span>
+                                      </div>
+                                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-3">
+                                        <div className="flex items-center gap-1">
+                                          <FileText className="h-4 w-4" />
+                                          <span className="font-semibold">
+                                            {document.fileType || "File"}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Calendar className="h-4 w-4" />
+                                          <span>
+                                            {document.uploadedAt
+                                              ? new Date(
+                                                  document.uploadedAt
+                                                ).toLocaleDateString()
+                                              : "N/A"}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Clock className="h-4 w-4" />
+                                          <span>
+                                            {document.uploadedAt
+                                              ? new Date(
+                                                  document.uploadedAt
+                                                ).toLocaleTimeString()
+                                              : "N/A"}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <p className="text-sm text-gray-700">
+                                        <strong>File Size:</strong>{" "}
+                                        {(document.fileSize / 1024).toFixed(2)}{" "}
+                                        KB
+                                      </p>
+                                    </div>
+                                  </div>
 
-                                {/* Document Details */}
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <h3 className="font-semibold text-lg">
-                                      {document?.prescriptions?.reasonForVisit}
-                                    </h3>
-                                    <Badge
-                                      variant={
-                                        document?.prescriptions
-                                          ? "default"
-                                          : "secondary"
+                                  {/* Action Buttons */}
+                                  <div className="flex flex-col gap-2 ml-4">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() =>
+                                        window.open(
+                                          getBunnyCDNUrl(document),
+                                          "_blank"
+                                        )
                                       }
-                                      className={
-                                        document?.prescriptions
-                                          ? "bg-green-100 text-green-800"
-                                          : "bg-gray-100 text-gray-800"
-                                      }
+                                      className="text-blue-600 hover:text-blue-700"
                                     >
-                                      {document?.prescriptions
-                                        ? "Active"
-                                        : "Reviewed"}
-                                    </Badge>
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      View
+                                    </Button>
+                                    <button
+                                      onClick={() => handleDownload(document)}
+                                      className="px-3 py-2 text-xs bg-gradient-to-r from-blue-500
+                                     to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-md flex items-center gap-1"
+                                    >
+                                      <Download className="h-3 w-3" />
+                                      Download
+                                    </button>
                                   </div>
-                                  <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                                    <div className="flex items-center gap-1">
-                                      <FileText className="h-4 w-4" />
-                                      <span className="font-semibold">
-                                        Prescription
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Calendar className="h-4 w-4" />
-                                      <span>
-                                        {new Date(
-                                          document?.prescriptions?.createdAt
-                                        ).toLocaleDateString()}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Clock className="h-4 w-4" />
-                                      <span>
-                                        {formatInTimeZone(
-                                          document?.prescriptions?.createdAt,
-                                          "Etc/UTC",
-                                          "hh:mm a"
-                                        )}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <UserRoundPlus className="h-5 w-5" />
-                                      <span>
-                                        {document?.prescriptions?.doctorName}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <p className="text-sm text-gray-700 mb-2">
-                                    <strong>Description:</strong>{" "}
-                                    {document?.prescriptions?.primaryDiagnosis}
-                                  </p>
                                 </div>
                               </div>
-
-                              {/* Action Buttons */}
-                              <div className="flex flex-col  gap-2 ml-4 mt-6">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-transparent border border-gray-400 bg-blue-100 hover:border-primary/50"
-                                >
-                                  <Eye className="h-3 w-3 mr-1 text-blue-600" />
-                                  View
-                                </Button>
-                                <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md">
-                                  <Download className="h-3 w-3 mr-1" />
-                                  Download
-                                </Button>
-                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-12 text-gray-500">
+                              <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                              <p className="text-lg">No documents found</p>
+                              <p className="text-sm">
+                                Documents will appear here once uploaded
+                              </p>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Prescriptions Tab Content */}
+                      {activeDocTab === "prescriptions" && (
+                        <div className="space-y-4">
+                          {result?.prescriptions &&
+                          result.prescriptions.length > 0 ? (
+                            result.prescriptions.map((prescription, index) => (
+                              <div
+                                key={index}
+                                className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-green-50 to-emerald-50"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-start gap-4 flex-1">
+                                    {/* Prescription Icon */}
+                                    <div className="p-3 rounded-lg bg-green-100">
+                                      <Pill className="h-6 w-6 text-green-600" />
+                                    </div>
+
+                                    {/* Prescription Details */}
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <h3 className="font-semibold text-lg">
+                                          {prescription.primaryDiagnosis ||
+                                            "Prescription"}
+                                        </h3>
+                                        <span className="px-2 py-1 text-xs rounded-md bg-green-100 text-green-800">
+                                          Active
+                                        </span>
+                                      </div>
+                                      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                                        <div className="flex items-center gap-1">
+                                          <FileText className="h-4 w-4" />
+                                          <span className="font-semibold">
+                                            Prescription
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Calendar className="h-4 w-4" />
+                                          <span>
+                                            {prescription.createdAt
+                                              ? new Date(
+                                                  prescription.createdAt
+                                                ).toLocaleDateString()
+                                              : "N/A"}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Clock className="h-4 w-4" />
+                                          <span>
+                                            {prescription.createdAt
+                                              ? new Date(
+                                                  prescription.createdAt
+                                                ).toLocaleTimeString()
+                                              : "N/A"}
+                                          </span>
+                                        </div>
+                                        {prescription.followUpDate && (
+                                          <div className="flex items-center gap-1">
+                                            <Calendar className="h-4 w-4" />
+                                            <span>
+                                              Follow-up:{" "}
+                                              {new Date(
+                                                prescription.followUpDate
+                                              ).toLocaleDateString()}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      {prescription.symptoms && (
+                                        <p className="text-sm text-gray-700 mb-2">
+                                          <strong>Symptoms:</strong>{" "}
+                                          {prescription.symptoms}
+                                        </p>
+                                      )}
+                                      {prescription.medication &&
+                                        prescription.medication.length > 0 && (
+                                          <p className="text-sm text-gray-700 mb-2">
+                                            <strong>Medications:</strong>{" "}
+                                            {prescription.medication.length}{" "}
+                                            prescribed
+                                          </p>
+                                        )}
+                                      {prescription.additionalNote && (
+                                        <p className="text-sm text-gray-700">
+                                          <strong>Notes:</strong>{" "}
+                                          {prescription.additionalNote}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  <div className="flex flex-col gap-2 ml-4">
+                                    <button
+                                      onClick={() =>
+                                        seePrescription(prescription)
+                                      }
+                                      className="px-3 py-2 text-xs border border-gray-400 bg-green-100 hover:bg-green-200 rounded-md flex items-center gap-1"
+                                    >
+                                      <Eye className="h-3 w-3 text-green-600" />
+                                      View
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-12 text-gray-500">
+                              <Pill className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                              <p className="text-lg">No prescriptions found</p>
+                              <p className="text-sm">
+                                Prescriptions will appear here once created
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </main>

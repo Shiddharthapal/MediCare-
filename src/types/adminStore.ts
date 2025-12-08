@@ -80,8 +80,15 @@ interface AdminPrescription {
   doctorId: string;
   doctorName: string;
   patientId: string;
+  doctorHospital: string;
+  doctorContact: string;
+  doctorSpecializations: string;
+  doctorSpecialist: string;
   patientName: string;
   patientAge: number;
+  patientGender: string;
+  patientContact: string;
+  patientBloodGroup: string;
   doctorpatinetId: string;
   reasonForVisit: string;
   vitalSign: VitalSign;
@@ -186,6 +193,8 @@ interface AppointmentData {
   doctorSpecialist: string;
   doctorGender: string;
   doctorEmail: string;
+  doctorContact: string;
+  doctorRegistrationNo: string;
   hospital: string;
   patientName: string;
   patientId: string;
@@ -219,6 +228,8 @@ interface Appointment {
   doctorGender?: string;
   doctorEmail?: string;
   hospital?: string;
+  doctorContact: string;
+  doctorRegistrationNo: string;
 
   // Patient Information
   patientId?: string;
@@ -269,6 +280,8 @@ interface RescheduleAppointment {
   doctorGender?: string;
   doctorEmail?: string;
   hospital?: string;
+  doctorContact: string;
+  doctorRegistrationNo: string;
 
   // Patient Information
   patientId?: string;
@@ -317,6 +330,24 @@ interface RescheduleAppointment {
   createdAt?: Date;
 }
 
+interface UserImage {
+  userId: string;
+  userName: string;
+  email: string;
+  filename: string;
+  documentName: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: string;
+  deletedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface DoctorDetails {
   _id: string;
   userId: string;
@@ -340,7 +371,7 @@ interface DoctorDetails {
   appointments: AppointmentDataDoctor[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
-  prescription?: AdminPrescription;
+  prescription?: AdminPrescription[];
   status?: string;
   createdAt: Date;
 }
@@ -365,6 +396,7 @@ interface UserDetails {
   healthRecord: HealthRecord[];
   lastTreatmentDate?: Date;
   status?: string;
+  prescription?: AdminPrescription[];
   createdAt: Date;
 }
 interface UserRegister {

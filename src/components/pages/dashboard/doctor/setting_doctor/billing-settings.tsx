@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
 import { useAppSelector } from "@/redux/hooks";
 import { BadgeDollarSign } from "lucide-react";
 
@@ -48,6 +47,7 @@ export function BillingSettings() {
   const doctor = useAppSelector((state) => state.auth.user);
   const id = doctor?._id;
 
+  //fetch the doctor details
   useEffect(() => {
     const fetchData = async () => {
       let response = await fetch(`/api/doctor/${id}`);
@@ -71,9 +71,9 @@ export function BillingSettings() {
     fetchData();
   }, [id]);
 
+  //handler function to save the payment process
   const handleSave = async () => {
     setIsLoading(true);
-
     try {
       const response = await fetch("/api/doctor/billingSetting", {
         method: "POST",
@@ -82,9 +82,7 @@ export function BillingSettings() {
         },
         body: JSON.stringify({ formData, id }),
       });
-
       const result = await response.json();
-
       if (!response.ok) {
         throw new Error(result.error || "Failed to save settings");
       }
@@ -99,6 +97,8 @@ export function BillingSettings() {
       setIsLoading(false);
     }
   };
+
+  //handler function that mannage the input change
   const handleInputChange = (field: keyof PaymentMethods, value: any) => {
     setFormData((prev) => ({
       ...prev,

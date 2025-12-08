@@ -775,24 +775,26 @@ export default function DashboardPage() {
                     {stats.map((stat, index) => (
                       <Card
                         key={index}
-                        className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
+                        className=" transition-all hover:border-primary/50 hover:shadow-lg bg-[hsl(201,96%,32%)] "
                       >
                         <CardContent className="px-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm text-gray-600 mb-1">
+                              <p className="text-sm text-gray-200 mb-1">
                                 {stat.title}
                               </p>
-                              <p className="text-2xl font-bold">{stat.value}</p>
+                              <p className="text-2xl font-bold text-gray-200">
+                                {stat.value}
+                              </p>
                             </div>
-                            <stat.icon className="h-8 w-8 text-gray-400" />
+                            <stat.icon className="h-8 w-8 text-gray-100" />
                           </div>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
                   <div className="pb-3">
-                    <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
+                    <Card className="border border-gray-400 bg-[hsl(201,96%,32%)] transition-all hover:border-primary/50 hover:shadow-lg">
                       <CardContent className="px-6  text-center">
                         <Avatar className="h-20 w-20 mx-auto mb-4">
                           <AvatarImage src="/placeholder.svg?height=80&width=80" />
@@ -800,32 +802,34 @@ export default function DashboardPage() {
                             {getDoctorInitials(doctorData?.name)}
                           </AvatarFallback>
                         </Avatar>
-                        <h3 className="font-bold text-xl mb-2">
+                        <h3 className="font-bold text-xl text-gray-200 mb-2">
                           {doctorData?.name}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-6">
+                        <p className=" text-sm text-gray-300 mb-6">
                           {doctorData?.specialist}
                         </p>
                         <div className="grid grid-cols-3 gap-3 text-center mb-4">
                           <div className="p-2">
-                            <p className="text-xs text-gray-500 uppercase mb-1">
+                            <p className="text-xs text-gray-300 uppercase mb-1">
                               Experience
                             </p>
-                            <p className="font-bold text-lg">
+                            <p className="font-bold text-lg text-gray-300">
                               {doctorData?.experience} yrs
                             </p>
                           </div>
                           <div className="p-2">
-                            <p className="text-xs text-gray-500 uppercase mb-1">
+                            <p className="text-xs text-gray-300 uppercase mb-1">
                               Rating
                             </p>
-                            <p className="font-bold text-lg">4.7</p>
+                            <p className="font-bold text-lg text-gray-300">
+                              4.7
+                            </p>
                           </div>
                           <div className="p-2">
-                            <p className="text-xs text-gray-500 uppercase mb-1">
+                            <p className="text-xs text-gray-300 uppercase mb-1">
                               License
                             </p>
-                            <p className="font-bold text-lg">
+                            <p className="font-bold text-lg text-gray-300">
                               {doctorData?.registrationNo}
                             </p>
                           </div>
@@ -982,9 +986,11 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Today's Appointments */}
-                  <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
+                  <Card className="bg-[hsl(201,96%,32%)] transition-all hover:border-primary/50 hover:shadow-lg">
                     <CardHeader>
-                      <CardTitle>{"Today's Appointments"}</CardTitle>
+                      <CardTitle className="text-gray-100">
+                        {"Today's Appointments"}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       {Object.keys(todayGrouped).length > 0 ? (
@@ -1074,10 +1080,10 @@ export default function DashboardPage() {
                         </div>
                       ) : (
                         <div>
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          <h3 className="text-lg font-medium text-gray-100 mb-2">
                             No appointments
                           </h3>
-                          <p className="text-gray-600 mb-4">
+                          <p className="text-gray-200 mb-4">
                             You don't have any appointments scheduled for today.
                           </p>
                         </div>

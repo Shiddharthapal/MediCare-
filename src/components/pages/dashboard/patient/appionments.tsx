@@ -18,9 +18,44 @@ import {
   X,
   FileText,
   Info,
+  Eye,
+  Download,
+  MessageCircle,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import RescheduleBookAppointments from "./rescheduleBookAppointment";
+import { RoomCreationForm } from "./roomCreationForm";
+import { MessageModal } from "./message-modal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+
+interface FileUpload {
+  _id: string;
+  patientId: string;
+  doctorId: string;
+  filename: string;
+  patientName: string;
+  documentName: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: Date;
+  doctorName?: string;
+  category?: string;
+  userIdWHUP?: string;
+  appointmentId?: string;
+  deletedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 interface appointmentdata {
   _id: string;
@@ -43,6 +78,7 @@ interface appointmentdata {
   specialRequests: string;
   status: string;
   meetLink?: string;
+  uploadedFiles: FileUpload[];
 }
 
 const mockappointmentdata = {
@@ -215,6 +251,9 @@ interface UploadedFile extends File {
   preview?: string;
 }
 
+// Add your Bunny CDN configuration
+const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
+
 export default function Appointments({
   onNavigate,
 }: {
@@ -227,18 +266,21 @@ export default function Appointments({
   const [isUploading, setIsUploading] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isReschedule, setIsReschedule] = useState(false);
+  const [uploadData, setUploadData] = useState<FileUpload | []>([]);
   const [rescheduleData, setRescheduleData] = useState<Partial<
     appointmentdata[]
   > | null>(null);
   const [selectedAppointment, setSelectedAppointment] =
     useState<appointmentdata | null>(null);
-
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [appointmentsData, setAppointmentsData] =
     useState<appointmentdata | null>(null);
+  const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
 
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
+  const email = user?.email;
   const categorizedAppointments = useMemo(() => {
     return categorizeAppointments(
       appointmentsData
@@ -248,6 +290,14 @@ export default function Appointments({
         : []
     );
   }, [appointmentsData]);
+
+  //Helper function to  construct proper bunny cdn url for fetch document
+  const getBunnyCDNUrl = (document: FileUpload) => {
+    // Remove the storage domain and replace with pull zone
+    const path = `${document?.patientId}/${document?.fileType.startsWith("image/") ? "image" : "document"}/${document?.filename}`;
+
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -259,6 +309,7 @@ export default function Appointments({
           },
         });
         let userdata = await response.json();
+        setUploadData(userdata?.userdetails?.upload);
         //console.log("🧞‍♂️userdata --->", userdata?.userdetails.appointments);
         setAppointmentsData(userdata?.userdetails?.appointments);
       } catch (err) {
@@ -267,6 +318,7 @@ export default function Appointments({
     };
     fetchData();
   }, [user?._id]);
+
   // Group appointments by date
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
@@ -331,6 +383,39 @@ export default function Appointments({
       );
     }
   };
+
+  // fetch report data
+  useEffect(() => {
+    const fetchuploaddata = async () => {
+      try {
+        const doctorUserId = selectedAppointment?.doctorUserId;
+        console.log("🧞‍♂️  doctorUserId --->", doctorUserId);
+
+        // Filter uploads where userIdWHUp matches doctorUserId
+        const filteredUploads =
+          uploadData?.filter(
+            (uploadObj: FileUpload) => uploadObj.userIdWHUP === doctorUserId
+          ) || [];
+        console.log("🧞‍♂️  filteredUploads --->", filteredUploads);
+        const uploadedFilesWithUrls = await Promise.all(
+          filteredUploads.map(async (upload) => {
+            const document = getBunnyCDNUrl(upload);
+            upload.url = document;
+            return upload;
+          })
+        );
+        console.log("🧞‍♂️  uploadedFilesWithUrls --->", uploadedFilesWithUrls);
+
+        setSelectedAppointment((prev) => ({
+          ...prev,
+          uploadedFiles: uploadedFilesWithUrls,
+        }));
+      } catch (error) {
+        console.error("Error fetching uploaded documents:", error);
+      }
+    };
+    fetchuploaddata();
+  }, [showDetailsModal && uploadData]);
 
   //Cancel the appointment
   const handleCancelAppointment = async (appointmentId: number) => {
@@ -406,6 +491,11 @@ export default function Appointments({
 
   //Handle the file rename function with Debouncing
   const debounceTimersRef = useRef<Record<number, NodeJS.Timeout>>({});
+  useEffect(() => {
+    return () => {
+      Object.values(debounceTimersRef.current).forEach(clearTimeout);
+    };
+  }, []);
   const handleDocumentNameChange = (index: number, newName: string) => {
     // Clear existing timer for this index
     if (debounceTimersRef.current[index]) {
@@ -422,7 +512,9 @@ export default function Appointments({
     // Set new debounced timer
     const timerId = setTimeout(() => {
       // This is where you could make an API call if needed
+      console.log(`Document name updated for index ${index}: ${newName}`);
     }, 500); // 500ms delay
+
     debounceTimersRef.current[index] = timerId;
   };
 
@@ -436,17 +528,65 @@ export default function Appointments({
     };
   }, [showReportsModal]);
 
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowDetailsModal(false);
+      }
+    };
+    // Add event listener when modal is shown
+    if (showDetailsModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showDetailsModal]);
+
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowPrescriptionModal(false);
+      }
+    };
+    // Add event listener when modal is shown
+    if (showPrescriptionModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showPrescriptionModal]);
+
+  //For escape button
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowReportsModal(false);
+      }
+    };
+    // Add event listener when modal is shown
+    if (showReportsModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+    // Cleanup: remove event listener when component unmounts or modal closes
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showReportsModal]);
+
   //user trying to save document
   const handleSaveDocuments = async () => {
     if (!selectedAppointment) return;
-
     if (uploadedFiles.length === 0) {
       alert("Please select at least one file to upload");
       return;
     }
-
     setIsUploading(true);
-
     try {
       // Create FormData to send files
       const formData = new FormData();
@@ -456,20 +596,17 @@ export default function Appointments({
       formData.append("consultedType", selectedAppointment.consultedType);
       formData.append("userIdWHUP", selectedAppointment.doctorUserId);
       formData.append("userId", id || user?._id || "");
-
       // Append all files
       uploadedFiles.forEach((fileData, index) => {
         formData.append(`files`, fileData.file);
         formData.append(`documentNames`, fileData.documentName);
         formData.append(`originalNames`, fileData.name);
       });
-
       // Call the upload API
       const response = await fetch("/api/user/upload", {
         method: "POST",
         body: formData,
       });
-
       if (!response.ok) {
         throw new Error("Upload failed");
       }
@@ -507,6 +644,26 @@ export default function Appointments({
     }
   };
 
+  //add the download handler function
+  const handleDownload = async (document: FileUpload) => {
+    try {
+      const response = await fetch(document.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = document.originalName;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file");
+    }
+  };
+
+  //handler function to view details of appointment
   const handleViewDetails = (appointment: appointmentdata, status: string) => {
     let appointmentWithStatus = {
       ...appointment,
@@ -516,14 +673,22 @@ export default function Appointments({
     setShowDetailsModal(true);
   };
 
+  //handler function to view prescription of appointment
   const handleViewPrescription = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowPrescriptionModal(true);
   };
 
+  //handler function to view report of appointment
   const handleViewReports = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowReportsModal(true);
+  };
+
+  //handler function to send message
+  const handleSendMessage = (message: string) => {
+    console.log("Message sent:", message);
+    setShowMessageModal(false);
   };
 
   const getDoctorInitials = (doctorName: string) => {
@@ -558,112 +723,150 @@ export default function Appointments({
     appointment: any;
     showActions?: boolean;
   }) => (
-    <Card
-      className={`mb-4 border-l-4 ${getBorderColor(status)} hover:shadow-md transition-shadow`}
-    >
-      <CardContent className="p-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src="/placeholder.svg?height=48&width=48" />
-              <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                {getDoctorInitials(appointment.doctorName)}
-              </AvatarFallback>
-            </Avatar>
+    <>
+      <Card
+        className={`mb-4  border-l-4 ${getBorderColor(status)} hover:shadow-md transition-shadow`}
+      >
+        <CardContent className="p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src="/placeholder.svg?height=48&width=48" />
+                <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                  {getDoctorInitials(appointment.doctorName)}
+                </AvatarFallback>
+              </Avatar>
 
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-gray-900">
-                  {appointment.reasonForVisit}
-                </h3>
-                <Badge className={getStatusColor(status)}>{status}</Badge>
-              </div>
-
-              <p className="text-sm text-gray-600 mb-1">
-                {appointment.doctorName} • {appointment.doctorSpecialist}
-              </p>
-
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {appointment.appointmentTime}
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-gray-900">
+                    {appointment.reasonForVisit}
+                  </h3>
+                  <Badge className={getStatusColor(status)}>{status}</Badge>
                 </div>
-                <div className="flex items-center gap-1">
-                  {getModeIcon(appointment.consultationType)}
-                  {appointment.consultationType === "in-person"
-                    ? "In-person"
-                    : appointment.consultationType === "video"
-                      ? "Video Call"
-                      : "Phone Call"}
+
+                <p className="text-sm text-gray-600 mb-1">
+                  {appointment.doctorName} • {appointment.doctorSpecialist}
+                </p>
+
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {appointment.appointmentTime}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {getModeIcon(appointment.consultationType)}
+                    {appointment.consultationType === "in-person"
+                      ? "In-person"
+                      : appointment.consultationType === "video"
+                        ? "Video Call"
+                        : "Phone Call"}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex gap-2 flex-wrap">
-            {/* Appointment Management Actions (only for upcoming/today) */}
-            {showActions && (
-              <>
-                {status === "confirmed" &&
-                  appointment.consultationType === "video" && (
-                    <Button
-                      className="bg-pink-500 hover:bg-pink-600 text-white"
-                      onClick={() => handleJoinSession(appointment)}
-                    >
-                      <Video className="h-4 w-4 mr-2" />
-                      {appointment.meetLink ? "Join" : "Create & Join"}
-                    </Button>
+            <div className="flex gap-2 flex-wrap">
+              {/* Appointment Management Actions (only for upcoming/today) */}
+              {showActions && (
+                <>
+                  {status === "confirmed" &&
+                    appointment.consultationType === "video" && (
+                      <>
+                        <Button
+                          size="sm"
+                          className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
+                          onClick={() => setShowRoomDialog(true)}
+                        >
+                          <Video className="h-3 w-3 mr-1" />
+                          Start
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
+                           hover:bg-purple-50 text-purple-700 bg-transparent"
+                          onClick={() => setShowMessageModal(true)}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  {status === "pending" && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
+                        onClick={() => handleCancelAppointment(appointment._id)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
+                        onClick={() => handleRescheduleAppointment(appointment)}
+                      >
+                        Reschedule
+                      </Button>
+                    </>
                   )}
-                {status === "pending" && (
-                  <>
-                    <Button
-                      variant="outline"
-                      className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                      onClick={() => handleCancelAppointment(appointment._id)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                      onClick={() => handleRescheduleAppointment(appointment)}
-                    >
-                      Reschedule
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
+                </>
+              )}
 
-            {/* Prescription and Reports options (always visible) */}
-            <Button
-              variant="outline"
-              className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-              onClick={() => handleViewPrescription(appointment)}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Prescription
-            </Button>
-            <Button
-              variant="outline"
-              className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-              onClick={() => handleViewDetails(appointment, status)}
-            >
-              <Info className="h-4 w-4 mr-2" />
-              See Details
-            </Button>
-            <Button
-              variant="outline"
-              className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-              onClick={() => handleViewReports(appointment)}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Reports
-            </Button>
+              {/* Prescription and Reports options (always visible) */}
+              <Button
+                variant="outline"
+                className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                onClick={() => handleViewPrescription(appointment)}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Prescription
+              </Button>
+              <Button
+                variant="outline"
+                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                onClick={() => handleViewDetails(appointment, status)}
+              >
+                <Info className="h-4 w-4 mr-2" />
+                See Details
+              </Button>
+              <Button
+                variant="outline"
+                className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                onClick={() => handleViewReports(appointment)}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Reports
+              </Button>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <Dialog open={showRoomDialog} onOpenChange={setShowRoomDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Room</DialogTitle>
+            <DialogDescription>
+              Enter a room number to start the consultation
+            </DialogDescription>
+          </DialogHeader>
+          <RoomCreationForm
+            onSuccess={() => setShowRoomDialog(false)}
+            emailId={email || ""}
+          />
+        </DialogContent>
+      </Dialog>
+      {/* Message Modal */}
+      <MessageModal
+        open={showMessageModal}
+        onOpenChange={setShowMessageModal}
+        doctorName={appointment.doctorName}
+        patientName={appointment.patientName}
+        doctorEmail={appointment.doctorEmail}
+        patientEmail={appointment.patientEmail || email}
+        senderRole="patient"
+      />
+    </>
   );
 
   const CancelledAppointmentCard = ({ appointment }: { appointment: any }) => (
@@ -809,7 +1012,7 @@ export default function Appointments({
 
       {/* Content */}
       {activeTab === "upcoming" && (
-        <div className="space-y-6">
+        <div className=" mb-6 ">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-600" />
             <h2 className="text-xl font-semibold text-gray-900">Next 7 Days</h2>
@@ -890,7 +1093,7 @@ export default function Appointments({
       )}
 
       {activeTab === "today" && (
-        <div className="space-y-4">
+        <div className="mb-6">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-green-600" />
             <h2 className="text-xl font-semibold text-gray-900">
@@ -1004,6 +1207,7 @@ export default function Appointments({
         </div>
       )}
 
+      {/*Details Modal*/}
       {showDetailsModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
@@ -1103,6 +1307,76 @@ export default function Appointments({
                     <strong>Special Requests:</strong>{" "}
                     {selectedAppointment.specialRequests}
                   </p>
+                </div>
+                {/* New Section: Uploaded Documents/Reports */}
+                <div className="md:col-span-2 mt-4">
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Uploaded Documents & Reports
+                  </h3>
+                  {selectedAppointment?.uploadedFiles &&
+                  selectedAppointment?.uploadedFiles?.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedAppointment?.uploadedFiles?.map(
+                        (file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-100 rounded">
+                                <FileText className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">
+                                  {file?.documentName}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {file.fileSize &&
+                                    `${(file.fileSize / 1024).toFixed(2)} KB`}{" "}
+                                  • Uploaded on{" "}
+                                  {file?.updatedAt
+                                    ? new Date(
+                                        file.updatedAt
+                                      ).toLocaleDateString("en-US", {
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                      })
+                                    : "N/A"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(file.url, "_blank")}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              <button
+                                onClick={() => handleDownload(file)}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary
+                                 text-primary-foreground hover:text-black rounded-lg hover:bg-primary/90 transition-colors"
+                              >
+                                <Download className="w-4 h-4" />
+                                Download
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 bg-gray-50 rounded-lg border border-gray-200">
+                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500 text-sm">
+                        No documents uploaded for this appointment
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -233,7 +233,6 @@ const PrescriptionSchema = new mongoose.Schema({
   },
   medication: {
     type: [MedicationSchema],
-    default: [],
   },
   restrictions: {
     type: String,
@@ -249,16 +248,6 @@ const PrescriptionSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: () => {
-      // Get current time in Bangladesh timezone (UTC+6)
-      const now = new Date();
-      const bdTime = new Date(
-        now.toLocaleString("en-US", {
-          timeZone: "Asia/Dhaka",
-        })
-      );
-      return bdTime;
-    },
   },
 });
 
@@ -353,7 +342,6 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     patientPhone: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     patientGender: {
       type: String,
@@ -372,11 +360,9 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     appointmentDate: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     appointmentTime: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     status: {
       type: String,
@@ -384,22 +370,18 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     consultationType: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     consultedType: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     reasonForVisit: {
       type: String,
     },
     symptoms: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     previousVisit: {
       type: String,
-      required: true, // Fixed: was 'require'
     },
     emergencyContact: {
       type: String,
@@ -416,7 +398,10 @@ const appointmentDataSchema = new mongoose.Schema(
     },
     prescription: {
       type: PrescriptionSchema,
-      default: {},
+    },
+    document: {
+      type: [FileUploadSchema],
+      default: [],
     },
     cancelledBy: {
       type: String,
@@ -561,7 +546,6 @@ const doctorDetailsSchema = new mongoose.Schema({
 
   practiceSettingData: {
     type: practiceSettingData,
-    default: () => ({}),
   },
 
   createdAt: {

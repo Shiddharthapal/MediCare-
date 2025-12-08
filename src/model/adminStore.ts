@@ -243,6 +243,12 @@ const PrescriptionSchema = new mongoose.Schema({
   doctorpatinetId: {
     type: String,
   },
+  patientName: {
+    type: String,
+  },
+  patientAge: {
+    type: String,
+  },
   vitalSign: {
     type: VitalSignSchema,
   },
@@ -299,11 +305,32 @@ const AdminPrescriptionSchema = new mongoose.Schema({
   patientId: {
     type: String,
   },
+  doctorHospital: {
+    type: String,
+  },
+  doctorContact: {
+    type: String,
+  },
+  doctorSpecializations: {
+    type: String,
+  },
+  doctorSpecialist: {
+    type: String,
+  },
   patientName: {
     type: String,
   },
   patientAge: {
     type: Number,
+  },
+  patientGender: {
+    type: String,
+  },
+  patientContact: {
+    type: String,
+  },
+  patientBloodGroup: {
+    type: String,
   },
   doctorpatinetId: {
     type: String,
@@ -609,6 +636,12 @@ const appointmentDataSchema = new mongoose.Schema(
     doctorEmail: {
       type: String,
     },
+    doctorContact: {
+      type: String,
+    },
+    doctorRegistrationNo: {
+      type: String,
+    },
     hospital: {
       type: String,
     },
@@ -715,6 +748,12 @@ const AdminAppointmentSchema = new mongoose.Schema(
       type: String,
     },
     hospital: {
+      type: String,
+    },
+    doctorContact: {
+      type: String,
+    },
+    doctorRegistrationNo: {
       type: String,
     },
 
@@ -844,6 +883,72 @@ const AdminAppointmentSchema = new mongoose.Schema(
   { _id: true }
 );
 
+//schema for profile picture of user
+const UserImageSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+  },
+  userName: {
+    type: String,
+  },
+  filename: {
+    type: String,
+  },
+  documentName: {
+    type: String,
+  },
+  originalName: {
+    type: String,
+  },
+  fileType: {
+    type: String,
+  },
+  fileSize: {
+    type: Number,
+  },
+  path: {
+    type: String,
+  },
+  url: {
+    type: String,
+  },
+  checksum: {
+    type: String,
+  },
+  uploadedAt: {
+    type: Date,
+  },
+  deletedAt: {
+    type: Date,
+  },
+  createdAt: {
+    type: Date,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
+  },
+  updatedAt: {
+    type: Date,
+    default: () => {
+      // Get current time in Bangladesh timezone (UTC+6)
+      const now = new Date();
+      const bdTime = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Dhaka",
+        })
+      );
+      return bdTime;
+    },
+  },
+});
+
 const RescheduleAppointmentSchema = new mongoose.Schema(
   {
     // Doctor Information
@@ -856,6 +961,12 @@ const RescheduleAppointmentSchema = new mongoose.Schema(
     doctorGender: { type: String },
     doctorEmail: { type: String },
     hospital: { type: String },
+    doctorContact: {
+      type: String,
+    },
+    doctorRegistrationNo: {
+      type: String,
+    },
 
     // Patient Information
     patientId: { type: String },
@@ -1016,7 +1127,6 @@ const doctorDetailsSchema = new mongoose.Schema({
   },
   prescription: {
     type: [PrescriptionSchema],
-    default: [],
   },
 
   practiceSettingData: {

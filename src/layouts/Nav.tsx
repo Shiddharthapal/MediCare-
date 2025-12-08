@@ -52,7 +52,7 @@ export default function Navigation() {
 
   return (
     <nav className="bg-white shadow-sm border-b print:hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-auto mx-auto px-4 sm:px-6 lg:pr-8 lg:pl-3">
         <div className="flex justify-between items-center h-14 lg:h-14">
           {/* Logo */}
           <div className="flex items-center">
@@ -234,40 +234,16 @@ export default function Navigation() {
             ) : (
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    Login
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
+                  <Link to="/login" className="flex items-center text-gray-900">
+                    <Button
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      Login
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </Link>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem className="cursor-pointer" asChild>
-                    <Link
-                      to="/loginasUser"
-                      className="flex items-center text-gray-900"
-                    >
-                      <Users className="mr-2 h-4 w-4" />
-                      <span>Patient</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Link
-                      to="/loginasDoctor"
-                      className="flex items-center text-gray-900"
-                    >
-                      <Shield className="mr-4 h-4 w-4" />
-                      <span>Doctor</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Link
-                      to="/loginasAdmin"
-                      className="flex items-center text-gray-900"
-                    >
-                      <Users className="mr-4 h-4 w-4" />
-                      <p>Admin</p>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
               </DropdownMenu>
             )}
           </div>

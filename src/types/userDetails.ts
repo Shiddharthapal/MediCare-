@@ -71,6 +71,22 @@ interface PaymentMethods {
   mobileBankingMethods: MobileBankingMethodSchema[];
 }
 
+interface UserImage {
+  userId: string;
+  filename: string;
+  documentName: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  path: string;
+  url: string;
+  checksum: string;
+  uploadedAt: string;
+  deletedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface FileUpload {
   _id: string;
   patientId: string;

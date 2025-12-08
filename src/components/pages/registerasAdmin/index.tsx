@@ -81,10 +81,10 @@ export default function Register() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Card className="w-[500px]">
+        <Card className="w-[450px]">
           <CardHeader>
             <CardTitle className="text-2xl text-center text-gray-800">
-              Registration As Admin
+              Registration as Admin
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -98,7 +98,7 @@ export default function Register() {
                   <Input
                     id="email"
                     type="email"
-                    className="bordar border-gray-900 shadow-md"
+                    className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                     {...register("email", {
                       required: "Email is required",
                       pattern: {
@@ -118,7 +118,7 @@ export default function Register() {
                 <Input
                   id="name"
                   type="name"
-                  className="border border-gray-900 shadow-md"
+                  className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                   placeholder="John Doe"
                   {...register("name", {
                     required: "Name is required",
@@ -137,7 +137,7 @@ export default function Register() {
                 <Input
                   id="adminId"
                   type="string"
-                  className="bordar border-gray-900 shadow-md"
+                  className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                   {...register("adminId", {
                     required: "Admin Id is require",
                     minLength: {
@@ -152,30 +152,6 @@ export default function Register() {
                 />
               </div>
 
-              {/* Role Field */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="role"
-                  className="text-sm font-medium text-foreground text-gray-700"
-                >
-                  Role
-                </label>
-                <select
-                  id="role"
-                  {...register("role", {
-                    required: "Admin is require",
-                  })}
-                  className={`w-full px-3 py-2 border border-gray-900 rounded-md bg-background text-foreground 
-                    focus:outline-none focus:ring-2 focus:ring-primary  ${
-                      errors.role ? "border-destructive" : "border-input"
-                    }`}
-                >
-                  <option value="admin">Admin</option>
-                  <option value="moderator">Moderator</option>
-                  <option value="user">User</option>
-                </select>
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-gray-700">
                   Password
@@ -183,7 +159,7 @@ export default function Register() {
                 <div className="relative">
                   <Input
                     id="password"
-                    className="bordar-2 border-gray-900 shadow-md"
+                    className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                     type={showPassword ? "text" : "password"}
                     {...register("password", {
                       required: "Password is required",
@@ -222,7 +198,7 @@ export default function Register() {
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    className="bordar-2 border-gray-900 shadow-md"
+                    className="border border-[hsl(201,72%,38%)] shadow-md focus-visible:ring-0"
                     {...register("confirmPassword", {
                       required: "Please confirm your password",
                       validate: (value) =>
@@ -252,7 +228,7 @@ export default function Register() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gray-800"
+                className="w-full bg-[hsl(201,51%,50%)]"
                 disabled={loading}
               >
                 {loading ? "Loading..." : "Register"}
@@ -260,10 +236,7 @@ export default function Register() {
 
               {/* Login Link */}
               <div className="text-center text-sm">
-                <Link
-                  to="/loginasAdmin"
-                  className="text-primary hover:underline"
-                >
+                <Link to="/login" className="text-primary hover:underline">
                   Already have an account? Login
                 </Link>
               </div>

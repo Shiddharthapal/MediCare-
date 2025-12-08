@@ -142,7 +142,11 @@ export function SecuritySettings() {
                   checkIfSamePassword(e.target.value, newPassword);
                 }}
                 disabled={isLoading}
-                className="border border-gray-400 hover:border-primary/50"
+                className={`focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none ${
+                  isSamePassword && newPassword !== ""
+                    ? "border-red-500 focus:border-red-500"
+                    : ""
+                }`}
               />
               <Button
                 type="button"
@@ -171,12 +175,8 @@ export function SecuritySettings() {
                   checkIfSamePassword(currentPassword, e.target.value);
                 }}
                 disabled={isLoading}
-                className={`border border-gray-400 hover:border-primary/50
-                  ${
-                    isSamePassword && newPassword !== ""
-                      ? "border-red-500 focus:border-red-500"
-                      : ""
-                  }
+                className={`focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none 
+                 
                 `}
               />
               <Button
@@ -210,13 +210,11 @@ export function SecuritySettings() {
                   checkPasswordsMatch(newPassword, e.target.value);
                 }}
                 disabled={isLoading}
-                className={`border border-gray-400 hover:border-primary/50
-                  ${
-                    !passwordsMatch && confirmPassword !== ""
-                      ? "border-red-500 focus:border-red-500"
-                      : ""
-                  }
-                `}
+                className={`focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none ${
+                  isSamePassword && confirmPassword !== ""
+                    ? "border-red-500 focus:border-red-500"
+                    : ""
+                }`}
               />
               <Button
                 type="button"

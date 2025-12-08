@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -36,10 +36,26 @@ import { loginSuccess } from "@/redux/slices/authSlice";
 
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CalendarIcon } from "lucide-react";
+import { Loader2, CalendarIcon, Check } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+
+interface UserImage {
+  userId?: string;
+  filename?: string;
+  documentName?: string;
+  originalName?: string;
+  fileType?: string;
+  fileSize?: number;
+  path?: string;
+  url?: string;
+  checksum?: string;
+  uploadedAt?: string;
+  deletedAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 interface PatientData {
   email?: string;
@@ -50,6 +66,7 @@ interface PatientData {
   age: string;
   dateOfBirth: Date;
   bloodGroup: string;
+  image: UserImage;
   weight: string;
   height: string;
   gender: string;
@@ -66,6 +83,7 @@ interface PatientDataErrors {
   dateOfBirth?: string;
 }
 
+const BUNNY_CDN_PULL_ZONE = "my-lulu.b-cdn.net";
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 //Helper function without timezone issues
@@ -85,22 +103,26 @@ export default function PatientProfileForm() {
     age: "",
     dateOfBirth: new Date("2016-03-24"),
     gender: " ",
+    image: {},
     weight: "",
     height: "",
     bloodGroup: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<PatientData>>({});
-  const { toast } = useToast();
-  const dispatch = useAppDispatch();
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isShowingSavedData, setIsShowingSavedData] = useState(false);
   const [savedPatientId, setSavedPatientId] = useState<string | null>(null);
+  const [showBloodDropdown, setShowBloodDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id || null;
-  const navigate = useNavigate();
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
   // Dummy data representing an existing patient
   const dummyPatientData: PatientData = {
     email: "",
@@ -110,10 +132,18 @@ export default function PatientProfileForm() {
     contactNumber: "",
     age: "",
     dateOfBirth: new Date("2016-03-24"),
+    image: {},
     gender: "",
     bloodGroup: "",
     weight: "",
     height: "",
+  };
+
+  //set up the avatar area when click on it open the computer to add picture
+  const handleAvatarClick = () => {
+    if (isEditing) {
+      fileInputRef.current?.click();
+    }
   };
 
   // Update the initial formData state to use dummy data:
@@ -149,6 +179,22 @@ export default function PatientProfileForm() {
     fetchData();
   }, [user]);
 
+  //handler function to get avatar pic from bunny cdn
+  const getBunnyCDNUrl = (document: UserImage) => {
+    const path = `${document.userId}/image/${document?.filename}`;
+    return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
+  };
+
+  const images = formData?.image;
+  let documentimage: string | undefined;
+
+  if (images) {
+    documentimage = getBunnyCDNUrl(images);
+    console.log("🧞‍♂️ documentimage --->", documentimage);
+  } else {
+    console.log("🧞‍♂️ No images available");
+  }
+
   const handleInputChange = (field: keyof PatientData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
@@ -161,6 +207,7 @@ export default function PatientProfileForm() {
     navigate(-1);
   };
 
+  //handler file to create profile
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -230,12 +277,52 @@ export default function PatientProfileForm() {
     }
   };
 
+  //handler function to set profile/avatar preview
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const validExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+    if (!fileExtension || !validExtensions.includes(fileExtension)) {
+      alert("Please select a valid image file");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const preview = reader.result as string;
+      setAvatarPreview(preview);
+
+      const fileData = {
+        name: file.name,
+        documentName: file.name.replace(/\.[^/.]+$/, ""),
+        size: file.size,
+        type: file.type,
+        file: file,
+        preview: preview,
+      };
+
+      setUploadedFiles([fileData]);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
   const resetForm = () => {
     setFormData(initialFormData);
     setErrors({});
     setIsShowingSavedData(false);
     setSavedPatientId(null);
     setIsEditing(false);
+  };
+
+  const handleBloodGroupSelect = (group: string) => {
+    handleInputChange("gender", group);
+    setShowBloodDropdown(false);
   };
 
   return (
@@ -275,6 +362,55 @@ export default function PatientProfileForm() {
           )}
         </CardHeader>
         <CardContent>
+          {/* <div>
+            <div className="flex flex-col items-center gap-3">
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                className={`relative w-28 h-28 rounded-full transition-opacity ${
+                  isEditing
+                    ? "hover:opacity-80 cursor-pointer"
+                    : "cursor-default opacity-90"
+                }`}
+                disabled={!isEditing}
+              >
+                {documentimage || avatarPreview ? (
+                  <img
+                    src={avatarPreview || documentimage}
+                    alt="Channel avatar"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-300 to-blue-200 flex items-center justify-center border-4 border-blue-200">
+                    <svg
+                      className="w-18 h-18 text-blue-600"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4m0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                  </div>
+                )}
+              </button>
+
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={handleAvatarClick}
+                  className="text-lg font-medium text-blue-400 hover:text-blue-300 transition-colors cursor-pointer active:scale-95"
+                >
+                  Select picture
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+          </div> */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information */}
             <div className="space-y-4">
@@ -711,34 +847,24 @@ export default function PatientProfileForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="weight">
-                    Weight (kg) <span className="text-red-500">*</span>
+                  <Label>
+                    Gender <span className="text-red-500">*</span>
                   </Label>
                   {isEditing ? (
-                    <>
-                      <Input
-                        id="weight"
-                        type="number"
-                        value={formData?.weight}
-                        onChange={(e) =>
-                          handleInputChange("weight", e.target.value)
-                        }
-                        placeholder="Enter weight"
-                        min="1"
-                        step="0.1"
-                        className={
-                          errors.weight ? "border-red-500" : "bg-white"
-                        }
-                      />
-                      {errors.weight && (
-                        <p className="text-sm text-red-500">{errors.weight}</p>
-                      )}
-                    </>
+                    <select
+                      value={formData?.gender}
+                      onChange={(e) =>
+                        handleInputChange("gender", e.target.value)
+                      }
+                      className={`border border-gray-200 p-1.5 mx-2  rounded-md ${errors.gender} ? "border-red-500" : ""`}
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
                   ) : (
                     <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                      {formData?.weight
-                        ? `${formData.weight} kg`
-                        : "Not provided"}
+                      {formData?.gender || "Not provided"}
                     </p>
                   )}
                 </div>
@@ -776,39 +902,34 @@ export default function PatientProfileForm() {
                   )}
                 </div>
                 <div className="space-y-2 ">
-                  <Label>
-                    Gender <span className="text-red-500">*</span>
+                  <Label htmlFor="weight">
+                    Weight (kg) <span className="text-red-500">*</span>
                   </Label>
                   {isEditing ? (
                     <>
-                      <Select
-                        value={formData?.gender}
-                        onValueChange={(value) =>
-                          handleInputChange("gender", value)
+                      <Input
+                        id="weight"
+                        type="number"
+                        value={formData?.weight}
+                        onChange={(e) =>
+                          handleInputChange("weight", e.target.value)
                         }
-                      >
-                        <SelectTrigger
-                          className={
-                            errors.gender
-                              ? "border-red-500 bg-white"
-                              : "bg-white"
-                          }
-                        >
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent className=" max-h-[200px]">
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.gender && (
-                        <p className="text-sm text-red-500">{errors.gender}</p>
+                        placeholder="Enter weight"
+                        min="1"
+                        step="0.1"
+                        className={
+                          errors.weight ? "border-red-500" : "bg-white"
+                        }
+                      />
+                      {errors.weight && (
+                        <p className="text-sm text-red-500">{errors.weight}</p>
                       )}
                     </>
                   ) : (
                     <p className="text-gray-700 p-2 bg-gray-50 rounded">
-                      {formData?.gender || "Not provided"}
+                      {formData?.weight
+                        ? `${formData.weight} kg`
+                        : "Not provided"}
                     </p>
                   )}
                 </div>

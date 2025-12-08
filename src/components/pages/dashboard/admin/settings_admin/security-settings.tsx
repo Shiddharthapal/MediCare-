@@ -26,8 +26,8 @@ export function SecuritySettings() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const doctor = useAppSelector((state) => state.auth.user);
-  const id = doctor?._id;
+  const admin = useAppSelector((state) => state.auth.user);
+  const id = admin?._id;
   const { toast } = useToast();
 
   const checkPasswordsMatch = (newPass: string, confirmPass: string) => {
@@ -92,7 +92,7 @@ export function SecuritySettings() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/doctor/changePassword", {
+      const response = await fetch("/api/admin/changePassward", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -123,8 +123,8 @@ export function SecuritySettings() {
   };
 
   return (
-    <div className="space-y-3">
-      <Card className="border border-gray-400">
+    <div className="space-y-3 w-full">
+      <Card className="border border-gray-400 w-full">
         <CardHeader>
           <CardTitle className="text-xl">Change Password</CardTitle>
           <CardDescription>Manage your password</CardDescription>
@@ -142,7 +142,11 @@ export function SecuritySettings() {
                   checkIfSamePassword(e.target.value, newPassword);
                 }}
                 disabled={isLoading}
-                className="border border-gray-400 hover:border-primary/50"
+                className={`focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none ${
+                  isSamePassword && newPassword !== ""
+                    ? "border-red-500 focus:border-red-500"
+                    : ""
+                }`}
               />
               <Button
                 type="button"
@@ -171,12 +175,8 @@ export function SecuritySettings() {
                   checkIfSamePassword(currentPassword, e.target.value);
                 }}
                 disabled={isLoading}
-                className={`border border-gray-400 hover:border-primary/50
-                  ${
-                    isSamePassword && newPassword !== ""
-                      ? "border-red-500 focus:border-red-500"
-                      : ""
-                  }
+                className={`focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none 
+                 
                 `}
               />
               <Button
@@ -210,13 +210,11 @@ export function SecuritySettings() {
                   checkPasswordsMatch(newPassword, e.target.value);
                 }}
                 disabled={isLoading}
-                className={`border border-gray-400 hover:border-primary/50
-                  ${
-                    !passwordsMatch && confirmPassword !== ""
-                      ? "border-red-500 focus:border-red-500"
-                      : ""
-                  }
-                `}
+                className={`focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-2 focus:ring-[hsl(201,72%,39%)] focus:outline-none ${
+                  isSamePassword && confirmPassword !== ""
+                    ? "border-red-500 focus:border-red-500"
+                    : ""
+                }`}
               />
               <Button
                 type="button"

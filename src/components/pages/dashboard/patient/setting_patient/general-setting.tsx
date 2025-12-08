@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -74,16 +74,11 @@ export default function GeneralSettings() {
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
 
-  useEffect(() => {
-    fetchProfileData();
-  }, []);
-
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/admin/${id}`);
+      const response = await fetch(`/api/user/${id}`);
       const data = await response.json();
-      console.log("🧞‍♂️  data --->", data);
 
       if (data) {
         setUserData((prev) => ({
@@ -113,7 +108,11 @@ export default function GeneralSettings() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, toast]);
+
+  useEffect(() => {
+    fetchProfileData();
+  }, [fetchProfileData]);
 
   const updatePreferences = (field: keyof SystemPreferences, value: any) => {
     setUserData((prev) => ({
@@ -123,7 +122,7 @@ export default function GeneralSettings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Profile Information</CardTitle>
@@ -131,7 +130,7 @@ export default function GeneralSettings() {
             Update your personal and contact details
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-2">
           <Card className="bg-green-50 border-green-200">
             <CardHeader>
               <CardTitle className="text-green-800">
@@ -176,7 +175,7 @@ export default function GeneralSettings() {
           </Card>
         </CardContent>
       </Card>
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>System Preferences</CardTitle>
           <CardDescription>
@@ -239,7 +238,7 @@ export default function GeneralSettings() {
             </Select>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }
