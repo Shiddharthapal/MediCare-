@@ -137,12 +137,12 @@ export default function MedicationLandingPage() {
   const totalWidth = services.length * cardWidth;
 
   return (
-    <div className="bg-gradient-to-br from-primary to-secondary">
+    <div className=" bg-gradient-to-br from-primary to-secondary">
       <div className=" ">
         <section className="relative py-20 lg:py-32">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center">
-              <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
+              <div className="sm:text-center md:max-w-4xl xl:max-w-5xl md:mx-auto lg:col-span-6 lg:text-left">
                 <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
                   Your Health,
                   <span className="text-[hsl(201,96%,32%)]"> Delivered</span>
@@ -302,8 +302,8 @@ export default function MedicationLandingPage() {
                     <CardContent>
                       <CardDescription className="text-base leading-relaxed">
                         Customize your experience with personalized preferences,
-                        notification settings, privacy controls, billing setting
-                        and account management options.
+                        privacy controls, billing setting and account management
+                        options.
                       </CardDescription>
                     </CardContent>
                   </Card>
@@ -408,8 +408,8 @@ export default function MedicationLandingPage() {
                     <CardContent>
                       <CardDescription className="text-base leading-relaxed">
                         Customize your experience with personalized preferences,
-                        notification settings, privacy controls, billing setting
-                        and account management options.
+                        privacy controls, billing setting and account management
+                        options.
                       </CardDescription>
                     </CardContent>
                   </Card>
@@ -452,7 +452,7 @@ export default function MedicationLandingPage() {
               </p>
             </div>
 
-            <div className="overflow-hidden">
+            <div className="overflow-hidden mx-8 2xl:mx-80">
               <motion.div
                 className="flex"
                 animate={{
@@ -633,7 +633,7 @@ export default function MedicationLandingPage() {
 
         {/* Stats Section */}
         <section className="py-16 bg-[hsl(201,96%,32%)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 ">
             <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
               <div className="text-center">
                 <div className="text-3xl font-bold text-white">50K+</div>
