@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 const PeerContext = React.createContext(null);
 
@@ -6,20 +6,19 @@ export const usePeer = () => React.useContext(PeerContext);
 
 export const PeerProvider = (props) => {
   const [remoteStream, setRemoteStream] = useState(null);
-  const peer = useMemo(
-    () =>
-      new RTCPeerConnection({
-        iceServers: [
-          {
-            urls: [
-              "stun:stun.l.google.com:19302",
-              "stun:global.stun.twilio.com:3478",
-            ],
-          },
-        ],
-      }),
-    []
-  );
+  const createPeer = () =>
+    new RTCPeerConnection({
+      iceServers: [
+        {
+          urls: [
+            "stun:stun.l.google.com:19302",
+            "stun:global.stun.twilio.com:3478",
+          ],
+        },
+      ],
+    });
+
+  const [peer, setPeer] = useState(() => createPeer());
 
   const createOffer = async () => {
     if (peer.signalingState !== "stable") {
@@ -65,6 +64,17 @@ export const PeerProvider = (props) => {
     setRemoteStream(stream[0]);
   }, []);
 
+  const resetPeer = useCallback(() => {
+    try {
+      peer.close();
+    } catch (err) {
+      console.warn("Error closing peer on reset", err);
+    }
+    const next = createPeer();
+    setRemoteStream(null);
+    setPeer(next);
+  }, [createPeer, peer]);
+
   useEffect(() => {
     peer.addEventListener("track", handleTrackEvent);
 
@@ -80,6 +90,7 @@ export const PeerProvider = (props) => {
         createAnswer,
         setRemoteAns,
         sendStream,
+        resetPeer,
         remoteStream,
       }}
     >

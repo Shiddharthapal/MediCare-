@@ -20,7 +20,9 @@ const RoomPage = () => {
     setRemoteAns,
     sendStream,
     remoteStream,
+    resetPeer,
   } = usePeer();
+
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
   const [remoteEmailId, setRemoteEmailId] = useState<string | null>(null);
   const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
@@ -67,6 +69,8 @@ const RoomPage = () => {
       remoteVideoRef.current.srcObject = null;
     }
 
+    socket.emit("leave-room", { roomId, emailId });
+
     // Close peer connection
     if (peer) {
       peer.getSenders().forEach((sender) => {
@@ -86,12 +90,13 @@ const RoomPage = () => {
     }
 
     // Reset state
+    resetPeer();
     setRemoteSocketId(null);
     setRemoteEmailId(null);
     setPendingCall(null);
     setCallActive(false);
     pendingIceRef.current = [];
-  }, [myStream, peer]);
+  }, [myStream, peer, resetPeer]);
 
   // Ensure we always have a local stream before sending offers/answers
   const ensureLocalStream = useCallback(async () => {
@@ -295,12 +300,21 @@ const RoomPage = () => {
 
     // Cleanup all resources
     cleanupCall();
+    navigate("/");
 
     // // Navigate back to appointments after a short delay
     // setTimeout(() => {
     //   navigate("/");
     // }, 500);
-  }, [remoteSocketId, socket, roomId, emailId, cleanupCall, navigate]);
+  }, [
+    remoteSocketId,
+    socket,
+    roomId,
+    emailId,
+    cleanupCall,
+    navigate,
+    isDoctor,
+  ]);
 
   // If doctor ends the call, remote peers should leave and return to appointments
   useEffect(() => {
@@ -316,6 +330,22 @@ const RoomPage = () => {
     socket.on("end-call-by-creator", handleRemoteEnd);
     return () => {
       socket.off("end-call-by-creator", handleRemoteEnd);
+    };
+  }, [cleanupCall, emailId, navigate, roomId, socket]);
+
+  // If remote user leaves voluntarily, clean up and navigate away
+  useEffect(() => {
+    const handleUserLeft = () => {
+      if (roomId) {
+        socket.emit("leave-room", { roomId, emailId });
+      }
+      cleanupCall();
+      navigate("/");
+    };
+
+    socket.on("user-left", handleUserLeft);
+    return () => {
+      socket.off("user-left", handleUserLeft);
     };
   }, [cleanupCall, emailId, navigate, roomId, socket]);
 
