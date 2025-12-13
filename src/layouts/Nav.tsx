@@ -134,7 +134,7 @@ export default function Navigation() {
             >
               <span className="sr-only">Open main menu</span>
               {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6 transition-colors hover:text-blue-600" />
               ) : (
                 <Menu className="h-6 w-6" />
               )}

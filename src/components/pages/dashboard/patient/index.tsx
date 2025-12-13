@@ -791,14 +791,13 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile menu button */}
-      <Button
-        variant="ghost"
+      <button
         size="icon"
-        className="fixed top-3  z-50 lg:hidden hover:bg-gray-300"
+        className="fixed top-5 ml-2  z-50 lg:hidden hover:text-[hsl(201,95%,31%)]"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
-        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
+        {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
 
       {/* Sidebar */}
       <div
@@ -901,7 +900,7 @@ export default function Dashboard() {
         className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
         {currentPage === "dashboard" && (
-          <main className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <main className="h-screen  p-6 lg:p-6 pt-5  lg:pt-10">
             <div className="max-w-6xl mx-auto space-y-6">
               {/* Header */}
               <div className="space-y-1">
@@ -1098,7 +1097,7 @@ export default function Dashboard() {
                 {/* Details Modal */}
                 {showDetailsModal && selectedAppointment && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h2 className="text-xl font-semibold text-gray-900">
@@ -1110,7 +1109,7 @@ export default function Dashboard() {
                             size="icon"
                             onClick={() => setShowDetailsModal(false)}
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-4 w-4 transition-colors hover:text-blue-600" />
                           </Button>
                         </div>
                         <div className="mb-4">
@@ -1289,7 +1288,7 @@ export default function Dashboard() {
                 {/* Prescription Modal */}
                 {showPrescriptionModal && selectedAppointment && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h2 className="text-xl font-semibold text-gray-900">
@@ -1373,7 +1372,7 @@ export default function Dashboard() {
                 {/*Report modal*/}
                 {showReportsModal && selectedAppointment && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h2 className="text-xl font-semibold text-gray-900">
@@ -1619,7 +1618,7 @@ export default function Dashboard() {
               </div>
 
               {/* Add some extra content to demonstrate scrolling */}
-              <div className="space-y-4">
+              <div className="space-y-4 pb-10">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Recent Activity
                 </h2>
@@ -1655,7 +1654,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "appointments" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Appointments onNavigate={setCurrentPage} />
             </div>

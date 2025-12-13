@@ -152,6 +152,31 @@
     scrollbar-color: hsl(201, 95%, 31%) transparent;
   }
 
+  /* Custom scrollbar styles */
+  .custom-scrollbar {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(201, 95%, 31%) transparent;
+  }
+
+  /* For Webkit browsers (Chrome, Safari, Edge) */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(201, 95%, 31%);
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(201, 95%, 41%);
+  }
+
   body {
     @apply bg-background text-foreground;
   }

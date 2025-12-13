@@ -276,6 +276,7 @@ export default function Appointments({
   const [appointmentsData, setAppointmentsData] =
     useState<appointmentdata | null>(null);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const [showAudioRoomDialog, setShowAudioRoomDialog] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
 
   const user = useAppSelector((state) => state.auth.user);
@@ -727,7 +728,7 @@ export default function Appointments({
       <Card
         className={`mb-4  border-l-4 ${getBorderColor(status)} hover:shadow-md transition-shadow`}
       >
-        <CardContent className="p-4">
+        <CardContent className=" px-4 lg:p-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
               <Avatar className="h-12 w-12">
@@ -785,7 +786,29 @@ export default function Appointments({
                           size="sm"
                           variant="outline"
                           className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
-                           hover:bg-purple-50 text-purple-700 bg-transparent"
+         hover:bg-purple-50 text-purple-700 bg-transparent"
+                          onClick={() => setShowMessageModal(true)}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  {status === "confirmed" &&
+                    appointment.consultationType === "audio" && (
+                      <>
+                        <Button
+                          size="sm"
+                          className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
+                          onClick={() => setShowAudioRoomDialog(true)}
+                        >
+                          <Phone className="h-3 w-3 mr-1" />
+                          Start
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
+         hover:bg-purple-50 text-purple-700 bg-transparent"
                           onClick={() => setShowMessageModal(true)}
                         >
                           <MessageCircle className="h-4 w-4" />
@@ -819,24 +842,24 @@ export default function Appointments({
                 className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
                 onClick={() => handleViewPrescription(appointment)}
               >
-                <FileText className="h-4 w-4 mr-2" />
+                <FileText className="h-4 w-4 mr-0" />
                 Prescription
-              </Button>
-              <Button
-                variant="outline"
-                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                onClick={() => handleViewDetails(appointment, status)}
-              >
-                <Info className="h-4 w-4 mr-2" />
-                See Details
               </Button>
               <Button
                 variant="outline"
                 className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
                 onClick={() => handleViewReports(appointment)}
               >
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="h-4 w-4 mr-0" />
                 Reports
+              </Button>
+              <Button
+                variant="outline"
+                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                onClick={() => handleViewDetails(appointment, status)}
+              >
+                <Info className="h-4 w-4 mr-0" />
+                See Details
               </Button>
             </div>
           </div>
@@ -846,6 +869,20 @@ export default function Appointments({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Create Room</DialogTitle>
+            <DialogDescription>
+              Enter a room number to start the consultation
+            </DialogDescription>
+          </DialogHeader>
+          <RoomCreationForm
+            onSuccess={() => setShowRoomDialog(false)}
+            emailId={email || ""}
+          />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showAudioRoomDialog} onOpenChange={setShowAudioRoomDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Audio Room</DialogTitle>
             <DialogDescription>
               Enter a room number to start the consultation
             </DialogDescription>
@@ -913,7 +950,7 @@ export default function Appointments({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -931,7 +968,7 @@ export default function Appointments({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-blue-600 font-medium">Upcoming</p>
@@ -945,7 +982,7 @@ export default function Appointments({
         </Card>
 
         <Card className="bg-green-50 border-green-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-green-600 font-medium">Today</p>
@@ -959,7 +996,7 @@ export default function Appointments({
         </Card>
 
         <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-purple-600 font-medium">Completed</p>
@@ -1012,7 +1049,7 @@ export default function Appointments({
 
       {/* Content */}
       {activeTab === "upcoming" && (
-        <div className=" mb-6 ">
+        <div className=" pb-10 ">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-600" />
             <h2 className="text-xl font-semibold text-gray-900">Next 7 Days</h2>
@@ -1033,7 +1070,10 @@ export default function Appointments({
                         year: "numeric",
                       })}
                     </span>
-                    <Badge variant="outline" className="ml-2">
+                    <Badge
+                      variant="outline"
+                      className="ml-2 bg-purple-300 text-purple-900"
+                    >
                       {appointments.length} appointment
                       {appointments.length !== 1 ? "s" : ""}
                     </Badge>
@@ -1154,7 +1194,7 @@ export default function Appointments({
             <h2 className="text-xl font-semibold text-gray-900">
               Appointment History
             </h2>
-            <Badge variant="outline">
+            <Badge variant="outline" className="bg-blue-300 text-blue-800">
               {Object.keys(pastGrouped).length} completed
             </Badge>
           </div>
@@ -1172,7 +1212,10 @@ export default function Appointments({
                         year: "numeric",
                       })}
                     </h3>
-                    <Badge variant="outline" className="ml-2">
+                    <Badge
+                      variant="outline"
+                      className="ml-2 bg-blue-500 text-white"
+                    >
                       {appointments.length} appointment
                       {appointments.length !== 1 ? "s" : ""}
                     </Badge>
@@ -1210,7 +1253,7 @@ export default function Appointments({
       {/*Details Modal*/}
       {showDetailsModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -1387,7 +1430,7 @@ export default function Appointments({
       {/* Prescription Modal */}
       {showPrescriptionModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -1470,7 +1513,7 @@ export default function Appointments({
       {/* Reports Modal add */}
       {showReportsModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
