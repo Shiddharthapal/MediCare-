@@ -284,6 +284,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const doctor = useAppSelector((state) => state.auth.user);
   // console.log("🧞‍♂️doctor --->", doctor);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const [showAudioRoomDialog, setShowAudioRoomDialog] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const email = user?.email;
@@ -297,7 +298,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       case "pending":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "completed":
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-blue-200 text-blue-800 border-blue-200";
       case "cancelled":
         return "bg-red-100 text-red-800 border-red-200";
       default:
@@ -550,90 +551,112 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     isPrevious?: boolean;
   }) => (
     <>
-      <Card className="mb-4  border border-gray-600 transition-all  hover:shadow-lg w-full max-w-full">
-        <CardContent className="px-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-start gap-4 flex-1">
-              <Avatar className="w-12 h-12 ring-1">
+      <Card className="mb-4 border border-gray-600 bg-blue-0 transition-all hover:shadow-lg w-full">
+        <CardContent className="p-4">
+          {/* Mobile and Tablet Layout */}
+          <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+            {/* Patient Info Section */}
+            <div className="flex items-start gap-3 sm:gap-4 flex-1">
+              {/* Avatar */}
+              <Avatar className="w-10 h-10 sm:w-12 sm:h-12 ring-1 flex-shrink-0">
                 <AvatarImage src="/placeholder.svg?height=48&width=48" />
                 <AvatarFallback>
                   {getPatientInitials(appointment?.patientName)}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-lg">
+
+              {/* Patient Details */}
+              <div className="flex-1 min-w-0">
+                {/* Name and Badges */}
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <h3 className="font-semibold text-base sm:text-lg">
                     {appointment?.patientName}
                   </h3>
-                  <Badge className={getStatusColor(status)}>{status}</Badge>
-                  <div>
-                    <Badge
-                      variant="outline"
-                      className="bg-blue-50 text-blue-700 border-blue-200"
-                    >
-                      {appointment.patientGender}
-                    </Badge>
-                  </div>
+                  <Badge className={`${getStatusColor(status)}`}>
+                    {status}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-50 text-blue-700 border-blue-200"
+                  >
+                    {appointment.patientGender}
+                  </Badge>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                  <div className="flex flex-col  gap-1">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4 text-[hsl(273,100%,60%)]" />
-                      {showDate && <span>{appointment?.appointmentDate} </span>}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4 text-red-500" />
-                      <span>{appointment.appointmentTime} • 30 Minutes</span>
-                    </div>
+                {/* Contact and Appointment Info Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm text-gray-600 mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-[hsl(273,100%,60%)] flex-shrink-0" />
+                    {showDate && (
+                      <span className="truncate">
+                        {appointment?.appointmentDate}
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4 text-orange-500" />
-                    <span>
-                      {appointment.consultationType === "video" || "phone"
+
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-red-500 flex-shrink-0" />
+                    <span className="truncate">
+                      {appointment.appointmentTime} • 30 Minutes
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                    <span className="truncate">
+                      {appointment.consultationType === "video" ||
+                      appointment.consultationType === "phone"
                         ? "In home (online)"
                         : appointmentData.hospital}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Phone className="h-4 w-4 text-cyan-600" />
-                    <span>{appointment.patientPhone}</span>
+
+                  <div className="flex items-center gap-1.5">
+                    <Phone className="h-4 w-4 text-cyan-600 flex-shrink-0" />
+                    <span className="truncate">{appointment.patientPhone}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Mail className="h-4 w-4 text-blue-500" />
-                    <span>{appointment.patientEmail}</span>
+
+                  <div className="flex items-center gap-1.5 sm:col-span-2">
+                    <Mail className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                    <span className="truncate">{appointment.patientEmail}</span>
                   </div>
                 </div>
-                <div className="mb-3">
-                  <p className="text-sm">
+
+                {/* Additional Details */}
+                <div className="space-y-1 mb-3 text-sm">
+                  <p>
                     <strong>Type:</strong> {appointment?.consultationType}
                   </p>
-                  <p className="text-sm">
+                  <p>
                     <strong>Doctor:</strong> {appointment?.doctorName}
                   </p>
-                  <p className="text-sm">
-                    <strong>Reason: </strong> {appointment.reasonForVisit}
+                  <p>
+                    <strong>Reason:</strong> {appointment.reasonForVisit}
                   </p>
                   {isPrevious && appointment.outcome && (
-                    <p className="text-sm">
+                    <p>
                       <strong>Outcome:</strong> {appointment.outcome}
                     </p>
                   )}
                 </div>
+
+                {/* Patient Age/Gender */}
                 <div className="text-xs text-gray-500">
                   Patient: {appointment?.patientAge} years old,{" "}
                   {appointment?.patientGender}
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-2 ml-4">
+
+            {/* Action Buttons Section */}
+            <div className="flex flex-row sm:flex-col gap-2 lg:ml-4 lg:min-w-[140px]">
               {status !== "completed" ? (
-                <div className="flex flex-col gap-1">
+                <>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => handleSeeDocument(appointment)}
-                    className="text-xs  border-2 border-gray-400 transition-all hover:border-primary/50 "
+                    className="text-xs border-2 border-gray-400 transition-all hover:border-primary/50 flex-1 sm:flex-none sm:w-full"
                   >
                     Document
                   </Button>
@@ -642,51 +665,70 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-xs border-2 border-gray-400 transition-all hover:border-0 hover:bg-red-200 hover:shadow-lg"
+                      className="text-xs border-2 border-gray-400 transition-all hover:border-0 hover:bg-red-200 hover:shadow-lg flex-1 sm:flex-none sm:w-full"
                       onClick={() => handleCancelAppointment(appointment)}
                     >
                       Cancel
                     </Button>
                   )}
-                </div>
+                </>
               ) : (
-                <div className="flex flex-col gap-1">
-                  <div className="">
+                <div className="flex flex-col gap-2 w-full">
+                  <Button
+                    size="sm"
+                    className="text-xs bg-green-500 hover:bg-green-600 text-white w-full"
+                    onClick={() => handleShowPrescription(appointment)}
+                  >
+                    <Eye className="h-3 w-3 mr-1" />
+                    See Prescription
+                  </Button>
+
+                  <div className="flex gap-2">
+                    {appointment.consultationType === "video" && (
+                      <>
+                        <Button
+                          size="sm"
+                          className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
+                          onClick={() => setShowRoomDialog(true)}
+                        >
+                          <Video className="h-3 w-3 mr-1" />
+                          Start
+                        </Button>
+                      </>
+                    )}
+
+                    {appointment.consultationType === "audio" && (
+                      <>
+                        <Button
+                          size="sm"
+                          className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
+                          onClick={() => setShowAudioRoomDialog(true)}
+                        >
+                          <Phone className="h-3 w-3 mr-1" />
+                          Start
+                        </Button>
+                      </>
+                    )}
+
                     <Button
                       size="sm"
-                      className="text-xs bg-green-500 hover:bg-green-600 text-white flex-1"
-                      onClick={() => handleShowPrescription(appointment)}
+                      className="text-xs bg-green-500 hover:bg-green-600 hover:text-black text-white flex-1"
+                      onClick={() => handleCreatePrescription(appointment)}
                     >
-                      <Eye className="h-3 w-3 mr-1" />
-                      See Prescription
-                    </Button>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
-                        onClick={() => setShowRoomDialog(true)}
-                      >
-                        <Video className="h-3 w-3 mr-1" />
-                        Start
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="text-xs bg-green-500 hover:bg-green-600 hover:text-black text-white flex-1"
-                        onClick={() => handleCreatePrescription(appointment)}
-                      >
-                        <FileEdit className="h-3 w-3 mr-1" />
-                        Create
-                      </Button>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600 hover:bg-purple-50 text-purple-700 bg-transparent"
-                      onClick={() => setShowMessageModal(true)}
-                    >
-                      <MessageCircle className="h-4 w-4" />
+                      <FileEdit className="h-3 w-3 mr-1" />
+                      Create
                     </Button>
                   </div>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600 hover:bg-purple-50 text-purple-700 bg-transparent w-full"
+                    onClick={() => setShowMessageModal(true)}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    Message
+                  </Button>
                 </div>
               )}
             </div>
@@ -697,6 +739,22 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Create Room</DialogTitle>
+            <DialogDescription>
+              Enter a room number to start the consultation
+            </DialogDescription>
+          </DialogHeader>
+          <RoomCreationForm
+            onSuccess={() => setShowRoomDialog(false)}
+            emailId={email || ""}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/*for audio call */}
+      <Dialog open={showAudioRoomDialog} onOpenChange={setShowAudioRoomDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Audio Room</DialogTitle>
             <DialogDescription>
               Enter a room number to start the consultation
             </DialogDescription>
@@ -721,10 +779,10 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   );
 
   return (
-    <div className="flex-1 flex flex-col mx-auto px-10 pb-5 w-full max-w-7xl overflow-hidden min-h-screen bg-white">
+    <div className="flex-1 flex flex-col mx-auto  pb-5 w-full max-w-7xl overflow-hidden min-h-screen bg-white">
       {/* Header */}
       <header className="flex items-center justify-between px-6 pb-2 pt-4 bg-white ">
-        <div className="flex flex-col md:flex-row justify-between gap-4 md:gap-8 w-full">
+        <div className="flex flex-row justify-between gap-4 md:gap-8 w-full">
           <div className="relative border border-gray-400 rounded-md transition-all hover:border-primary/50 hover:shadow-lg flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-500 " />
             <input
@@ -735,13 +793,13 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex gap-6">
+          <div className="flex gap-2">
             <Button
               variant="outline"
-              size="sm"
-              className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg"
+              size="md"
+              className="border border-gray-400 bg-[hsl(201,95%,41%)] hover:bg-[hsl(201,95%,31%)] hover:text-white  p-2 transition-all hover:border-primary/50 hover:shadow-lg"
             >
-              <Filter className="h-4 w-4 mr-2" />
+              <Filter className="h-4 w-4 mr-0" />
               Filter
             </Button>
           </div>
@@ -749,7 +807,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       </header>
 
       {/* Main Content - Scrollable */}
-      <main className="flex-1 overflow-y-auto px-6 py-1">
+      <main className="flex-1 custom-scrollbar px-6 py-1">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card className="border border-gray-400 transition-all hover:border-primary/50 hover:shadow-lg">
@@ -828,8 +886,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
           <TabsContent value="today" className="mt-1">
             <Card className="border border-gray-600 transition-all hover:border-primary/50 hover:shadow-lg">
               <CardHeader className="py-2 bg-gradient-to-r  from-green-100 to-emerald-100">
-                <CardTitle className="flex items-center text-2xl gap-2 font-semibold">
-                  <Calendar className="h-5 w-5 text-[hsl(273,100%,60%)]" />
+                <CardTitle className="flex items-center text-xl lg:text-2xl gap-2 font-semibold">
+                  <Calendar className="h-5 w-5 text-green-700" />
                   {`Today's Appointments - ${new Date().toISOString().split("T")[0]}`}
                 </CardTitle>
               </CardHeader>
@@ -861,8 +919,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   )
                 ) : (
                   <Card>
-                    <CardContent className="p-8 text-center">
-                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <CardContent className="px-8 py-0 lg:p-8 text-center">
+                      <Calendar className="h-10 lg:h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">
                         No appointments
                       </h3>
@@ -1109,7 +1167,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             <div className="space-y-3">
               <Card className="border border-gray-400">
                 <CardHeader className="flex items-center gap-2 text-2xl  font-semibold bg-gradient-to-r py-2 from-yellow-100 to-orange-100 pb-2">
-                  <Clock className="h-6 w-6 text-blue-500" />
+                  <Clock className="h-6 w-6 text-yellow-600" />
                   Upcoming Appointments
                 </CardHeader>
 
@@ -1200,7 +1258,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             <Card className="border border-gray-400">
               <CardHeader className="bg-gradient-to-r py-2 from-purple-100 to-pink-100">
                 <CardTitle className="flex items-center gap-2 text-2xl">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+                  <CheckCircle className="h-6 w-6 text-purple-600" />
                   Previous Appointments
                 </CardTitle>
               </CardHeader>
