@@ -460,7 +460,7 @@ export default function BookAppointment({
           <>
             {/* Doctor Info Header */}
             <Card className="mb-6">
-              <CardContent className="p-4">
+              <CardContent className="px-4 lg:p-4">
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src="/placeholder.svg" />
@@ -491,7 +491,7 @@ export default function BookAppointment({
             </Card>
 
             {/* Progress Steps */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-0 lg:mb-6">
               {[1, 2, 3, 4].map((step) => (
                 <div key={step} className="flex items-center">
                   <div
@@ -764,7 +764,7 @@ export default function BookAppointment({
                               handleInputChange("consultationType", mode)
                             }
                           >
-                            <CardContent className="p-4 text-center">
+                            <CardContent className=" px-4 lg:p-4 text-center">
                               {getIcon(mode)}
                               <h4 className="font-medium">{capitalizedMode}</h4>
                               <p className="text-xs text-gray-600 mt-1">

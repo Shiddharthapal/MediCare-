@@ -337,7 +337,10 @@ export default function Reports() {
                   <h3 className="text-lg font-medium text-gray-800">
                     {formatDate(date)}
                   </h3>
-                  <Badge variant="outline" className="ml-2">
+                  <Badge
+                    variant="outline"
+                    className="ml-2 bg-blue-300 text-blue-800"
+                  >
                     {groupedDocuments[date].length} document
                     {groupedDocuments[date].length !== 1 ? "s" : ""}
                   </Badge>

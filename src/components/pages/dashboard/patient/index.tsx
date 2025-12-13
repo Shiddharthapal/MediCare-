@@ -1662,7 +1662,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "doctors" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Doctors />
             </div>
@@ -1670,21 +1670,21 @@ export default function Dashboard() {
         )}
 
         {currentPage === "reports" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Reports />
             </div>
           </div>
         )}
         {currentPage === "health records" && (
-          <div className="h-screen  p-6 lg:p-6 ">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <HealthRecords onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "settings" && (
-          <div className="h-screen  p-6 lg:p-6 ">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <SettingPatient onNavigate={setCurrentPage} />
             </div>

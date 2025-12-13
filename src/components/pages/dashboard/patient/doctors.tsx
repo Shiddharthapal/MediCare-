@@ -253,7 +253,7 @@ export default function Doctors({
 
   const DoctorCard = ({ doctor }: { doctor: DoctorDetails }) => (
     <Card className="border-2 transition-all hover:border-primary/50 hover:shadow-lg">
-      <CardContent className="p-6">
+      <CardContent className="px-6 lg:p-6">
         <div className="flex items-start space-x-4 mb-4">
           <Avatar className="h-16 w-16">
             <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold text-lg">
@@ -475,7 +475,7 @@ export default function Doctors({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-blue-600 font-medium">
@@ -491,7 +491,7 @@ export default function Doctors({
         </Card>
 
         <Card className="bg-green-50 border-green-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-green-600 font-medium">
@@ -521,7 +521,7 @@ export default function Doctors({
         </Card>
 
         <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-purple-600 font-medium">
@@ -541,7 +541,7 @@ export default function Doctors({
         </Card>
 
         <Card className="bg-orange-50 border-orange-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-orange-600 font-medium">
@@ -557,7 +557,7 @@ export default function Doctors({
 
       {/* Initial Loading */}
       {loading && doctordata.length === 0 && (
-        <div className="flex justify-center items-center py-20">
+        <div className="flex justify-center items-center py-10">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
         </div>
       )}
@@ -600,7 +600,7 @@ export default function Doctors({
 
       {/* End of List Message */}
       {!hasMore && doctordata.length > 0 && (
-        <div className="text-center py-8">
+        <div className="text-center py-4">
           <Card className="bg-gray-50 border-gray-200">
             <CardContent className="p-6">
               <p className="text-gray-600 font-medium">
