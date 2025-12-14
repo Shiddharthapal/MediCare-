@@ -1622,10 +1622,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                           <FileText className="h-5 w-5 text-violet-600" />
                           Patient Documents & Prescriptions
                         </h2>
-                        <button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md px-4 py-2 rounded-md flex items-center gap-2">
-                          <Download className="h-4 w-4" />
-                          Download All
-                        </button>
                       </div>
                     </div>
 
@@ -1681,7 +1677,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                   <div className="flex items-start gap-4 flex-1">
                                     {/* Document Icon */}
-                                    <div className="p-3 rounded-lg bg-blue-100">
+                                    <div className=" p-1 lg:p-3 rounded-lg bg-blue-100">
                                       {document.category === "Lab Report" && (
                                         <ClipboardList className="h-6 w-6 text-green-600" />
                                       )}
@@ -1692,7 +1688,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
 
                                     {/* Document Details */}
                                     <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-2">
+                                      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 mb-2">
                                         <h3 className="font-semibold text-lg">
                                           {document.filename ||
                                             document.originalName}
@@ -1738,9 +1734,9 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                   </div>
 
                                   {/* Action Buttons */}
-                                  <div className="flex flex-col gap-2 ml-4">
+                                  <div className="flex flex-row lg:flex-col gap-2 ml-4">
                                     <Button
-                                      variant="ghost"
+                                      variant="secondary"
                                       size="sm"
                                       onClick={() =>
                                         window.open(
@@ -1748,7 +1744,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                           "_blank"
                                         )
                                       }
-                                      className="text-blue-600 hover:text-blue-700"
+                                      className="text-blue-600 hover:text-blue-800 border hover:border-blue-800"
                                     >
                                       <Eye className="h-4 w-4 mr-1" />
                                       View
