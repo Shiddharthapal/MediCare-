@@ -979,58 +979,60 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   }
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-white overflow-hidden">
       {/* Left Sidebar - Fixed */}
-      <aside className="w-min-44  bg-white ">
+      <aside
+        className={`bg-white border-b border-gray-200 lg:border-r lg:border-b-0 w-full lg:w-80 lg:max-w-sm shrink-0 custom-scrollbar ${
+          showPatientList ? "block" : "hidden lg:block"
+        }`}
+      >
         {/* Patient List */}
-        {showPatientList && (
-          <div className="p-2 overflow-y-auto">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium text-blue-500">
-                Patient Lists ({Object.entries(patientData).length})
-              </h3>
-              <Button variant="ghost" size="icon">
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {Object.entries(patientData).map(([id, patient]) => (
-                <div
-                  key={id}
-                  className={`flex items-center gap-3 px-3 py-1 rounded-lg cursor-pointer transition-colors ${
-                    selectedPatient?.id === id
-                      ? "bg-blue-100 border border-blue-300"
-                      : "hover:bg-gray-100"
-                  }`}
-                  onClick={() => setSelectedPatient(patient)}
-                >
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={`/placeholder.svg?height=32&width=32`} />
-                    <AvatarFallback className="text-xs">
-                      {getPatientInitials(patient?.patientInfo?.patientName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-gray-900 truncate">
-                      {patient?.patientInfo?.patientName}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {patient?.patientInfo?.patientAddress}
-                    </p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
-                </div>
-              ))}
-            </div>
+        <div className="p-2 custom-scrollbar">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-medium text-blue-500">
+              Patient Lists ({Object.entries(patientData).length})
+            </h3>
+            <Button variant="ghost" size="icon">
+              <Search className="h-4 w-4" />
+            </Button>
           </div>
-        )}
+          <div className="space-y-2 max-h-[60vh] lg:h-full custom-scrollbar">
+            {Object.entries(patientData).map(([id, patient]) => (
+              <div
+                key={id}
+                className={`flex items-center gap-3 px-3 py-1 rounded-lg cursor-pointer transition-colors ${
+                  selectedPatient?.id === id
+                    ? "bg-blue-100 border border-blue-300"
+                    : "hover:bg-gray-100"
+                }`}
+                onClick={() => setSelectedPatient(patient)}
+              >
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={`/placeholder.svg?height=32&width=32`} />
+                  <AvatarFallback className="text-xs">
+                    {getPatientInitials(patient?.patientInfo?.patientName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm text-gray-900 truncate">
+                    {patient?.patientInfo?.patientName}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {patient?.patientInfo?.patientAddress}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+              </div>
+            ))}
+          </div>
+        </div>
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {/* Header */}
-        <header className="flex items-center justify-between pt-3 pl-3 pr-6 pb-3 bg-white">
-          <div className="flex items-center gap-4">
+        <header className="flex flex-wrap items-center justify-between gap-3 pt-3 pl-3 pr-6 pb-3 bg-white">
+          <div className="flex items-center gap-4 min-w-0">
             <Avatar className="w-10 h-10 ring-4 ring-blue-200">
               <AvatarImage src="/placeholder.svg?height=48&width=48" />
               <AvatarFallback>
@@ -1050,10 +1052,20 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
               </p>
             </div>
           </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="ml-auto border lg:hidden bg-[hsl(201,96%,32%)] text-gray-100 hover:text-black
+            hover:border-[hsl(201,96%,32%)]"
+            onClick={() => setShowPatientList((prev) => !prev)}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            {showPatientList ? "Hide Patients" : "Show Patients"}
+          </Button>
         </header>
 
         {/* Tabs */}
-        <div className="grid grid-cols-4 md:gap-10 px-6 py-1 border-b border-gray-400 bg-white">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-10 px-3 sm:px-6 py-1 border-b border-gray-400 bg-white">
           <button
             className={`pb-2 border-b-4 transition-colors font-semibold ${
               activeTab === "overview"
@@ -1100,20 +1112,20 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         <div className="flex-1 overflow-hidden ">
           <div className="flex h-full">
             {/* Scrollable Content */}
-            <main className="flex-1 w-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+            <main className="flex-1 w-full custom-scrollbar scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
               {activeTab === "overview" && (
                 <div className="py-3">
                   {/* Personal Information */}
                   <div className="mb-4 px-1">
                     <Card className="border border-gray-400">
                       <CardHeader className="bg-gradient-to-r py-2 from-blue-100 to-indigo-100 border-b border-gray-200/60">
-                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <CardTitle className="text-lg lg:text-xl font-bold text-gray-900 flex items-center gap-2">
                           <User className="h-5 w-5 text-blue-600" />
                           Personal Information
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                           <div>
                             <div className="flex flex-row gap-1">
                               <User className="h-4 w-4 text-gray-600" />
@@ -1150,7 +1162,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             </p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                           <div>
                             <div className="flex flex-row gap-1">
                               <Transgender className="h-4 w-4 text-gray-600" />
@@ -1181,7 +1193,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             </p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                           <div>
                             <div className="flex flex-row gap-1">
                               <Cake className="h-4 w-4 text-gray-600" />
@@ -1226,7 +1238,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   <div className="mb-4 px-1">
                     <Card className="border border-gray-400">
                       <CardHeader className="bg-gradient-to-r py-2 from-purple-100 to-pink-100 border-b border-gray-200/60">
-                        <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <CardTitle className="text-lg lg:text-xl font-bold text-gray-900 flex items-center gap-2">
                           <Activity className="h-5 w-5 text-purple-600" />
                           Previous Conditions
                         </CardTitle>
@@ -1237,7 +1249,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             (values, index) => (
                               <div
                                 key={index}
-                                className="flex items-center justify-between p-4 
+                                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-2 lg:p-4 
                                 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-l-4 border-pink-300"
                               >
                                 <div className="flex items-center gap-3">
@@ -1254,11 +1266,11 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     </p>
                                   </div>
                                 </div>
-                                <Badge
+                                {/* <Badge
                                   className={getSeverityColor(values?.reason)}
                                 >
-                                  {values?.reason}
-                                </Badge>
+                                  {values?.appointment?.status}
+                                </Badge> */}
                               </div>
                             )
                           )}
@@ -1281,12 +1293,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                         {(selectedPatient?.upcomingAppointments).length > 0 ? (
                           selectedPatient?.upcomingAppointments.map(
                             (value, index) => (
-                              <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border border-l-4 border-yellow-300">
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-yellow-50 rounded-lg border border-l-4 border-yellow-300">
                                 <div className="p-2 bg-yellow-200 rounded-lg">
                                   <Calendar className="h-5 w-5 text-yellow-600" />
                                 </div>
                                 <div className="flex-1">
-                                  <div className="flex items-center justify-between mb-1">
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-1">
                                     <h3 className="font-semibold">
                                       {value?.consultedType}
                                     </h3>
@@ -1294,7 +1306,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                       Confirmed
                                     </Badge>
                                   </div>
-                                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
                                     <div className="flex items-center gap-1">
                                       <Clock className="h-4 w-4" />
                                       <span>
@@ -1327,8 +1339,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             )
                           )
                         ) : (
-                          <div className="text-center py-8 text-gray-500">
-                            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <div className="text-center  rounded-lg bg-gradient-to-r from-yellow-100 to-orange-100 py-2 lg:py-8 text-gray-800">
+                            <Calendar className="h-10 lg:h-12 w-10 lg:w-12 mx-auto mb-4 opacity-50" />
                             <p className="text-lg font-medium mb-2">
                               No Upcoming Appointments
                             </p>
@@ -1413,7 +1425,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                 key={index}
                                 className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50"
                               >
-                                <div className="flex items-center justify-between mb-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                                   <div className="flex items-center gap-3">
                                     {getStatusIcon(disease.reason)}
                                     <h3 className="font-semibold text-lg">
@@ -1472,7 +1484,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     </Badge>
                                   </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                                   <div>
                                     <p className="text-gray-500">
                                       Diagnosed Date
@@ -1483,7 +1495,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                       ).toLocaleDateString()}
                                     </p>
                                   </div>
-                                  <div className="pl-10">
+                                  <div className="sm:pl-10">
                                     <p className="text-gray-500">
                                       Current Status
                                     </p>
@@ -1537,7 +1549,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                 key={index}
                                 className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-blue-50 to-cyan-50"
                               >
-                                <div className="flex items-center justify-between mb-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                                   <div className="flex items-center gap-3">
                                     <div className="p-2 bg-blue-100 rounded-lg">
                                       <Calendar className="h-5 w-5 text-blue-600" />
@@ -1565,7 +1577,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                           appointment.status.slice(1))}
                                   </Badge>
                                 </div>
-                                <div className="grid grid-cols-3 gap-4 text-sm">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                                   <div>
                                     <p className="text-gray-500">Date</p>
                                     <p className="font-medium">
@@ -1578,7 +1590,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                       {appointment?.appointmentTime}
                                     </p>
                                   </div>
-                                  <div className="pl-11">
+                                  <div className="sm:pl-11">
                                     <p className="text-gray-500">Status</p>
                                     <p className="font-medium text-green-600">
                                       {appointment?.status &&
@@ -1620,7 +1632,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                   <div className="border border-gray-400 rounded-lg">
                     {/* Header */}
                     <div className="bg-gradient-to-r py-3 px-6 from-violet-100 to-purple-100 border-b border-gray-200/60 rounded-t-lg">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
                         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           <FileText className="h-5 w-5 text-violet-600" />
                           Patient Documents & Prescriptions
@@ -1681,7 +1693,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                 key={index}
                                 className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
                               >
-                                <div className="flex items-start justify-between">
+                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                   <div className="flex items-start gap-4 flex-1">
                                     {/* Document Icon */}
                                     <div className="p-3 rounded-lg bg-blue-100">
@@ -1790,7 +1802,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                 key={index}
                                 className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-green-50 to-emerald-50"
                               >
-                                <div className="flex items-start justify-between">
+                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                   <div className="flex items-start gap-4 flex-1">
                                     {/* Prescription Icon */}
                                     <div className="p-3 rounded-lg bg-green-100">
