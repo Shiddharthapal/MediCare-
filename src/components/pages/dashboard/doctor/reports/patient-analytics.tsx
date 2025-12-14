@@ -312,7 +312,7 @@ export function PatientAnalytics(
                 color: "hsl(217, 91%, 60%)",
               },
             }}
-            className="h-[250px] sm:h-[280px] md:h-[280px]  w-full"
+            className="h-[200px] sm:h-[250px] md:h-[280px]  w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -388,7 +388,7 @@ export function PatientAnalytics(
                 color: "hsl(330, 81%, 60%)",
               },
             }}
-            className="h-[200px] xs:h-[250px] sm:h-[280px] md:h-[280px]  w-full"
+            className="h-[200px] sm:h-[250px] md:h-[280px]  w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
