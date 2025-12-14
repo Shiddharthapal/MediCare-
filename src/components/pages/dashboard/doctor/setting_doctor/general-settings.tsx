@@ -159,10 +159,10 @@ export function GeneralSettings() {
               <strong>Degree:</strong>{" "}
               {formData?.profile?.degree || "Not Provided"}
             </div>
-            <div>
-              <strong>Professional Bio:</strong>{" "}
-              {formData?.profile?.about || "Not Provided"}
-            </div>
+          </div>
+          <div className="pt-4">
+            <strong>Professional Bio:</strong>{" "}
+            {formData?.profile?.about || "Not Provided"}
           </div>
         </CardContent>
       </Card>
