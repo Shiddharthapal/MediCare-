@@ -308,7 +308,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                 color: "hsl(330, 81%, 60%)", // Red
               },
             }}
-            className="h-[200px] sm:h-[250px] md:h-[280px] lg:h-[280px] md:w-full"
+            className="h-[200px] sm:h-[250px] md:h-[280px] lg:h-[280px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
