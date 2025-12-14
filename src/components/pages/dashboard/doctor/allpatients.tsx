@@ -846,7 +846,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-white overflow-hidden">
+    <div className="flex flex-col px-5 lg:flex-row min-h-screen bg-white overflow-hidden">
       {/* Left Sidebar - Fixed */}
       <aside
         className={`bg-white border-b border-gray-200 lg:border-r lg:border-b-0 w-full lg:w-80 lg:max-w-sm shrink-0 custom-scrollbar ${

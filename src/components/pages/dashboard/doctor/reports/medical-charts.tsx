@@ -86,22 +86,6 @@ interface TimeData {
   appointments: number;
 }
 
-// Medical-specific chart data
-const diagnosisAccuracyData = [
-  { month: "Jan", accuracy: 92.5, totalCases: 14 },
-  { month: "Feb", accuracy: 94.2, totalCases: 16 },
-  { month: "Mar", accuracy: 91.8, totalCases: 13 },
-  { month: "Apr", accuracy: 95.1, totalCases: 17 },
-  { month: "May", accuracy: 93.7, totalCases: 19 },
-  { month: "Jun", accuracy: 96.3, totalCases: 21 },
-  { month: "Jul", accuracy: 90.2, totalCases: 10 },
-  { month: "Aug", accuracy: 92.8, totalCases: 11 },
-  { month: "Sep", accuracy: 94.3, totalCases: 12 },
-  { month: "Oct", accuracy: 97.1, totalCases: 9 },
-  { month: "Nov", accuracy: 93.4, totalCases: 21 },
-  { month: "Dec", accuracy: 90.7, totalCases: 20 },
-];
-
 const treatmentOutcomeData = [
   { treatment: "Medication", success: 85, partial: 12, failed: 3 },
   { treatment: "Therapy", success: 78, partial: 18, failed: 4 },
@@ -240,156 +224,160 @@ export function MedicalCharts(
   console.log("appointmentTimeData=>", appointmentTimeData);
 
   return (
-    <div className="grid gap-4 grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 overflow-x-hidden">
       {/* Diagnosis Accuracy Trend */}
-      <Card className="md:col-span-2 border border-pink-500">
-        <CardHeader className="bg-gradient-to-r py-2 from-purple-200 to-pink-200">
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Diagnosis Accuracy Trend
-          </CardTitle>
-          <CardDescription className="text-gray-700">
-            Monthly diagnosis accuracy rates and case volumes
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              accuracy: {
-                label: "Accuracy (%)",
-                color: "hsl(217, 91%, 60%)",
-              },
-              totalCases: {
-                label: "Total Cases",
-                color: "hsl(330, 81%, 60%)",
-              },
-            }}
-            className="h-[250px] sm:h-[280px]   w-full"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={diagnosisAccuracyData}
-                margin={{ top: 5, right: 20, left: 20, bottom: 20 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="month"
-                  label={{
-                    value: " Month ",
-                    position: "insideBottom",
-                    offset: -10,
-                    style: {
-                      textAnchor: "middle",
-                      fill: "black",
-                      fontSize: "14px",
-                    },
-                  }}
-                />
-                <YAxis
-                  yAxisId="left"
-                  domain={[85, 100]}
-                  label={{
-                    value: " Accuracy ",
-                    position: "middle",
-                    angle: -90,
-                    offset: 0,
-                    dx: -20,
-                    style: {
-                      textAnchor: "middle",
-                      fill: "black",
-                      fontSize: "16px",
-                    },
-                  }}
-                />
-                <YAxis
-                  yAxisId="right"
-                  orientation="right"
-                  padding={{ top: 5, bottom: 0 }}
-                  label={{
-                    value: " Appointment",
-                    position: "insideRight",
-                    angle: +90,
-                    offset: +20,
-                    style: {
-                      textAnchor: "middle",
-                      fill: "black",
-                      fontSize: "16px",
-                    },
-                  }}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area
-                  yAxisId="left"
-                  type="monotone"
-                  dataKey="accuracy"
-                  stroke="hsl(217, 91%, 60%)"
-                  fill="hsl(217, 91%, 60%)"
-                  fillOpacity={0.3}
-                  name="Accuracy (%)"
-                />
-                <Line
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="totalCases"
-                  stroke="hsl(330, 81%, 60%)"
-                  fill="hsl(330, 81%, 60%)"
-                  strokeWidth={2}
-                  name="Total Cases"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      <div className="lg:col-span-2 xl:col-span-3">
+        <Card className="md:col-span-2 border border-pink-500">
+          <CardHeader className="bg-gradient-to-r py-2 from-purple-200 to-pink-200">
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Diagnosis Accuracy Trend
+            </CardTitle>
+            <CardDescription className="text-gray-700">
+              Monthly diagnosis accuracy rates and case volumes
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{
+                accuracy: {
+                  label: "Accuracy (%)",
+                  color: "hsl(217, 91%, 60%)",
+                },
+                totalCases: {
+                  label: "Total Cases",
+                  color: "hsl(330, 81%, 60%)",
+                },
+              }}
+              className="h-[200px] sm:h-[250px] md:h-[280px] lg:h-[280px]  w-full"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={diagnosisAccuracyData}
+                  margin={{ top: 5, right: 20, left: 20, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="month"
+                    label={{
+                      value: " Month ",
+                      position: "insideBottom",
+                      offset: -10,
+                      style: {
+                        textAnchor: "middle",
+                        fill: "black",
+                        fontSize: "14px",
+                      },
+                    }}
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    domain={[85, 100]}
+                    label={{
+                      value: " Accuracy ",
+                      position: "middle",
+                      angle: -90,
+                      offset: 0,
+                      dx: -20,
+                      style: {
+                        textAnchor: "middle",
+                        fill: "black",
+                        fontSize: "16px",
+                      },
+                    }}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    padding={{ top: 5, bottom: 0 }}
+                    label={{
+                      value: " Appointment",
+                      position: "insideRight",
+                      angle: +90,
+                      offset: +20,
+                      style: {
+                        textAnchor: "middle",
+                        fill: "black",
+                        fontSize: "16px",
+                      },
+                    }}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="accuracy"
+                    stroke="hsl(217, 91%, 60%)"
+                    fill="hsl(217, 91%, 60%)"
+                    fillOpacity={0.3}
+                    name="Accuracy (%)"
+                  />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="totalCases"
+                    stroke="hsl(330, 81%, 60%)"
+                    fill="hsl(330, 81%, 60%)"
+                    strokeWidth={2}
+                    name="Total Cases"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Symptom Frequency Analysis */}
-      <Card className="border border-cyan-600">
-        <CardHeader className="bg-gradient-to-r py-2 from-cyan-600 to-blue-400 ">
-          <CardTitle className="flex items-center text-white gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            Common Symptoms
-          </CardTitle>
-          <CardDescription className="text-white">
-            Most frequently reported symptoms by patients
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {consultedData.map((symptom, index) => (
-              <div
-                key={symptom.symptoms}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary 
+      <div>
+        {/* Symptom Frequency Analysis */}
+        <Card className="border border-cyan-600">
+          <CardHeader className="bg-gradient-to-r py-2 from-cyan-600 to-blue-400 ">
+            <CardTitle className="flex items-center text-white gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Common Symptoms
+            </CardTitle>
+            <CardDescription className="text-white">
+              Most frequently reported symptoms by patients
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {consultedData.map((symptom, index) => (
+                <div
+                  key={symptom.symptoms}
+                  className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary 
                   text-primary-foreground text-sm font-medium"
-                  >
-                    {index + 1}
-                  </div>
-                  <div>
-                    <div className="font-medium">{symptom.symptoms}</div>
-                    {/* <div
+                    >
+                      {index + 1}
+                    </div>
+                    <div>
+                      <div className="font-medium">{symptom.symptoms}</div>
+                      {/* <div
                       className={`text-sm ${getSeverityColor(symptom.severity)}`}
                     >
                       {symptom.severity} Severity
                     </div> */}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Progress
+                      value={(symptom.frequency / 234) * 100}
+                      className="w-full sm:w-28 md:w-32"
+                    />
+                    <div className="text-sm font-medium min-w-[40px]">
+                      {symptom.frequency}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Progress
-                    value={(symptom.frequency / 234) * 100}
-                    className="w-20"
-                  />
-                  <div className="text-sm font-medium min-w-[40px]">
-                    {symptom.frequency}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Risk Assessment Distribution */}
       <Card className="border border-orange-400">
@@ -410,7 +398,7 @@ export function MedicalCharts(
                 color: "hsl(var(--chart-1))",
               },
             }}
-            className="h-[250px]"
+            className="h-[200px] sm:h-[250px] md:h-[280px] lg:h-[280px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <RadialBarChart
@@ -426,7 +414,7 @@ export function MedicalCharts(
               </RadialBarChart>
             </ResponsiveContainer>
           </ChartContainer>
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+          <div className="mt-4 grid grid-cols-3  gap-3 text-center">
             {riskAssessmentData.map((item) => (
               <div key={item.category} className="space-y-1">
                 <div
@@ -445,7 +433,7 @@ export function MedicalCharts(
       </Card>
 
       {/* Treatment Outcomes */}
-      <Card className="col-span-2 border border-green-500">
+      <Card className="lg:col-span-2 xl:col-span-2 border border-green-500">
         <CardHeader className="bg-gradient-to-r py-2 from-green-800 to-blue-300">
           <CardTitle className="text-white">
             Treatment Outcome Analysis
@@ -470,7 +458,7 @@ export function MedicalCharts(
                 color: "hsl(330, 81%, 60%)",
               },
             }}
-            className="h-[250px] sm:h-[280px] md:h-[280px] w-full"
+            className="h-[200px] sm:h-[250px] md:h-[280px] lg:h-[280px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={treatmentOutcomeData}>
@@ -503,7 +491,7 @@ export function MedicalCharts(
       </Card>
 
       {/* Appointment Time Analysis */}
-      <Card className="col-span-2 mb-10 border border-sky-400">
+      <Card className="lg:col-span-2 xl:col-span-3 mb-10 border border-sky-400">
         <CardHeader className="bg-gradient-to-r py-2 from-sky-300 to-blue-200">
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
@@ -525,7 +513,7 @@ export function MedicalCharts(
                 color: "hsl(217, 91%, 60%)",
               },
             }}
-            className="h-[250px] sm:h-[280px] md:h-[280px] w-full"
+            className="h-[200px]  w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={appointmentTimeData}>

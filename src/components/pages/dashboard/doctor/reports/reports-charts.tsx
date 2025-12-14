@@ -154,6 +154,13 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
 
   const getChartDimensionsRating = () => {
     switch (screenSize) {
+      case "xs": // Extra small devices (phones, < 480px)
+        return {
+          height: 180,
+          width: 320,
+          margin: { top: 8, right: 8, left: 8, bottom: 8 },
+          fontSize: 9,
+        };
       case "sm":
         return {
           height: 200,
@@ -301,7 +308,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                 color: "hsl(330, 81%, 60%)", // Red
               },
             }}
-            className="h-[250px] sm:h-[300px] lg:h-[350px] w-[400px] md:w-full"
+            className="h-[200px] sm:h-[250px] md:h-[280px] lg:h-[280px] md:w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
@@ -382,16 +389,17 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
         </CardHeader>
         <CardContent>
           {/* Chart Container */}
-          <div className="w-full" style={{ height: `${height1}px` }}>
+          <div className="h-[200px] sm:h-[250px] md:h-[280px] lg:h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+              <PieChart>
                 <Pie
                   data={consultedData}
-                  cx="50%"
+                  cx="60%"
                   cy="50%"
                   labelLine={false}
                   label={renderCustomLabel}
-                  outerRadius={outerRadius}
+                  outerRadius="60%"
+                  innerRadius="0%"
                   fill="#8884d8"
                   dataKey="count"
                   stroke="#fff"
@@ -435,7 +443,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
       </Card>
 
       {/* Patient Satisfaction */}
-      <Card className="w-full lg:col-span-2 border border-cyan-600">
+      <Card className="w-full mb-5 lg:col-span-2 border border-cyan-600">
         <CardHeader className="bg-gradient-to-r py-2 from-cyan-700 to-blue-300">
           <CardTitle>Patient Satisfaction</CardTitle>
           <CardDescription className="text-white">
@@ -444,7 +452,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
         </CardHeader>
         <CardContent>
           {/* Chart Container */}
-          <div className="w-full" style={{ height: `${height}px` }}>
+          <div className="w-full h-[200px] sm:h-[250px] md:h-[280px] lg:h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={patientSatisfactionData} margin={margin}>
                 <defs>
@@ -461,7 +469,7 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
                       stopOpacity={0.8}
                     />
                     <stop
-                      offset="95%"
+                      offset="85%"
                       stopColor="hsl(217, 91%, 60%)"
                       stopOpacity={0.1}
                     />

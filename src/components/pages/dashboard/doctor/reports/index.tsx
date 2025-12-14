@@ -188,7 +188,7 @@ export default function ReportsPage({ onNavigate }: SettingPageProps) {
 
   return (
     <>
-      <div className="space-y-4 mx-14 mt-4 width: 100%">
+      <div className="space-y-4 px-6 lg:mx-14 pt-4 width: 100%">
         {/* Tabs for Different Report Views */}
         <div>
           <h1 className="text-3xl font-semibold text-gray-900">Reports</h1>
@@ -197,7 +197,7 @@ export default function ReportsPage({ onNavigate }: SettingPageProps) {
           </p>
         </div>
         <Tabs defaultValue="overview">
-          <div className="overflow-x-auto">
+          <div className="custom-x-scrollbar">
             <TabsList className="grid w-full grid-cols-5 min-w-[500px] sm:min-w-0 bg-gray-300">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="medical">Medical</TabsTrigger>
