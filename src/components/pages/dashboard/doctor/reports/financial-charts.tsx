@@ -110,6 +110,7 @@ export function FinancialCharts({ appointment, fees }: DoctorDetailstProps) {
     const allMonths: MonthlyData[] = [];
     const currentDate = new Date();
 
+    //insert the value of 12 months
     for (let i = 11; i >= 0; i--) {
       const monthDate = new Date(
         currentDate.getFullYear(),

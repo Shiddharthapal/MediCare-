@@ -1,12 +1,4 @@
 "use client";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportsCharts } from "./reports-charts";
 import { DiagnosisTable } from "./diagnosis-table";
@@ -171,8 +163,6 @@ interface SettingPageProps {
   onNavigate: (page: string) => void;
 }
 export default function ReportsPage({ onNavigate }: SettingPageProps) {
-  const [showFilters, setShowFilters] = useState(false);
-  const [showExport, setShowExport] = useState(false);
   const [doctordata, setDoctordata] = useState<DoctorDetails>();
   let doctor = useAppSelector((state) => state.auth.user);
   let id = doctor?._id;

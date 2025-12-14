@@ -124,6 +124,7 @@ interface DoctorDetailstProps {
 export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
   const [screenSize, setScreenSize] = useState("lg");
 
+  //find the chart dimension for different size of display
   const getChartDimensions = () => {
     switch (screenSize) {
       case "sm":
@@ -152,9 +153,10 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
     return `${type} ${percentage}%`;
   };
 
+  //get the chart dimensions rating  for different screen size
   const getChartDimensionsRating = () => {
     switch (screenSize) {
-      case "xs": // Extra small devices (phones, < 480px)
+      case "xs":
         return {
           height: 180,
           width: 320,
@@ -283,8 +285,6 @@ export function ReportsCharts({ appointment, fees }: DoctorDetailstProps) {
 
     return result;
   }, [appointment]);
-
-  console.log("🧞‍♂️  monthlyData --->", monthlyData);
 
   return (
     <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">

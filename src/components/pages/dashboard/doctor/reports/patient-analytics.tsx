@@ -107,6 +107,7 @@ export function PatientAnalytics(
 ) {
   const appointmentData = data?.appointment;
 
+  //findout the age group and store that to the browser store
   const ageGroupData = useMemo(() => {
     if (!appointmentData || appointmentData.length === 0) {
       return [

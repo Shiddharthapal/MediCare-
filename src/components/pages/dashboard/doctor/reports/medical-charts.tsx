@@ -188,6 +188,7 @@ export function MedicalCharts(
     }));
   }, [appointmentdata]);
 
+  //calculate the appointmenttime and  store the data to the browser store
   const appointmentTimeData = useMemo(() => {
     const hourMap: Record<number, number> = {};
     for (let hour = 9; hour <= 22; hour++) {
@@ -220,8 +221,6 @@ export function MedicalCharts(
 
     return timeData;
   }, [appointmentdata]);
-
-  console.log("appointmentTimeData=>", appointmentTimeData);
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 overflow-x-hidden">

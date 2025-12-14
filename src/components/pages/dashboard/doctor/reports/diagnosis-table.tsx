@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Search, Filter, Download } from "lucide-react";
 import { useState } from "react";
 
@@ -82,17 +81,7 @@ export function DiagnosisTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState(diagnosisData);
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    const filtered = diagnosisData.filter(
-      (item) =>
-        item.diagnosis.toLowerCase().includes(value.toLowerCase()) ||
-        item.icdCode.toLowerCase().includes(value.toLowerCase()) ||
-        item.department.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredData(filtered);
-  };
-
+  // get the severity color
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "High":
