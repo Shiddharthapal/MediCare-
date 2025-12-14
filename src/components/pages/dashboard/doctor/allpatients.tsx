@@ -1549,7 +1549,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                 key={index}
                                 className="border border-gray-400 rounded-lg p-4 bg-gradient-to-r from-blue-50 to-cyan-50"
                               >
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                                <div className="flex flex-row items-center justify-between gap-3 mb-3">
                                   <div className="flex items-center gap-3">
                                     <div className="p-2 bg-blue-100 rounded-lg">
                                       <Calendar className="h-5 w-5 text-blue-600" />
@@ -1577,7 +1577,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                           appointment.status.slice(1))}
                                   </Badge>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                                <div className="grid grid-cols-2 gap-4 text-sm">
                                   <div>
                                     <p className="text-gray-500">Date</p>
                                     <p className="font-medium">
@@ -1588,21 +1588,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                                     <p className="text-gray-500">Time</p>
                                     <p className="font-medium">
                                       {appointment?.appointmentTime}
-                                    </p>
-                                  </div>
-                                  <div className="sm:pl-11">
-                                    <p className="text-gray-500">Status</p>
-                                    <p className="font-medium text-green-600">
-                                      {appointment?.status &&
-                                        (appointment.status.charAt(0) ===
-                                        appointment.status
-                                          .charAt(0)
-                                          .toUpperCase()
-                                          ? appointment.status
-                                          : appointment.status
-                                              .charAt(0)
-                                              .toUpperCase() +
-                                            appointment.status.slice(1))}
                                     </p>
                                   </div>
                                 </div>
