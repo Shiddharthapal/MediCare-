@@ -177,6 +177,31 @@
     background-color: hsl(201, 95%, 41%);
   }
 
+  /* Custom scrollbar styles for x */
+  .custom-x-scrollbar {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(201, 95%, 31%) transparent;
+  }
+
+  /* For Webkit browsers (Chrome, Safari, Edge) */
+  .custom-x-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-x-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-x-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(201, 95%, 31%);
+    border-radius: 4px;
+  }
+
+  .custom-x-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(201, 95%, 41%);
+  }
+
   body {
     @apply bg-background text-foreground;
   }

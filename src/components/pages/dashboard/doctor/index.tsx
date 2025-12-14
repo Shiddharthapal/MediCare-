@@ -716,7 +716,7 @@ export default function DashboardPage() {
                               4.7
                             </p>
                           </div>
-                          <div className="p-2">
+                          <div className="px-2 pt-2 lg:p-2">
                             <p className="text-xs text-gray-300 uppercase mb-1">
                               License
                             </p>
@@ -746,7 +746,7 @@ export default function DashboardPage() {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="h-[300px] w-full">
+                        <div className="h-[150px] lg:h-[300px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                               data={dataAppointmentCount}
@@ -816,15 +816,15 @@ export default function DashboardPage() {
                         <CardTitle>Gender Distribution</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="h-[300px] w-full">
+                        <div className="h-[150px] lg:h-[300px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
                                 data={datagender}
                                 cx="50%"
                                 cy="50%"
-                                innerRadius={60}
-                                outerRadius={100}
+                                innerRadius="70%"
+                                outerRadius="100%"
                                 paddingAngle={5}
                                 dataKey="value"
                               >
@@ -885,23 +885,23 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       {Object.keys(todayGrouped).length > 0 ? (
-                        <div className="overflow-x-auto">
+                        <div className="custom-x-scrollbar">
                           <table className="w-full">
                             <thead>
                               <tr className="border-b">
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   PATIENT
                                 </th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   SERVICE
                                 </th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   DATE
                                 </th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   TIME
                                 </th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   ACTION
                                 </th>
                               </tr>
