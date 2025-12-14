@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatInTimeZone } from "date-fns-tz";
 import {
   Search,
   Calendar,
@@ -251,29 +250,6 @@ const mockAppointmentData: AppointmentData = {
   createdAt: new Date(),
 };
 
-const mockDoctorDetails: DoctorDetails = {
-  userId: "",
-  name: "",
-  email: "",
-  contact: "",
-  gender: "",
-  registrationNo: "",
-  specialist: "",
-  specializations: [],
-  hospital: "",
-  fees: 0,
-  rating: 0,
-  experience: "",
-  education: "",
-  degree: "",
-  language: [],
-  about: "",
-  availableSlots: [],
-  appointments: [],
-  consultationModes: [],
-  createdAt: new Date(),
-};
-
 interface FileUpload {
   _id: string;
   filename: string;
@@ -294,7 +270,6 @@ interface FileUpload {
 }
 
 // Mock data for patients
-
 interface ReasonForVisit {
   appointment: AppointmentData;
   reason: string;
@@ -372,89 +347,6 @@ const mockPatientData: PatientData = {
   previousAppointments: [],
 };
 
-interface CategorizedAppointments {
-  today: AppointmentData[];
-  future: AppointmentData[];
-  past: AppointmentData[];
-}
-
-// Interface for grouped appointments by date
-interface GroupedAppointments {
-  [date: string]: AppointmentData[];
-}
-
-// Helper function to get today's date in YYYY-MM-DD format
-const getTodayDate = (): string => {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
-};
-
-// Helper function to compare dates
-const compareDates = (
-  appointmentDate: string,
-  todayDate: string
-): "past" | "today" | "future" => {
-  if (appointmentDate < todayDate) return "past";
-  if (appointmentDate === todayDate) return "today";
-  return "future";
-};
-
-// Function to categorize appointments
-const categorizeAppointments = (
-  appointments: AppointmentData[]
-): CategorizedAppointments => {
-  const todayDate = getTodayDate();
-  console.log("appointments=>", appointments);
-
-  const categorized: CategorizedAppointments = {
-    today: [],
-    future: [],
-    past: [],
-  };
-
-  appointments.forEach((appointment) => {
-    const category = compareDates(appointment.appointmentDate, todayDate);
-    categorized[category].push(appointment);
-  });
-
-  // Sort appointments within each category
-  categorized.today.sort((a, b) =>
-    a.appointmentTime.localeCompare(b.appointmentTime)
-  );
-  categorized.future.sort((a, b) => {
-    if (a.appointmentDate === b.appointmentDate) {
-      return a.appointmentTime.localeCompare(b.appointmentTime);
-    }
-    return a.appointmentDate.localeCompare(b.appointmentDate);
-  });
-  categorized.past.sort((a, b) => {
-    if (b.appointmentDate === a.appointmentDate) {
-      return b.appointmentTime.localeCompare(a.appointmentTime);
-    }
-    return b.appointmentDate.localeCompare(a.appointmentDate);
-  });
-
-  return categorized;
-};
-
-// Function to group appointments by date
-const groupAppointmentsByDate = (
-  appointments: AppointmentData[]
-): GroupedAppointments => {
-  return appointments.reduce((grouped: GroupedAppointments, appointment) => {
-    const date = appointment.appointmentDate;
-    if (!grouped[date]) {
-      grouped[date] = [];
-    }
-    grouped[date].push(appointment);
-    // Sort appointments within the same date by time
-    grouped[date].sort((a, b) =>
-      a.appointmentTime.localeCompare(b.appointmentTime)
-    );
-    return grouped;
-  }, {});
-};
-
 interface PatientsPageProps {
   onNavigate: (page: string) => void;
 }
@@ -468,13 +360,12 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     useState<PatientData>(mockPatientData);
   const [showPatientList, setShowPatientList] = useState(true);
   const [activeDocTab, setActiveDocTab] = useState("documents");
-  const [edit, setEdit] = useState(false);
   const [showPrescription, setShowPrescription] = useState(false);
   const [prescriptionDocument, setPrescriptionDocument] = useState(null);
   const [document, setDocument] = useState<Prescription | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
   const [doctorData, setDoctorData] = useState<DoctorDetails | null>(null);
-  const [appointmentData, setAppointmentData] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
 
   //Helper function to  construct proper bunny cdn url for fetch document
@@ -585,18 +476,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   //   ? appointment.document
   //   : [];
 
-  //Categorized appointments
-  const categorizedAppointments = useMemo(() => {
-    let appointmentdata = appointmentData.appointments;
-    return categorizeAppointments(
-      appointmentdata
-        ? Array.isArray(appointmentdata)
-          ? appointmentdata
-          : []
-        : []
-    );
-  }, [appointmentData]);
-
   useEffect(() => {
     let id = doctor?._id;
     const fetchData = async () => {
@@ -613,18 +492,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     };
     fetchData();
   }, [doctor]);
-
-  const futureGrouped = useMemo(() => {
-    return groupAppointmentsByDate(categorizedAppointments.future);
-  }, [categorizedAppointments.future]);
-
-  const todayGrouped = useMemo(() => {
-    return groupAppointmentsByDate(categorizedAppointments.today);
-  }, [categorizedAppointments.today]);
-
-  const pastGrouped = useMemo(() => {
-    return groupAppointmentsByDate(categorizedAppointments.past);
-  }, [categorizedAppointments.past]);
 
   //Tunction to cancel appointment
   const handleCancelAppointment = async (appointment: any) => {
@@ -988,13 +855,32 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       >
         {/* Patient List */}
         <div className="p-2 custom-scrollbar">
+          <div className="flex flex-row justify-between gap-4 md:gap-8 w-full">
+            <div className="relative border border-gray-300 rounded-md transition-all hover:border-blue-500 hover:shadow-md flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search appointments..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="md"
+                className="border border-gray-300 bg-[hsl(201,95%,41%)] hover:bg-[hsl(201,95%,31%)] text-white
+                 hover:text-white px-6 py-2.5 transition-all hover:border-blue-500 hover:shadow-md rounded-md"
+              >
+                Search
+              </Button>
+            </div>
+          </div>
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-medium text-blue-500">
               Patient Lists ({Object.entries(patientData).length})
             </h3>
-            <Button variant="ghost" size="icon">
-              <Search className="h-4 w-4" />
-            </Button>
           </div>
           <div className="space-y-2 max-h-[60vh] lg:h-full custom-scrollbar">
             {Object.entries(patientData).map(([id, patient]) => (
