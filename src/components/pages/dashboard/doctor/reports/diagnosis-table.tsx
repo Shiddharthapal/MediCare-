@@ -110,40 +110,46 @@ export function DiagnosisTable() {
     <Card>
       <CardHeader className="px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <CardTitle className="text-lg sm:text-xl">
-              Diagnosis Reports
-            </CardTitle>
-            <CardDescription className="text-sm sm:text-base">
-              Most common diagnoses and treatment patterns
-            </CardDescription>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search diagnoses..."
-                value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-8 w-full sm:w-[250px]"
-              />
+          <div className="flex flex-row items-center justify-between ">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between ">
+              <CardTitle className="text-lg sm:text-xl">
+                Diagnosis Reports
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Most common diagnoses and treatment patterns
+              </CardDescription>
             </div>
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 bg-transparent"
-            >
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">Filter</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 bg-transparent"
+              className="gap-2 bg-[hsl(201,95%,41%)] hover:bg-[hsl(201,95%,31%)] text-white hover:text-white"
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export</span>
             </Button>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-row justify-between gap-4 md:gap-8 w-full">
+              <div className="relative border border-gray-300 rounded-md transition-all hover:border-blue-500 hover:shadow-md flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search appointments..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="md"
+                  className="border border-gray-300 bg-[hsl(201,95%,41%)] hover:bg-[hsl(201,95%,31%)] text-white hover:text-white px-6 py-2.5 transition-all hover:border-blue-500 hover:shadow-md rounded-md"
+                >
+                  Search
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </CardHeader>
