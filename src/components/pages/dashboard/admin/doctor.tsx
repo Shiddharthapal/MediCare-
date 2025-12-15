@@ -23,6 +23,7 @@ import {
   User,
   Clock,
   Eye,
+  School,
 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import PrescriptionShow from "./prescriptionShow";
@@ -534,12 +535,14 @@ export default function DoctorManagementSettings({
         className={`p-2 rounded ${hasChanged ? "bg-yellow-50 border border-yellow-200" : ""}`}
       >
         <div className="flex items-start justify-between">
-          <p>
+          <p className="flex flex-row md:flex-col">
             <strong className="flex items-center gap-2">
               {Icon && <Icon className="h-4 w-4" />}
               {label}:
-            </strong>{" "}
-            <span className={hasChanged ? "text-yellow-900 font-medium" : ""}>
+            </strong>
+            <span
+              className={`ml-1 ${hasChanged ? "text-yellow-900 font-medium" : ""}`}
+            >
               {Array.isArray(value) ? value.join(", ") : value}
             </span>
           </p>
@@ -563,12 +566,12 @@ export default function DoctorManagementSettings({
   };
 
   return (
-    <div className="container mx-auto space-y-6  min-h-screen">
-      <div className="flex items-center justify-between">
+    <div className="container w-full  space-y-6 min-h-screen px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold text-slate-900">Doctors</h1>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 bg-white py-2 rounded-lg shadow-sm">
+      <div className=" w-full grid grid-cols-2 gap-2 bg-white py-2 rounded-lg shadow-sm">
         <Button
           variant={activeTab === "register" ? "default" : "ghost"}
           className={`${activeTab === "register" ? "bg-blue-500 text-white shadow-sm" : "border-2 border-gray-300"}`}
@@ -586,31 +589,31 @@ export default function DoctorManagementSettings({
       </div>
 
       {activeTab === "register" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {registerDoctor.map((doctor) => (
             <div
               key={doctor._id}
-              className="bg-purple-50 rounded-lg border  p-6 hover:shadow-md hover:shadow-blue-100 transition-shadow"
+              className="bg-purple-50 rounded-lg border p-4 sm:p-6 hover:shadow-md hover:shadow-blue-100 transition-shadow"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-base sm:text-lg shrink-0">
                   {getDoctorInitials(doctor?.email)}
                 </div>
-                <span
-                  className={`inline-flex border border-green-400 items-center justify-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700`}
-                >
-                  <span className={`w-2 h-2 rounded-full  bg-green-500`}></span>
+                <span className="inline-flex border border-green-400 items-center justify-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
                   Active
                 </span>
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">
-                <div className="flex items-center gap-2">
-                  <Mail size={16} />
-                  {doctor.email}
+                <div className="flex items-start gap-2">
+                  <Mail size={16} className="shrink-0 mt-0.5" />
+                  <span className="break-all text-sm sm:text-base">
+                    {doctor.email}
+                  </span>
                 </div>
               </h3>
               <div className="space-y-2 mb-4 text-sm text-slate-600">
-                {doctor?.registrationNo?.toString()}
+                Reg No: {doctor?.registrationNo?.toString()}
               </div>
               <div className="flex">
                 <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-500 rounded hover:bg-red-50 transition-colors">
@@ -623,7 +626,7 @@ export default function DoctorManagementSettings({
       )}
 
       {activeTab === "details" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {latestDoctorData && latestDoctorData.length > 0 ? (
             latestDoctorData.map((doctor: DoctorDetails) => {
               const versions = getDoctorVersionsByUserId(doctor.userId);
@@ -632,31 +635,38 @@ export default function DoctorManagementSettings({
               return (
                 <div
                   key={doctor._id}
-                  className="bg-purple-50 rounded-lg border border-slate-200 px-6 py-3 hover:shadow-md hover:shadow-blue-100  transition-shadow relative"
+                  className="bg-purple-50 rounded-lg border border-slate-200 px-4
+                   sm:px-6 py-3 hover:shadow-md hover:shadow-blue-100 transition-shadow relative"
                 >
                   {hasMultipleVersions && (
-                    <div className="absolute top-2  right-2">
-                      <span className="inline-flex items-center gap-1 px-2  border border-blue-400 bg-blue-200 text-blue-700 rounded-full text-xs font-medium">
+                    <div className="absolute top-2 right-2">
+                      <span
+                        className="inline-flex items-center gap-1 px-2 border border-blue-400
+                       bg-blue-200 text-blue-700 rounded-full text-xs font-medium"
+                      >
                         <History className="h-3 w-3" />v{versions.length}
                       </span>
                     </div>
                   )}
 
                   <div className="flex items-start justify-between mb-4 mt-6">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                    <div
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br
+                     from-blue-400 to-blue-600 flex items-center justify-center text-white
+                      font-bold text-base sm:text-lg shrink-0"
+                    >
                       {getDoctorInitials(doctor.name)}
                     </div>
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border border-green-400 bg-green-100 text-green-700`}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium 
+                    border border-green-400 bg-green-100 text-green-700"
                     >
-                      <span
-                        className={`w-2 h-2 rounded-full bg-green-500`}
-                      ></span>
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
                       Active
                     </span>
                   </div>
 
-                  <h3 className="font-semibold text-slate-900 mb-0">
+                  <h3 className="font-semibold text-slate-900 mb-0 text-base sm:text-lg">
                     {doctor.name}
                   </h3>
                   <p className="text-sm text-slate-600 mb-2">
@@ -664,13 +674,13 @@ export default function DoctorManagementSettings({
                   </p>
 
                   <div className="space-y-2 mb-1 text-sm text-slate-600">
-                    <div className="flex items-center gap-2">
-                      <Mail size={16} />
+                    <div className="flex items-start gap-2">
+                      <Mail size={16} className="shrink-0 mt-0.5" />
                       <span className="truncate">{doctor.email}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Phone size={16} />
-                      {doctor.contact}
+                      <Phone size={16} className="shrink-0" />
+                      <span className="break-all">{doctor.contact}</span>
                     </div>
                   </div>
 
@@ -683,13 +693,13 @@ export default function DoctorManagementSettings({
 
                   <div className="flex gap-2">
                     <Button
-                      className="flex-1  py-0 border border-blue-200 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 hover:bg-gradient-to-tl text-white transition-colors"
+                      className="flex-1 py-2 border border-blue-200 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 hover:bg-gradient-to-tl text-white transition-colors"
                       variant="destructive"
                       onClick={() => handleViewDetails(doctor)}
                     >
                       <Info className="h-4 w-4" />
                     </Button>
-                    <button className="flex-1 text-red-600 hover:text-red-700 py-0 border border-red-200  rounded-lg bg-red-200 hover:bg-red-300 transition-colors">
+                    <button className="flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded-lg bg-red-200 hover:bg-red-300 transition-colors">
                       <Trash2 size={18} className="mx-auto" />
                     </button>
                   </div>
@@ -706,11 +716,11 @@ export default function DoctorManagementSettings({
 
       {/* Details Modal */}
       {showDetailsModal && selectedDoctor && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
-            <div className="p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 ">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-4xl mt-6 sm:mt-10">
+            <div className="p-4 sm:p-6 max-h-[90vh] custom-scrollbar ">
               {/* Header */}
-              <div className="flex items-start justify-between mb-6">
+              <div className="flex flex-row items-start justify-between gap-4 mb-6">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
                     <Stethoscope className="h-8 w-8 text-blue-600" />
@@ -738,9 +748,10 @@ export default function DoctorManagementSettings({
                   </div>
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="icon"
                   onClick={() => setShowDetailsModal(false)}
+                  className="bg-[hsl(201,96%,32%)] text-white"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -796,7 +807,7 @@ export default function DoctorManagementSettings({
                     Appointments
                   </h3>
                   {selectedDoctor.appointments.length > 0 ? (
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                    <div className="space-y-2 max-h-[400px] custom-scrollbar">
                       {selectedDoctor.appointments.map((apt) => (
                         <div
                           key={apt.doctorpatinetId}
@@ -862,7 +873,7 @@ export default function DoctorManagementSettings({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
                 {/* Contact Information */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900 mb-3">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-3">
                     Contact Information
                   </h3>
                   <p>
@@ -885,7 +896,7 @@ export default function DoctorManagementSettings({
 
                 {/* Professional Details */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-3 flex items-center gap-2">
                     <GraduationCap className="h-5 w-5" />
                     Professional Details
                   </h3>
@@ -895,8 +906,11 @@ export default function DoctorManagementSettings({
                     fieldName="degree"
                     icon={BookText}
                   />
-                  <p>
-                    <strong>Education:</strong> {selectedDoctor.education}
+                  <p className="flex flex-row pl-2 gap-2">
+                    <School className="h-4 w-4" />
+                    <div>
+                      <strong>Education:</strong> {selectedDoctor.education}
+                    </div>
                   </p>
                   <FieldWithChangeIndicator
                     label="Experience"
@@ -904,7 +918,7 @@ export default function DoctorManagementSettings({
                     fieldName="experience"
                     icon={GraduationCap}
                   />
-                  <p>
+                  <p className="pl-2">
                     <strong>Status:</strong>{" "}
                     <span
                       className={`inline-flex px-2 py-1 rounded text-xs ${selectedDoctor.status === "Available" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
@@ -916,7 +930,7 @@ export default function DoctorManagementSettings({
 
                 {/* Hospital & Practice */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-3 flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
                     Hospital & Practice
                   </h3>
@@ -942,7 +956,7 @@ export default function DoctorManagementSettings({
 
                 {/* Languages & Specializations */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-3 flex items-center gap-2">
                     <Languages className="h-5 w-5" />
                     Languages & Specializations
                   </h3>
@@ -968,7 +982,9 @@ export default function DoctorManagementSettings({
 
                 {/* About */}
                 <div className="md:col-span-2">
-                  <h3 className="font-semibold text-gray-900 mb-3">About</h3>
+                  <h3 className="font-semibold text-lg text-gray-900 mb-3">
+                    About
+                  </h3>
                   <FieldWithChangeIndicator
                     label=""
                     value={selectedDoctor.about}
@@ -979,10 +995,10 @@ export default function DoctorManagementSettings({
 
                 {/* Additional Info */}
                 <div className="md:col-span-2">
-                  <h3 className="font-semibold text-gray-900 mb-3">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-3">
                     Additional Information
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <p>
                       <strong>Member Since:</strong>{" "}
                       {formatDate(selectedDoctor.createdAt)}
@@ -1000,23 +1016,23 @@ export default function DoctorManagementSettings({
 
       {selectedAppointment && (
         <div
-          className={`fixed inset-0 ${showPrescriptionComponent ? "z-40" : "z-50"} bg-black bg-opacity-50 flex items-center justify-center z-50 p-4`}
+          className={`fixed inset-0 ${showPrescriptionComponent ? "z-40" : "z-50"} bg-black bg-opacity-50 flex items-start justify-center p-2 sm:p-4 `}
         >
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-4xl mt-6 sm:mt-10 max-h-[90vh] custom-scrollbar">
             {/* Header */}
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-4 flex flex-row items-center justify-between gap-3">
               <h2 className="text-2xl font-bold text-gray-800">
                 Appointment Details
               </h2>
               <button
                 onClick={handleCloseModal}
-                className="p-2 hover:bg-gray-100 rounded-full transition"
+                className="self-start sm:self-auto p-2 bg-[hsl(201,96%,32%)] text-white hover:text-gray-900 rounded-full transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6">
               {/* Status Badge */}
               <div className="flex items-center gap-3">
                 <span
@@ -1035,7 +1051,7 @@ export default function DoctorManagementSettings({
                   <Calendar className="w-5 h-5 text-blue-600" />
                   Appointment Information
                 </h3>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600">Date</p>
                     <p className="font-medium">
@@ -1102,7 +1118,7 @@ export default function DoctorManagementSettings({
                         <div className="space-y-3">
                           {selectedAppointment?.prescription?.prescriptionId ? (
                             <div className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-green-50 to-emerald-50">
-                              <div className="flex items-start justify-between">
+                              <div className="flex flex-col md:flex-row items-start justify-between">
                                 <div className="flex items-start gap-4 flex-1">
                                   {/* Prescription Icon */}
                                   <div className="p-3 rounded-lg bg-green-100">
@@ -1120,7 +1136,7 @@ export default function DoctorManagementSettings({
                                         Active
                                       </span>
                                     </div>
-                                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                                       <div className="flex items-center gap-1">
                                         <FileText className="h-4 w-4" />
                                         <span className="font-semibold">
@@ -1200,7 +1216,6 @@ export default function DoctorManagementSettings({
 
                                 {/* Action Buttons */}
                                 <div className=" pt-4">
-                                  <h3 className="font-bold mb-1">Actions</h3>
                                   <button
                                     onClick={() =>
                                       handleViewPrescription(
