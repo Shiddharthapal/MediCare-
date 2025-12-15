@@ -1230,7 +1230,7 @@ export default function Appointments({
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl mt-6 sm:mt-10">
             <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex flex-row sm:items-center sm:justify-between ">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Appointment Details - {selectedAppointment.reasonForVisit}
                 </h2>
@@ -1358,7 +1358,7 @@ export default function Appointments({
           <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-3xl mt-6 sm:mt-10">
             <div className="p-4 sm:p-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
               {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex flex-row items-center justify-between gap-3 mb-4">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">
                     Rescheduled Appointment Details
@@ -1759,7 +1759,7 @@ export default function Appointments({
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-2xl mt-6 sm:mt-10">
             <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex flex-row items-center justify-between gap-3">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Prescription - {selectedAppointment.consultedType}
                 </h2>
@@ -1842,7 +1842,7 @@ export default function Appointments({
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-2xl mt-6 sm:mt-10">
             <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex flex-row items-center justify-between gap-3">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Reports - {selectedAppointment.consultedType}
                 </h2>
