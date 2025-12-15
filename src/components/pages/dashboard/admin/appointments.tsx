@@ -222,13 +222,13 @@ const getStatusColor = (status: string) => {
 const getModeIcon = (mode: string) => {
   switch (mode) {
     case "video":
-      return <Video className="h-4 w-4" />;
+      return <Video className="h-4 w-4 text-gray-800" />;
     case "phone":
-      return <Phone className="h-4 w-4" />;
+      return <Phone className="h-4 w-4 text-gray-800" />;
     case "in-person":
-      return <MapPin className="h-4 w-4" />;
+      return <MapPin className="h-4 w-4 text-gray-800" />;
     default:
-      return <Calendar className="h-4 w-4" />;
+      return <Calendar className="h-4 w-4 text-gray-800" />;
   }
 };
 
@@ -694,22 +694,22 @@ export default function Appointments({
                 <Badge className={getStatusColor(status)}>{status}</Badge>
               </div>
 
-              <p className="text-sm text-gray-600 mb-1">
+              <p className="text-sm font-semibold text-gray-800 mb-1">
                 {appointment.doctorName} • {appointment.doctorSpecialist}
               </p>
 
-              <p className="text-sm text-gray-600 mb-1">
+              <p className="text-sm font-semibold text-gray-800 mb-1">
                 Patient• {appointment.patientName}
               </p>
 
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
+                  <Clock className="h-4 w-4 text-gray-800 " />
                   {appointment.appointmentTime}
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="h-4 w-4 text-gray-800" />
                   {appointment.appointmentDate}
                 </div>
                 <div className="flex items-center gap-1">
@@ -729,7 +729,7 @@ export default function Appointments({
 
             {showActions && (
               <>
-                {status === "confirmed" &&
+                {/* {status === "confirmed" &&
                   appointment.consultationType === "video" && (
                     <Button
                       className="bg-pink-500 hover:bg-pink-600 text-white"
@@ -738,7 +738,7 @@ export default function Appointments({
                       <Video className="h-4 w-4 mr-2" />
                       Join
                     </Button>
-                  )}
+                  )} */}
                 {type === "upcoming" && (
                   <>
                     <Button
@@ -805,8 +805,8 @@ export default function Appointments({
   );
 
   return (
-    <div className="container px-auto space-y-4 w-full  mx-auto">
-      <div className="flex items-center justify-between">
+    <div className="container w-full mx-auto space-y-4 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -854,48 +854,50 @@ export default function Appointments({
       </div>
 
       {/* Tabs */}
-      <div className=" grid grid-cols-5 space-x-1 bg-gray-100 p-1 rounded-lg w-full">
-        <Button
-          variant={activeTab === "upcoming" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
-          onClick={() => setActiveTab("upcoming")}
-        >
-          Upcoming ({Object.keys(futureGrouped).length})
-        </Button>
-        <Button
-          variant={activeTab === "today" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "today" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
-          onClick={() => setActiveTab("today")}
-        >
-          Today ({Object.keys(todayGrouped).length})
-        </Button>
-        <Button
-          variant={activeTab === "past" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "past" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
-          onClick={() => setActiveTab("past")}
-        >
-          Past ({Object.keys(pastGrouped).length})
-        </Button>
-        <Button
-          variant={activeTab === "reschedule" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "reschedule" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
-          onClick={() => setActiveTab("reschedule")}
-        >
-          Reschedule ({rescheduleappointment?.length})
-        </Button>
-        <Button
-          variant={activeTab === "cancelled" ? "default" : "ghost"}
-          className={`px-4 py-2 ${activeTab === "cancelled" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
-          onClick={() => setActiveTab("cancelled")}
-        >
-          Cancelled ({Object.keys(cancelledGrouped).length})
-        </Button>
+      <div className="w-full ">
+        <div className="grid min-w-[320px] grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 bg-gray-100 p-1 rounded-lg">
+          <Button
+            variant={activeTab === "upcoming" ? "default" : "ghost"}
+            className={`w-full text-sm sm:text-base px-4 py-2 ${activeTab === "upcoming" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+            onClick={() => setActiveTab("upcoming")}
+          >
+            Upcoming ({Object.keys(futureGrouped).length})
+          </Button>
+          <Button
+            variant={activeTab === "today" ? "default" : "ghost"}
+            className={`w-full text-sm sm:text-base px-4 py-2 ${activeTab === "today" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+            onClick={() => setActiveTab("today")}
+          >
+            Today ({Object.keys(todayGrouped).length})
+          </Button>
+          <Button
+            variant={activeTab === "past" ? "default" : "ghost"}
+            className={`w-full text-sm sm:text-base px-4 py-2 ${activeTab === "past" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+            onClick={() => setActiveTab("past")}
+          >
+            Past ({Object.keys(pastGrouped).length})
+          </Button>
+          <Button
+            variant={activeTab === "reschedule" ? "default" : "ghost"}
+            className={`w-full text-sm sm:text-base px-4 py-2 ${activeTab === "reschedule" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+            onClick={() => setActiveTab("reschedule")}
+          >
+            Reschedule ({rescheduleappointment?.length})
+          </Button>
+          <Button
+            variant={activeTab === "cancelled" ? "default" : "ghost"}
+            className={`w-full text-sm sm:text-base px-4 py-2 ${activeTab === "cancelled" ? "bg-blue-500 shadow-sm" : "border-2 border-gray-800"}`}
+            onClick={() => setActiveTab("cancelled")}
+          >
+            Cancelled ({Object.keys(cancelledGrouped).length})
+          </Button>
+        </div>
       </div>
 
       {/* Content */}
       {activeTab === "upcoming" && (
         <div className="space-y-6">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-600" />
             <h2 className="text-xl font-semibold text-gray-900">
               Upcoming Appointments
@@ -909,7 +911,7 @@ export default function Appointments({
             Object.entries(futureGrouped).map(
               ([date, appointments]: [string, appointmentdata[]]) => (
                 <div key={date} className="space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b">
+                  <div className="flex flex-wrap items-center gap-2 pb-2 border-b">
                     <h3 className="text-lg font-medium text-gray-800">
                       {formatDate(date)}
                     </h3>
@@ -947,23 +949,37 @@ export default function Appointments({
                       }
                     })
                   ) : (
-                    <div className="text-gray-500 text-center py-4">
-                      No appointments found for this date
-                    </div>
+                    <Card>
+                      <CardContent className="px-8 py-4 lg:p-8  text-center">
+                        <div className="bg-blue-300 rounded-lg p-2">
+                          <Calendar className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            No upcoming appointments
+                          </h3>
+                          <p className="text-gray-600 mb-4">
+                            You don't have any appointments scheduled for the
+                            next 7 days.
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
                 </div>
               )
             )
           ) : (
             <Card>
-              <CardContent className="p-8 text-center">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No upcoming appointments
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  You don't have any appointments scheduled for the next 7 days.
-                </p>
+              <CardContent className="px-8 py-4 lg:p-8  text-center">
+                <div className="bg-blue-50 rounded-lg p-2">
+                  <Calendar className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No upcoming appointments
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    You don't have any appointments scheduled for the next 7
+                    days.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -972,8 +988,8 @@ export default function Appointments({
 
       {activeTab === "today" && (
         <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-green-600" />
+          <div className="flex flex-wrap items-center gap-2">
+            <Clock className="h-5 w-5 text-green-600 " />
             <h2 className="text-xl font-semibold text-gray-900">
               Today's Appointments
             </h2>
@@ -1007,22 +1023,42 @@ export default function Appointments({
                   })
               )
             ) : (
-              <div className="text-gray-500 text-center py-4">
-                No appointments found for today
-              </div>
+              <Card>
+                <CardContent className="px-8 py-4 lg:p-8  text-center">
+                  <div className="bg-blue-300 rounded-lg p-2">
+                    <Calendar className="h-12 w-12 text-gray-700 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No today appointments
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      You don't have any appointments scheduled for today.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             )
           ) : (
-            <div className="text-gray-500 text-center py-4">
-              No appointment data available
-            </div>
+            <Card>
+              <CardContent className="px-8 py-4 lg:p-8  text-center">
+                <div className="bg-green-50 rounded-lg p-2">
+                  <Calendar className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No today appointments
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    You don't have any appointments scheduled for today.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
 
       {activeTab === "past" && (
         <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-gray-600" />
+          <div className="flex flex-wrap items-center gap-2">
+            <Calendar className="h-5 w-5 text-purple-700" />
             <h2 className="text-xl font-semibold text-gray-900">
               Appointment History
             </h2>
@@ -1036,7 +1072,7 @@ export default function Appointments({
               .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
               .map(([date, appointments]: [string, any]) => (
                 <div key={date} className="space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b">
+                  <div className="flex flex-wrap items-center gap-2 pb-2 border-b">
                     <h3 className="text-lg font-medium text-gray-800">
                       {new Date(date).toLocaleDateString("en-US", {
                         weekday: "long",
@@ -1045,7 +1081,7 @@ export default function Appointments({
                         year: "numeric",
                       })}
                     </h3>
-                    <Badge variant="outline" className="ml-2">
+                    <Badge variant="outline" className="ml-2 bg-purple-200">
                       {appointments.length} appointment
                       {appointments.length !== 1 ? "s" : ""}
                     </Badge>
@@ -1067,27 +1103,36 @@ export default function Appointments({
                 </div>
               ))
           ) : (
-            <div className="text-gray-500 text-center py-4">
-              No appointment data available
-            </div>
+            <Card>
+              <CardContent className="px-8 py-4 lg:p-8  text-center">
+                <div className="bg-purple-50 rounded-lg p-2">
+                  <Calendar className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No previous appointments
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    You don't have any previous appointments.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
 
       {activeTab === "reschedule" && (
-        <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-gray-600" />
+        <div className="space-y-6 pb-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <Calendar className="h-5 w-5 text-gray-900" />
             <h2 className="text-xl font-semibold text-gray-900">
               All Rescheduled Appointment History
             </h2>
-            <Badge variant="outline" className="bg-purple-700 text-white">
+            <Badge variant="outline" className="bg-gray-800 text-white">
               {rescheduleappointment.length} completed
             </Badge>
           </div>
 
-          {rescheduleappointment &&
-            rescheduleappointment.length > 0 &&
+          {Object.keys(rescheduleappointment).length > 0 ? (
             rescheduleappointment
               .sort((a, b) => {
                 const dateA = new Date(a.appointmentDate).getTime();
@@ -1110,18 +1155,33 @@ export default function Appointments({
                     type="reschedule"
                   />
                 );
-              })}
+              })
+          ) : (
+            <Card>
+              <CardContent className="px-8 py-4 lg:p-8  text-center">
+                <div className="bg-gray-50 rounded-lg p-2">
+                  <Calendar className="h-12 w-12 text-gray-700 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No reschedule appointments
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    You don't have any reschedule appointments.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 
       {activeTab === "cancelled" && (
         <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-gray-600" />
+          <div className="flex flex-wrap items-center gap-2">
+            <Calendar className="h-5 w-5 text-red-700" />
             <h2 className="text-xl font-semibold text-gray-900">
               All Cancelled Appointment
             </h2>
-            <Badge variant="outline" className="bg-purple-700 text-white">
+            <Badge variant="outline" className="bg-red-700 text-white">
               {Object.keys(cancelledGrouped).length} completed
             </Badge>
           </div>
@@ -1148,23 +1208,34 @@ export default function Appointments({
                 })
               )
           ) : (
-            <div className="text-gray-500 text-center py-8 border border-slate-200 rounded-lg">
-              No appointment data available
-            </div>
+            <Card>
+              <CardContent className="px-8 py-4 lg:p-8  text-center">
+                <div className="bg-red-50 rounded-lg p-2">
+                  <Calendar className="h-12 w-12 text-red-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No upcoming appointments
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    You don't have any appointments scheduled for the next 7
+                    days.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
 
       {showDetailsModal && selectedAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl mt-6 sm:mt-10">
+            <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Appointment Details - {selectedAppointment.reasonForVisit}
                 </h2>
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="icon"
                   onClick={() => setShowDetailsModal(false)}
                 >
@@ -1182,7 +1253,7 @@ export default function Appointments({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">
                     Patient Information
                   </h3>
                   <p>
@@ -1196,7 +1267,7 @@ export default function Appointments({
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">
                     Doctor Information
                   </h3>
                   <p>
@@ -1214,7 +1285,7 @@ export default function Appointments({
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">
                     Appointment Specifics
                   </h3>
                   <p>
@@ -1236,7 +1307,7 @@ export default function Appointments({
                   </p>
                 </div>
                 <div className="md:col-span-2">
-                  <h3 className="font-semibold text-gray-900 mb-2">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">
                     Medical Details
                   </h3>
                   <p>
@@ -1252,7 +1323,7 @@ export default function Appointments({
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">
                     Emergency Contact
                   </h3>
                   <p>
@@ -1264,7 +1335,7 @@ export default function Appointments({
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">
                     Other Information
                   </h3>
                   <p>
@@ -1283,11 +1354,11 @@ export default function Appointments({
       )}
 
       {showDetailsModal && selectedrescheduleappointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[85vh] overflow-y-auto">
-            <div className="p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-3xl mt-6 sm:mt-10">
+            <div className="p-4 sm:p-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
               {/* Header */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">
                     Rescheduled Appointment Details
@@ -1297,7 +1368,7 @@ export default function Appointments({
                   </p>
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="icon"
                   onClick={() => setShowDetailsModal(false)}
                 >
@@ -1685,15 +1756,15 @@ export default function Appointments({
 
       {/* Prescription Modal */}
       {showPrescriptionModal && selectedAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-2xl mt-6 sm:mt-10">
+            <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Prescription - {selectedAppointment.consultedType}
                 </h2>
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="icon"
                   onClick={() => setShowPrescriptionModal(false)}
                 >
@@ -1768,15 +1839,15 @@ export default function Appointments({
 
       {/* Reports Modal add */}
       {showReportsModal && selectedAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-2xl mt-6 sm:mt-10">
+            <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Reports - {selectedAppointment.consultedType}
                 </h2>
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="icon"
                   onClick={() => setShowReportsModal(false)}
                 >
