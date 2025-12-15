@@ -23,6 +23,7 @@ import {
   User,
   Stethoscope,
   ClipboardPlus,
+  Check,
 } from "lucide-react";
 
 interface Prescription {
@@ -343,7 +344,6 @@ export default function Appointments({
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReportsModal, setShowReportsModal] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isReschedule, setIsReschedule] = useState(false);
   const [rescheduleData, setRescheduleData] = useState<Partial<
@@ -357,7 +357,6 @@ export default function Appointments({
 
   const [selectedrescheduleappointment, setSelectedrescheduleappointment] =
     useState<RescheduleAppointment | null>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
   const [appointmentsData, setAppointmentsData] =
     useState<appointmentdata | null>(null);
@@ -456,6 +455,7 @@ export default function Appointments({
     return patientData.flatMap((patient) => patient?.appointments || []);
   }, [patientData]);
 
+  //categorize the appointment into the browser memo
   const categorizedAppointments = useMemo(() => {
     return categorizeAppointments(
       allAppointments
@@ -490,18 +490,22 @@ export default function Appointments({
   }, [admin]);
 
   // Group appointments by date
+  // Group today appointments by date
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
   }, [categorizedAppointments.today]);
 
+  // Group future appointments by date
   const futureGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.future);
   }, [categorizedAppointments.future]);
 
+  // Group past appointments by date
   const pastGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
 
+  // Group canclled appointments
   const cancelledGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.cancelled);
   }, [categorizedAppointments.cancelled]);
@@ -576,16 +580,6 @@ export default function Appointments({
     setRescheduleData(appointment);
     setIsReschedule(true);
     setIsBookingOpen(true);
-  };
-
-  const getFileIcon = (file: File) => {
-    if (file.type.startsWith("image/")) {
-      return <ImageIcon className="h-5 w-5 text-blue-500" />;
-    } else if (file.type === "application/pdf") {
-      return <FileText className="h-5 w-5 text-red-500" />;
-    } else {
-      return <File className="h-5 w-5 text-gray-500" />;
-    }
   };
 
   const getBorderColor = (status: string) => {
@@ -667,6 +661,7 @@ export default function Appointments({
     }
   };
 
+  //appointment card
   const AppointmentCard = ({
     status,
     appointment,
@@ -816,7 +811,7 @@ export default function Appointments({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
+          <CardContent className=" px-4 py-0 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-blue-600 font-medium">Upcoming</p>
@@ -830,7 +825,7 @@ export default function Appointments({
         </Card>
 
         <Card className="bg-green-50 border-green-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 py-0 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-green-600 font-medium">Today</p>
@@ -844,7 +839,7 @@ export default function Appointments({
         </Card>
 
         <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 py-0 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-purple-600 font-medium">Completed</p>
@@ -852,19 +847,7 @@ export default function Appointments({
                   {Object.keys(pastGrouped).length}
                 </p>
               </div>
-              <Badge className="h-8 w-8 text-purple-500 bg-transparent p-0">
-                <svg
-                  className="h-8 w-8"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </Badge>
+              <Check className="h-8 w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>

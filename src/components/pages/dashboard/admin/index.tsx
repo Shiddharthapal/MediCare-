@@ -871,7 +871,7 @@ export default function Dashboard() {
           </div>
         )}
         {currentPage === "appointments" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Appointments onNavigate={setCurrentPage} />
             </div>
