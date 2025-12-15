@@ -287,7 +287,6 @@ export default function DoctorManagementSettings({
     useState<Prescription | null>(null);
   const [showPrescriptionComponent, setShowPrescriptionComponent] =
     useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
@@ -1306,7 +1305,7 @@ export default function DoctorManagementSettings({
             </div>
           </div>
           {showPrescriptionComponent && selectedPrescriptions && (
-            <div className="fixed inset-0 z-50 bg-white overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+            <div className="fixed inset-0 z-50 bg-white custom-scrollbar">
               <PrescriptionShow
                 patientData={{
                   // Patient info
