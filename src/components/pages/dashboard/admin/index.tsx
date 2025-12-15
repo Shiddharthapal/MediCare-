@@ -503,14 +503,13 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-background">
       {/* Mobile menu button */}
-      <Button
-        variant="ghost"
+      <button
         size="icon"
-        className="fixed top-3  z-50 lg:hidden hover:bg-gray-300"
+        className="fixed top-5 ml-2  z-50 lg:hidden hover:text-[hsl(201,95%,31%)]"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
-        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
+        {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
 
       {/* Sidebar */}
       <div
