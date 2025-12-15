@@ -329,26 +329,66 @@ export default function DoctorManagementSettings({
     fetchDataofAdmin();
   }, [admin]);
 
-  // Single escape button handler for all modals
+  // Single escape button handler for all modals (close top-most first)
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setShowDetailsModal(false);
-        setShowPrescriptions(false);
+      if (event.key !== "Escape") return;
+
+      if (showPrescriptionComponent) {
+        setShowPrescriptionComponent(false);
+        setSelectedPrescriptions(null);
+        return;
+      }
+
+      if (showPrescriptionWA) {
+        setShowPrescriptionWA(false);
+        setSelectedPrescriptionWA(null);
+        return;
+      }
+
+      if (selectedAppointment) {
+        setSelectedAppointment(null);
+        return;
+      }
+
+      if (showAppointments) {
         setShowAppointments(false);
+        return;
+      }
+
+      if (showPrescriptions) {
+        setShowPrescriptions(false);
+        return;
+      }
+
+      if (showDetailsModal) {
+        setShowDetailsModal(false);
       }
     };
 
-    // Only add listener if any modal is open
-    if (showDetailsModal || showPrescriptions || showAppointments) {
+    const anyModalOpen =
+      showDetailsModal ||
+      showPrescriptions ||
+      showAppointments ||
+      showPrescriptionComponent ||
+      showPrescriptionWA ||
+      Boolean(selectedAppointment);
+
+    if (anyModalOpen) {
       document.addEventListener("keydown", handleEscapeKey);
     }
 
-    // Cleanup
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [showDetailsModal, showPrescriptions, showAppointments]);
+  }, [
+    showDetailsModal,
+    showPrescriptions,
+    showAppointments,
+    showPrescriptionComponent,
+    showPrescriptionWA,
+    selectedAppointment,
+  ]);
 
   // Function to get latest doctor details grouped by userId
   const getLatestDoctorsByUserId = (doctors: DoctorDetails[]) => {
