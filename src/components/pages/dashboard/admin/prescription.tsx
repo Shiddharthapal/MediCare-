@@ -179,6 +179,25 @@ export default function PrescriptionSettings({
     }
   }, [selectedPrescription]);
 
+  // handler escape button - close the topmost open modal first
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (modalOpen) {
+        event.preventDefault();
+        setSelectedPrescription(null);
+        setModalOpen(false);
+      }
+    };
+
+    if (modalOpen) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [modalOpen]);
+
   //handler function that helps to open prescription
   const handleInfoClick = (prescription: Prescription) => {
     setSelectedPrescription(prescription);
@@ -197,7 +216,7 @@ export default function PrescriptionSettings({
   }: PrescriptionCardProps) => {
     return (
       <Card className="hover:shadow-lg transition-shadow border-gray-700">
-        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
+        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-0">
           <div className="flex-1">
             <CardTitle className="text-lg">Appointment Id:</CardTitle>
             <CardDescription>{prescription.doctorpatinetId}</CardDescription>
@@ -206,7 +225,7 @@ export default function PrescriptionSettings({
             variant="ghost"
             onClick={() => onInfoClick(prescription)}
             aria-label="View prescription details"
-            className="border  bg-gradient-to-br from-blue-400 to-blue-600 hover:bg-gradient-to-tl text-white transition-colors"
+            className="border  bg-[hsl(201,96%,32%)] text-white hover:text-black hover:border-[hsl(201,96%,32%)]"
           >
             <Info className="h-4 w-4" />
             <span>About</span>
@@ -235,7 +254,7 @@ export default function PrescriptionSettings({
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Diagnosis</p>
-            <Badge variant="outline" className="mt-1 bg-pink-50">
+            <Badge variant="outline" className="mt-1 bg-pink-100">
               {prescription.primaryDiagnosis}
             </Badge>
           </div>
@@ -253,9 +272,9 @@ export default function PrescriptionSettings({
   };
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background pb-5">
       <div className="mx-auto max-w-6xl px-4 md:px-6 ">
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">Prescriptions</h1>
           <p className=" text-muted-foreground">
             View and manage medical prescriptions. Click the info icon to see

@@ -870,7 +870,7 @@ export default function Dashboard() {
           </div>
         )}
         {currentPage === "appointments" && (
-          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Appointments onNavigate={setCurrentPage} />
             </div>
@@ -878,28 +878,28 @@ export default function Dashboard() {
         )}
 
         {currentPage === "doctors" && (
-          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Doctors onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "patients" && (
-          <div className="h-screen  p-6 lg:p-6 ">
+          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Patients onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "prescription" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen p-6 lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Prescription onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "document" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Document onNavigate={setCurrentPage} />
             </div>
@@ -907,7 +907,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "settings" && (
-          <div className="h-screen  p-6 lg:p-6 ">
+          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Setting onNavigate={setCurrentPage} />
             </div>
