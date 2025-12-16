@@ -542,7 +542,6 @@ export default function DoctorManagementSettings({
 
   //handler function to view prescription
   const handleViewPrescription = (prescription: Prescription) => {
-    console.log("🧞‍♂️  prescription --->", prescription);
     setSelectedPrescriptions(prescription);
     setShowPrescriptionComponent(true);
   };
@@ -881,7 +880,10 @@ export default function DoctorManagementSettings({
                   </h3>
                   {selectedDoctor?.prescription &&
                   selectedDoctor?.prescription?.length > 0 ? (
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                    <div
+                      className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600
+                      hover:scrollbar-thumb-gray-500"
+                    >
                       {selectedDoctor.prescription.map((apt) => (
                         <div
                           key={apt.doctorpatinetId}
@@ -1055,7 +1057,7 @@ export default function DoctorManagementSettings({
 
       {selectedAppointment && (
         <div
-          className={`fixed inset-0 ${showPrescriptionComponent ? "z-40" : "z-50"} bg-black bg-opacity-50 flex items-start justify-center p-2 sm:p-4 `}
+          className={`fixed inset-0 z-50 bg-black bg-opacity-50 flex items-start justify-center p-2 sm:p-4 `}
         >
           <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-4xl mt-6 sm:mt-10 max-h-[90vh] custom-scrollbar">
             {/* Header */}
@@ -1345,7 +1347,7 @@ export default function DoctorManagementSettings({
             </div>
           </div>
           {showPrescriptionComponent && selectedPrescriptions && (
-            <div className="fixed inset-0 z-50 bg-white custom-scrollbar">
+            <div className="fixed inset-0 z-60 bg-white custom-scrollbar">
               <PrescriptionShow
                 patientData={{
                   // Patient info
