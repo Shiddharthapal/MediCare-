@@ -483,26 +483,55 @@ export default function DoctorManagementSettings({
     });
   };
 
-  //handler escape button
+  // handler escape button - close the topmost open modal first
   useEffect(() => {
+    const modalStack = [
+      {
+        isOpen: !!(selectedPrescription && prescriptionFromAppointment),
+        close: () => {
+          setSelectedPrescription(null);
+          showPrescriptionFromAppointment(false);
+        },
+      },
+      { isOpen: !!selectedAppointment, close: () => setSelectedAppointment(null) },
+      { isOpen: !!selectedDocument, close: () => setSelectedDocument(null) },
+      { isOpen: isModalOpen, close: () => setIsModalOpen(false) },
+      { isOpen: showHealthRecord, close: () => setShowHealthRecord(false) },
+      { isOpen: showDocument, close: () => setShowDocument(false) },
+      { isOpen: showPrescriptions, close: () => setShowPrescriptions(false) },
+      { isOpen: showAppointments, close: () => setShowAppointments(false) },
+      { isOpen: showDetailsModal, close: () => setShowDetailsModal(false) },
+    ];
+
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setShowDetailsModal(false);
-        setShowPrescriptions(false);
-        setShowAppointments(false);
+      if (event.key !== "Escape") return;
+      const topModal = modalStack.find((modal) => modal.isOpen);
+      if (topModal) {
+        event.preventDefault();
+        topModal.close();
       }
     };
 
-    // Only add listener if any modal is open
-    if (showDetailsModal || showPrescriptions || showAppointments) {
+    const anyModalOpen = modalStack.some((modal) => modal.isOpen);
+    if (anyModalOpen) {
       document.addEventListener("keydown", handleEscapeKey);
     }
 
-    // Cleanup
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [showDetailsModal, showPrescriptions, showAppointments]);
+  }, [
+    showDetailsModal,
+    showPrescriptions,
+    showAppointments,
+    showDocument,
+    showHealthRecord,
+    isModalOpen,
+    selectedDocument,
+    selectedAppointment,
+    selectedPrescription,
+    prescriptionFromAppointment,
+  ]);
 
   //Get function that return name initial of patient
   const getPatientInitials = (patientName: string) => {
