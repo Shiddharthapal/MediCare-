@@ -109,6 +109,24 @@ export default function DocumentSettings({
     fetchDocuments();
   }, [id]);
 
+  // Close document modal with Escape
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && selectedDocument) {
+        event.preventDefault();
+        setSelectedDocument(null);
+      }
+    };
+
+    if (selectedDocument) {
+      document.addEventListener("keydown", handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [selectedDocument]);
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-background flex items-center justify-center">
@@ -220,7 +238,7 @@ export default function DocumentSettings({
           </div>
           <button
             onClick={onInfo}
-            className="ml-4 p-2 hover:bg-primary/80 rounded-full transition-colors"
+            className="ml-4 p-2 bg-primary/40 hover:bg-primary/80 rounded-full transition-colors"
             aria-label="View document details"
           >
             <InfoIcon className="w-5 h-5 text-white" />
@@ -347,7 +365,7 @@ export default function DocumentSettings({
 
         {/* Modal */}
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-card border border-border rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] custom-scrollbar">
             {/* Modal Header */}
             <div className="sticky top-0 bg-card border-b border-border px-6 py-2 flex items-start justify-between">
               <div className="flex items-center gap-3 flex-1">
@@ -365,7 +383,7 @@ export default function DocumentSettings({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-secondary rounded-lg transition-colors ml-4 flex-shrink-0"
+                className="p-2 bg-[hsl(201,96%,32%)] text-white rounded-full transition-colors ml-4 flex-shrink-0"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -545,9 +563,9 @@ export default function DocumentSettings({
 
   return (
     <main className="min-h-screen bg-background px-6 pb-10">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl ">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Medical Documents
           </h1>
@@ -555,7 +573,7 @@ export default function DocumentSettings({
             View and manage patient medical documents and records
           </p>
           {documents.length > 0 && (
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-gray-800 mt-1">
               {documents.length} document{documents.length !== 1 ? "s" : ""}{" "}
               found
             </p>
