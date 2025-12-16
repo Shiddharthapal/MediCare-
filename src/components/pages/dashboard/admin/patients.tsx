@@ -603,7 +603,7 @@ export default function DoctorManagementSettings({
             className="ml-4 p-2 hover:bg-primary/80 rounded-full transition-colors"
             aria-label="View document details"
           >
-            <InfoIcon className="w-5 h-5 text-white" />
+            <InfoIcon className="w-5 h-5  text-white" />
           </button>
         </div>
 
@@ -727,7 +727,7 @@ export default function DoctorManagementSettings({
 
         {/* Modal */}
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-card border border-border rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] custom-scrollbar">
             {/* Modal Header */}
             <div className="sticky top-0 bg-card border-b border-border px-6 py-2 flex items-start justify-between">
               <div className="flex items-center gap-3 flex-1">
@@ -747,7 +747,7 @@ export default function DoctorManagementSettings({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-secondary rounded-lg transition-colors ml-4 flex-shrink-0"
+                className="p-2 bg-[hsl(201,96%,32%)] rounded-full text-white hover:text-gray-900 ml-4 flex-shrink-0"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -952,7 +952,7 @@ export default function DoctorManagementSettings({
   }) => {
     console.log("🧞‍♂️  prescription --->", appointment);
     return (
-      <div className="fixed inset-0 z-50 bg-white overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+      <div className="fixed inset-0 z-50 bg-white custom-scrollbar">
         <PrescriptionShow
           patientData={{
             // Patient info
@@ -1046,9 +1046,89 @@ export default function DoctorManagementSettings({
     );
   };
 
+  const handleDelete = (patient) => {
+    console.log("Delete patient:", patient.name);
+  };
+
+  const PatientCard = ({
+    patient,
+    hasMultipleVersions = false,
+    versions = [],
+    onViewDetails,
+    onDelete,
+  }) => {
+    const getPatientInitials = (name) => {
+      return name
+        .split(" ")
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    };
+
+    return (
+      <div className="bg-purple-50 rounded-lg border border-slate-200 px-6 py-3 hover:shadow-md hover:shadow-blue-100 transition-shadow relative">
+        {hasMultipleVersions && (
+          <div className="absolute top-2 right-2">
+            <span className="inline-flex items-center gap-1 px-2 border border-blue-400 bg-blue-200 text-blue-700 rounded-full text-xs font-medium">
+              <History className="h-3 w-3" />
+              {versions.length}
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-start justify-between mb-4 mt-6">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+            {getPatientInitials(patient.name)}
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border border-green-400 bg-green-100 text-green-700">
+            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+            Active
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+          <h3 className="font-semibold text-slate-900 mb-0">
+            {patient.name} •
+          </h3>
+          <p className="text-sm text-slate-600 mb-2">{patient?.age} years</p>
+        </div>
+
+        <div className="space-y-1 mb-1 text-sm text-slate-600">
+          <div className="flex items-center gap-2">
+            <Mail size={16} />
+            <span className="truncate">{patient.email}</span>
+          </div>
+        </div>
+
+        <p className="text-sm text-slate-600 mb-4">
+          Appointments:{" "}
+          <span className="font-semibold text-slate-900">
+            {patient.appointments?.length || 0}
+          </span>
+        </p>
+
+        <div className="flex flex-row lg:flex-wrap gap-2">
+          <button
+            className="w-full sm:flex-1 py-2 border border-blue-200 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 hover:bg-gradient-to-tl text-white transition-colors flex items-center justify-center gap-2"
+            onClick={() => onViewDetails?.(patient)}
+          >
+            <Info className="h-4 w-4" />
+          </button>
+          <button
+            className="w-full sm:flex-1 text-red-600 hover:text-red-700 py-2 border border-red-200 rounded-lg bg-red-200 hover:bg-red-300 transition-colors flex items-center justify-center"
+            onClick={() => onDelete?.(patient)}
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="container mx-auto space-y-6  min-h-screen">
-      <div className="flex items-center justify-between">
+    <div className="container  space-y-6 min-h-screen px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <h1 className="text-3xl font-bold text-slate-900">Patients</h1>
       </div>
 
@@ -1070,7 +1150,7 @@ export default function DoctorManagementSettings({
       </div>
 
       {activeTab === "register" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-2 gap-6">
           {registerPatient.map((patient) => (
             <div
               key={patient._id}
@@ -1104,76 +1184,20 @@ export default function DoctorManagementSettings({
       )}
 
       {activeTab === "details" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-2 gap-6">
           {latestPatientData && latestPatientData.length > 0 ? (
             latestPatientData.map((patient: UserDetails) => {
               const versions = getPatientVersionsByUserId(patient.userId);
               const hasMultipleVersions = versions.length > 1;
 
               return (
-                <div
-                  key={patient._id}
-                  className="bg-purple-50 rounded-lg border border-slate-200 px-6 py-3 hover:shadow-md hover:shadow-blue-100  transition-shadow relative"
-                >
-                  {hasMultipleVersions && (
-                    <div className="absolute top-2  right-2">
-                      <span className="inline-flex items-center gap-1 px-2  border border-blue-400 bg-blue-200 text-blue-700 rounded-full text-xs font-medium">
-                        <History className="h-3 w-3" />
-                        {versions.length}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex items-start justify-between mb-4 mt-6">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                      {getPatientInitials(patient.name)}
-                    </div>
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border border-green-400 bg-green-100 text-green-700`}
-                    >
-                      <span
-                        className={`w-2 h-2 rounded-full bg-green-500`}
-                      ></span>
-                      Active
-                    </span>
-                  </div>
-
-                  <div className="flex flex-row gap-0">
-                    <h3 className="font-semibold text-slate-900 mb-0">
-                      {patient.name} •
-                    </h3>
-                    <p className="text-sm text-slate-600 mb-2">
-                      {" "}
-                      {patient?.age} years
-                    </p>
-                  </div>
-                  <div className="space-y-1 mb-1 text-sm text-slate-600">
-                    <div className="flex items-center gap-2">
-                      <Mail size={16} />
-                      <span className="truncate">{patient.email}</span>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-slate-600 mb-4">
-                    Appointments:{" "}
-                    <span className="font-semibold text-slate-900">
-                      {patient.appointments?.length || 0}
-                    </span>
-                  </p>
-
-                  <div className="flex gap-2">
-                    <Button
-                      className="flex-1  py-0 border border-blue-200 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 hover:bg-gradient-to-tl text-white transition-colors"
-                      variant="destructive"
-                      onClick={() => handleViewDetails(patient)}
-                    >
-                      <Info className="h-4 w-4" />
-                    </Button>
-                    <button className="flex-1 text-red-600 hover:text-red-700 py-0 border border-red-200  rounded-lg bg-red-200 hover:bg-red-300 transition-colors">
-                      <Trash2 size={18} className="mx-auto" />
-                    </button>
-                  </div>
-                </div>
+                <PatientCard
+                  patient={patient}
+                  hasMultipleVersions={hasMultipleVersions}
+                  versions={versions || 1}
+                  onViewDetails={handleViewDetails}
+                  onDelete={handleDelete}
+                />
               );
             })
           ) : (
@@ -1187,10 +1211,7 @@ export default function DoctorManagementSettings({
       {/* Details Modal */}
       {showDetailsModal && selectedPatient && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div
-            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin
-           scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500"
-          >
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] custom-scrollbar">
             <div className="p-6">
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
@@ -1208,7 +1229,7 @@ export default function DoctorManagementSettings({
                   </div>
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="icon"
                   onClick={() => setShowDetailsModal(false)}
                 >
@@ -1233,7 +1254,7 @@ export default function DoctorManagementSettings({
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-1 mb-6">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 mb-6">
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -1241,7 +1262,7 @@ export default function DoctorManagementSettings({
                     setShowPrescriptions(false);
                     setShowDocument(false);
                   }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 w-full sm:w-auto justify-center"
                 >
                   <Calendar className="h-4 w-4" />
                   View Appointments ({selectedPatient.appointments?.length || 0}
@@ -1255,7 +1276,7 @@ export default function DoctorManagementSettings({
                     setShowDocument(false);
                     setShowHealthRecord(false);
                   }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 w-full sm:w-auto justify-center"
                 >
                   <FileText className="h-4 w-4" />
                   View Prescriptions (
@@ -1272,7 +1293,7 @@ export default function DoctorManagementSettings({
                     setShowPrescriptions(false);
                     setShowHealthRecord(false);
                   }}
-                  className="flex items-center gap-2 "
+                  className="flex items-center gap-2 w-full sm:w-auto justify-center"
                 >
                   <File className="h-4 w-4" />
                   View Document ({selectedPatient.upload.length})
@@ -1285,7 +1306,7 @@ export default function DoctorManagementSettings({
                     setShowAppointments(false);
                     setShowPrescriptions(false);
                   }}
-                  className="flex items-center gap-2 "
+                  className="flex items-center gap-2 w-full sm:w-auto justify-center"
                 >
                   <HeartPlus className="h-4 w-4" />
                   Health Record ({selectedPatient.healthRecord.length})
@@ -1300,7 +1321,7 @@ export default function DoctorManagementSettings({
                     Appointments
                   </h3>
                   {selectedPatient.appointments.length > 0 ? (
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                    <div className="space-y-2 max-h-[400px] custom-scrollbar">
                       {selectedPatient.appointments.map((apt) => (
                         <div
                           key={apt.doctorpatinetId}
@@ -1333,7 +1354,7 @@ export default function DoctorManagementSettings({
                     <File className="h-5 w-5" />
                     Prescription
                   </h3>
-                  <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                  <div className="space-y-2 max-h-[400px] custom-scrollbar">
                     {selectedPatient.appointments.map((apt) =>
                       apt.prescription?.reasonForVisit ? (
                         <div
@@ -1367,8 +1388,8 @@ export default function DoctorManagementSettings({
               )}
 
               {/*Document section */}
-              {showDocument && selectedPatient?.upload?.length > 0 ? (
-                <div className="space-y-2 mb-4 px-4 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+              {showDocument && selectedPatient?.upload?.length > 0 && (
+                <div className="space-y-2 mb-4 px-4 max-h-[400px] custom-scrollbar">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <File className="h-5 w-5" />
                     Document ({selectedPatient.upload.length})
@@ -1390,19 +1411,17 @@ export default function DoctorManagementSettings({
                     />
                   )}
                 </div>
-              ) : (
-                <div>No document available</div>
               )}
 
               {/*Heath Record section */}
               {showHealthRecord &&
                 selectedPatient?.healthRecord?.length > 0 && (
-                  <div className="space-y-2 mb-4 px-4 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                  <div className="space-y-2 mb-4 px-4 max-h-[400px] custom-scrollbar">
                     <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                       <File className="h-5 w-5" />
                       Document ({selectedPatient?.healthRecord?.length})
                     </h3>
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+                    <div className="space-y-2 max-h-[400px] custom-scrollbar">
                       {groupedRecords ? (
                         Object?.entries(groupedRecords || "")?.map(
                           ([date, dateRecords]) => (
@@ -1494,10 +1513,10 @@ export default function DoctorManagementSettings({
                 )}
 
               {/* Main Content Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
+              <div className="grid grid-cols-1 pt-2 md:grid-cols-2 gap-6 text-sm text-gray-700">
                 {/* Contact Information */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900 mb-3">
+                <div className="space-y-2 lg:space-y-3">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-0">
                     Information
                   </h3>
                   <p>
@@ -1552,7 +1571,7 @@ export default function DoctorManagementSettings({
                 </div>
 
                 {/* Professional Details */}
-                <div className="space-y-3">
+                <div className="space-y-2 lg:space-y-3">
                   <p>
                     <strong>Status:</strong>{" "}
                     <span
@@ -1593,7 +1612,7 @@ export default function DoctorManagementSettings({
 
                 {/* Additional Info */}
                 <div className="md:col-span-2">
-                  <h3 className="font-semibold text-gray-900 mb-3">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-3">
                     Additional Information
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
@@ -1615,10 +1634,7 @@ export default function DoctorManagementSettings({
       )}
       {selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div
-            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin
-         scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500"
-          >
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] custom-scrollbar">
             {/* Header */}
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-800">
@@ -1626,13 +1642,13 @@ export default function DoctorManagementSettings({
               </h2>
               <button
                 onClick={onCloseHandleAppointment}
-                className="p-2 hover:bg-gray-100 rounded-full transition"
+                className="p-2 bg-[hsl(201,96%,32%)] text-white hover:text-gray-400 rounded-full transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className=" px-6 py-2 lg:p-6 space-y-3">
               {/* Status Badge */}
               <div className="flex items-center gap-3">
                 <span
@@ -1852,7 +1868,7 @@ export default function DoctorManagementSettings({
               )}
 
               {/* Documents */}
-              {selectedAppointment.document &&
+              {selectedAppointment?.document &&
                 selectedAppointment.document.length > 0 && (
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h3 className="font-semibold text-gray-800 mb-3">
@@ -1910,7 +1926,7 @@ export default function DoctorManagementSettings({
             </div>
           </div>
           {selectedPrescription && prescriptionFromAppointment && (
-            <div className="fixed inset-0 z-50 bg-white overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+            <div className="fixed inset-0 z-50 bg-white custom-scrollbar">
               <PrescriptionShow
                 patientData={{
                   // Patient info

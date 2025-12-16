@@ -580,7 +580,7 @@ export default function PrescriptionShow({
     : `RX-${Date.now()}`;
 
   return (
-    <div className="bg-white pt-16 shadow-lg rounded-lg  print:shadow-none print:rounded-none">
+    <div className="bg-white pt-16 shadow-lg rounded-lg custom-scrollbar print:shadow-none print:rounded-none">
       {/* Print Button */}
       <div className="p-4 w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-gray-50 border-b print:hidden">
         <Button

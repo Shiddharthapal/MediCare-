@@ -275,7 +275,7 @@ export default function PrescriptionSettings({
       </div>
 
       {modalOpen && selectedPrescription && (
-        <div className="fixed inset-0 z-50 bg-white overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+        <div className="fixed inset-0 z-50 bg-white custom-scrollbar">
           <PrescriptionShow
             patientData={{
               // Patient info
