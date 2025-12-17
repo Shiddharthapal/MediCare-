@@ -607,11 +607,11 @@ export default function Dashboard() {
       )}
 
       <div
-        className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
+        className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen w-full flex-1`}
       >
         {currentPage === "dashboard" && (
           <div className=" container flex-1 flex items-center mx-auto pt-1 lg:pt-5 flex-col ">
-            <main className="flex-1 custom-scrollbar px-6 pb-6 pt-2 w-full">
+            <main className="flex-1 custom-scrollbar lg:p-6 pt-3 lg:pt-6 w-full">
               <div className="max-w-6xl mx-auto space-y-6">
                 {/* Header */}
                 <div className="space-y-0">
@@ -870,7 +870,7 @@ export default function Dashboard() {
           </div>
         )}
         {currentPage === "appointments" && (
-          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
+          <div className="h-screen lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Appointments onNavigate={setCurrentPage} />
             </div>
@@ -878,28 +878,28 @@ export default function Dashboard() {
         )}
 
         {currentPage === "doctors" && (
-          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
+          <div className="h-screen   lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Doctors onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "patients" && (
-          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
+          <div className="h-screen  lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Patients onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "prescription" && (
-          <div className="h-screen p-6 lg:p-6 pt-3 lg:pt-6">
+          <div className="h-screen lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Prescription onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "document" && (
-          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
+          <div className="h-screen   lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Document onNavigate={setCurrentPage} />
             </div>
@@ -907,8 +907,8 @@ export default function Dashboard() {
         )}
 
         {currentPage === "settings" && (
-          <div className="h-screen  p-6 lg:p-6 pt-3 lg:pt-6">
-            <div className="max-w-6xl mx-auto">
+          <div className="h-screen w-full flex-1 p-0 lg:p-6 pt-3 lg:pt-6">
+            <div className=" mx-auto">
               <Setting onNavigate={setCurrentPage} />
             </div>
           </div>
