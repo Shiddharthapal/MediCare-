@@ -780,13 +780,13 @@ export default function Appointments({
                           onClick={() => setShowRoomDialog(true)}
                         >
                           <Video className="h-3 w-3 mr-1" />
-                          Start
+                          Join
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
-         hover:bg-purple-50 text-purple-700 bg-transparent"
+                           hover:bg-purple-50 text-purple-700 bg-transparent"
                           onClick={() => setShowMessageModal(true)}
                         >
                           <MessageCircle className="h-4 w-4" />
@@ -802,13 +802,13 @@ export default function Appointments({
                           onClick={() => setShowAudioRoomDialog(true)}
                         >
                           <Phone className="h-3 w-3 mr-1" />
-                          Start
+                          Join
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
-         hover:bg-purple-50 text-purple-700 bg-transparent"
+                         hover:bg-purple-50 text-purple-700 bg-transparent"
                           onClick={() => setShowMessageModal(true)}
                         >
                           <MessageCircle className="h-4 w-4" />
@@ -835,6 +835,25 @@ export default function Appointments({
                   )}
                 </>
               )}
+              <>
+                <Button
+                  size="sm"
+                  className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
+                  onClick={() => setShowAudioRoomDialog(true)}
+                >
+                  <Phone className="h-3 w-3 mr-1" />
+                  Join
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
+                         hover:bg-purple-50 text-purple-700 bg-transparent"
+                  onClick={() => setShowMessageModal(true)}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+              </>
 
               {/* Prescription and Reports options (always visible) */}
               <Button
@@ -870,7 +889,7 @@ export default function Appointments({
           <DialogHeader>
             <DialogTitle>Create Room</DialogTitle>
             <DialogDescription>
-              Enter a room number to start the consultation
+              Enter the room number provided by your doctor to join the call
             </DialogDescription>
           </DialogHeader>
           <RoomCreationForm
@@ -884,11 +903,12 @@ export default function Appointments({
           <DialogHeader>
             <DialogTitle>Create Audio Room</DialogTitle>
             <DialogDescription>
-              Enter a room number to start the consultation
+              Enter the room number provided by your doctor to join the call
             </DialogDescription>
           </DialogHeader>
           <RoomCreationForm
-            onSuccess={() => setShowRoomDialog(false)}
+            mode="audio"
+            onSuccess={() => setShowAudioRoomDialog(false)}
             emailId={email || ""}
           />
         </DialogContent>
