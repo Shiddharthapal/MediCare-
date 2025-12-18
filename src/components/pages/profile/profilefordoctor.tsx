@@ -20,6 +20,7 @@ import {
   Mail,
   Phone,
   Target,
+  Edit2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -174,6 +175,30 @@ export default function DoctorProfilePage() {
       setHasProfile(Boolean(responseData.doctordetails));
       setDoctor(responseData.doctordetails);
       setEditedDoctor(responseData.doctordetails);
+
+      // Normalize availableSlots (Map on backend) into our form structure
+      const availableSlots = responseData?.doctordetails?.availableSlots;
+      if (availableSlots) {
+        const normalized: PracticeData["appointmentSlot"] = {};
+        const dayOrder = [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ];
+        dayOrder.forEach((day) => {
+          const slot = availableSlots[day];
+          normalized[day] = {
+            enabled: slot?.enabled ?? false,
+            startTime: slot?.startTime || "09:00",
+            endTime: slot?.endTime || "17:00",
+          };
+        });
+        setFormData({ appointmentSlot: normalized });
+      }
     };
     fetchDetails();
   }, [user]);
@@ -186,6 +211,20 @@ export default function DoctorProfilePage() {
         [day]: {
           ...prev.appointmentSlot[day],
           [field]: value,
+        },
+      },
+    }));
+  };
+
+  //handler function to toggle day
+  const handleToggleDay = (day, checked) => {
+    setFormData((prev) => ({
+      ...prev,
+      appointmentSlot: {
+        ...prev.appointmentSlot,
+        [day]: {
+          ...prev.appointmentSlot[day],
+          enabled: checked,
         },
       },
     }));
@@ -687,54 +726,79 @@ export default function DoctorProfilePage() {
                   )}
                 </div>
 
-                <div>
-                  <Label className="text-lg font-semibold flex items-center text-orange-900 mb-1">
-                    <Clock className="h-5 w-5 mr-2 text-orange-600" />
-                    Available Time Slots
-                  </Label>
-                  {isEditing ? (
-                    <div>
-                      <Card className=" border border-gray-400">
-                        <CardHeader>
-                          <CardDescription>
-                            Set your visiting hours
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {[
-                            "Monday",
-                            "Tuesday",
-                            "Wednesday",
-                            "Thursday",
-                            "Friday",
-                            "Saturday",
-                            "Sunday",
-                          ].map((day) => (
-                            <div
-                              key={day}
-                              className="flex items-center justify-between"
-                            >
-                              <div className="flex items-center space-x-4">
-                                <Switch
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <Clock className="h-6 w-6 mr-3 text-orange-600" />
+                    <h2 className="text-2xl font-bold text-orange-900">
+                      Available Time Slots
+                    </h2>
+                  </div>
+                  <button
+                    onClick={() => setIsEditing(!isEditing)}
+                    className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                  >
+                    {isEditing ? (
+                      <>
+                        <Save className="h-4 w-4" />
+                        Save
+                      </>
+                    ) : (
+                      <>
+                        <Edit2 className="h-4 w-4" />
+                        Edit
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {isEditing ? (
+                  <div className="border border-gray-400 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                      <p className="text-sm text-gray-600">
+                        Set your visiting hours
+                      </p>
+                    </div>
+                    <div className="p-6 space-y-4">
+                      {[
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday",
+                      ].map((day) => (
+                        <div
+                          key={day}
+                          className="border-b border-gray-100 pb-4 last:border-0"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-4">
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
                                   checked={
                                     formData.appointmentSlot[day].enabled
                                   }
-                                  onCheckedChange={(checked) =>
-                                    handleWorkingHourChange(
-                                      day,
-                                      "enabled",
-                                      checked
-                                    )
+                                  onChange={(e) =>
+                                    handleToggleDay(day, e.target.checked)
                                   }
+                                  className="sr-only peer"
                                 />
-                                <Label className="w-20">{day}</Label>
-                              </div>
+                                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                              </label>
+                              <span className="font-semibold text-gray-700 text-lg">
+                                {day}
+                              </span>
+                            </div>
+                          </div>
+
+                          {formData.appointmentSlot[day].enabled && (
+                            <div className="ml-16 space-y-2">
                               <div className="flex items-center space-x-2">
-                                <Input
+                                <input
                                   type="time"
-                                  value={
-                                    formData.appointmentSlot[day].startTime
-                                  }
+                                  value={formData.appointmentSlot[day].startTime}
                                   onChange={(e) =>
                                     handleWorkingHourChange(
                                       day,
@@ -742,10 +806,10 @@ export default function DoctorProfilePage() {
                                       e.target.value
                                     )
                                   }
-                                  className="w-32"
+                                  className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 />
-                                <span>to</span>
-                                <Input
+                                <span className="text-gray-500">to</span>
+                                <input
                                   type="time"
                                   value={formData.appointmentSlot[day].endTime}
                                   onChange={(e) =>
@@ -755,34 +819,37 @@ export default function DoctorProfilePage() {
                                       e.target.value
                                     )
                                   }
-                                  className="w-32"
+                                  className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 />
                               </div>
                             </div>
-                          ))}
-                        </CardContent>
-                      </Card>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-                      {doctor?.availableSlots &&
-                        Object.entries(doctor?.availableSlots).map(
-                          ([day, hours]) => (
-                            <div key={day} className="flex items-center py-1">
-                              <span className="capitalize font-medium text-gray-700 w-20">
-                                {day}:
-                              </span>
-                              <span
-                                className={`${hours?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
-                              >
-                                {formatWorkingHours(hours)}
-                              </span>
-                            </div>
-                          )
-                        )}
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(
+                      isEditing ? formData.appointmentSlot : formData.appointmentSlot
+                    ).map(([day, dayData]) => (
+                      <div
+                        key={day}
+                        className="flex items-center py-3 px-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <span className="capitalize font-semibold text-gray-700 w-24">
+                          {day}:
+                        </span>
+                        <span
+                          className={`${dayData?.enabled ? "text-green-600" : "text-red-500"} font-medium text-sm`}
+                        >
+                          {formatWorkingHours(dayData)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div>
                   <Label className="text-lg font-semibold flex items-center text-violet-900 mb-1 ">
                     <Languages className="h-5 w-5 mr-2 text-violet-600" />
