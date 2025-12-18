@@ -89,10 +89,14 @@ interface PracticeSettingData {
   sendReminders?: boolean;
 }
 
-interface AppointmentSlot {
-  enabled: boolean;
+interface TimeSlot {
   startTime: string;
   endTime: string;
+}
+
+interface AppointmentSlot {
+  enabled: boolean;
+  slots: TimeSlot[]; // Array of time slots
 }
 
 interface AppointmentData {
