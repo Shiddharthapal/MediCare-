@@ -9,6 +9,24 @@ interface AppointmentSlot {
   startTime: string;
   endTime: string;
 }
+
+const DAY_ORDER = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+const DEFAULT_SLOT: AppointmentSlot = {
+  enabled: false,
+  startTime: "09:00",
+  endTime: "17:00",
+};
+
+const TIME_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
 export const POST: APIRoute = async ({ request }) => {
   const headers = {
     "Content-Type": "application/json",
@@ -139,16 +157,27 @@ export const POST: APIRoute = async ({ request }) => {
           ? Object.fromEntries(formData.appointmentSlot)
           : formData.appointmentSlot;
 
-      // Validate and add each day's slot
-      for (const [dayName, dayData] of Object.entries(slotsData)) {
-        const slot = dayData as AppointmentSlot;
+      // Normalize and validate each day's slot against schema expectations
+      for (const dayName of DAY_ORDER) {
+        const slot = (slotsData as any)?.[dayName] as AppointmentSlot | undefined;
+        const enabled = Boolean(slot?.enabled);
+        const startTime = slot?.startTime || DEFAULT_SLOT.startTime;
+        const endTime = slot?.endTime || DEFAULT_SLOT.endTime;
 
-        // Validate time format
+        if (!TIME_REGEX.test(startTime) || !TIME_REGEX.test(endTime)) {
+          return new Response(
+            JSON.stringify({
+              message: "Invalid time format for appointment slots",
+              details: { day: dayName, startTime, endTime },
+            }),
+            { status: 400, headers }
+          );
+        }
 
         availableSlotsMap.set(dayName, {
-          enabled: slot.enabled,
-          startTime: slot.startTime,
-          endTime: slot.endTime,
+          enabled,
+          startTime,
+          endTime,
         });
       }
     }

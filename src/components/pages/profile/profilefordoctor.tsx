@@ -222,8 +222,10 @@ export default function DoctorProfilePage() {
           const slot = availableSlots[day];
           normalized[day] = {
             enabled: slot?.enabled ?? false,
-            startTime: slot?.startTime || "09:00",
-            endTime: slot?.endTime || "17:00",
+            slots:
+              slot?.enabled && slot?.startTime && slot?.endTime
+                ? [{ startTime: slot.startTime, endTime: slot.endTime }]
+                : [],
           };
         });
         setFormData({ appointmentSlot: normalized });
@@ -356,24 +358,15 @@ export default function DoctorProfilePage() {
     }
   };
 
-  const formatWorkingHours = (hours: {
-    enabled: boolean;
-    slots: TimeSlot[];
-  }) => {
-    if (!hours?.enabled) {
+  const formatWorkingHours = (dayData) => {
+    // Check if day is enabled and has slots
+    if (!dayData?.enabled || !dayData?.slots || dayData.slots.length === 0) {
       return "Closed";
     }
-    if (hours?.slots?.length === 1) {
-      const startTime = formatTo12Hour(hours.slots[0].startTime);
-      const endTime = formatTo12Hour(hours.slots[0].endTime);
-      return `${startTime} - ${endTime}`;
-    }
 
-    return hours.slots
-      ?.map(
-        (slot) =>
-          `${formatTo12Hour(slot.startTime)} - ${formatTo12Hour(slot.endTime)}`
-      )
+    // Map through slots array and format each time range
+    return dayData.slots
+      .map((slot) => `${slot.startTime} - ${slot.endTime}`)
       .join(", ");
   };
 
@@ -384,12 +377,33 @@ export default function DoctorProfilePage() {
   const handleSave = async () => {
     try {
       dispatch(updateProfileStart());
+
+      // Normalize slots array (UI) to single start/end per day expected by backend
+      const normalizedAppointmentSlot = Object.entries(
+        formData.appointmentSlot
+      ).reduce((acc, [day, data]) => {
+        const firstSlot = data.slots?.[0];
+        acc[day] = {
+          enabled: !!data.enabled,
+          startTime: firstSlot?.startTime || "09:00",
+          endTime: firstSlot?.endTime || "17:00",
+        };
+        return acc;
+      }, {} as any);
+
       const response = await fetch("/api/doctorProfileCreate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ editedDoctor, id, formData }),
+        body: JSON.stringify({
+          editedDoctor,
+          id,
+          formData: {
+            ...formData,
+            appointmentSlot: normalizedAppointmentSlot,
+          },
+        }),
       });
 
       const responseData = await response.json();
