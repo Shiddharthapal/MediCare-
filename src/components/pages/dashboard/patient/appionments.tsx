@@ -812,6 +812,7 @@ export default function Appointments({
                           onClick={() => setShowMessageModal(true)}
                         >
                           <MessageCircle className="h-4 w-4" />
+                          Message
                         </Button>
                       </>
                     )}
@@ -835,7 +836,7 @@ export default function Appointments({
                   )}
                 </>
               )}
-                      
+
               {/* Prescription and Reports options (always visible) */}
               <Button
                 variant="outline"

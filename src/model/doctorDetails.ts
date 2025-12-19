@@ -524,13 +524,34 @@ const doctorDetailsSchema = new mongoose.Schema({
     of: AppointmentSlotSchema,
     default: () =>
       new Map([
-        ["Monday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
-        ["Tuesday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
-        ["Wednesday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
-        ["Thursday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
-        ["Friday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
-        ["Saturday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
-        ["Sunday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
+        [
+          "Monday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Tuesday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Wednesday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Thursday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Friday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Saturday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Sunday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
       ]),
   },
   appointments: {
@@ -550,7 +571,10 @@ const doctorDetailsSchema = new mongoose.Schema({
     type: [PrescriptionSchema],
     default: [],
   },
-
+  upload: {
+    type: [FileUploadSchema],
+    default: [],
+  },
   practiceSettingData: {
     type: practiceSettingData,
   },

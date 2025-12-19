@@ -1135,7 +1135,10 @@ const doctorDetailsSchema = new mongoose.Schema({
   prescription: {
     type: [PrescriptionSchema],
   },
-
+  upload: {
+    type: [FileUploadSchema],
+    default: [],
+  },
   practiceSettingData: {
     type: practiceSettingData,
     default: () => ({}),

@@ -156,6 +156,7 @@ export interface DoctorDetails {
   appointments: AppointmentData[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
+  upload: FileUpload[];
   prescription?: Prescription[];
   createdAt: Date;
 }
