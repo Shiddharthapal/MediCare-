@@ -220,12 +220,15 @@ export default function DoctorProfilePage() {
         ];
         dayOrder.forEach((day) => {
           const slot = availableSlots[day];
+          const slotArray =
+            Array.isArray(slot?.slots) && slot.slots.length > 0
+              ? slot.slots
+              : slot?.startTime && slot?.endTime
+                ? [{ startTime: slot.startTime, endTime: slot.endTime }]
+                : [];
           normalized[day] = {
             enabled: slot?.enabled ?? false,
-            slots:
-              slot?.enabled && slot?.startTime && slot?.endTime
-                ? [{ startTime: slot.startTime, endTime: slot.endTime }]
-                : [],
+            slots: slotArray,
           };
         });
         setFormData({ appointmentSlot: normalized });
@@ -366,7 +369,10 @@ export default function DoctorProfilePage() {
 
     // Map through slots array and format each time range
     return dayData.slots
-      .map((slot) => `${slot.startTime} - ${slot.endTime}`)
+      .map(
+        (slot) =>
+          `${formatTo12Hour(slot.startTime)} - ${formatTo12Hour(slot.endTime)}`
+      )
       .join(", ");
   };
 
@@ -378,18 +384,28 @@ export default function DoctorProfilePage() {
     try {
       dispatch(updateProfileStart());
 
-      // Normalize slots array (UI) to single start/end per day expected by backend
+      // Normalize slots array (UI) for backend (stores multiple slots per day)
       const normalizedAppointmentSlot = Object.entries(
         formData.appointmentSlot
       ).reduce((acc, [day, data]) => {
-        const firstSlot = data.slots?.[0];
+        const slots =
+          data?.slots?.length && Array.isArray(data.slots)
+            ? data.slots.map(({ startTime, endTime }) => ({
+                startTime,
+                endTime,
+              })) // Only keep startTime and endTime
+            : [{ startTime: "09:00", endTime: "17:00" }];
+
         acc[day] = {
           enabled: !!data.enabled,
-          startTime: firstSlot?.startTime || "09:00",
-          endTime: firstSlot?.endTime || "17:00",
+          slots,
         };
         return acc;
       }, {} as any);
+      console.log(
+        "🧞‍♂️  normalizedAppointmentSlot --->",
+        normalizedAppointmentSlot
+      );
 
       const response = await fetch("/api/doctorProfileCreate", {
         method: "POST",

@@ -314,6 +314,7 @@ const AppointmentSlotSchema = new mongoose.Schema(
     },
     slots: {
       type: [TimeSlotSchema],
+      default: [{ startTime: "09:00", endTime: "17:00" }],
     },
   },
   { _id: false } // Disable _id for subdocuments
@@ -523,13 +524,13 @@ const doctorDetailsSchema = new mongoose.Schema({
     of: AppointmentSlotSchema,
     default: () =>
       new Map([
-        ["Monday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Tuesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Wednesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Thursday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Friday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Saturday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Sunday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        ["Monday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
+        ["Tuesday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
+        ["Wednesday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
+        ["Thursday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
+        ["Friday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
+        ["Saturday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
+        ["Sunday", { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] }],
       ]),
   },
   appointments: {

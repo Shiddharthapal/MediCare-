@@ -4,10 +4,14 @@ import DoctorDetails from "@/model/doctorDetails";
 import adminStore from "@/model/adminStore";
 import type { APIRoute } from "astro";
 
-interface AppointmentSlot {
-  enabled: boolean;
+interface TimeSlot {
   startTime: string;
   endTime: string;
+}
+
+interface AppointmentSlot {
+  enabled: boolean;
+  slots: TimeSlot[]; // Array of time slots
 }
 
 const DAY_ORDER = [
@@ -22,8 +26,7 @@ const DAY_ORDER = [
 
 const DEFAULT_SLOT: AppointmentSlot = {
   enabled: false,
-  startTime: "09:00",
-  endTime: "17:00",
+  slots: [],
 };
 
 const TIME_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
@@ -156,28 +159,51 @@ export const POST: APIRoute = async ({ request }) => {
         formData.appointmentSlot instanceof Map
           ? Object.fromEntries(formData.appointmentSlot)
           : formData.appointmentSlot;
+      console.log("🧞‍♂️  slotsData --->", slotsData);
 
       // Normalize and validate each day's slot against schema expectations
       for (const dayName of DAY_ORDER) {
-        const slot = (slotsData as any)?.[dayName] as AppointmentSlot | undefined;
-        const enabled = Boolean(slot?.enabled);
-        const startTime = slot?.startTime || DEFAULT_SLOT.startTime;
-        const endTime = slot?.endTime || DEFAULT_SLOT.endTime;
+        const daySlot = (slotsData as any)?.[dayName] as
+          | AppointmentSlot
+          | undefined;
 
-        if (!TIME_REGEX.test(startTime) || !TIME_REGEX.test(endTime)) {
-          return new Response(
-            JSON.stringify({
-              message: "Invalid time format for appointment slots",
-              details: { day: dayName, startTime, endTime },
-            }),
-            { status: 400, headers }
-          );
+        const enabled = Boolean(daySlot?.enabled);
+        const slots =
+          daySlot?.slots?.length && Array.isArray(daySlot.slots)
+            ? daySlot.slots
+            : [{ startTime: "09:00", endTime: "17:00" }];
+
+        // Validate each time slot
+        for (let i = 0; i < slots.length; i++) {
+          const slot = slots[i];
+          const startTime = slot?.startTime;
+          const endTime = slot?.endTime;
+
+          if (!TIME_REGEX.test(startTime) || !TIME_REGEX.test(endTime)) {
+            return new Response(
+              JSON.stringify({
+                message: "Invalid time format for appointment slots",
+                details: {
+                  day: dayName,
+                  slotIndex: i,
+                  startTime,
+                  endTime,
+                },
+              }),
+              { status: 400, headers }
+            );
+          }
         }
-
-        availableSlotsMap.set(dayName, {
-          enabled,
+        // Clean slots to remove any _id fields
+        const cleanedSlots = slots.map(({ startTime, endTime }) => ({
           startTime,
           endTime,
+        }));
+
+        // THIS is where it's stored
+        availableSlotsMap.set(dayName, {
+          enabled,
+          slots: cleanedSlots,
         });
       }
     }
