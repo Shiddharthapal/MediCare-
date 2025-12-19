@@ -818,8 +818,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                       className="text-xs bg-green-500 hover:bg-green-600 hover:text-black text-white w-full xs:flex-1"
                       onClick={() => handleViewReports(appointment)}
                     >
-                      <FileEdit className="h-3 w-3 mr-1" />
-                      Document
+                      <Upload className="h-3 w-3 mr-1" />
+                      Upload
                     </Button>
 
                     {status === "pending" && (
