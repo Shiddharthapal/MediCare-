@@ -554,9 +554,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       <Card className="mb-4 border border-gray-600 bg-blue-0 transition-all hover:shadow-lg w-full">
         <CardContent className="p-4">
           {/* Mobile and Tablet Layout */}
-          <div className="flex flex-col lg:flex-row lg:items-start gap-4">
-            {/* Patient Info Section */}
-            <div className="flex items-start gap-3 sm:gap-4 flex-1">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start gap-4 flex-1">
               {/* Avatar */}
               <Avatar className="w-10 h-10 sm:w-12 sm:h-12 ring-1 flex-shrink-0">
                 <AvatarImage src="/placeholder.svg?height=48&width=48" />
@@ -649,14 +648,14 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             </div>
 
             {/* Action Buttons Section */}
-            <div className="flex flex-row sm:flex-col gap-2 lg:ml-4 lg:min-w-[140px]">
+            <div className="flex flex-col gap-2 ml-4">
               {status !== "completed" ? (
                 <>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => handleSeeDocument(appointment)}
-                    className="text-xs border-2 border-gray-400 transition-all hover:border-primary/50 flex-1 sm:flex-none sm:w-full"
+                    className="text-xs border-2 border-gray-400 transition-all hover:border-primary/50 w-full xs:flex-1"
                   >
                     Document
                   </Button>
@@ -665,85 +664,55 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-xs border-2 border-gray-400 transition-all hover:border-0 hover:bg-red-200 hover:shadow-lg flex-1 sm:flex-none sm:w-full"
+                      className="text-xs border-2 border-gray-400 transition-all hover:border-0 hover:bg-red-200 hover:shadow-lg w-full xs:flex-1"
                       onClick={() => handleCancelAppointment(appointment)}
                     >
                       Cancel
                     </Button>
                   )}
 
-                  <>
-                    <Button
-                      size="sm"
-                      className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
-                      onClick={() => setShowAudioRoomDialog(true)}
-                    >
-                      <Phone className="h-3 w-3 mr-1" />
-                      Join
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
-                         hover:bg-purple-50 text-purple-700 bg-transparent"
-                      onClick={() => setShowMessageModal(true)}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                    </Button>
-                  </>
-                </>
-              ) : (
-                <div className="flex flex-col gap-2 w-full">
                   <Button
                     size="sm"
-                    className="text-xs bg-green-500 hover:bg-green-600 text-white w-full"
+                    className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white w-full xs:flex-1"
+                    onClick={() => setShowAudioRoomDialog(true)}
+                  >
+                    <Phone className="h-3 w-3 mr-1" />
+                    Join
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
+           hover:bg-purple-50 text-purple-700 bg-transparent w-full xs:flex-1"
+                    onClick={() => setShowMessageModal(true)}
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <div className="flex flex-col xs:flex-row gap-2 w-full">
+                  <Button
+                    size="sm"
+                    className="text-xs bg-green-500 hover:bg-green-600 text-white w-full xs:flex-1"
                     onClick={() => handleShowPrescription(appointment)}
                   >
                     <Eye className="h-3 w-3 mr-1" />
                     See Prescription
                   </Button>
 
-                  <div className="flex gap-2">
-                    {appointment.consultationType === "video" && (
-                      <>
-                        <Button
-                          size="sm"
-                          className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
-                          onClick={() => setShowRoomDialog(true)}
-                        >
-                          <Video className="h-3 w-3 mr-1" />
-                          Start
-                        </Button>
-                      </>
-                    )}
-
-                    {appointment.consultationType === "audio" && (
-                      <>
-                        <Button
-                          size="sm"
-                          className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
-                          onClick={() => setShowAudioRoomDialog(true)}
-                        >
-                          <Phone className="h-3 w-3 mr-1" />
-                          Start
-                        </Button>
-                      </>
-                    )}
-
-                    <Button
-                      size="sm"
-                      className="text-xs bg-green-500 hover:bg-green-600 hover:text-black text-white flex-1"
-                      onClick={() => handleCreatePrescription(appointment)}
-                    >
-                      <FileEdit className="h-3 w-3 mr-1" />
-                      Create
-                    </Button>
-                  </div>
+                  <Button
+                    size="sm"
+                    className="text-xs bg-green-500 hover:bg-green-600 hover:text-black text-white w-full xs:flex-1"
+                    onClick={() => handleCreatePrescription(appointment)}
+                  >
+                    <FileEdit className="h-3 w-3 mr-1" />
+                    Create
+                  </Button>
 
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600 hover:bg-purple-50 text-purple-700 bg-transparent w-full"
+                    className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600 hover:bg-purple-50 text-purple-700 bg-transparent w-full xs:flex-1"
                     onClick={() => setShowMessageModal(true)}
                   >
                     <MessageCircle className="h-4 w-4 mr-1" />

@@ -835,26 +835,7 @@ export default function Appointments({
                   )}
                 </>
               )}
-              <>
-                <Button
-                  size="sm"
-                  className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
-                  onClick={() => setShowAudioRoomDialog(true)}
-                >
-                  <Phone className="h-3 w-3 mr-1" />
-                  Join
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
-                         hover:bg-purple-50 text-purple-700 bg-transparent"
-                  onClick={() => setShowMessageModal(true)}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                </Button>
-              </>
-
+                      
               {/* Prescription and Reports options (always visible) */}
               <Button
                 variant="outline"
