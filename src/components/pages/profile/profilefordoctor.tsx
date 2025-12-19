@@ -926,7 +926,8 @@ export default function DoctorProfilePage() {
                                 <input
                                   type="checkbox"
                                   checked={
-                                    formData.appointmentSlot[day].enabled
+                                    formData.appointmentSlot[day]?.enabled ||
+                                    false
                                   }
                                   onChange={(e) =>
                                     handleToggleDay(day, e.target.checked)
@@ -939,7 +940,7 @@ export default function DoctorProfilePage() {
                                 {day}
                               </span>
                             </div>
-                            {formData.appointmentSlot[day].enabled && (
+                            {formData.appointmentSlot[day]?.enabled && (
                               <button
                                 onClick={() => addTimeSlot(day)}
                                 className="flex items-center gap-1 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors text-sm font-medium"
@@ -950,78 +951,84 @@ export default function DoctorProfilePage() {
                             )}
                           </div>
 
-                          {formData?.appointmentSlot[day] && (
-                            <div className="ml-16 space-y-2">
-                              {Object?.entries(
-                                formData?.appointmentSlot[day]?.slots || {}
-                              ).map((slot, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-center space-x-2"
-                                >
-                                  <input
-                                    type="time"
-                                    value={slot.startTime}
-                                    onChange={(e) =>
-                                      updateTimeSlot(
-                                        day,
-                                        index,
-                                        "startTime",
-                                        e.target.value
-                                      )
-                                    }
-                                    disabled={
-                                      editingSlot?.day !== day ||
-                                      editingSlot?.index !== index
-                                    }
-                                    className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                  />
-                                  <span className="text-gray-500">to</span>
-                                  <input
-                                    type="time"
-                                    value={slot.endTime}
-                                    onChange={(e) =>
-                                      updateTimeSlot(
-                                        day,
-                                        index,
-                                        "endTime",
-                                        e.target.value
-                                      )
-                                    }
-                                    disabled={
-                                      editingSlot?.day !== day ||
-                                      editingSlot?.index !== index
-                                    }
-                                    className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                  />
-                                  <button
-                                    onClick={() => toggleEditSlot(day, index)}
-                                    className={`p-2 rounded-md transition-colors ${
-                                      editingSlot?.day === day &&
-                                      editingSlot?.index === index
-                                        ? "bg-green-100 text-green-600 hover:bg-green-200"
-                                        : "text-blue-600 hover:bg-blue-50"
-                                    }`}
-                                    title={
-                                      editingSlot?.day === day &&
-                                      editingSlot?.index === index
-                                        ? "Save time slot"
-                                        : "Edit time slot"
-                                    }
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => removeTimeSlot(day, index)}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                    title="Remove time slot"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          {formData?.appointmentSlot[day]?.enabled &&
+                            formData?.appointmentSlot[day]?.slots?.length >
+                              0 && (
+                              <div className="ml-16 space-y-2">
+                                {formData.appointmentSlot[day].slots.map(
+                                  (slot, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center space-x-2"
+                                    >
+                                      <input
+                                        type="time"
+                                        value={slot?.startTime || ""}
+                                        onChange={(e) =>
+                                          updateTimeSlot(
+                                            day,
+                                            index,
+                                            "startTime",
+                                            e.target.value
+                                          )
+                                        }
+                                        disabled={
+                                          editingSlot?.day !== day ||
+                                          editingSlot?.index !== index
+                                        }
+                                        className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                      />
+                                      <span className="text-gray-500">to</span>
+                                      <input
+                                        type="time"
+                                        value={slot?.endTime || ""}
+                                        onChange={(e) =>
+                                          updateTimeSlot(
+                                            day,
+                                            index,
+                                            "endTime",
+                                            e.target.value
+                                          )
+                                        }
+                                        disabled={
+                                          editingSlot?.day !== day ||
+                                          editingSlot?.index !== index
+                                        }
+                                        className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                      />
+                                      <button
+                                        onClick={() =>
+                                          toggleEditSlot(day, index)
+                                        }
+                                        className={`p-2 rounded-md transition-colors ${
+                                          editingSlot?.day === day &&
+                                          editingSlot?.index === index
+                                            ? "bg-green-100 text-green-600 hover:bg-green-200"
+                                            : "text-blue-600 hover:bg-blue-50"
+                                        }`}
+                                        title={
+                                          editingSlot?.day === day &&
+                                          editingSlot?.index === index
+                                            ? "Save time slot"
+                                            : "Edit time slot"
+                                        }
+                                      >
+                                        <Pencil className="h-4 w-4" />
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          removeTimeSlot(day, index)
+                                        }
+                                        className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                        title="Remove time slot"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </button>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )}
                         </div>
                       ))}
                     </div>
