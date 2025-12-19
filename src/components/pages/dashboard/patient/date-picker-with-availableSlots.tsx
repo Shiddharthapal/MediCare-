@@ -12,8 +12,7 @@ import {
 interface AppointmentSlot {
   day: string;
   enabled: boolean;
-  startTime: any;
-  endTime: any;
+  slots?: { startTime: string; endTime: string }[];
 }
 
 interface DatePickerWithSlotsProps {
@@ -41,11 +40,12 @@ export function DatePickerWithSlots({
     const dayNameLower = date
       .toLocaleDateString("en-US", { weekday: "long" })
       .toLowerCase();
-    const dayName =
-      dayNameLower.charAt(0).toUpperCase() + dayNameLower.slice(1);
     return (
-      availableSlots?.some((slot) => slot.day === dayName && slot.enabled) ??
-      false
+      availableSlots?.some((slot) => {
+        if (!slot.enabled) return false;
+        if (slot.slots && slot.slots.length === 0) return false;
+        return slot.day.toLowerCase() === dayNameLower;
+      }) ?? false
     );
   };
 

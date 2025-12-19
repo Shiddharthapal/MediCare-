@@ -342,7 +342,7 @@ export default function Doctors({
                                 ? dayData.slots
                                     .map(
                                       (slot) =>
-                                        `${slot.startTime} - ${slot.endTime}`
+                                        `${formatTo12Hour(slot.startTime)} - ${formatTo12Hour(slot.endTime)}`
                                     )
                                     .join(", ")
                                 : "Unavailable"}

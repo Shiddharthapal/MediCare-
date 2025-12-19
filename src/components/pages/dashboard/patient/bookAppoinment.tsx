@@ -90,8 +90,7 @@ interface AppointmentData {
 interface Appointmentslot {
   day: string;
   enabled: boolean;
-  startTime: any;
-  endTime: any;
+  slots?: TimeSlot[];
 }
 
 const consultationType = [
@@ -331,12 +330,14 @@ export default function BookAppointment({
         const response =
           doctor?.availableSlots &&
           Object.entries(doctor.availableSlots)
-            .filter(([day, schedule]) => schedule.enabled)
+            .filter(
+              ([_, schedule]) =>
+                schedule.enabled && (schedule.slots?.length ?? 0) > 0
+            )
             .map(([day, schedule]) => ({
               day,
               enabled: schedule.enabled,
-              startTime: schedule.startTime,
-              endTime: schedule.endTime,
+              slots: schedule.slots,
             }));
         if (!response) {
           console.log("doctor availavelslots is not valid");
@@ -613,7 +614,10 @@ export default function BookAppointment({
                         Available days:{" "}
                         {doctor?.availableSlots
                           ? Object.entries(doctor.availableSlots)
-                              .filter(([_, slot]) => slot?.enabled)
+                              .filter(
+                                ([_, dayData]) =>
+                                  dayData?.enabled && dayData?.slots?.length > 0
+                              )
                               .map(
                                 ([day]) =>
                                   day.charAt(0).toUpperCase() + day.slice(1)
@@ -662,11 +666,23 @@ export default function BookAppointment({
                               }
                             );
 
-                            // Get the slot for that specific day
-                            const daySlot =
-                              doctor?.availableSlots?.[dayName].slots;
+                            // Get the day data for that specific day
+                            const dayKey = doctor?.availableSlots
+                              ? Object.keys(doctor.availableSlots).find(
+                                  (key) =>
+                                    key.toLowerCase() === dayName.toLowerCase()
+                                )
+                              : undefined;
+                            const dayData = dayKey
+                              ? doctor?.availableSlots?.[dayKey]
+                              : undefined;
 
-                            if (!daySlot?.enabled) {
+                            // Check if day is enabled and has slots
+                            if (
+                              !dayData?.enabled ||
+                              !dayData?.slots ||
+                              dayData.slots.length === 0
+                            ) {
                               return (
                                 <div className="px-2 py-4 text-center text-gray-500">
                                   No slots available for {dayName}
@@ -674,15 +690,17 @@ export default function BookAppointment({
                               );
                             }
 
-                            return (
+                            // Return individual time slots as SelectItems
+                            return dayData.slots.map((slot) => (
                               <SelectItem
-                                key={dayName}
-                                value={formatWorkingHours(daySlot)}
+                                key={slot._id}
+                                value={`${formatTo12Hour(slot.startTime)} - ${formatTo12Hour(slot.endTime)}`}
                                 className="font-medium"
                               >
-                                {dayName}: {formatWorkingHours(daySlot)}
+                                {formatTo12Hour(slot.startTime)} -{" "}
+                                {formatTo12Hour(slot.endTime)}
                               </SelectItem>
-                            );
+                            ));
                           })()}
                         </SelectContent>
                       </Select>
