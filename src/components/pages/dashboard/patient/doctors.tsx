@@ -23,10 +23,14 @@ import {
   Loader2,
 } from "lucide-react";
 import BookAppointment from "./bookAppoinment";
-interface AppointmentSlot {
-  enabled: boolean;
+interface TimeSlot {
   startTime: string;
   endTime: string;
+}
+
+interface AppointmentSlot {
+  enabled: boolean;
+  slots: TimeSlot[]; // Array of time slots
 }
 
 interface DoctorDetails {
@@ -326,15 +330,22 @@ export default function Doctors({
                   <div className="grid grid-cols-2 gap-x-4">
                     {doctor?.availableSlots &&
                       Object.entries(doctor?.availableSlots).map(
-                        ([day, hours]) => (
+                        ([day, dayData]) => (
                           <div key={day} className="flex items-center py-1">
                             <span className="capitalize font-medium text-gray-700 w-20">
                               {day}:
                             </span>
                             <span
-                              className={`${hours?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
+                              className={`${dayData?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
                             >
-                              {formatWorkingHours(hours)}
+                              {dayData?.enabled && dayData?.slots?.length > 0
+                                ? dayData.slots
+                                    .map(
+                                      (slot) =>
+                                        `${slot.startTime} - ${slot.endTime}`
+                                    )
+                                    .join(", ")
+                                : "Unavailable"}
                             </span>
                           </div>
                         )

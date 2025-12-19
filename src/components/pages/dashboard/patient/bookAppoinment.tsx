@@ -36,12 +36,15 @@ import {
 import { useAppSelector } from "@/redux/hooks";
 import { DatePickerWithSlots } from "./date-picker-with-availableSlots";
 
-interface AppointmentSlot {
-  enabled: boolean;
+interface TimeSlot {
   startTime: string;
   endTime: string;
 }
-[];
+
+interface AppointmentSlot {
+  enabled: boolean;
+  slots: TimeSlot[]; // Array of time slots
+}
 
 interface Doctor {
   _id: string;
@@ -660,7 +663,8 @@ export default function BookAppointment({
                             );
 
                             // Get the slot for that specific day
-                            const daySlot = doctor?.availableSlots?.[dayName];
+                            const daySlot =
+                              doctor?.availableSlots?.[dayName].slots;
 
                             if (!daySlot?.enabled) {
                               return (
