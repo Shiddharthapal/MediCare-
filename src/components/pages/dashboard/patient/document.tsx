@@ -125,19 +125,27 @@ export default function Document({
   isEditMode = false,
   onSave,
 }: PrescriptionProps) {
-  const [documentForm, setDocumentForm] =
-    useState<DocumentData>(mockDocumentdata);
   const [isLoading, setIsLoading] = useState(false);
-  const [viewMode, setViewMode] = useState(!!savedPrescription && !isEditMode);
   const [documents, setDocuments] = useState<FileUpload[]>([]);
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     let id = DocumentData.patientId;
     let doctorpatinetId = DocumentData.doctorpatinetId;
 
     const fetchData = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
         const response = await fetch("/api/user/fetchdocumentfromappointment", {
           method: "POST",
           body: JSON.stringify({ id, doctorpatinetId }),
