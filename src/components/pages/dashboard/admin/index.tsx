@@ -174,6 +174,8 @@ export default function Dashboard() {
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
   const [doctorData, setDoctorData] = useState<DoctorDetails[]>([]);
   const [randomDoctors, setRandomDoctors] = useState<DoctorDetails[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
@@ -220,6 +222,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         let response = await fetch(`/api/admin/${id}`, {
           method: "GET",
           headers: {
@@ -230,6 +233,8 @@ export default function Dashboard() {
         setAdminData(admindata?.adminstore);
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -239,6 +244,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         let response = await fetch(`/api/admin/fetchdata`, {
           method: "GET",
           headers: {
@@ -256,6 +262,8 @@ export default function Dashboard() {
         setDoctorData(result.doctordetails);
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -266,6 +274,17 @@ export default function Dashboard() {
     // Cleanup: clear interval when component unmounts
     return () => clearInterval(interval);
   }, [admin]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   //Calculate new patient
   const currentMonthNewPatients = useMemo(() => {
@@ -810,7 +829,7 @@ export default function Dashboard() {
                           <MoreVertical size={20} />
                         </button>
                       </div>
-                      <div className="overflow-x-auto">
+                      <div className="custom-x-scrollbar">
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-slate-200 bg-gradient-to-r py-2 from-green-100 to-blue-100">
