@@ -290,6 +290,9 @@ export default function DoctorManagementSettings({
     useState<Prescription | null>(null);
   const [prescriptionFromAppointment, showPrescriptionFromAppointment] =
     useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
 
@@ -315,9 +318,21 @@ export default function DoctorManagementSettings({
     return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
   };
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     const fetchDataofAdmin = async () => {
       try {
+        setLoading(true);
         let response = await fetch(`/api/admin/${id}`, {
           method: "GET",
           headers: {
@@ -346,6 +361,8 @@ export default function DoctorManagementSettings({
         setLatestPatientData(shuffledLatestPats);
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchDataofAdmin();
@@ -493,7 +510,10 @@ export default function DoctorManagementSettings({
           showPrescriptionFromAppointment(false);
         },
       },
-      { isOpen: !!selectedAppointment, close: () => setSelectedAppointment(null) },
+      {
+        isOpen: !!selectedAppointment,
+        close: () => setSelectedAppointment(null),
+      },
       { isOpen: !!selectedDocument, close: () => setSelectedDocument(null) },
       { isOpen: isModalOpen, close: () => setIsModalOpen(false) },
       { isOpen: showHealthRecord, close: () => setShowHealthRecord(false) },
@@ -726,6 +746,7 @@ export default function DoctorManagementSettings({
 
     const handleDownload = async () => {
       try {
+        setLoading(true);
         const response = await fetch(documentUrl);
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -739,6 +760,8 @@ export default function DoctorManagementSettings({
       } catch (error) {
         console.error("Download failed:", error);
         alert("Failed to download file");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -979,7 +1002,6 @@ export default function DoctorManagementSettings({
     appointment: AppointmentData;
     onClose: () => void;
   }) => {
-    console.log("🧞‍♂️  prescription --->", appointment);
     return (
       <div className="fixed inset-0 z-50 bg-white custom-scrollbar">
         <PrescriptionShow
