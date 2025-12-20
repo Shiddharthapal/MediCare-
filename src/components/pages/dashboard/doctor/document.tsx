@@ -83,8 +83,8 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
   const [uploadedFilesData, setUploadedFilesData] = useState<FileUpload[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const user = useAppSelector((state) => state.auth.user);
-  const id = user?._id;
+  const doctor = useAppSelector((state) => state.auth.user);
+  const id = doctor?._id;
 
   //to fetch userdata
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
       }
     };
     fetchData();
-  }, [user?._id]);
+  }, [doctor?._id]);
 
   const groupedDocuments = useMemo(() => {
     return groupDocumentsByDate(uploadedFilesData);
@@ -278,7 +278,7 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
         formData.append(`documentNames`, fileData.documentName);
         formData.append(`originalNames`, fileData?.name);
       });
-      const response = await fetch("/api/user/uploadfromReport", {
+      const response = await fetch("/api/doctor/uploadfromReport", {
         method: "POST",
         body: formData,
       });
