@@ -287,6 +287,8 @@ export default function DoctorManagementSettings({
     useState<Prescription | null>(null);
   const [showPrescriptionComponent, setShowPrescriptionComponent] =
     useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
@@ -294,6 +296,7 @@ export default function DoctorManagementSettings({
   useEffect(() => {
     const fetchDataofAdmin = async () => {
       try {
+        setLoading(true);
         let response = await fetch(`/api/admin/${id}`, {
           method: "GET",
           headers: {
@@ -324,6 +327,8 @@ export default function DoctorManagementSettings({
         setLatestDoctorData(shuffledLatestDocs);
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchDataofAdmin();
@@ -880,10 +885,7 @@ export default function DoctorManagementSettings({
                   </h3>
                   {selectedDoctor?.prescription &&
                   selectedDoctor?.prescription?.length > 0 ? (
-                    <div
-                      className="space-y-2 max-h-[400px] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-600
-                      hover:scrollbar-thumb-gray-500"
-                    >
+                    <div className="space-y-2 max-h-[400px] custom-scrollbar">
                       {selectedDoctor.prescription.map((apt) => (
                         <div
                           key={apt.doctorpatinetId}
@@ -1158,7 +1160,10 @@ export default function DoctorManagementSettings({
                         <p className="text-sm text-gray-600">Medications</p>
                         <div className="space-y-3">
                           {selectedAppointment?.prescription?.prescriptionId ? (
-                            <div className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-green-50 to-emerald-50">
+                            <div
+                              className="border border-gray-300 rounded-lg p-4 hover:shadow-md
+                             transition-shadow bg-gradient-to-r from-green-50 to-emerald-50"
+                            >
                               <div className="flex flex-col md:flex-row items-start justify-between">
                                 <div className="flex items-start gap-4 flex-1">
                                   {/* Prescription Icon */}
@@ -1395,7 +1400,7 @@ export default function DoctorManagementSettings({
         </div>
       )}
       {showPrescriptionWA && selectedPrescriptionWA && (
-        <div className="fixed inset-0 z-50 bg-white overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+        <div className="fixed inset-0 z-50 bg-white custom-scrollbar">
           <PrescriptionShow
             patientData={{
               // Patient info
