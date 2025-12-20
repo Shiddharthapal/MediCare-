@@ -267,7 +267,6 @@ export default function PrescriptionShow({
     window.print();
   };
 
-  console.log("🧞‍♂️  patientData --->", patientData);
   const PrescriptionPDF = ({ patientData }) => (
     <Document>
       <Page size="A4" style={styles.page}>
