@@ -137,6 +137,7 @@ export default function Document({
 
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch("/api/user/fetchdocumentfromappointment", {
           method: "POST",
           body: JSON.stringify({ id, doctorpatinetId }),

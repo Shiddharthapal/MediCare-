@@ -90,7 +90,6 @@ export function SecuritySettings() {
     if (!validateForm()) return;
 
     setIsLoading(true);
-
     try {
       const response = await fetch("/api/doctor/changePassword", {
         method: "POST",

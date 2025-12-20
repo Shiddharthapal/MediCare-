@@ -5,15 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSelector } from "@/redux/hooks";
@@ -121,6 +112,17 @@ export function GeneralSettings() {
       preferences: { ...prev.preferences, [field]: value },
     }));
   };
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3 ">
