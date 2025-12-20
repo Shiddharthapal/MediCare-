@@ -204,19 +204,19 @@ export default function Document({
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onClose}
+          className="gap-2 gray border border-gray-400 bg-[hsl(201,96%,32%)] text-white hover:bg-cyan-700"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onClose}
-              className="gap-2 gray border border-gray-400 hover:bg-cyan-700"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
             <div>
-              <h1 className="text-3xl font-bold">Patient Documents</h1>
+              <h1 className="text-3xl font-bold">Appointment Documents</h1>
               <p className=" flex flex-row text-gray-600 mt-1">
                 <p className="text-green-600">{DocumentData?.patientName} </p> •
                 Appointment ID: {DocumentData?.doctorpatinetId}

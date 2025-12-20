@@ -1277,7 +1277,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
 
               <div className="mb-6">
                 <p className="text-sm text-gray-600">
-                  {selectedAppointment.doctorName} •{" "}
+                  {selectedAppointment.patientName} •{" "}
                   {formatDate(selectedAppointment.appointmentDate)}
                 </p>
               </div>
