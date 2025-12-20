@@ -34,7 +34,7 @@ import Appointments from "./appoinments";
 import Patients from "./allpatients";
 import Setting from "./setting_doctor/index";
 import Reports from "./reports/index";
-import Documents from "./document";
+import Document from "./document";
 import { useAppSelector } from "@/redux/hooks";
 import { useLocation } from "react-router-dom";
 
@@ -149,7 +149,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", active: true },
   { icon: Calendar, label: "Appointments", active: false },
   { icon: Users, label: "Patients", active: false },
-  { icon: File, label: "Documents", active: false },
+  { icon: File, label: "Document", active: false },
   { icon: FileText, label: "Reports", active: false },
   { icon: Settings, label: "Setting", active: false },
 ];
@@ -1075,9 +1075,7 @@ export default function DashboardPage() {
         {currentPage === "patients" && <Patients onNavigate={setCurrentPage} />}
         {currentPage === "setting" && <Setting onNavigate={setCurrentPage} />}
         {currentPage === "reports" && <Reports onNavigate={setCurrentPage} />}
-        {currentPage === "document" && (
-          <Documents onNavigate={setCurrentPage} />
-        )}
+        {currentPage === "document" && <Document onNavigate={setCurrentPage} />}
 
         {/* Other Pages Placeholder */}
         {currentPage !== "dashboard" &&

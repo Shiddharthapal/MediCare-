@@ -52,7 +52,7 @@ interface FileUpload {
 
 // Group documents by date
 const groupDocumentsByDate = (documents: any[]) => {
-  return documents.reduce((groups: any, document) => {
+  return documents?.reduce((groups: any, document) => {
     const date = document.createdAt;
     if (!groups[date]) {
       groups[date] = [];
@@ -110,7 +110,7 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
   }, [uploadedFilesData]);
 
   const sortedDates = useMemo(() => {
-    return Object.keys(groupedDocuments).sort(
+    return Object.keys(groupedDocuments || [])?.sort(
       (a, b) => new Date(b).getTime() - new Date(a).getTime()
     );
   }, [groupedDocuments]);
@@ -306,10 +306,10 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
   };
 
   return (
-    <div className=" pb-10">
+    <div className=" container pb-10">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="pb-6">
+        <div className="pb-6 xs:pt-2 md:pt-5">
           <h1 className="text-2xl font-semibold text-gray-900">
             Medical Records
           </h1>
@@ -381,7 +381,7 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
 
       {/* Document Preview Dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] custom-scrollbar">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {selectedDocument && (
@@ -441,7 +441,7 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
       </Dialog>
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto  scrollbar-gutter-stable">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
