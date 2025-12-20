@@ -117,6 +117,17 @@ export default function PrescriptionSettings({
   const admin = useAppSelector((state) => state.auth.user);
   let id = admin?._id;
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     const fetchdata = async () => {
       try {
