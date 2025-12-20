@@ -164,17 +164,36 @@ interface SettingPageProps {
 }
 export default function ReportsPage({ onNavigate }: SettingPageProps) {
   const [doctordata, setDoctordata] = useState<DoctorDetails>();
+    const [loading, setLoading] = useState(true);
   let doctor = useAppSelector((state) => state.auth.user);
   let id = doctor?._id;
 
   useEffect(() => {
     const fetchData = async () => {
-      let response = await fetch(`/api/doctor/${id}`);
-      let result = await response.json();
-      setDoctordata(result.doctordetails);
+      try {
+        setLoading(true);
+        let response = await fetch(`/api/doctor/${id}`);
+        let result = await response.json();
+        setDoctordata(result.doctordetails);
+      } catch (error) {
+        console.error("No document are  available");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, [doctor]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

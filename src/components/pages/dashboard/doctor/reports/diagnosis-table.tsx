@@ -133,7 +133,8 @@ export function DiagnosisTable() {
                 <Button
                   variant="outline"
                   size="md"
-                  className="border border-gray-300 bg-[hsl(201,95%,41%)] hover:bg-[hsl(201,95%,31%)] text-white hover:text-white px-6 py-2.5 transition-all hover:border-blue-500 hover:shadow-md rounded-md"
+                  className="border border-gray-300 bg-[hsl(201,95%,41%)] hover:bg-[hsl(201,95%,31%)] text-white
+                   hover:text-white px-6 py-2.5 transition-all hover:border-blue-500 hover:shadow-md rounded-md"
                 >
                   Search
                 </Button>
@@ -143,7 +144,7 @@ export function DiagnosisTable() {
         </div>
       </CardHeader>
       <CardContent className="px-0 sm:px-6">
-        <div className="overflow-x-auto">
+        <div className="custom-scrollbar">
           <Table>
             <TableHeader>
               <TableRow>
