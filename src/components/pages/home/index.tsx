@@ -42,12 +42,10 @@ type ServiceType = "report" | "diagnosis" | "treatment" | "monitoring" | null;
 
 export default function MedicationLandingPage() {
   const [activeService, setActiveService] = useState<ServiceType>(null);
+
   let doctor = useAppSelector((state) => state.auth.user);
-  console.log("🧞‍♂️  doctor --->", doctor);
   const role = doctor?.role || null;
-  console.log("🧞‍♂️  role --->", role);
   let demo = useAppSelector((state) => state.profile.hasProfile);
-  console.log("🧞‍♂️  demo --->", demo);
   const services = [
     {
       id: "diagnosis" as const,
