@@ -16,6 +16,7 @@ import {
   LogOut,
   X,
   Menu,
+  File,
 } from "lucide-react";
 import {
   Area,
@@ -33,6 +34,7 @@ import Appointments from "./appoinments";
 import Patients from "./allpatients";
 import Setting from "./setting_doctor/index";
 import Reports from "./reports/index";
+import Documents from "./document";
 import { useAppSelector } from "@/redux/hooks";
 import { useLocation } from "react-router-dom";
 
@@ -147,6 +149,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", active: true },
   { icon: Calendar, label: "Appointments", active: false },
   { icon: Users, label: "Patients", active: false },
+  { icon: File, label: "Documents", active: false },
   { icon: FileText, label: "Reports", active: false },
   { icon: Settings, label: "Setting", active: false },
 ];
@@ -1072,13 +1075,17 @@ export default function DashboardPage() {
         {currentPage === "patients" && <Patients onNavigate={setCurrentPage} />}
         {currentPage === "setting" && <Setting onNavigate={setCurrentPage} />}
         {currentPage === "reports" && <Reports onNavigate={setCurrentPage} />}
+        {currentPage === "document" && (
+          <Documents onNavigate={setCurrentPage} />
+        )}
 
         {/* Other Pages Placeholder */}
         {currentPage !== "dashboard" &&
           currentPage !== "appointments" &&
           currentPage !== "reports" &&
           currentPage !== "setting" &&
-          currentPage !== "patients" && (
+          currentPage !== "patients" &&
+          currentPage !== "document" && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <h2 className="text-2xl font-bold mb-4 capitalize">
