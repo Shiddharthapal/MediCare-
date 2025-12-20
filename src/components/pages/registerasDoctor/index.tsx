@@ -35,6 +35,17 @@ export default function Register() {
 
   const password = watch("password");
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Register...</p>
+        </div>
+      </div>
+    );
+  }
+
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setLoading(true);
