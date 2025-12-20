@@ -74,20 +74,30 @@ export default function BillingSettings() {
   const [expiryYear, setExpiryYear] = useState("");
   const [cvv, setCvv] = useState("");
   const [cardholderName, setCardholderName] = useState("");
-
   const [mobileProvider, setMobileProvider] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [accountName, setAccountName] = useState("");
-
+  const [isLoading, setIsLoading] = useState(false);
   const doctor = useAppSelector((state) => state.auth.user);
   const id = doctor?._id;
-
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
+      setIsLoading(true);
       try {
         const response = await fetch(`/api/user/${id}`);
         const responsedata = await response.json();
@@ -97,6 +107,8 @@ export default function BillingSettings() {
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -130,7 +142,7 @@ export default function BillingSettings() {
     }
 
     setIsSubmitting(true);
-
+    setIsLoading(true);
     try {
       const hasExistingMethods =
         paymentMethods.cardMethods.length > 0 ||
@@ -226,6 +238,7 @@ export default function BillingSettings() {
       });
     } finally {
       setIsSubmitting(false);
+      setIsLoading(true);
     }
   };
 

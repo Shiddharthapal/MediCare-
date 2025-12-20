@@ -1,6 +1,5 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -8,14 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSelector } from "@/redux/hooks";
@@ -74,6 +65,17 @@ export default function GeneralSettings() {
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const fetchProfileData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -113,13 +115,6 @@ export default function GeneralSettings() {
   useEffect(() => {
     fetchProfileData();
   }, [fetchProfileData]);
-
-  const updatePreferences = (field: keyof SystemPreferences, value: any) => {
-    setUserData((prev) => ({
-      ...prev,
-      preferences: { ...prev.preferences, [field]: value },
-    }));
-  };
 
   return (
     <div className="space-y-3">
