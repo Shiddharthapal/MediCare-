@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +22,6 @@ export const RoomCreationForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const { socket } = useSocket();
   const navigate = useNavigate();
-  console.log("🧞‍♂️  emailId --->", emailId);
   const [timeoutId, setTimeoutId] = useState<number | null>(null);
 
   const handleRoomJoined = useCallback(

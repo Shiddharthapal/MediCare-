@@ -574,20 +574,6 @@ export default function PrescriptionShow({
     }
   };
 
-  const getPatientInitials = (patientName: string) => {
-    if (!patientName) return "AB";
-    const cleanName = patientName.trim();
-    if (!cleanName) return "AB";
-    const words = cleanName.split(" ").filter((word) => word.length > 0);
-    if (words.length >= 2) {
-      return (words[0][0] + words[1][0]).toUpperCase();
-    } else if (words.length === 1) {
-      return words[0].substring(0, 2).toUpperCase();
-    } else {
-      return "AB";
-    }
-  };
-
   // Generate prescription ID if not available
   const prescriptionId = patientData.patientId
     ? `RX-${patientData.patientId}-${Date.now()}`
