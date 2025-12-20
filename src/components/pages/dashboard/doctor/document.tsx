@@ -69,9 +69,6 @@ interface PatientsPageProps {
 }
 
 export default function Documents({ onNavigate }: PatientsPageProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -83,12 +80,25 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
   const [uploadedFilesData, setUploadedFilesData] = useState<FileUpload[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const doctor = useAppSelector((state) => state.auth.user);
   const id = doctor?._id;
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   //to fetch userdata
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let response = await fetch(`/api/doctor/${id}`, {
           method: "GET",
@@ -100,6 +110,8 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
         setUploadedFilesData(userdata?.userdetails?.upload);
       } catch (err) {
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -130,11 +142,6 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
       month: "long",
       day: "numeric",
     });
-  };
-
-  const handleViewDocument = (document: any) => {
-    setSelectedDocument(document);
-    setIsPreviewOpen(true);
   };
 
   const handleDownloadDocument = (document: any) => {
@@ -267,6 +274,7 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
       return;
     }
     setIsUploading(true);
+
     try {
       const formData = new FormData();
       // Add category to form data
@@ -472,7 +480,8 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
                   <button
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full border-2 rounded-md px-3 py-2 text-left bg-white transition-all hover:border-primary/50 hover:shadow-lg flex items-center justify-between"
+                    className="w-full border-2 rounded-md px-3 py-2 text-left bg-white transition-all 
+                    hover:border-primary/50 hover:shadow-lg flex items-center justify-between"
                   >
                     <span
                       className={
@@ -497,7 +506,7 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
                       />
 
                       {/* Dropdown menu */}
-                      <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                      <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 custom-scrollbar">
                         {[
                           "Laboratory",
                           "Dermatology",
@@ -555,7 +564,8 @@ export default function Documents({ onNavigate }: PatientsPageProps) {
                   />
                   <label
                     htmlFor="file-upload-modal"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md
+                     text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
                   >
                     Choose Files
                   </label>

@@ -497,7 +497,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       return;
     }
     setIsUploading(true);
-    setIsLoading(true);
     try {
       // Create FormData to send files
       const formData = new FormData();
@@ -541,13 +540,11 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       );
     } finally {
       setIsUploading(false);
-      setIsLoading(false);
     }
   };
 
   const handleCancelAppointment = async (appointment: any) => {
-    let id = doctor?._id;
-    setIsLoading(true);
+    let id = doctor?._id;;
     try {
       const response = await fetch("/api/doctor/cancelAppointment", {
         method: "POST",
@@ -577,8 +574,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       }
     } catch (error) {
       console.error("Error cancelling appointment:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
