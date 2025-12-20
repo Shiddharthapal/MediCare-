@@ -27,7 +27,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -40,16 +39,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import {
-  setEditMode,
   updateProfileStart,
   updateProfileSuccess,
   updateProfileFailure,
@@ -133,6 +125,8 @@ export default function DoctorProfilePage() {
     index: number;
   } | null>(null);
   const [hasProfile, setHasProfile] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<PracticeData>({
     appointmentSlot: {
       Monday: {
@@ -169,7 +163,6 @@ export default function DoctorProfilePage() {
   const token = useAppSelector((state) => state.auth.token);
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
-  console.log("🧞‍♂️  id --->", id);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -189,66 +182,71 @@ export default function DoctorProfilePage() {
         console.error("Unable to authenticate user");
         return;
       }
-      const response = await fetch(`/api/doctor/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`Status:${response.status}`);
-      }
-
-      const responseData = await response.json();
-      console.log("🧞‍♂️  responseData --->", responseData);
-      setHasProfile(Boolean(responseData.doctordetails));
-      setDoctor(responseData.doctordetails);
-      setEditedDoctor(responseData.doctordetails);
-
-      // Normalize availableSlots (Map on backend) into our form structure
-      const availableSlots = responseData?.doctordetails?.availableSlots;
-      if (availableSlots) {
-        const normalized: PracticeData["appointmentSlot"] = {};
-        const dayOrder = [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
-        ];
-        dayOrder.forEach((day) => {
-          const slot = availableSlots[day];
-          const slotArray =
-            Array.isArray(slot?.slots) && slot.slots.length > 0
-              ? slot.slots
-              : slot?.startTime && slot?.endTime
-                ? [{ startTime: slot.startTime, endTime: slot.endTime }]
-                : [];
-          normalized[day] = {
-            enabled: slot?.enabled ?? false,
-            slots: slotArray,
-          };
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/doctor/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
-        setFormData({ appointmentSlot: normalized });
+        if (!response.ok) {
+          throw new Error(`Status:${response.status}`);
+        }
+
+        const responseData = await response.json();
+        console.log("🧞‍♂️  responseData --->", responseData);
+        setHasProfile(Boolean(responseData.doctordetails));
+        setDoctor(responseData.doctordetails);
+        setEditedDoctor(responseData.doctordetails);
+
+        // Normalize availableSlots (Map on backend) into our form structure
+        const availableSlots = responseData?.doctordetails?.availableSlots;
+        if (availableSlots) {
+          const normalized: PracticeData["appointmentSlot"] = {};
+          const dayOrder = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ];
+          dayOrder.forEach((day) => {
+            const slot = availableSlots[day];
+            const slotArray =
+              Array.isArray(slot?.slots) && slot.slots.length > 0
+                ? slot.slots
+                : slot?.startTime && slot?.endTime
+                  ? [{ startTime: slot.startTime, endTime: slot.endTime }]
+                  : [];
+            normalized[day] = {
+              enabled: slot?.enabled ?? false,
+              slots: slotArray,
+            };
+          });
+          setFormData({ appointmentSlot: normalized });
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchDetails();
   }, [user]);
 
-  const handleWorkingHourChange = (day: string, field: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      appointmentSlot: {
-        ...prev.appointmentSlot,
-        [day]: {
-          ...prev.appointmentSlot[day],
-          [field]: value,
-        },
-      },
-    }));
-  };
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleToggleDay = (day: string, checked: boolean) => {
     setFormData((prev) => ({
@@ -381,6 +379,7 @@ export default function DoctorProfilePage() {
   };
 
   const handleSave = async () => {
+    setIsCreating(true);
     try {
       dispatch(updateProfileStart());
 
@@ -402,10 +401,6 @@ export default function DoctorProfilePage() {
         };
         return acc;
       }, {} as any);
-      console.log(
-        "🧞‍♂️  normalizedAppointmentSlot --->",
-        normalizedAppointmentSlot
-      );
 
       const response = await fetch("/api/doctorProfileCreate", {
         method: "POST",
@@ -464,8 +459,21 @@ export default function DoctorProfilePage() {
         description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsCreating(false);
     }
   };
+
+  if (isCreating) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Profile creating...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleToggleConsultationMode = (
     mode: "video" | "phone" | "in-person"
@@ -934,7 +942,13 @@ export default function DoctorProfilePage() {
                                   }
                                   className="sr-only peer"
                                 />
-                                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                                <div
+                                  className="w-11 h-6 bg-gray-300 peer-focus:outline-none 
+                                peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full
+                                 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                                  after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 
+                                  after:w-5 after:transition-all peer-checked:bg-orange-600"
+                                ></div>
                               </label>
                               <span className="font-semibold text-gray-700 text-lg">
                                 {day}
@@ -943,7 +957,8 @@ export default function DoctorProfilePage() {
                             {formData.appointmentSlot[day]?.enabled && (
                               <button
                                 onClick={() => addTimeSlot(day)}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors text-sm font-medium"
+                                className="flex items-center gap-1 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-md
+                                 hover:bg-orange-200 transition-colors text-sm font-medium"
                               >
                                 <Plus className="h-4 w-4" />
                                 Add Slot
@@ -976,7 +991,8 @@ export default function DoctorProfilePage() {
                                           editingSlot?.day !== day ||
                                           editingSlot?.index !== index
                                         }
-                                        className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2
+                                         focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                       />
                                       <span className="text-gray-500">to</span>
                                       <input
@@ -994,7 +1010,8 @@ export default function DoctorProfilePage() {
                                           editingSlot?.day !== day ||
                                           editingSlot?.index !== index
                                         }
-                                        className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2
+                                         focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                       />
                                       <button
                                         onClick={() =>
