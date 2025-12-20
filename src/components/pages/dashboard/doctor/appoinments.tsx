@@ -28,7 +28,7 @@ import {
   File,
 } from "lucide-react";
 import Prescription from "./prescription";
-import Document from "./document";
+import Document from "./appointmentDocument";
 import { useAppSelector } from "@/redux/hooks";
 import {
   Dialog,
