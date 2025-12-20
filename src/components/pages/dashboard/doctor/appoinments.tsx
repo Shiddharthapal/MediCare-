@@ -294,6 +294,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentData | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const user = useAppSelector((state) => state.auth.user);
   const email = user?.email;
 
@@ -342,17 +343,35 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
     );
   }, [appointmentData]);
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     let id = doctor?._id;
     const fetchData = async () => {
-      const response = await fetch(`/api/doctor/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const responsedata = await response.json();
-      setAppointmentData(responsedata.doctordetails);
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/doctor/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const responsedata = await response.json();
+        setAppointmentData(responsedata.doctordetails);
+      } catch (error) {
+        console.error("No doctor data. Error is:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
@@ -381,40 +400,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const pastGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
-
-  const handleAcceptRequest = (
-    requestId: number,
-    timeSlot: "primary" | "alternative"
-  ) => {
-    setRequests((prevRequests) =>
-      prevRequests.map((request) =>
-        request.id === requestId
-          ? {
-              ...request,
-              status: "accepted",
-              confirmedTime:
-                timeSlot === "primary"
-                  ? request.requestedTime
-                  : request.alternativeTime,
-            }
-          : request
-      )
-    );
-    alert(`Appointment request accepted and confirmation sent to patient!`);
-  };
-
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency.toLowerCase()) {
-      case "high":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "low":
-        return "bg-green-100 text-green-800 border-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
 
   //handler function to show prescription
   const handleCreatePrescription = (patient: any) => {
@@ -529,6 +514,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       return;
     }
     setIsUploading(true);
+    setIsLoading(true);
     try {
       // Create FormData to send files
       const formData = new FormData();
@@ -572,16 +558,13 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       );
     } finally {
       setIsUploading(false);
+      setIsLoading(false);
     }
-  };
-  //handler function to send message
-  const handleSendMessage = (message: string) => {
-    console.log("Message sent:", message);
-    setShowMessageModal(false);
   };
 
   const handleCancelAppointment = async (appointment: any) => {
     let id = doctor?._id;
+    setIsLoading(true);
     try {
       const response = await fetch("/api/doctor/cancelAppointment", {
         method: "POST",
@@ -611,6 +594,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
       }
     } catch (error) {
       console.error("Error cancelling appointment:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -982,7 +967,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
             <Button
               variant="outline"
               size="md"
-              className="border border-gray-300 bg-[hsl(201,95%,41%)] hover:bg-[hsl(201,95%,31%)] text-white hover:text-white px-6 py-2.5 transition-all hover:border-blue-500 hover:shadow-md rounded-md"
+              className="border border-gray-300 bg-[hsl(201,95%,41%)]
+               hover:bg-[hsl(201,95%,31%)] text-white hover:text-white px-6 py-2.5 transition-all hover:border-blue-500 hover:shadow-md rounded-md"
             >
               Search
             </Button>
@@ -1288,7 +1274,10 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                   <h3 className="text-lg font-medium text-gray-900 mb-3">
                     Upload Reports
                   </h3>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg 
+                  p-6 text-center hover:border-blue-400 transition-colors"
+                  >
                     <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                     <p className="text-sm text-gray-600 mb-2">
                       Upload medical reports, lab results, or other documents
@@ -1314,7 +1303,8 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
                     />
                     <label
                       htmlFor={`file-upload-${selectedAppointment._id}`}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md
+                       text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
                     >
                       Choose Files
                     </label>
