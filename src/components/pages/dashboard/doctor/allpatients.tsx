@@ -367,6 +367,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   const [patientData, setPatientData] = useState<GroupedPatientData>({});
   const [doctorData, setDoctorData] = useState<DoctorDetails | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isLoading, setIsLoading] = useState(true);
 
   //Helper function to  construct proper bunny cdn url for fetch document
   const getBunnyCDNUrl = (document: FileUpload) => {
@@ -476,19 +477,37 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   //   ? appointment.document
   //   : [];
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     let id = doctor?._id;
     const fetchData = async () => {
-      const response = await fetch(`/api/doctor/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      setIsLoading(false);
+      try {
+        const response = await fetch(`/api/doctor/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      let responseData = await response.json();
-      setDoctorData(responseData?.doctordetails);
-      groupAppointmentsByPatientId(responseData.doctordetails);
+        let responseData = await response.json();
+        setDoctorData(responseData?.doctordetails);
+        groupAppointmentsByPatientId(responseData.doctordetails);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, [doctor]);
@@ -496,6 +515,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
   //Tunction to cancel appointment
   const handleCancelAppointment = async (appointment: any) => {
     let id = doctor?._id;
+    setIsLoading(false);
     try {
       const response = await fetch("/api/doctor/cancelAppointment", {
         method: "POST",
@@ -520,6 +540,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
       }
     } catch (error) {
       console.error("Error cancelling appointment:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -714,7 +736,6 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
     if (!selectedPatient) {
       return { prescriptions: [], documents: [] };
     }
-    console.log("🧞‍♂️  selectedPatient --->", selectedPatient);
 
     const prescriptions = [];
     const documents = [];
@@ -998,7 +1019,7 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
         <div className="flex-1 overflow-hidden ">
           <div className="flex h-full">
             {/* Scrollable Content */}
-            <main className="flex-1 w-full custom-scrollbar scrollbar-thin scrollbar-thumb-gray-600  hover:scrollbar-thumb-gray-500">
+            <main className="flex-1 w-full custom-scrollbar ">
               {activeTab === "overview" && (
                 <div className="py-3">
                   {/* Personal Information */}
@@ -1558,7 +1579,8 @@ export default function PatientsPage({ onNavigate }: PatientsPageProps) {
                             result.documents.map((document, index) => (
                               <div
                                 key={index}
-                                className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
+                                className="border border-gray-300 rounded-lg p-4 
+                                hover:shadow-md transition-shadow bg-gradient-to-r from-violet-50 to-purple-50"
                               >
                                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                   <div className="flex items-start gap-4 flex-1">
