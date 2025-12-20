@@ -127,7 +127,7 @@ export default function Document({
 }: PrescriptionProps) {
   const [documentForm, setDocumentForm] =
     useState<DocumentData>(mockDocumentdata);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState(!!savedPrescription && !isEditMode);
   const [documents, setDocuments] = useState<FileUpload[]>([]);
 

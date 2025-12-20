@@ -210,6 +210,7 @@ export default function BookAppointment({
   const [isSuccess, setIsSuccess] = useState(false);
   const [enabledDays, setEnabledDays] = useState<Appointmentslot[]>();
   const [errors, setErrors] = useState<Partial<AppointmentData>>({});
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<AppointmentData>({
     appointmentDate: "",
     appointmentTime: "",
@@ -265,9 +266,21 @@ export default function BookAppointment({
     return Object.keys(newErrors).length === 0;
   };
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     let id = user?._id;
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -286,6 +299,8 @@ export default function BookAppointment({
         });
       } catch (err) {
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -310,7 +325,7 @@ export default function BookAppointment({
     setIsSubmitting(true);
     const id = user?._id;
     try {
-      let response = await fetch("./api/user/bookAppointment", {
+      let response = await fetch("/api/user/bookAppointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -408,11 +423,6 @@ export default function BookAppointment({
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 7); // 7 days from now
     return maxDate.toISOString().split("T")[0];
-  };
-
-  const getConsultationIcon = (type: string) => {
-    const consultation = consultationType.find((c) => c.value === type);
-    return consultation ? consultation.icon : Calendar;
   };
 
   //Set the time in pm/am formate
