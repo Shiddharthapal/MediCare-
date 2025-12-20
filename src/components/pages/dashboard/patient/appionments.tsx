@@ -265,6 +265,7 @@ export default function Appointments({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isReschedule, setIsReschedule] = useState(false);
   const [uploadData, setUploadData] = useState<FileUpload | []>([]);
@@ -302,8 +303,20 @@ export default function Appointments({
     return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
   };
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -317,6 +330,8 @@ export default function Appointments({
         setAppointmentsData(userdata?.userdetails?.appointments);
       } catch (err) {
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -326,80 +341,26 @@ export default function Appointments({
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
   }, [categorizedAppointments.today]);
-  console.log("today appointment=>", todayGrouped);
 
   const futureGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.future);
   }, [categorizedAppointments.future]);
-  console.log("future appointment=>", futureGrouped);
 
   const pastGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
-
-  //Handle to join in video conferrance
-  const handleJoinSession = async (appointment: appointmentdata) => {
-    console.log(`[v0] Joining session for appointment ${appointment._id}`);
-
-    // If meet link exists, open it
-    if (appointment.meetLink) {
-      window.open(appointment.meetLink, "_blank");
-      return;
-    }
-
-    // If no meet link, try to create one
-    try {
-      const response = await fetch("/api/google/create-meet", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          appointmentId: appointment._id,
-          doctorName: appointment.doctorName,
-          patientName: appointment.patientName,
-          patientEmail: appointment.patientEmail,
-          appointmentDate: appointment.appointmentDate,
-          appointmentTime: appointment.appointmentTime,
-          reasonForVisit: appointment.reasonForVisit,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success && result.meetLink) {
-        // Update appointment with new meet link
-        appointment.meetLink = result.meetLink;
-
-        // Open the meet link
-        window.open(result.meetLink, "_blank");
-
-        // Show success message
-        alert("Google Meet link created successfully!");
-      } else {
-        throw new Error(result.error || "Failed to create Meet link");
-      }
-    } catch (error) {
-      console.error("[v0] Error creating Meet link:", error);
-      alert(
-        "Failed to create video call link. Please try again or contact support."
-      );
-    }
-  };
 
   // fetch report data
   useEffect(() => {
     const fetchuploaddata = async () => {
       try {
         const doctorUserId = selectedAppointment?.doctorUserId;
-        console.log("🧞‍♂️  doctorUserId --->", doctorUserId);
 
         // Filter uploads where userIdWHUp matches doctorUserId
         const filteredUploads =
           uploadData?.filter(
             (uploadObj: FileUpload) => uploadObj.userIdWHUP === doctorUserId
           ) || [];
-        console.log("🧞‍♂️  filteredUploads --->", filteredUploads);
         const uploadedFilesWithUrls = await Promise.all(
           filteredUploads.map(async (upload) => {
             const document = getBunnyCDNUrl(upload);
@@ -407,7 +368,6 @@ export default function Appointments({
             return upload;
           })
         );
-        console.log("🧞‍♂️  uploadedFilesWithUrls --->", uploadedFilesWithUrls);
 
         setSelectedAppointment((prev) => ({
           ...prev,
@@ -582,6 +542,17 @@ export default function Appointments({
     };
   }, [showReportsModal]);
 
+  if (isUploading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Uploading...</p>
+        </div>
+      </div>
+    );
+  }
+
   //user trying to save document
   const handleSaveDocuments = async () => {
     if (!selectedAppointment) return;
@@ -615,7 +586,6 @@ export default function Appointments({
       }
 
       const result = await response.json();
-      console.log("[v0] Upload successful:", result);
 
       // Clear uploaded files for this appointment
       setShowReportsModal(false);
@@ -698,12 +668,6 @@ export default function Appointments({
   const handleCloseDocument = () => {
     setShowDocument(false);
     setAppointmentsData(null);
-  };
-
-  //handler function to send message
-  const handleSendMessage = (message: string) => {
-    console.log("Message sent:", message);
-    setShowMessageModal(false);
   };
 
   const getDoctorInitials = (doctorName: string) => {
@@ -1432,7 +1396,8 @@ export default function Appointments({
                         (file, index) => (
                           <div
                             key={index}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                            className="flex items-center justify-between p-3
+                             bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <div className="p-2 bg-blue-100 rounded">
@@ -1636,7 +1601,8 @@ export default function Appointments({
                     />
                     <label
                       htmlFor={`file-upload-${selectedAppointment._id}`}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
+                      className="inline-flex items-center px-4 py-2 border 
+                      border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
                     >
                       Choose Files
                     </label>
