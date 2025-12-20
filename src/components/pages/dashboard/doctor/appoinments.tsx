@@ -294,7 +294,7 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentData | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const email = user?.email;
 
@@ -312,23 +312,6 @@ export default function AppointmentsPage({ onNavigate }: PatientsPageProps) {
         return "bg-red-100 text-red-800 border-red-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "confirmed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case "in-progress":
-        return <Clock className="h-4 w-4 text-blue-500" />;
-      case "pending":
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case "completed":
-        return <CheckCircle className="h-4 w-4 text-gray-500" />;
-      case "cancelled":
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
 

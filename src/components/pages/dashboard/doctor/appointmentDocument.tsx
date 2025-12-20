@@ -88,23 +88,6 @@ interface DocumentData {
   updatedAt: Date;
 }
 
-interface AppointmentData {
-  doctorpatinetId: string;
-  doctorUserId: string;
-  doctorName: string;
-  doctorSpecialist: string;
-  doctorGender: string;
-  doctorEmail: string;
-  hospital: string;
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
-  appointmentDate: string;
-  appointmentTime: string;
-  document: FileUpload[];
-  createdAt: Date;
-}
-
 const mockDocumentdata: DocumentData = {
   doctorpatinetId: "",
   doctorId: "",
@@ -136,17 +119,26 @@ export default function Document({
   isEditMode = false,
   onSave,
 }: PrescriptionProps) {
-  const [documentForm, setDocumentForm] =
-    useState<DocumentData>(mockDocumentdata);
-  const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState(!!savedPrescription && !isEditMode);
+  const [isLoading, setIsLoading] = useState(false);
   const [documents, setDocuments] = useState<FileUpload[]>([]);
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     let id = DocumentData.doctorId;
     let doctorpatinetId = DocumentData.doctorpatinetId;
 
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch("/api/doctor/fetchdocumentfromuser", {
           method: "POST",
@@ -186,19 +178,6 @@ export default function Document({
     // In a real app, this would trigger a download
     console.log("Downloading:", document.name);
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-64 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background p-6">
