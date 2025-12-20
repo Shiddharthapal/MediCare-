@@ -1,12 +1,4 @@
 "use client";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportsCharts } from "./reports-charts";
 import { DiagnosisTable } from "./diagnosis-table";
@@ -171,24 +163,41 @@ interface SettingPageProps {
   onNavigate: (page: string) => void;
 }
 export default function ReportsPage({ onNavigate }: SettingPageProps) {
-  const [showFilters, setShowFilters] = useState(false);
-  const [showExport, setShowExport] = useState(false);
   const [doctordata, setDoctordata] = useState<DoctorDetails>();
+    const [loading, setLoading] = useState(true);
   let doctor = useAppSelector((state) => state.auth.user);
   let id = doctor?._id;
 
   useEffect(() => {
     const fetchData = async () => {
-      let response = await fetch(`/api/doctor/${id}`);
-      let result = await response.json();
-      setDoctordata(result.doctordetails);
+      try {
+        setLoading(true);
+        let response = await fetch(`/api/doctor/${id}`);
+        let result = await response.json();
+        setDoctordata(result.doctordetails);
+      } catch (error) {
+        console.error("No document are  available");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, [doctor]);
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="space-y-4 mx-14 mt-4 width: 100%">
+      <div className="space-y-4 px-6 lg:mx-14 pt-4 width: 100%">
         {/* Tabs for Different Report Views */}
         <div>
           <h1 className="text-3xl font-semibold text-gray-900">Reports</h1>
@@ -197,7 +206,7 @@ export default function ReportsPage({ onNavigate }: SettingPageProps) {
           </p>
         </div>
         <Tabs defaultValue="overview">
-          <div className="overflow-x-auto">
+          <div className="custom-x-scrollbar">
             <TabsList className="grid w-full grid-cols-5 min-w-[500px] sm:min-w-0 bg-gray-300">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="medical">Medical</TabsTrigger>

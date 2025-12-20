@@ -70,46 +70,6 @@ const patientSatisfactionData = [
   { week: "Week 4", satisfaction: 4.8, responses: 61 },
 ];
 
-const COLORS = ["#15803d", "#84cc16", "#ea580c", "#6b7280", "#f97316"];
-
-const CustomTooltip = ({ active, payload }: { active: any; payload: any }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="bg-white p-2 border rounded shadow-lg text-sm">
-        <p className="font-semibold">{data.type}</p>
-        <p className="text-blue-600">Count: {data.count}</p>
-        <p className="text-gray-600">Percentage: {data.percentage}%</p>
-      </div>
-    );
-  }
-  return null;
-};
-
-const CustomTooltipRating = ({
-  active,
-  payload,
-  label,
-}: {
-  active: any;
-  payload: any;
-  label: any;
-}) => {
-  if (active && payload && payload.length) {
-    const data = payload[0];
-    return (
-      <div className="bg-white p-3 border rounded-lg shadow-lg">
-        <p className="font-semibold text-gray-700">{`Week ${label}`}</p>
-        <p className="text-blue-600">
-          <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-          Satisfaction: {data.value}/5
-        </p>
-      </div>
-    );
-  }
-  return null;
-};
-
 interface DoctorDetailstProps {
   appointment: AppointmentData[] | undefined;
   fees?: number;
@@ -117,19 +77,6 @@ interface DoctorDetailstProps {
 
 export function FinancialCharts({ appointment, fees }: DoctorDetailstProps) {
   const [screenSize, setScreenSize] = useState("lg");
-
-  const getChartDimensions = () => {
-    switch (screenSize) {
-      case "sm":
-        return { outerRadius: 50, height1: 200 };
-      case "md":
-        return { outerRadius: 65, height1: 250 };
-      case "lg":
-        return { outerRadius: 80, height1: 300 };
-      default:
-        return { outerRadius: 95, height1: 350 };
-    }
-  };
 
   //calculate revenue and appointment of last 12 month for graph
   const monthlyData = useMemo(() => {
@@ -163,6 +110,7 @@ export function FinancialCharts({ appointment, fees }: DoctorDetailstProps) {
     const allMonths: MonthlyData[] = [];
     const currentDate = new Date();
 
+    //insert the value of 12 months
     for (let i = 11; i >= 0; i--) {
       const monthDate = new Date(
         currentDate.getFullYear(),
@@ -200,7 +148,7 @@ export function FinancialCharts({ appointment, fees }: DoctorDetailstProps) {
                   color: "hsl(217, 91%, 60%)", // Green
                 },
               }}
-              className="h-[250px] sm:h-[300px] lg:h-[300px] w-[400px] md:w-[800px]"
+              className="h-[200px] sm:h-[250px] md:h-[280px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart

@@ -42,12 +42,10 @@ type ServiceType = "report" | "diagnosis" | "treatment" | "monitoring" | null;
 
 export default function MedicationLandingPage() {
   const [activeService, setActiveService] = useState<ServiceType>(null);
+
   let doctor = useAppSelector((state) => state.auth.user);
-  console.log("🧞‍♂️  doctor --->", doctor);
   const role = doctor?.role || null;
-  console.log("🧞‍♂️  role --->", role);
   let demo = useAppSelector((state) => state.profile.hasProfile);
-  console.log("🧞‍♂️  demo --->", demo);
   const services = [
     {
       id: "diagnosis" as const,
@@ -139,7 +137,7 @@ export default function MedicationLandingPage() {
   return (
     <div className=" bg-gradient-to-br from-primary to-secondary">
       <div className=" ">
-        <section className="relative py-20 lg:py-32">
+        <section className="relative pt-10 pb-20 lg:py-32">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center">
               <div className="sm:text-center md:max-w-4xl xl:max-w-5xl md:mx-auto lg:col-span-6 lg:text-left">
@@ -188,7 +186,7 @@ export default function MedicationLandingPage() {
         </section>
 
         {/*Dashboard features*/}
-        <section className="py-16 bg-gray-50">
+        <section className=" pt-12 pb-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
@@ -441,8 +439,8 @@ export default function MedicationLandingPage() {
         </section>
 
         {/*service section */}
-        <section id="services" className="py-16 bg-white">
-          <div className="w-full py-16 bg-white overflow-hidden">
+        <section id="services" className=" bg-white">
+          <div className="w-full pb-16 pt-8 lg:py-16 bg-white overflow-hidden">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
                 Services
@@ -500,7 +498,7 @@ export default function MedicationLandingPage() {
         </section>
 
         {/* Features Section */}
-        <section id="services" className="py-16 bg-white">
+        <section id="services" className="pb-16 pt-8 lg:py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
@@ -577,7 +575,7 @@ export default function MedicationLandingPage() {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="py-16 bg-gray-50">
+        <section id="how-it-works" className="pb-16 pt-8 lg:py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">

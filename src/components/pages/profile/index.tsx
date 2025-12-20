@@ -109,6 +109,7 @@ export default function PatientProfileForm() {
     bloodGroup: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [errors, setErrors] = useState<Partial<PatientData>>({});
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
@@ -148,6 +149,17 @@ export default function PatientProfileForm() {
 
   // Update the initial formData state to use dummy data:
   const initialFormData = dummyPatientData;
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   useEffect(() => {
     if (user) {
       setFormData((prev) => ({
@@ -157,6 +169,7 @@ export default function PatientProfileForm() {
       }));
     }
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -174,6 +187,8 @@ export default function PatientProfileForm() {
         setFormData(responseData?.userdetails);
       } catch (err) {
         console.log(err);
+      }finally{
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -211,7 +226,7 @@ export default function PatientProfileForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setIsLoading(true);
+    setIsCreating(true);
     try {
       dispatch(updateProfileStart());
       const response = await fetch("/api/createProfile", {
@@ -273,44 +288,20 @@ export default function PatientProfileForm() {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsCreating(false);
     }
   };
 
-  //handler function to set profile/avatar preview
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    const validExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
-    const fileExtension = file.name.split(".").pop()?.toLowerCase();
-
-    if (!fileExtension || !validExtensions.includes(fileExtension)) {
-      alert("Please select a valid image file");
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      const preview = reader.result as string;
-      setAvatarPreview(preview);
-
-      const fileData = {
-        name: file.name,
-        documentName: file.name.replace(/\.[^/.]+$/, ""),
-        size: file.size,
-        type: file.type,
-        file: file,
-        preview: preview,
-      };
-
-      setUploadedFiles([fileData]);
-    };
-
-    reader.readAsDataURL(file);
-  };
+   if (isCreating) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Profile creating...</p>
+        </div>
+      </div>
+    );
+  }
 
   const resetForm = () => {
     setFormData(initialFormData);

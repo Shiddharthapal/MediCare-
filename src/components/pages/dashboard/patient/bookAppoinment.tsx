@@ -36,12 +36,15 @@ import {
 import { useAppSelector } from "@/redux/hooks";
 import { DatePickerWithSlots } from "./date-picker-with-availableSlots";
 
-interface AppointmentSlot {
-  enabled: boolean;
+interface TimeSlot {
   startTime: string;
   endTime: string;
 }
-[];
+
+interface AppointmentSlot {
+  enabled: boolean;
+  slots: TimeSlot[]; // Array of time slots
+}
 
 interface Doctor {
   _id: string;
@@ -60,6 +63,7 @@ interface Doctor {
   about: string;
   availableSlots: AppointmentSlot;
   consultationModes: string[];
+  appointments?: BookedAppointment[];
 }
 
 interface User {
@@ -84,11 +88,16 @@ interface AppointmentData {
   specialRequests: string;
 }
 
+interface BookedAppointment {
+  appointmentDate: string;
+  appointmentTime: string;
+  status?: string;
+}
+
 interface Appointmentslot {
   day: string;
   enabled: boolean;
-  startTime: any;
-  endTime: any;
+  slots?: TimeSlot[];
 }
 
 const consultationType = [
@@ -201,6 +210,7 @@ export default function BookAppointment({
   const [isSuccess, setIsSuccess] = useState(false);
   const [enabledDays, setEnabledDays] = useState<Appointmentslot[]>();
   const [errors, setErrors] = useState<Partial<AppointmentData>>({});
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<AppointmentData>({
     appointmentDate: "",
     appointmentTime: "",
@@ -256,9 +266,21 @@ export default function BookAppointment({
     return Object.keys(newErrors).length === 0;
   };
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     let id = user?._id;
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -277,6 +299,8 @@ export default function BookAppointment({
         });
       } catch (err) {
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -301,13 +325,27 @@ export default function BookAppointment({
     setIsSubmitting(true);
     const id = user?._id;
     try {
-      let response = await fetch("./api/user/bookAppointment", {
+      let response = await fetch("/api/user/bookAppointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ formData, doctor, id }),
       });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        if (response.status === 409) {
+          setErrors((prev) => ({
+            ...prev,
+            appointmentTime:
+              payload?.message || "Selected time slot is already booked",
+          }));
+        } else {
+          console.error("Error booking appointment:", payload);
+        }
+        return;
+      }
 
       console.log("Appointment booked:", {
         doctor: doctor,
@@ -328,12 +366,14 @@ export default function BookAppointment({
         const response =
           doctor?.availableSlots &&
           Object.entries(doctor.availableSlots)
-            .filter(([day, schedule]) => schedule.enabled)
+            .filter(
+              ([_, schedule]) =>
+                schedule.enabled && (schedule.slots?.length ?? 0) > 0
+            )
             .map(([day, schedule]) => ({
               day,
               enabled: schedule.enabled,
-              startTime: schedule.startTime,
-              endTime: schedule.endTime,
+              slots: schedule.slots,
             }));
         if (!response) {
           console.log("doctor availavelslots is not valid");
@@ -385,11 +425,6 @@ export default function BookAppointment({
     return maxDate.toISOString().split("T")[0];
   };
 
-  const getConsultationIcon = (type: string) => {
-    const consultation = consultationType.find((c) => c.value === type);
-    return consultation ? consultation.icon : Calendar;
-  };
-
   //Set the time in pm/am formate
   const formatTo12Hour = (time24) => {
     if (!time24) return "";
@@ -419,12 +454,22 @@ export default function BookAppointment({
     return `${startTime} - ${endTime}`;
   };
 
+  const normalizeTimeLabel = (label: string) => {
+    return label.replace(/\s+/g, " ").trim().toLowerCase();
+  };
+
+  const isAppointmentCancelled = (status?: string) => {
+    if (!status) return false;
+    const normalized = status.toLowerCase();
+    return normalized === "cancelled" || normalized === "canceled";
+  };
+
   //check the doctor is not
   if (!doctor) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh]  custom-scrollbar">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
@@ -460,7 +505,7 @@ export default function BookAppointment({
           <>
             {/* Doctor Info Header */}
             <Card className="mb-6">
-              <CardContent className="p-4">
+              <CardContent className="px-4 lg:p-4">
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src="/placeholder.svg" />
@@ -491,7 +536,7 @@ export default function BookAppointment({
             </Card>
 
             {/* Progress Steps */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-0 lg:mb-6">
               {[1, 2, 3, 4].map((step) => (
                 <div key={step} className="flex items-center">
                   <div
@@ -610,7 +655,10 @@ export default function BookAppointment({
                         Available days:{" "}
                         {doctor?.availableSlots
                           ? Object.entries(doctor.availableSlots)
-                              .filter(([_, slot]) => slot?.enabled)
+                              .filter(
+                                ([_, dayData]) =>
+                                  dayData?.enabled && dayData?.slots?.length > 0
+                              )
                               .map(
                                 ([day]) =>
                                   day.charAt(0).toUpperCase() + day.slice(1)
@@ -659,26 +707,85 @@ export default function BookAppointment({
                               }
                             );
 
-                            // Get the slot for that specific day
-                            const daySlot = doctor?.availableSlots?.[dayName];
+                            // Get the day data for that specific day
+                            const dayKey = doctor?.availableSlots
+                              ? Object.keys(doctor.availableSlots).find(
+                                  (key) =>
+                                    key.toLowerCase() === dayName.toLowerCase()
+                                )
+                              : undefined;
+                            const dayData = dayKey
+                              ? doctor?.availableSlots?.[dayKey]
+                              : undefined;
 
-                            if (!daySlot?.enabled) {
+                            // Check if day is enabled and has slots
+                            if (
+                              !dayData?.enabled ||
+                              !dayData?.slots ||
+                              dayData.slots.length === 0
+                            ) {
                               return (
                                 <div className="px-2 py-4 text-center text-gray-500">
-                                  No slots available for {dayName}
+                                  No slots available for{" "}
+                                  {formData.appointmentDate}
                                 </div>
                               );
                             }
 
-                            return (
-                              <SelectItem
-                                key={dayName}
-                                value={formatWorkingHours(daySlot)}
-                                className="font-medium"
-                              >
-                                {dayName}: {formatWorkingHours(daySlot)}
-                              </SelectItem>
+                            const bookedTimes = new Set(
+                              (doctor?.appointments ?? [])
+                                .filter(
+                                  (appointment) =>
+                                    appointment.appointmentDate ===
+                                      formData.appointmentDate &&
+                                    !isAppointmentCancelled(appointment.status)
+                                )
+                                .map((appointment) =>
+                                  normalizeTimeLabel(
+                                    appointment.appointmentTime || ""
+                                  )
+                                )
                             );
+
+                            const availableTimeSlots = dayData.slots.filter(
+                              (slot) => {
+                                const label = `${formatTo12Hour(
+                                  slot.startTime
+                                )} - ${formatTo12Hour(slot.endTime)}`;
+                                return !bookedTimes.has(
+                                  normalizeTimeLabel(label)
+                                );
+                              }
+                            );
+                            console.log(
+                              "🧞‍♂️  availableTimeSlots --->",
+                              availableTimeSlots
+                            );
+
+                            if (availableTimeSlots.length === 0) {
+                              return (
+                                <div className="px-2 py-1 text-center text-blue-500">
+                                  All slots are booked for{" "}
+                                  {formData.appointmentDate}
+                                </div>
+                              );
+                            }
+
+                            // Return individual time slots as SelectItems
+                            return availableTimeSlots.map((slot) => {
+                              const label = `${formatTo12Hour(
+                                slot.startTime
+                              )} - ${formatTo12Hour(slot.endTime)}`;
+                              return (
+                                <SelectItem
+                                  key={label}
+                                  value={label}
+                                  className="font-medium"
+                                >
+                                  {label}
+                                </SelectItem>
+                              );
+                            });
                           })()}
                         </SelectContent>
                       </Select>
@@ -764,7 +871,7 @@ export default function BookAppointment({
                               handleInputChange("consultationType", mode)
                             }
                           >
-                            <CardContent className="p-4 text-center">
+                            <CardContent className=" px-4 lg:p-4 text-center">
                               {getIcon(mode)}
                               <h4 className="font-medium">{capitalizedMode}</h4>
                               <p className="text-xs text-gray-600 mt-1">

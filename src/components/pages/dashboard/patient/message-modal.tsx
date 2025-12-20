@@ -125,7 +125,7 @@ export const MessageModal = ({
         </DialogHeader>
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 pr-4 overflow-y-auto scrollbar-track-white">
+        <ScrollArea className="flex-1 pr-4 custom-scrollbar scrollbar-track-white">
           <div className="space-y-3">
             {messages.map((message) => (
               <div

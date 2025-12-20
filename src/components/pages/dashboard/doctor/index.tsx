@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -17,6 +16,7 @@ import {
   LogOut,
   X,
   Menu,
+  File,
 } from "lucide-react";
 import {
   Area,
@@ -34,6 +34,7 @@ import Appointments from "./appoinments";
 import Patients from "./allpatients";
 import Setting from "./setting_doctor/index";
 import Reports from "./reports/index";
+import Document from "./document";
 import { useAppSelector } from "@/redux/hooks";
 import { useLocation } from "react-router-dom";
 
@@ -121,28 +122,6 @@ const mockGenderCount: GenderCount = {
   Female: 7,
   Other: 1,
 };
-const mockAppointmentData: AppointmentData = {
-  doctorName: "",
-  doctorSpecialist: "",
-  doctorEmail: "",
-  patientId: "",
-  patientName: "",
-  patientEmail: "",
-  patientPhone: "",
-  patientGender: "",
-  appointmentDate: "",
-  appointmentTime: "",
-  consultationType: "",
-  consultedType: "",
-  reasonForVisit: "",
-  symptoms: "",
-  previousVisit: "",
-  emergencyContact: "",
-  emergencyPhone: "",
-  paymentMethod: "",
-  specialRequests: "",
-  createdAt: new Date(),
-};
 
 // Mock DoctorDetails with empty strings
 const mockDoctorDetails: DoctorDetails = {
@@ -170,103 +149,13 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", active: true },
   { icon: Calendar, label: "Appointments", active: false },
   { icon: Users, label: "Patients", active: false },
+  { icon: File, label: "Document", active: false },
   { icon: FileText, label: "Reports", active: false },
   { icon: Settings, label: "Setting", active: false },
 ];
 
 const COLORS = ["#3b82f6", "#ec4899", "#047857"];
 
-const data = [
-  { name: "Jan", appointments: 12 },
-  { name: "Feb", appointments: 19 },
-  { name: "Mar", appointments: 15 },
-  { name: "Apr", appointments: 25 },
-  { name: "May", appointments: 22 },
-  { name: "Jun", appointments: 18 },
-  { name: "Jul", appointments: 10 },
-  { name: "Aug", appointments: 8 },
-  { name: "Sep", appointments: 22 },
-  { name: "Oct", appointments: 2 },
-  { name: "Nov", appointments: 18 },
-  { name: "Dec", appointments: 10 },
-];
-const stats = [
-  {
-    title: "Appointments",
-    value: "28",
-    change: "-2.5%",
-    trend: "down",
-    icon: Calendar,
-  },
-  {
-    title: "Revenue",
-    value: "$982",
-    change: "-1%",
-    trend: "down",
-    icon: CreditCard,
-  },
-  {
-    title: "Total Patients",
-    value: "258",
-    change: "-1.8%",
-    trend: "down",
-    icon: Users,
-  },
-  {
-    title: "New Patients",
-    value: "32",
-    change: "+3.7%",
-    trend: "up",
-    icon: User,
-  },
-];
-
-const todaysAppointments = [
-  {
-    id: 1,
-    patient: "Kristina Stokes",
-    service: "Consultation",
-    date: "05/02/2022",
-    time: "09:30",
-    avatar: "/placeholder.svg?height=32&width=32",
-    status: "active",
-  },
-  {
-    id: 2,
-    patient: "Alexander Preston",
-    service: "Consultation",
-    date: "05/02/2022",
-    time: "12:00",
-    avatar: "/placeholder.svg?height=32&width=32",
-    status: "pending",
-  },
-  {
-    id: 3,
-    patient: "Johnathan Mcgee",
-    service: "Consultation",
-    date: "05/02/2022",
-    time: "15:30",
-    avatar: "/placeholder.svg?height=32&width=32",
-    status: "pending",
-  },
-];
-
-const requests = [
-  {
-    id: 1,
-    patient: "Kevin Mitchell",
-    type: "Standard Consultation",
-    date: "07/02/2022",
-    time: "09:30 - 10:30",
-  },
-  {
-    id: 2,
-    patient: "Adeline Hughes",
-    type: "Standard Consultation",
-    date: "07/02/2022",
-    time: "14:00 - 15:00",
-  },
-];
 const findTotalPatient = (appoinments: AppointmentData[]) => {
   if (!appoinments) {
     return 0;
@@ -549,6 +438,7 @@ export default function DashboardPage() {
     return true;
   };
 
+  //categorize the appointment based on the appointment data
   const categorizedAppointments = useMemo(() => {
     return categorizeAppointments(
       doctorData.appointments
@@ -559,6 +449,7 @@ export default function DashboardPage() {
     );
   }, [doctorData.appointments]);
 
+  //use useEffect state for fetch data of the doctor
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -579,15 +470,18 @@ export default function DashboardPage() {
     fetchData();
   }, [doctor]);
 
+  //use useEffect state for findout patient by their gender and count the appointment
   useEffect(() => {
     handleGenderCountofPatient(doctorData.appointments);
     handleAppointmentCount(doctorData.appointments);
   }, [doctorData]);
 
+  //findout the todayappointment and save the data to browser memory
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
   }, [categorizedAppointments.today]);
 
+  // set the time format
   const checktimelimit = ([date, time]: [string, string]) => {
     const currentDate = new Date();
     const currentDateString = currentDate.toISOString().split("T")[0]; // Format: "2025-08-08"
@@ -630,6 +524,7 @@ export default function DashboardPage() {
       : "bg-gray-400 hover:bg-gray-500";
   };
 
+  //handle function to get the doctor initial
   const getDoctorInitials = (doctorName: string) => {
     if (!doctorName) return "DR";
 
@@ -657,24 +552,23 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile menu button */}
-      <Button
-        variant="ghost"
+      <button
         size="icon"
-        className="fixed top-3  z-50 lg:hidden hover:bg-gray-300"
+        className="fixed top-5 ml-2  z-50 lg:hidden hover:text-[hsl(201,95%,31%)]"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
-        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
+        {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
 
       {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 z-40 bg-white shadow-lg transform transition-all duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } ${collapsed ? "md:w-16" : "md:w-64"} w-full`}
+        } ${collapsed ? "md:w-16" : "md:w-64"} w-64`}
       >
         <div className="flex flex-col  pt-16 h-full">
           {/* Navigation */}
-          <nav className="flex-1 p-4 overflow-y-auto">
+          <nav className="flex-1 p-4 custom-scrollbar">
             <ul className="space-y-2">
               {menuItems.map((item, index) => (
                 <li key={index}>
@@ -766,8 +660,8 @@ export default function DashboardPage() {
       >
         {/* Main Content */}
         {currentPage === "dashboard" && (
-          <div className="flex-1 flex items-center mx-10 pt-5 flex-col ">
-            <main className="flex-1 overflow-y-auto px-6 pb-6 pt-2 w-full">
+          <div className="flex-1 flex items-center mx-auto pt-5 flex-col ">
+            <main className="flex-1 custom-scrollbar px-6 pb-6 pt-2 w-full">
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
                 {/* Stats Cards */}
                 <div className="xl:col-span-4 ">
@@ -825,7 +719,7 @@ export default function DashboardPage() {
                               4.7
                             </p>
                           </div>
-                          <div className="p-2">
+                          <div className="px-2 pt-2 lg:p-2">
                             <p className="text-xs text-gray-300 uppercase mb-1">
                               License
                             </p>
@@ -855,7 +749,7 @@ export default function DashboardPage() {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="h-[300px] w-full">
+                        <div className="h-[150px] lg:h-[300px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                               data={dataAppointmentCount}
@@ -925,15 +819,15 @@ export default function DashboardPage() {
                         <CardTitle>Gender Distribution</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="h-[300px] w-full">
+                        <div className="h-[150px] lg:h-[300px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
                                 data={datagender}
                                 cx="50%"
                                 cy="50%"
-                                innerRadius={60}
-                                outerRadius={100}
+                                innerRadius="70%"
+                                outerRadius="100%"
                                 paddingAngle={5}
                                 dataKey="value"
                               >
@@ -994,23 +888,23 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       {Object.keys(todayGrouped).length > 0 ? (
-                        <div className="overflow-x-auto">
+                        <div className="custom-x-scrollbar">
                           <table className="w-full">
                             <thead>
                               <tr className="border-b">
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   PATIENT
                                 </th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   SERVICE
                                 </th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   DATE
                                 </th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   TIME
                                 </th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">
+                                <th className="text-left py-3 px-4 font-medium text-gray-200">
                                   ACTION
                                 </th>
                               </tr>
@@ -1079,11 +973,11 @@ export default function DashboardPage() {
                           </table>
                         </div>
                       ) : (
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-100 mb-2">
+                        <div className=" p-2 bg-blue-300 rounded-lg">
+                          <h3 className="text-lg font-medium text-blue-800 mb-2">
                             No appointments
                           </h3>
-                          <p className="text-gray-200 mb-4">
+                          <p className="text-blue-800 mb-4">
                             You don't have any appointments scheduled for today.
                           </p>
                         </div>
@@ -1181,13 +1075,15 @@ export default function DashboardPage() {
         {currentPage === "patients" && <Patients onNavigate={setCurrentPage} />}
         {currentPage === "setting" && <Setting onNavigate={setCurrentPage} />}
         {currentPage === "reports" && <Reports onNavigate={setCurrentPage} />}
+        {currentPage === "document" && <Document onNavigate={setCurrentPage} />}
 
         {/* Other Pages Placeholder */}
         {currentPage !== "dashboard" &&
           currentPage !== "appointments" &&
           currentPage !== "reports" &&
           currentPage !== "setting" &&
-          currentPage !== "patients" && (
+          currentPage !== "patients" &&
+          currentPage !== "document" && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <h2 className="text-2xl font-bold mb-4 capitalize">

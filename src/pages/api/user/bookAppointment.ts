@@ -69,6 +69,48 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     const doctordetails = await doctorDetails.findOne({ userId: userId });
+    if (!doctordetails) {
+      return new Response(
+        JSON.stringify({
+          message: "No doctor found",
+        }),
+        {
+          status: 500,
+          headers,
+        }
+      );
+    }
+
+    const normalizeTimeLabel = (label: string) => {
+      return label.replace(/\s+/g, " ").trim().toLowerCase();
+    };
+
+    const isAppointmentCancelled = (status?: string) => {
+      if (!status) return false;
+      const normalized = status.toLowerCase();
+      return normalized === "cancelled" || normalized === "canceled";
+    };
+
+    const hasSlotConflict = doctordetails.appointments?.some((appointment) => {
+      if (appointment.appointmentDate !== appointmentDate) return false;
+      if (isAppointmentCancelled(appointment.status)) return false;
+      return (
+        normalizeTimeLabel(appointment.appointmentTime || "") ===
+        normalizeTimeLabel(appointmentTime)
+      );
+    });
+
+    if (hasSlotConflict) {
+      return new Response(
+        JSON.stringify({
+          message: "Selected time slot is already booked",
+        }),
+        {
+          status: 409,
+          headers,
+        }
+      );
+    }
 
     if (userdetails) {
       const newbookAppoinmentsDetails = {
@@ -109,17 +151,6 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
 
-      if (!doctordetails) {
-        return new Response(
-          JSON.stringify({
-            message: "No doctor found",
-          }),
-          {
-            status: 500,
-            headers,
-          }
-        );
-      }
       const newbookAppoinmentsDataforDoctor = {
         doctorpatinetId: uniqueId,
         doctorName: name,

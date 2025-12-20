@@ -33,6 +33,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import Document from "./document";
 
 interface FileUpload {
   _id: string;
@@ -264,6 +265,7 @@ export default function Appointments({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isReschedule, setIsReschedule] = useState(false);
   const [uploadData, setUploadData] = useState<FileUpload | []>([]);
@@ -276,7 +278,9 @@ export default function Appointments({
   const [appointmentsData, setAppointmentsData] =
     useState<appointmentdata | null>(null);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const [showAudioRoomDialog, setShowAudioRoomDialog] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showDocument, setShowDocument] = useState(false);
 
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
@@ -299,8 +303,20 @@ export default function Appointments({
     return `https://${BUNNY_CDN_PULL_ZONE}/${path}`;
   };
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -314,6 +330,8 @@ export default function Appointments({
         setAppointmentsData(userdata?.userdetails?.appointments);
       } catch (err) {
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -323,80 +341,26 @@ export default function Appointments({
   const todayGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.today);
   }, [categorizedAppointments.today]);
-  console.log("today appointment=>", todayGrouped);
 
   const futureGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.future);
   }, [categorizedAppointments.future]);
-  console.log("future appointment=>", futureGrouped);
 
   const pastGrouped = useMemo(() => {
     return groupAppointmentsByDate(categorizedAppointments.past);
   }, [categorizedAppointments.past]);
-
-  //Handle to join in video conferrance
-  const handleJoinSession = async (appointment: appointmentdata) => {
-    console.log(`[v0] Joining session for appointment ${appointment._id}`);
-
-    // If meet link exists, open it
-    if (appointment.meetLink) {
-      window.open(appointment.meetLink, "_blank");
-      return;
-    }
-
-    // If no meet link, try to create one
-    try {
-      const response = await fetch("/api/google/create-meet", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          appointmentId: appointment._id,
-          doctorName: appointment.doctorName,
-          patientName: appointment.patientName,
-          patientEmail: appointment.patientEmail,
-          appointmentDate: appointment.appointmentDate,
-          appointmentTime: appointment.appointmentTime,
-          reasonForVisit: appointment.reasonForVisit,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success && result.meetLink) {
-        // Update appointment with new meet link
-        appointment.meetLink = result.meetLink;
-
-        // Open the meet link
-        window.open(result.meetLink, "_blank");
-
-        // Show success message
-        alert("Google Meet link created successfully!");
-      } else {
-        throw new Error(result.error || "Failed to create Meet link");
-      }
-    } catch (error) {
-      console.error("[v0] Error creating Meet link:", error);
-      alert(
-        "Failed to create video call link. Please try again or contact support."
-      );
-    }
-  };
 
   // fetch report data
   useEffect(() => {
     const fetchuploaddata = async () => {
       try {
         const doctorUserId = selectedAppointment?.doctorUserId;
-        console.log("🧞‍♂️  doctorUserId --->", doctorUserId);
 
         // Filter uploads where userIdWHUp matches doctorUserId
         const filteredUploads =
           uploadData?.filter(
             (uploadObj: FileUpload) => uploadObj.userIdWHUP === doctorUserId
           ) || [];
-        console.log("🧞‍♂️  filteredUploads --->", filteredUploads);
         const uploadedFilesWithUrls = await Promise.all(
           filteredUploads.map(async (upload) => {
             const document = getBunnyCDNUrl(upload);
@@ -404,7 +368,6 @@ export default function Appointments({
             return upload;
           })
         );
-        console.log("🧞‍♂️  uploadedFilesWithUrls --->", uploadedFilesWithUrls);
 
         setSelectedAppointment((prev) => ({
           ...prev,
@@ -579,6 +542,17 @@ export default function Appointments({
     };
   }, [showReportsModal]);
 
+  if (isUploading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Uploading...</p>
+        </div>
+      </div>
+    );
+  }
+
   //user trying to save document
   const handleSaveDocuments = async () => {
     if (!selectedAppointment) return;
@@ -612,7 +586,6 @@ export default function Appointments({
       }
 
       const result = await response.json();
-      console.log("[v0] Upload successful:", result);
 
       // Clear uploaded files for this appointment
       setShowReportsModal(false);
@@ -679,16 +652,22 @@ export default function Appointments({
     setShowPrescriptionModal(true);
   };
 
+  //handler function to show document
+  const handleSeeDocument = (appointmentdata: any) => {
+    setAppointmentsData(appointmentdata);
+    setShowDocument(true);
+  };
+
   //handler function to view report of appointment
   const handleViewReports = (appointment: any) => {
     setSelectedAppointment(appointment);
     setShowReportsModal(true);
   };
 
-  //handler function to send message
-  const handleSendMessage = (message: string) => {
-    console.log("Message sent:", message);
-    setShowMessageModal(false);
+  //handler function to close document
+  const handleCloseDocument = () => {
+    setShowDocument(false);
+    setAppointmentsData(null);
   };
 
   const getDoctorInitials = (doctorName: string) => {
@@ -714,6 +693,42 @@ export default function Appointments({
       return "DR";
     }
   };
+
+  const isAppointmentToday = (appointmentDate: string) => {
+    return appointmentDate === getTodayDate();
+  };
+
+  if (showDocument) {
+    let id = user?._id;
+
+    // Transform appointmentsData to match DocumentData structure
+    const documentData = {
+      doctorpatinetId: appointmentsData?.doctorUserId, // or however you construct this
+      doctorId: appointmentsData?.doctorUserId,
+      doctorName: appointmentsData?.doctorName,
+      patientId: id || "",
+      patientName: appointmentsData?.patientName,
+      patientEmail: appointmentsData?.patientEmail,
+      category: appointmentsData?.consultationType,
+      userIdWHUP: id,
+      appointmentId: appointmentsData?._id,
+      deletedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    return (
+      <Document
+        DocumentData={documentData}
+        onClose={handleCloseDocument}
+        // Add these if needed:
+        // savedPrescription={undefined}
+        // isEditMode={false}
+        // onSave={(data) => console.log(data)}
+      />
+    );
+  }
+
   const AppointmentCard = ({
     status,
     appointment,
@@ -722,152 +737,207 @@ export default function Appointments({
     status: string;
     appointment: any;
     showActions?: boolean;
-  }) => (
-    <>
-      <Card
-        className={`mb-4  border-l-4 ${getBorderColor(status)} hover:shadow-md transition-shadow`}
-      >
-        <CardContent className="p-4">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src="/placeholder.svg?height=48&width=48" />
-                <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                  {getDoctorInitials(appointment.doctorName)}
-                </AvatarFallback>
-              </Avatar>
+  }) => {
+    const consultationType = (
+      appointment?.consultationType || ""
+    ).toLowerCase();
+    const isVideoConsult = consultationType === "video";
+    const isAudioConsult =
+      consultationType === "phone" || consultationType === "audio";
+    const isToday = isAppointmentToday(appointment?.appointmentDate);
+    const isCancelled =
+      (appointment?.status || "").toLowerCase() === "cancelled";
+    const canStartSession = isToday && !isCancelled && status !== "completed";
+    return (
+      <>
+        <Card
+          className={`mb-4  border-l-4 ${getBorderColor(status)} hover:shadow-md transition-shadow`}
+        >
+          <CardContent className=" px-4 lg:p-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src="/placeholder.svg?height=48&width=48" />
+                  <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                    {getDoctorInitials(appointment.doctorName)}
+                  </AvatarFallback>
+                </Avatar>
 
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-gray-900">
-                    {appointment.reasonForVisit}
-                  </h3>
-                  <Badge className={getStatusColor(status)}>{status}</Badge>
-                </div>
-
-                <p className="text-sm text-gray-600 mb-1">
-                  {appointment.doctorName} • {appointment.doctorSpecialist}
-                </p>
-
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {appointment.appointmentTime}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-gray-900">
+                      {appointment.reasonForVisit}
+                    </h3>
+                    <Badge className={getStatusColor(status)}>{status}</Badge>
                   </div>
-                  <div className="flex items-center gap-1">
-                    {getModeIcon(appointment.consultationType)}
-                    {appointment.consultationType === "in-person"
-                      ? "In-person"
-                      : appointment.consultationType === "video"
-                        ? "Video Call"
-                        : "Phone Call"}
+
+                  <p className="text-sm text-gray-600 mb-1">
+                    {appointment.doctorName} • {appointment.doctorSpecialist}
+                  </p>
+
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {appointment.appointmentTime}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {getModeIcon(appointment.consultationType)}
+                      {appointment.consultationType === "in-person"
+                        ? "In-person"
+                        : appointment.consultationType === "video"
+                          ? "Video Call"
+                          : "Phone Call"}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex gap-2 flex-wrap">
-              {/* Appointment Management Actions (only for upcoming/today) */}
-              {showActions && (
-                <>
-                  {status === "confirmed" &&
-                    appointment.consultationType === "video" && (
+              <div className="flex gap-2 flex-wrap">
+                {/* Appointment Management Actions (only for upcoming/today) */}
+                {showActions && (
+                  <>
+                    {isVideoConsult && canStartSession && (
+                      <Button
+                        size="sm"
+                        className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white w-full xs:flex-1"
+                        onClick={() => setShowRoomDialog(true)}
+                        disabled={!canStartSession}
+                      >
+                        <Video className="h-3 w-3 mr-1" />
+                        Join Video
+                      </Button>
+                    )}
+                    {isAudioConsult && canStartSession && (
+                      <Button
+                        size="sm"
+                        className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white w-full xs:flex-1"
+                        onClick={() => setShowAudioRoomDialog(true)}
+                        disabled={!canStartSession}
+                      >
+                        <Phone className="h-3 w-3 mr-1" />
+                        Join Audio
+                      </Button>
+                    )}
+                    {canStartSession && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
+                     hover:bg-purple-50 text-purple-700 bg-transparent w-full xs:flex-1"
+                        onClick={() => setShowMessageModal(true)}
+                        disabled={!canStartSession}
+                      >
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        Message
+                      </Button>
+                    )}
+                    {status === "pending" && (
                       <>
                         <Button
-                          size="sm"
-                          className="text-xs bg-blue-500 hover:bg-blue-600 hover:text-black text-white flex-1"
-                          onClick={() => setShowRoomDialog(true)}
+                          variant="outline"
+                          className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
+                          onClick={() =>
+                            handleCancelAppointment(appointment._id)
+                          }
                         >
-                          <Video className="h-3 w-3 mr-1" />
-                          Start
+                          Cancel
                         </Button>
                         <Button
-                          size="sm"
                           variant="outline"
-                          className="text-xs border-2 border-purple-400 transition-all hover:border-purple-600
-                           hover:bg-purple-50 text-purple-700 bg-transparent"
-                          onClick={() => setShowMessageModal(true)}
+                          className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
+                          onClick={() =>
+                            handleRescheduleAppointment(appointment)
+                          }
                         >
-                          <MessageCircle className="h-4 w-4" />
+                          Reschedule
                         </Button>
                       </>
                     )}
-                  {status === "pending" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        className="text-red-500 border-red-200 hover:bg-red-50 bg-transparent"
-                        onClick={() => handleCancelAppointment(appointment._id)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="text-gray-600 border-gray-200 hover:bg-gray-50 bg-transparent"
-                        onClick={() => handleRescheduleAppointment(appointment)}
-                      >
-                        Reschedule
-                      </Button>
-                    </>
-                  )}
-                </>
-              )}
+                  </>
+                )}
 
-              {/* Prescription and Reports options (always visible) */}
-              <Button
-                variant="outline"
-                className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
-                onClick={() => handleViewPrescription(appointment)}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Prescription
-              </Button>
-              <Button
-                variant="outline"
-                className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
-                onClick={() => handleViewDetails(appointment, status)}
-              >
-                <Info className="h-4 w-4 mr-2" />
-                See Details
-              </Button>
-              <Button
-                variant="outline"
-                className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
-                onClick={() => handleViewReports(appointment)}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Reports
-              </Button>
+                {/* Prescription and Reports options (always visible) */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleSeeDocument(appointment)}
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                >
+                  Document
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent"
+                  onClick={() => handleViewPrescription(appointment)}
+                >
+                  <FileText className="h-4 w-4 mr-0" />
+                  Prescription
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                  onClick={() => handleViewReports(appointment)}
+                >
+                  <Upload className="h-4 w-4 mr-0" />
+                  Reports
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-purple-600 border-purple-200 hover:bg-purple-50 bg-transparent"
+                  onClick={() => handleViewDetails(appointment, status)}
+                >
+                  <Info className="h-4 w-4 mr-0" />
+                  See Details
+                </Button>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-      <Dialog open={showRoomDialog} onOpenChange={setShowRoomDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create Room</DialogTitle>
-            <DialogDescription>
-              Enter a room number to start the consultation
-            </DialogDescription>
-          </DialogHeader>
-          <RoomCreationForm
-            onSuccess={() => setShowRoomDialog(false)}
-            emailId={email || ""}
-          />
-        </DialogContent>
-      </Dialog>
-      {/* Message Modal */}
-      <MessageModal
-        open={showMessageModal}
-        onOpenChange={setShowMessageModal}
-        doctorName={appointment.doctorName}
-        patientName={appointment.patientName}
-        doctorEmail={appointment.doctorEmail}
-        patientEmail={appointment.patientEmail || email}
-        senderRole="patient"
-      />
-    </>
-  );
+          </CardContent>
+        </Card>
+        <Dialog open={showRoomDialog} onOpenChange={setShowRoomDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Room</DialogTitle>
+              <DialogDescription>
+                Enter the room number provided by your doctor to join the call
+              </DialogDescription>
+            </DialogHeader>
+            <RoomCreationForm
+              onSuccess={() => setShowRoomDialog(false)}
+              emailId={email || ""}
+            />
+          </DialogContent>
+        </Dialog>
+        <Dialog
+          open={showAudioRoomDialog}
+          onOpenChange={setShowAudioRoomDialog}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Audio Room</DialogTitle>
+              <DialogDescription>
+                Enter the room number provided by your doctor to join the call
+              </DialogDescription>
+            </DialogHeader>
+            <RoomCreationForm
+              mode="audio"
+              onSuccess={() => setShowAudioRoomDialog(false)}
+              emailId={email || ""}
+            />
+          </DialogContent>
+        </Dialog>
+        {/* Message Modal */}
+        <MessageModal
+          open={showMessageModal}
+          onOpenChange={setShowMessageModal}
+          doctorName={appointment.doctorName}
+          patientName={appointment.patientName}
+          doctorEmail={appointment.doctorEmail}
+          patientEmail={appointment.patientEmail || email}
+          senderRole="patient"
+        />
+      </>
+    );
+  };
 
   const CancelledAppointmentCard = ({ appointment }: { appointment: any }) => (
     <Card className="mb-4 border-l-4 border-red-500">
@@ -913,7 +983,7 @@ export default function Appointments({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -931,7 +1001,7 @@ export default function Appointments({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-blue-600 font-medium">Upcoming</p>
@@ -945,7 +1015,7 @@ export default function Appointments({
         </Card>
 
         <Card className="bg-green-50 border-green-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-green-600 font-medium">Today</p>
@@ -959,7 +1029,7 @@ export default function Appointments({
         </Card>
 
         <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-purple-600 font-medium">Completed</p>
@@ -1012,7 +1082,7 @@ export default function Appointments({
 
       {/* Content */}
       {activeTab === "upcoming" && (
-        <div className=" mb-6 ">
+        <div className=" pb-10 ">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-600" />
             <h2 className="text-xl font-semibold text-gray-900">Next 7 Days</h2>
@@ -1033,7 +1103,10 @@ export default function Appointments({
                         year: "numeric",
                       })}
                     </span>
-                    <Badge variant="outline" className="ml-2">
+                    <Badge
+                      variant="outline"
+                      className="ml-2 bg-purple-300 text-purple-900"
+                    >
                       {appointments.length} appointment
                       {appointments.length !== 1 ? "s" : ""}
                     </Badge>
@@ -1154,7 +1227,7 @@ export default function Appointments({
             <h2 className="text-xl font-semibold text-gray-900">
               Appointment History
             </h2>
-            <Badge variant="outline">
+            <Badge variant="outline" className="bg-blue-300 text-blue-800">
               {Object.keys(pastGrouped).length} completed
             </Badge>
           </div>
@@ -1172,7 +1245,10 @@ export default function Appointments({
                         year: "numeric",
                       })}
                     </h3>
-                    <Badge variant="outline" className="ml-2">
+                    <Badge
+                      variant="outline"
+                      className="ml-2 bg-blue-500 text-white"
+                    >
                       {appointments.length} appointment
                       {appointments.length !== 1 ? "s" : ""}
                     </Badge>
@@ -1210,7 +1286,7 @@ export default function Appointments({
       {/*Details Modal*/}
       {showDetailsModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -1320,7 +1396,8 @@ export default function Appointments({
                         (file, index) => (
                           <div
                             key={index}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                            className="flex items-center justify-between p-3
+                             bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <div className="p-2 bg-blue-100 rounded">
@@ -1387,7 +1464,7 @@ export default function Appointments({
       {/* Prescription Modal */}
       {showPrescriptionModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -1470,7 +1547,7 @@ export default function Appointments({
       {/* Reports Modal add */}
       {showReportsModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -1524,7 +1601,8 @@ export default function Appointments({
                     />
                     <label
                       htmlFor={`file-upload-${selectedAppointment._id}`}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
+                      className="inline-flex items-center px-4 py-2 border 
+                      border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
                     >
                       Choose Files
                     </label>

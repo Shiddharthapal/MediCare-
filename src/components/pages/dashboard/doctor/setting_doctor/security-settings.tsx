@@ -90,7 +90,6 @@ export function SecuritySettings() {
     if (!validateForm()) return;
 
     setIsLoading(true);
-
     try {
       const response = await fetch("/api/doctor/changePassword", {
         method: "POST",
@@ -121,6 +120,17 @@ export function SecuritySettings() {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

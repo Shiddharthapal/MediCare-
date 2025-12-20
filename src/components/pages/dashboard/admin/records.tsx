@@ -60,7 +60,7 @@ export default function Records({
       </div>
 
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="custom-x-scrollbar">
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>

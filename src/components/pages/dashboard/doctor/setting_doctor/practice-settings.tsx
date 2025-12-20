@@ -56,6 +56,7 @@ export function PracticeSettings() {
   const loadPracticeData = async () => {
     let id = doctor?._id;
     try {
+      setIsLoading(false);
       const response = await fetch(`/api/doctor/${id}`, {
         method: "GET",
         headers: {
@@ -79,14 +80,16 @@ export function PracticeSettings() {
       }
     } catch (error) {
       console.error("Failed to load practice data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   //Handle when you trying to save data of user
   const handleSaveChanges = async () => {
     let id = doctor?._id;
-    setIsLoading(true);
     try {
+      setIsLoading(true);
       const response = await fetch("/api/doctor/practice-settings", {
         method: "POST",
         headers: {
@@ -117,6 +120,17 @@ export function PracticeSettings() {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   //Input change of form
   const handleInputChange = (field: keyof PracticeData, value: any) => {

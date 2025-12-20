@@ -10,10 +10,10 @@ interface SettingPageProps {
 
 export default function SettingsPage({ onNavigate }: SettingPageProps) {
   return (
-    <div className="p-8 pt-5">
+    <div className="p-8 pt-3">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-5">
           <h1 className="text-3xl font-bold text-foreground">Settings</h1>
           <p className="text-muted-foreground mt-2">
             Manage your account settings and preferences
@@ -21,8 +21,8 @@ export default function SettingsPage({ onNavigate }: SettingPageProps) {
         </div>
 
         <Tabs defaultValue="general" className="w-full space-y-2">
-          <div className="w-full overflow-x-auto">
-            <TabsList className="w-full min-w-max grid grid-cols-4 h-6 md:h-10 bg-gray-300">
+          <div className="w-full ">
+            <TabsList className="w-full min-w-max grid grid-cols-4 h-9 sm:h-10 md:h-11 bg-gray-200 gap-1 sm:gap-2 p-1">
               <TabsTrigger value="general" className="h-full">
                 General
               </TabsTrigger>

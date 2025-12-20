@@ -1,5 +1,11 @@
-import React, { useEffect, useCallback, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
 import { useSocket } from "@/components/provider/socket";
 import { usePeer } from "@/components/provider/peer";
@@ -8,10 +14,15 @@ import { Mic, MicOff, Phone, Share2, Video, VideoOff } from "lucide-react";
 // Client signaling aligned with server: offer/answer/ice-candidate targeting socketId
 const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.auth.user);
   const emailId = user?.email;
   const isDoctor = user?.role === "doctor";
+  const callMode = useMemo(
+    () => (searchParams.get("mode") === "audio" ? "audio" : "video"),
+    [searchParams]
+  );
   const { socket } = useSocket();
   const {
     peer,
@@ -24,6 +35,7 @@ const RoomPage = () => {
   } = usePeer();
 
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
+  const isAudioMode = callMode === "audio";
   const [remoteEmailId, setRemoteEmailId] = useState<string | null>(null);
   const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
   const [pendingCall, setPendingCall] = useState<{
@@ -32,21 +44,26 @@ const RoomPage = () => {
   } | null>(null);
   const [isMakingOffer, setIsMakingOffer] = useState(false);
   const [isAudioOn, setIsAudioOn] = useState(true);
-  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isVideoOn, setIsVideoOn] = useState(callMode !== "audio");
   const [callActive, setCallActive] = useState(true);
+  const [remoteMediaState, setRemoteMediaState] = useState({
+    audio: false,
+    video: callMode !== "audio",
+  });
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement>(null);
   const hasJoinedRef = useRef(false);
   const pendingIceRef = useRef<RTCIceCandidateInit[]>([]);
 
   const getUserMediaStream = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
-      video: true,
+      video: !isAudioMode,
     });
     setMyStream(stream);
     return stream;
-  }, []);
+  }, [isAudioMode]);
 
   // Cleanup function to stop all tracks and reset state
   const cleanupCall = useCallback(() => {
@@ -61,12 +78,19 @@ const RoomPage = () => {
       setMyStream(null);
     }
 
+    if (remoteStream) {
+      remoteStream.getTracks().forEach((track) => track.stop());
+    }
+
     // Clear video elements
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = null;
     }
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
+    }
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = null;
     }
 
     socket.emit("leave-room", { roomId, emailId });
@@ -95,8 +119,21 @@ const RoomPage = () => {
     setRemoteEmailId(null);
     setPendingCall(null);
     setCallActive(false);
+    setRemoteMediaState({
+      audio: false,
+      video: false,
+    });
     pendingIceRef.current = [];
-  }, [myStream, peer, resetPeer]);
+  }, [
+    emailId,
+    isAudioMode,
+    myStream,
+    peer,
+    remoteStream,
+    resetPeer,
+    roomId,
+    socket,
+  ]);
 
   // Ensure we always have a local stream before sending offers/answers
   const ensureLocalStream = useCallback(async () => {
@@ -225,25 +262,35 @@ const RoomPage = () => {
   //handler function for doing on/off toggle audio
   const toggleAudio = () => {
     if (myStream) {
+      const next = !isAudioOn;
       myStream.getAudioTracks().forEach((track) => {
-        track.enabled = !track.enabled;
+        track.enabled = next;
       });
-      setIsAudioOn(!isAudioOn);
+      setIsAudioOn(next);
+      if (roomId) {
+        socket.emit("toggle-audio", { roomId, isAudioEnabled: next });
+      }
     }
   };
 
   //handler function for doing on/off video
   const toggleVideo = () => {
+    if (isAudioMode) return;
     if (myStream) {
+      const next = !isVideoOn;
       myStream.getVideoTracks().forEach((track) => {
-        track.enabled = !track.enabled;
+        track.enabled = next;
       });
-      setIsVideoOn(!isVideoOn);
+      setIsVideoOn(next);
+      if (roomId) {
+        socket.emit("toggle-video", { roomId, isVideoEnabled: next });
+      }
     }
   };
 
   //handler function to share screen
   const handleScreenShare = async () => {
+    if (isAudioMode) return;
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
@@ -449,6 +496,44 @@ const RoomPage = () => {
     };
   }, [peer, remoteSocketId, socket]);
 
+  useEffect(() => {
+    const handleRemoteAudioToggle = ({
+      socketId,
+      isAudioEnabled,
+    }: {
+      socketId: string;
+      isAudioEnabled: boolean;
+    }) => {
+      if (remoteSocketId && socketId !== remoteSocketId) return;
+      setRemoteMediaState((prev) => ({
+        ...prev,
+        audio: !!isAudioEnabled,
+      }));
+    };
+
+    const handleRemoteVideoToggle = ({
+      socketId,
+      isVideoEnabled,
+    }: {
+      socketId: string;
+      isVideoEnabled: boolean;
+    }) => {
+      if (remoteSocketId && socketId !== remoteSocketId) return;
+      if (isAudioMode) return;
+      setRemoteMediaState((prev) => ({
+        ...prev,
+        video: !!isVideoEnabled,
+      }));
+    };
+
+    socket.on("user-toggled-audio", handleRemoteAudioToggle);
+    socket.on("user-toggled-video", handleRemoteVideoToggle);
+    return () => {
+      socket.off("user-toggled-audio", handleRemoteAudioToggle);
+      socket.off("user-toggled-video", handleRemoteVideoToggle);
+    };
+  }, [isAudioMode, remoteSocketId, socket]);
+
   //hook to get the media stream of device
   useEffect(() => {
     getUserMediaStream();
@@ -461,12 +546,31 @@ const RoomPage = () => {
     }
   }, [myStream]);
 
-  // Attach remote stream to video element
+  // Attach remote stream to video/audio element
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
       remoteVideoRef.current.srcObject = remoteStream;
     }
+    if (remoteAudioRef.current && remoteStream) {
+      remoteAudioRef.current.srcObject = remoteStream;
+    }
   }, [remoteStream]);
+
+  useEffect(() => {
+    if (!remoteStream) {
+      setRemoteMediaState({
+        audio: false,
+        video: false,
+      });
+      return;
+    }
+    const audioTrack = remoteStream.getAudioTracks()[0];
+    const videoTrack = remoteStream.getVideoTracks()[0];
+    setRemoteMediaState({
+      audio: !!audioTrack && audioTrack.enabled !== false,
+      video: isAudioMode ? false : !!videoTrack && videoTrack.enabled !== false,
+    });
+  }, [isAudioMode, remoteStream]);
 
   // Auto-send local tracks once we have them
   useEffect(() => {
@@ -491,32 +595,81 @@ const RoomPage = () => {
 
   return (
     <div className="fixed inset-0 bg-slate-900 mt-16 mb-2 xl:mt-16 xl:mb-4 flex flex-col">
-      {/* Main Video Area */}
+      {/* Main Media Area */}
       <div className="flex-1 relative">
-        {/* Remote Video - Full Screen */}
-        <video
-          ref={remoteVideoRef}
-          autoPlay
-          playsInline
-          className="w-full h-full object-cover"
-        />
+        {isAudioMode ? (
+          <div className="w-full h-full flex items-center justify-center bg-slate-900 text-white">
+            <div className="text-center space-y-2 bg-slate-800/60 px-6 py-4 rounded-xl border border-slate-700">
+              <p className="text-lg font-semibold">Audio call in progress</p>
+              <p className="text-sm text-slate-300">
+                {remoteEmailId || "Waiting for participant..."}
+              </p>
+              <div className="flex items-center justify-center gap-4 text-xs text-slate-200">
+                <span className="flex items-center gap-1">
+                  {remoteMediaState.audio ? (
+                    <Mic className="w-4 h-4 text-emerald-300" />
+                  ) : (
+                    <MicOff className="w-4 h-4 text-amber-300" />
+                  )}
+                  {remoteMediaState.audio ? "Mic on" : "Muted"}
+                </span>
+              </div>
+            </div>
+            <audio
+              ref={remoteAudioRef}
+              autoPlay
+              playsInline
+              className="hidden"
+            />
+          </div>
+        ) : (
+          <>
+            {/* Remote Video - Full Screen */}
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className="w-full h-full object-cover"
+            />
 
-        {/* Local Video - Circular PiP Bottom Right */}
-        <div className="absolute top-5 right-5 w-44 h-44 rounded-full overflow-hidden border-4 border-white shadow-lg">
-          <video
-            ref={localVideoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover"
-          />
-        </div>
+            {/* Local Video - Circular PiP Bottom Right */}
+            <div className="absolute top-5 right-5 w-44 h-44 rounded-full overflow-hidden border-4 border-white shadow-lg">
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </>
+        )}
 
         {/* Call Info Overlay */}
-        <div className="absolute top-8 left-8 text-white">
+        <div className="absolute top-8 left-8 text-white space-y-2">
           <p className="text-sm font-medium">
             {remoteEmailId || "Waiting for participant..."}
           </p>
+          <div className="flex items-center gap-3 text-xs text-slate-200">
+            <span className="flex items-center gap-1">
+              {remoteMediaState.audio ? (
+                <Mic className="w-4 h-4 text-emerald-300" />
+              ) : (
+                <MicOff className="w-4 h-4 text-amber-300" />
+              )}
+              {remoteMediaState.audio ? "Mic on" : "Muted"}
+            </span>
+            {!isAudioMode && (
+              <span className="flex items-center gap-1">
+                {remoteMediaState.video ? (
+                  <Video className="w-4 h-4 text-emerald-300" />
+                ) : (
+                  <VideoOff className="w-4 h-4 text-amber-300" />
+                )}
+                {remoteMediaState.video ? "Camera on" : "Camera off"}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -540,30 +693,34 @@ const RoomPage = () => {
         </button>
 
         {/* Video Toggle */}
-        <button
-          onClick={toggleVideo}
-          className={`p-4 rounded-full transition-all ${
-            isVideoOn
-              ? "bg-slate-700 hover:bg-slate-600"
-              : "bg-red-600 hover:bg-red-700"
-          }`}
-          title={isVideoOn ? "Turn off camera" : "Turn on camera"}
-        >
-          {isVideoOn ? (
-            <Video className="w-6 h-6 text-white" />
-          ) : (
-            <VideoOff className="w-6 h-6 text-white" />
-          )}
-        </button>
+        {!isAudioMode && (
+          <button
+            onClick={toggleVideo}
+            className={`p-4 rounded-full transition-all ${
+              isVideoOn
+                ? "bg-slate-700 hover:bg-slate-600"
+                : "bg-red-600 hover:bg-red-700"
+            }`}
+            title={isVideoOn ? "Turn off camera" : "Turn on camera"}
+          >
+            {isVideoOn ? (
+              <Video className="w-6 h-6 text-white" />
+            ) : (
+              <VideoOff className="w-6 h-6 text-white" />
+            )}
+          </button>
+        )}
 
         {/* Screen Share */}
-        <button
-          onClick={handleScreenShare}
-          className="p-4 rounded-full bg-slate-700 hover:bg-slate-600 transition-all"
-          title="Share screen"
-        >
-          <Share2 className="w-6 h-6 text-white" />
-        </button>
+        {!isAudioMode && (
+          <button
+            onClick={handleScreenShare}
+            className="p-4 rounded-full bg-slate-700 hover:bg-slate-600 transition-all"
+            title="Share screen"
+          >
+            <Share2 className="w-6 h-6 text-white" />
+          </button>
+        )}
 
         {/* End Call */}
         <button

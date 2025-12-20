@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,27 +10,29 @@ import { useNavigate } from "react-router-dom";
 interface RoomCreationFormProps {
   onSuccess?: () => void;
   emailId: string; // must be provided so server join validation passes
+  mode?: "video" | "audio";
 }
 
 export const RoomCreationForm = ({
   onSuccess,
   emailId,
+  mode = "video",
 }: RoomCreationFormProps) => {
   const [roomNumber, setRoomNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { socket } = useSocket();
   const navigate = useNavigate();
-  console.log("🧞‍♂️  emailId --->", emailId);
   const [timeoutId, setTimeoutId] = useState<number | null>(null);
 
   const handleRoomJoined = useCallback(
     ({ roomId }: { roomId: string }) => {
       setIsLoading(false);
-      console.log("Room joined successfully:", roomId);
-      navigate(`/room/${roomId}`);
+      console.log("Room joined successfully:", roomId, "mode:", mode);
+      const modeQuery = mode === "audio" ? "?mode=audio" : "";
+      navigate(`/room/${roomId}${modeQuery}`);
       onSuccess?.();
     },
-    [navigate, onSuccess]
+    [mode, navigate, onSuccess]
   );
 
   const handleRoomJoinError = useCallback((error: { message: string }) => {
@@ -64,7 +64,6 @@ export const RoomCreationForm = ({
       return;
     }
 
-    console.log("🧞‍♂️  socket --->", socket);
     if (!socket) {
       alert("Socket connection not available. Please refresh the page.");
       return;

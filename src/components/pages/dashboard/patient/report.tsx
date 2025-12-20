@@ -79,13 +79,26 @@ export default function Reports() {
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([]);
   const [uploadedFilesData, setUploadedFilesData] = useState<FileUpload[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   //to fetch userdata
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -97,6 +110,8 @@ export default function Reports() {
         setUploadedFilesData(userdata?.userdetails?.upload);
       } catch (err) {
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -127,11 +142,6 @@ export default function Reports() {
       month: "long",
       day: "numeric",
     });
-  };
-
-  const handleViewDocument = (document: any) => {
-    setSelectedDocument(document);
-    setIsPreviewOpen(true);
   };
 
   const handleDownloadDocument = (document: any) => {
@@ -253,6 +263,17 @@ export default function Reports() {
     debounceTimersRef.current[index] = timerId;
   };
 
+  if (isUploading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Uploading...</p>
+        </div>
+      </div>
+    );
+  }
+
   //Handle the file when you want to save it
   const handleSaveDocuments = async () => {
     if (!uploadDocumentCategory) {
@@ -337,7 +358,10 @@ export default function Reports() {
                   <h3 className="text-lg font-medium text-gray-800">
                     {formatDate(date)}
                   </h3>
-                  <Badge variant="outline" className="ml-2">
+                  <Badge
+                    variant="outline"
+                    className="ml-2 bg-blue-300 text-blue-800"
+                  >
                     {groupedDocuments[date].length} document
                     {groupedDocuments[date].length !== 1 ? "s" : ""}
                   </Badge>
@@ -375,7 +399,7 @@ export default function Reports() {
 
       {/* Document Preview Dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] custom-scrollbar">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {selectedDocument && (
@@ -435,7 +459,7 @@ export default function Reports() {
       </Dialog>
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto  scrollbar-gutter-stable">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar  scrollbar-gutter-stable">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -466,7 +490,8 @@ export default function Reports() {
                   <button
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full border-2 rounded-md px-3 py-2 text-left bg-white transition-all hover:border-primary/50 hover:shadow-lg flex items-center justify-between"
+                    className="w-full border-2 rounded-md px-3 py-2 text-left bg-white transition-all
+                     hover:border-primary/50 hover:shadow-lg flex items-center justify-between"
                   >
                     <span
                       className={
@@ -491,7 +516,10 @@ export default function Reports() {
                       />
 
                       {/* Dropdown menu */}
-                      <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                      <div
+                        className="absolute z-20 w-full mt-1 bg-white border
+                       border-gray-200 rounded-md shadow-lg max-h-60 custom-scrollbar"
+                      >
                         {[
                           "Laboratory",
                           "Dermatology",
@@ -549,7 +577,9 @@ export default function Reports() {
                   />
                   <label
                     htmlFor="file-upload-modal"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer transition-colors"
+                    className="inline-flex items-center px-4 py-2 border
+                     border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 
+                     cursor-pointer transition-colors"
                   >
                     Choose Files
                   </label>

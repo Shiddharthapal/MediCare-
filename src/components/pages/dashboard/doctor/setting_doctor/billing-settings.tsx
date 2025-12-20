@@ -47,26 +47,43 @@ export function BillingSettings() {
   const doctor = useAppSelector((state) => state.auth.user);
   const id = doctor?._id;
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   //fetch the doctor details
   useEffect(() => {
     const fetchData = async () => {
-      let response = await fetch(`/api/doctor/${id}`);
-      if (!response.ok) {
-        return new Response(
-          JSON.stringify({
-            message: "Failed to load user data",
-          }),
-          {
-            status: 404,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+      try {
+        setIsLoading(true);
+        let response = await fetch(`/api/doctor/${id}`);
+        if (!response.ok) {
+          return new Response(
+            JSON.stringify({
+              message: "Failed to load user data",
+            }),
+            {
+              status: 404,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+        }
+        const responsedata = await response.json();
+        setFormData(responsedata?.doctordetails?.payment);
+      } catch (error) {
+        console.error("No document are  available");
+      } finally {
+        setIsLoading(false);
       }
-      const responsedata = await response.json();
-      console.log("🧞‍♂️  responsedata --->", responsedata);
-      setFormData(responsedata?.doctordetails?.payment);
     };
     fetchData();
   }, [id]);

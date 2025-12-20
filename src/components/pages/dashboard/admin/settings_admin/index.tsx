@@ -7,7 +7,7 @@ interface SettingPageProps {
 
 export default function SettingsPage({ onNavigate }: SettingPageProps) {
   return (
-    <div className="container mx-auto space-y-6  min-h-screen">
+    <div className="container space-y-6  min-h-screen">
       <div className="  pb-8 pt-2">
         {/* Header */}
         <div className="mb-2">

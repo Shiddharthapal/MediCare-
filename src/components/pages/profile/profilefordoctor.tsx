@@ -20,11 +20,13 @@ import {
   Mail,
   Phone,
   Target,
+  Edit2,
+  Trash2,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -37,16 +39,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import {
-  setEditMode,
   updateProfileStart,
   updateProfileSuccess,
   updateProfileFailure,
@@ -73,26 +68,28 @@ interface Doctor {
   image: string;
 }
 
-interface AppointmentSlot {
-  enabled: boolean;
+interface TimeSlot {
   startTime: string;
   endTime: string;
+}
+
+interface AppointmentSlot {
+  enabled: boolean;
+  slots: TimeSlot[]; // Array of time slots
 }
 
 interface PracticeData {
   appointmentSlot: {
     [key: string]: {
       enabled: boolean;
-      startTime: string;
-      endTime: string;
+      slots: TimeSlot[];
     };
   };
 }
 
 const mockAppointmentSlot: AppointmentSlot = {
   enabled: false,
-  startTime: "",
-  endTime: "",
+  slots: [],
 };
 
 // Mock data - in real app, this would come from API/database
@@ -123,23 +120,49 @@ export default function DoctorProfilePage() {
   const { toast } = useToast();
   const [language, setLanguage] = useState("");
   const [specializations, setSpecializations] = useState("");
+  const [editingSlot, setEditingSlot] = useState<{
+    day: string;
+    index: number;
+  } | null>(null);
   const [hasProfile, setHasProfile] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<PracticeData>({
     appointmentSlot: {
-      Monday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Tuesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Wednesday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Thursday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Friday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Saturday: { enabled: true, startTime: "09:00", endTime: "17:00" },
-      Sunday: { enabled: true, startTime: "09:00", endTime: "17:00" },
+      Monday: {
+        enabled: true,
+        slots: [{ startTime: "09:00", endTime: "17:00" }],
+      },
+      Tuesday: {
+        enabled: true,
+        slots: [{ startTime: "09:00", endTime: "17:00" }],
+      },
+      Wednesday: {
+        enabled: true,
+        slots: [{ startTime: "09:00", endTime: "17:00" }],
+      },
+      Thursday: {
+        enabled: true,
+        slots: [{ startTime: "09:00", endTime: "17:00" }],
+      },
+      Friday: {
+        enabled: true,
+        slots: [{ startTime: "09:00", endTime: "17:00" }],
+      },
+      Saturday: {
+        enabled: false,
+        slots: [{ startTime: "09:00", endTime: "17:00" }],
+      },
+      Sunday: {
+        enabled: false,
+        slots: [{ startTime: "09:00", endTime: "17:00" }],
+      },
     },
   });
   const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.auth.token);
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
-  console.log("🧞‍♂️  id --->", id);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -159,43 +182,170 @@ export default function DoctorProfilePage() {
         console.error("Unable to authenticate user");
         return;
       }
-      const response = await fetch(`/api/doctor/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`Status:${response.status}`);
-      }
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/doctor/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Status:${response.status}`);
+        }
 
-      const responseData = await response.json();
-      console.log("🧞‍♂️  responseData --->", responseData);
-      setHasProfile(Boolean(responseData.doctordetails));
-      setDoctor(responseData.doctordetails);
-      setEditedDoctor(responseData.doctordetails);
+        const responseData = await response.json();
+        console.log("🧞‍♂️  responseData --->", responseData);
+        setHasProfile(Boolean(responseData.doctordetails));
+        setDoctor(responseData.doctordetails);
+        setEditedDoctor(responseData.doctordetails);
+
+        // Normalize availableSlots (Map on backend) into our form structure
+        const availableSlots = responseData?.doctordetails?.availableSlots;
+        if (availableSlots) {
+          const normalized: PracticeData["appointmentSlot"] = {};
+          const dayOrder = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ];
+          dayOrder.forEach((day) => {
+            const slot = availableSlots[day];
+            const slotArray =
+              Array.isArray(slot?.slots) && slot.slots.length > 0
+                ? slot.slots
+                : slot?.startTime && slot?.endTime
+                  ? [{ startTime: slot.startTime, endTime: slot.endTime }]
+                  : [];
+            normalized[day] = {
+              enabled: slot?.enabled ?? false,
+              slots: slotArray,
+            };
+          });
+          setFormData({ appointmentSlot: normalized });
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchDetails();
   }, [user]);
 
-  const handleWorkingHourChange = (day: string, field: string, value: any) => {
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleToggleDay = (day: string, checked: boolean) => {
     setFormData((prev) => ({
       ...prev,
       appointmentSlot: {
         ...prev.appointmentSlot,
         [day]: {
           ...prev.appointmentSlot[day],
-          [field]: value,
+          enabled: checked,
         },
       },
     }));
   };
 
-  const formatTo12Hour = (time24) => {
-    if (!time24) return "";
+  const toggleEditSlot = (day: string, index: number) => {
+    if (editingSlot?.day === day && editingSlot?.index === index) {
+      setEditingSlot(null);
+      toast({
+        title: "Changes saved",
+        description: `Time slot for ${day} updated successfully`,
+      });
+    } else {
+      setEditingSlot({ day, index });
+    }
+  };
 
+  const addTimeSlot = (day) => {
+    setFormData((prev) => ({
+      ...prev,
+      appointmentSlot: {
+        ...prev.appointmentSlot,
+        [day]: {
+          ...prev.appointmentSlot[day],
+          slots: [
+            ...prev?.appointmentSlot[day]?.slots,
+            { startTime: "09:00", endTime: "17:00" },
+          ],
+        },
+      },
+    }));
+  };
+
+  const removeTimeSlot = (day: string, index: number) => {
+    setFormData((prev) => {
+      const currentSlots = prev.appointmentSlot[day].slots;
+
+      // Don't allow removing the last slot
+      if (currentSlots.length === 1) {
+        toast({
+          title: "Cannot remove",
+          description:
+            "At least one time slot is required. Disable the day instead.",
+          variant: "destructive",
+        });
+        return prev;
+      }
+
+      return {
+        ...prev,
+        appointmentSlot: {
+          ...prev.appointmentSlot,
+          [day]: {
+            ...prev.appointmentSlot[day],
+            slots: currentSlots.filter((_, i) => i !== index),
+          },
+        },
+      };
+    });
+
+    toast({
+      title: "Time slot removed",
+      description: `Time slot removed from ${day}`,
+    });
+  };
+
+  const updateTimeSlot = (
+    day: string,
+    index: number,
+    field: string,
+    value: string
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      appointmentSlot: {
+        ...prev.appointmentSlot,
+        [day]: {
+          ...prev.appointmentSlot[day],
+          slots: prev.appointmentSlot[day].slots.map((slot, i) =>
+            i === index ? { ...slot, [field]: value } : slot
+          ),
+        },
+      },
+    }));
+  };
+
+  const formatTo12Hour = (time24: string) => {
+    if (!time24) return "";
     const [hours, minutes] = time24.split(":");
-    const hour = parseInt(hours, 10);
+    const hour = Number.parseInt(hours, 10);
     const minute = minutes || "00";
 
     if (hour === 0) {
@@ -209,15 +359,19 @@ export default function DoctorProfilePage() {
     }
   };
 
-  const formatWorkingHours = (hours) => {
-    if (!hours?.enabled) {
+  const formatWorkingHours = (dayData) => {
+    // Check if day is enabled and has slots
+    if (!dayData?.enabled || !dayData?.slots || dayData.slots.length === 0) {
       return "Closed";
     }
 
-    const startTime = formatTo12Hour(hours.startTime);
-    const endTime = formatTo12Hour(hours.endTime);
-
-    return `${startTime} - ${endTime}`;
+    // Map through slots array and format each time range
+    return dayData.slots
+      .map(
+        (slot) =>
+          `${formatTo12Hour(slot.startTime)} - ${formatTo12Hour(slot.endTime)}`
+      )
+      .join(", ");
   };
 
   const handleEdit = () => {
@@ -225,14 +379,42 @@ export default function DoctorProfilePage() {
   };
 
   const handleSave = async () => {
+    setIsCreating(true);
     try {
       dispatch(updateProfileStart());
+
+      // Normalize slots array (UI) for backend (stores multiple slots per day)
+      const normalizedAppointmentSlot = Object.entries(
+        formData.appointmentSlot
+      ).reduce((acc, [day, data]) => {
+        const slots =
+          data?.slots?.length && Array.isArray(data.slots)
+            ? data.slots.map(({ startTime, endTime }) => ({
+                startTime,
+                endTime,
+              })) // Only keep startTime and endTime
+            : [{ startTime: "09:00", endTime: "17:00" }];
+
+        acc[day] = {
+          enabled: !!data.enabled,
+          slots,
+        };
+        return acc;
+      }, {} as any);
+
       const response = await fetch("/api/doctorProfileCreate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ editedDoctor, id, formData }),
+        body: JSON.stringify({
+          editedDoctor,
+          id,
+          formData: {
+            ...formData,
+            appointmentSlot: normalizedAppointmentSlot,
+          },
+        }),
       });
 
       const responseData = await response.json();
@@ -277,8 +459,21 @@ export default function DoctorProfilePage() {
         description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsCreating(false);
     }
   };
+
+  if (isCreating) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Profile creating...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleToggleConsultationMode = (
     mode: "video" | "phone" | "in-person"
@@ -687,102 +882,196 @@ export default function DoctorProfilePage() {
                   )}
                 </div>
 
-                <div>
-                  <Label className="text-lg font-semibold flex items-center text-orange-900 mb-1">
-                    <Clock className="h-5 w-5 mr-2 text-orange-600" />
-                    Available Time Slots
-                  </Label>
-                  {isEditing ? (
-                    <div>
-                      <Card className=" border border-gray-400">
-                        <CardHeader>
-                          <CardDescription>
-                            Set your visiting hours
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {[
-                            "Monday",
-                            "Tuesday",
-                            "Wednesday",
-                            "Thursday",
-                            "Friday",
-                            "Saturday",
-                            "Sunday",
-                          ].map((day) => (
-                            <div
-                              key={day}
-                              className="flex items-center justify-between"
-                            >
-                              <div className="flex items-center space-x-4">
-                                <Switch
-                                  checked={
-                                    formData.appointmentSlot[day].enabled
-                                  }
-                                  onCheckedChange={(checked) =>
-                                    handleWorkingHourChange(
-                                      day,
-                                      "enabled",
-                                      checked
-                                    )
-                                  }
-                                />
-                                <Label className="w-20">{day}</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Input
-                                  type="time"
-                                  value={
-                                    formData.appointmentSlot[day].startTime
-                                  }
-                                  onChange={(e) =>
-                                    handleWorkingHourChange(
-                                      day,
-                                      "startTime",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="w-32"
-                                />
-                                <span>to</span>
-                                <Input
-                                  type="time"
-                                  value={formData.appointmentSlot[day].endTime}
-                                  onChange={(e) =>
-                                    handleWorkingHourChange(
-                                      day,
-                                      "endTime",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="w-32"
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </CardContent>
-                      </Card>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-                      {doctor?.availableSlots &&
-                        Object.entries(doctor?.availableSlots).map(
-                          ([day, hours]) => (
-                            <div key={day} className="flex items-center py-1">
-                              <span className="capitalize font-medium text-gray-700 w-20">
-                                {day}:
-                              </span>
-                              <span
-                                className={`${hours?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
-                              >
-                                {formatWorkingHours(hours)}
-                              </span>
-                            </div>
-                          )
-                        )}
-                    </div>
-                  )}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <Clock className="h-6 w-6 mr-3 text-orange-600" />
+                    <h2 className="text-2xl font-bold text-orange-900">
+                      Available Time Slots
+                    </h2>
+                  </div>
+                  <button
+                    onClick={isEditing ? handleSave : handleEdit}
+                    className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                  >
+                    {isEditing ? (
+                      <>
+                        <Save className="h-4 w-4" />
+                        Save
+                      </>
+                    ) : (
+                      <>
+                        <Edit2 className="h-4 w-4" />
+                        Edit
+                      </>
+                    )}
+                  </button>
                 </div>
+
+                {isEditing ? (
+                  <div className="border border-gray-400 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                      <p className="text-sm text-gray-600">
+                        Set your visiting hours
+                      </p>
+                    </div>
+                    <div className="p-6 space-y-4">
+                      {[
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday",
+                      ]?.map((day) => (
+                        <div
+                          key={day}
+                          className="border-b border-gray-100 pb-4 last:border-0"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-4">
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    formData.appointmentSlot[day]?.enabled ||
+                                    false
+                                  }
+                                  onChange={(e) =>
+                                    handleToggleDay(day, e.target.checked)
+                                  }
+                                  className="sr-only peer"
+                                />
+                                <div
+                                  className="w-11 h-6 bg-gray-300 peer-focus:outline-none 
+                                peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full
+                                 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                                  after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 
+                                  after:w-5 after:transition-all peer-checked:bg-orange-600"
+                                ></div>
+                              </label>
+                              <span className="font-semibold text-gray-700 text-lg">
+                                {day}
+                              </span>
+                            </div>
+                            {formData.appointmentSlot[day]?.enabled && (
+                              <button
+                                onClick={() => addTimeSlot(day)}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-md
+                                 hover:bg-orange-200 transition-colors text-sm font-medium"
+                              >
+                                <Plus className="h-4 w-4" />
+                                Add Slot
+                              </button>
+                            )}
+                          </div>
+
+                          {formData?.appointmentSlot[day]?.enabled &&
+                            formData?.appointmentSlot[day]?.slots?.length >
+                              0 && (
+                              <div className="ml-16 space-y-2">
+                                {formData.appointmentSlot[day].slots.map(
+                                  (slot, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center space-x-2"
+                                    >
+                                      <input
+                                        type="time"
+                                        value={slot?.startTime || ""}
+                                        onChange={(e) =>
+                                          updateTimeSlot(
+                                            day,
+                                            index,
+                                            "startTime",
+                                            e.target.value
+                                          )
+                                        }
+                                        disabled={
+                                          editingSlot?.day !== day ||
+                                          editingSlot?.index !== index
+                                        }
+                                        className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2
+                                         focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                      />
+                                      <span className="text-gray-500">to</span>
+                                      <input
+                                        type="time"
+                                        value={slot?.endTime || ""}
+                                        onChange={(e) =>
+                                          updateTimeSlot(
+                                            day,
+                                            index,
+                                            "endTime",
+                                            e.target.value
+                                          )
+                                        }
+                                        disabled={
+                                          editingSlot?.day !== day ||
+                                          editingSlot?.index !== index
+                                        }
+                                        className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2
+                                         focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                      />
+                                      <button
+                                        onClick={() =>
+                                          toggleEditSlot(day, index)
+                                        }
+                                        className={`p-2 rounded-md transition-colors ${
+                                          editingSlot?.day === day &&
+                                          editingSlot?.index === index
+                                            ? "bg-green-100 text-green-600 hover:bg-green-200"
+                                            : "text-blue-600 hover:bg-blue-50"
+                                        }`}
+                                        title={
+                                          editingSlot?.day === day &&
+                                          editingSlot?.index === index
+                                            ? "Save time slot"
+                                            : "Edit time slot"
+                                        }
+                                      >
+                                        <Pencil className="h-4 w-4" />
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          removeTimeSlot(day, index)
+                                        }
+                                        className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                        title="Remove time slot"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </button>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(formData.appointmentSlot).map(
+                      ([day, dayData]) => (
+                        <div
+                          key={day}
+                          className="flex items-center py-3 px-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                          <span className="capitalize font-semibold text-gray-700 w-24">
+                            {day}:
+                          </span>
+                          <span
+                            className={`${dayData?.enabled ? "text-green-600" : "text-red-500"} font-medium text-sm`}
+                          >
+                            {formatWorkingHours(dayData)}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+
                 <div>
                   <Label className="text-lg font-semibold flex items-center text-violet-900 mb-1 ">
                     <Languages className="h-5 w-5 mr-2 text-violet-600" />

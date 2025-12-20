@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,22 +11,22 @@ import {
   MapPin,
   Clock,
   Calendar,
-  Video,
-  Phone,
   Search,
   Filter,
   Heart,
-  Brain,
-  Eye,
   Stethoscope,
   Activity,
   Loader2,
 } from "lucide-react";
 import BookAppointment from "./bookAppoinment";
-interface AppointmentSlot {
-  enabled: boolean;
+interface TimeSlot {
   startTime: string;
   endTime: string;
+}
+
+interface AppointmentSlot {
+  enabled: boolean;
+  slots: TimeSlot[]; // Array of time slots
 }
 
 interface DoctorDetails {
@@ -62,7 +62,7 @@ export default function Doctors({
   onNavigate?: (page: string) => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [doctordata, setDoctordata] = useState<DoctorDetails[]>([]);
   const [page, setPage] = useState(1);
@@ -86,6 +86,17 @@ export default function Doctors({
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  }
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   // Fetch doctors with pagination
@@ -183,6 +194,7 @@ export default function Doctors({
     }
   };
 
+  //handler function to filter the doctor
   const filteredDoctors = doctordata?.filter((doctor) => {
     const matchesSearch =
       doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -208,6 +220,7 @@ export default function Doctors({
     return "bg-green-100 text-green-800";
   };
 
+  //return the intial of doctor
   const getDoctorInitials = (doctorName: string) => {
     if (!doctorName) return "DR";
     const cleanName = doctorName.replace(/^(DR\.?|Dr\.?)\s*/i, "").trim();
@@ -222,6 +235,7 @@ export default function Doctors({
     }
   };
 
+  //set the time in 12 hour formate (AM/PM)
   const formatTo12Hour = (time24) => {
     if (!time24) return "";
 
@@ -240,20 +254,9 @@ export default function Doctors({
     }
   };
 
-  const formatWorkingHours = (hours) => {
-    if (!hours?.enabled) {
-      return "Closed";
-    }
-
-    const startTime = formatTo12Hour(hours.startTime);
-    const endTime = formatTo12Hour(hours.endTime);
-
-    return `${startTime} - ${endTime}`;
-  };
-
   const DoctorCard = ({ doctor }: { doctor: DoctorDetails }) => (
     <Card className="border-2 transition-all hover:border-primary/50 hover:shadow-lg">
-      <CardContent className="p-6">
+      <CardContent className="px-6 lg:p-6">
         <div className="flex items-start space-x-4 mb-4">
           <Avatar className="h-16 w-16">
             <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold text-lg">
@@ -326,15 +329,22 @@ export default function Doctors({
                   <div className="grid grid-cols-2 gap-x-4">
                     {doctor?.availableSlots &&
                       Object.entries(doctor?.availableSlots).map(
-                        ([day, hours]) => (
+                        ([day, dayData]) => (
                           <div key={day} className="flex items-center py-1">
                             <span className="capitalize font-medium text-gray-700 w-20">
                               {day}:
                             </span>
                             <span
-                              className={`${hours?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
+                              className={`${dayData?.enabled ? "text-green-600" : "text-red-500"} font-medium`}
                             >
-                              {formatWorkingHours(hours)}
+                              {dayData?.enabled && dayData?.slots?.length > 0
+                                ? dayData.slots
+                                    .map(
+                                      (slot) =>
+                                        `${formatTo12Hour(slot.startTime)} - ${formatTo12Hour(slot.endTime)}`
+                                    )
+                                    .join(", ")
+                                : "Unavailable"}
                             </span>
                           </div>
                         )
@@ -475,7 +485,7 @@ export default function Doctors({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-blue-600 font-medium">
@@ -491,7 +501,7 @@ export default function Doctors({
         </Card>
 
         <Card className="bg-green-50 border-green-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-green-600 font-medium">
@@ -521,7 +531,7 @@ export default function Doctors({
         </Card>
 
         <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-purple-600 font-medium">
@@ -541,7 +551,7 @@ export default function Doctors({
         </Card>
 
         <Card className="bg-orange-50 border-orange-100">
-          <CardContent className="p-4">
+          <CardContent className="px-4 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-orange-600 font-medium">
@@ -557,7 +567,7 @@ export default function Doctors({
 
       {/* Initial Loading */}
       {loading && doctordata.length === 0 && (
-        <div className="flex justify-center items-center py-20">
+        <div className="flex justify-center items-center py-10">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
         </div>
       )}
@@ -600,7 +610,7 @@ export default function Doctors({
 
       {/* End of List Message */}
       {!hasMore && doctordata.length > 0 && (
-        <div className="text-center py-8">
+        <div className="text-center py-4">
           <Card className="bg-gray-50 border-gray-200">
             <CardContent className="p-6">
               <p className="text-gray-600 font-medium">

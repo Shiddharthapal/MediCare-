@@ -89,10 +89,14 @@ interface PracticeSettingData {
   sendReminders?: boolean;
 }
 
-interface AppointmentSlot {
-  enabled: boolean;
+interface TimeSlot {
   startTime: string;
   endTime: string;
+}
+
+interface AppointmentSlot {
+  enabled: boolean;
+  slots: TimeSlot[]; // Array of time slots
 }
 
 interface AppointmentData {
@@ -152,6 +156,7 @@ export interface DoctorDetails {
   appointments: AppointmentData[];
   practiceSettingData?: PracticeSettingData[];
   consultationModes: string[];
+  upload: FileUpload[];
   prescription?: Prescription[];
   createdAt: Date;
 }

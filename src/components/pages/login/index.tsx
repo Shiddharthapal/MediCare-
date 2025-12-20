@@ -33,6 +33,16 @@ export default function Login() {
     formState: { errors },
     reset,
   } = useForm<LoginFormData>();
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Login...</p>
+        </div>
+      </div>
+    );
+  }
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -210,7 +220,7 @@ export default function Login() {
                   </div>
                   {errors.password && (
                     <p className="text-sm text-red-500">
-                                        {errors.password.message}             
+                      {errors.password.message}             
                     </p>
                   )}
                    

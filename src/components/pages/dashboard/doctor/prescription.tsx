@@ -183,6 +183,7 @@ export default function Prescription({
     useState<Pescriptiondata>(mockPescriptiondata);
   const [isSaved, setIsSaved] = useState(!!savedPrescription);
   const [viewMode, setViewMode] = useState(!!savedPrescription && !isEditMode);
+  const [isLoading, setIsLoading] = useState(false);
   const [prescriptiondata, setPrescriptiondata] = useState<Prescription>({
     vitalSign: mockVitalsign,
     primaryDiagnosis: "",
@@ -195,63 +196,84 @@ export default function Prescription({
     prescriptionId: "",
     createdAt: new Date(),
   });
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     if (savedPrescription) {
       setPrescriptionForm(savedPrescription);
     }
     const fetchPrescription = async () => {
-      let response = await fetch(`/api/doctor/${patientData.doctorId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error("User not found");
-      }
-      let responsedata = await response.json();
-      // console.log("🧞‍♂️  responsedata --->", responsedata);
-      let data = responsedata.doctordetails.appointments
-        .map((appointment: any) => {
-          if (appointment.doctorpatinetId === patientData.doctorpatinetId) {
-            return appointment.prescription; // Return only the prescription
-          }
-          return null; // Return null for non-matching
-        })
-        .filter(Boolean); // Remove null values
-      //console.log("🧞‍♂️  data --->", data);
-      if (data && data.length > 0) {
-        const fetchedData = data[0]; // Assuming you want the first prescription
+      try {
+        setIsLoading(true);
+        let response = await fetch(`/api/doctor/${patientData.doctorId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error("User not found");
+        }
+        let responsedata = await response.json();
+        // console.log("🧞‍♂️  responsedata --->", responsedata);
+        let data = responsedata.doctordetails.appointments
+          .map((appointment: any) => {
+            if (appointment.doctorpatinetId === patientData.doctorpatinetId) {
+              return appointment.prescription; // Return only the prescription
+            }
+            return null; // Return null for non-matching
+          })
+          .filter(Boolean); // Remove null values
+        //console.log("🧞‍♂️  data --->", data);
+        if (data && data.length > 0) {
+          const fetchedData = data[0]; // Assuming you want the first prescription
 
-        setPrescriptionForm((prevForm) => ({
-          ...prevForm, // Keep existing form data
-          // Only update fields that exist in fetchedData and match the interface
-          ...(fetchedData.vitalSign && {
-            vitalSign: { ...prevForm.vitalSign, ...fetchedData.vitalSign },
-          }),
-          ...(fetchedData.primaryDiagnosis && {
-            primaryDiagnosis: fetchedData.primaryDiagnosis,
-          }),
-          ...(fetchedData.testandReport && {
-            testandReport: fetchedData.testandReport,
-          }),
-          ...(fetchedData.medication && { medication: fetchedData.medication }),
-          ...(fetchedData.restrictions && {
-            restrictions: fetchedData.restrictions,
-          }),
-          ...(fetchedData.followUpDate && {
-            followUpDate: fetchedData.followUpDate,
-          }),
-          ...(fetchedData.additionalNote && {
-            additionalNote: fetchedData.additionalNote,
-          }),
-          ...(fetchedData.symptoms && { symptoms: fetchedData.symptoms }),
-        }));
+          setPrescriptionForm((prevForm) => ({
+            ...prevForm, // Keep existing form data
+            // Only update fields that exist in fetchedData and match the interface
+            ...(fetchedData.vitalSign && {
+              vitalSign: { ...prevForm.vitalSign, ...fetchedData.vitalSign },
+            }),
+            ...(fetchedData.primaryDiagnosis && {
+              primaryDiagnosis: fetchedData.primaryDiagnosis,
+            }),
+            ...(fetchedData.testandReport && {
+              testandReport: fetchedData.testandReport,
+            }),
+            ...(fetchedData.medication && {
+              medication: fetchedData.medication,
+            }),
+            ...(fetchedData.restrictions && {
+              restrictions: fetchedData.restrictions,
+            }),
+            ...(fetchedData.followUpDate && {
+              followUpDate: fetchedData.followUpDate,
+            }),
+            ...(fetchedData.additionalNote && {
+              additionalNote: fetchedData.additionalNote,
+            }),
+            ...(fetchedData.symptoms && { symptoms: fetchedData.symptoms }),
+          }));
+        }
+        setPrescriptiondata(data);
+        setIsSaved(true);
+        setViewMode(true);
+        <PrescriptionView />;
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
       }
-      setPrescriptiondata(data);
-      setIsSaved(true);
-      setViewMode(true);
-      <PrescriptionView />;
     };
     fetchPrescription();
   }, [edit === false]);
@@ -606,7 +628,7 @@ export default function Prescription({
   };
 
   return (
-    <div className="min-h-screen overflow-auto bg-gray-50">
+    <div className="min-h-screen custom-scrollbar bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center gap-4">
@@ -824,7 +846,8 @@ export default function Prescription({
               <CardContent>
                 <textarea
                   placeholder="Enter primary diagnosis..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none 
+                  focus:ring-2 focus:ring-blue-500 h-24 resize-none"
                   value={prescriptionForm.primaryDiagnosis}
                   onChange={(e) =>
                     setPrescriptionForm((prev) => ({
@@ -842,7 +865,8 @@ export default function Prescription({
               <CardContent>
                 <textarea
                   placeholder="List patient symptoms..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
                   value={prescriptionForm.symptoms}
                   onChange={(e) =>
                     setPrescriptionForm((prev) => ({
@@ -863,7 +887,8 @@ export default function Prescription({
             <CardContent>
               <textarea
                 placeholder="Enter recommended tests, lab work, or reports (leave empty if no tests required)..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 resize-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 resize-none"
                 value={prescriptionForm.testandReport}
                 onChange={(e) =>
                   setPrescriptionForm((prev) => ({
@@ -948,7 +973,8 @@ export default function Prescription({
                         <input
                           type="text"
                           placeholder="e.g., Lisinopril"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                          focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={medication.medecineName}
                           onChange={(e) => {
                             setPrescriptionForm((prev) => ({
@@ -1089,7 +1115,8 @@ export default function Prescription({
                   </label>
                   <textarea
                     placeholder="Any activity restrictions..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-44 resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none
+                     focus:ring-2 focus:ring-blue-500 h-44 resize-none"
                     value={prescriptionForm.restrictions}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
@@ -1112,7 +1139,8 @@ export default function Prescription({
                   </label>
                   <input
                     type="date"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none
+                     focus:ring-2 focus:ring-blue-500"
                     value={prescriptionForm.followUpDate}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
@@ -1128,7 +1156,8 @@ export default function Prescription({
                   </label>
                   <textarea
                     placeholder="Any additional notes or instructions..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
                     value={prescriptionForm.additionalNote}
                     onChange={(e) =>
                       setPrescriptionForm((prev) => ({
@@ -1159,7 +1188,7 @@ export default function Prescription({
             </CardContent>
           </Card>
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-4 pt-3   bg-white p-6 rounded-lg">
+          <div className="flex items-center justify-end gap-4 pt-3 bg-white p-6 rounded-lg">
             <Button
               variant="outline"
               onClick={onClose}

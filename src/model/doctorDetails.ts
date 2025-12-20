@@ -295,19 +295,26 @@ const practiceSettingData = new mongoose.Schema({
   },
 });
 
+const TimeSlotSchema = new mongoose.Schema({
+  startTime: {
+    type: String,
+    match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:MM format validation
+  },
+  endTime: {
+    type: String,
+    match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:MM format validation
+  },
+});
+
 const AppointmentSlotSchema = new mongoose.Schema(
   {
     enabled: {
       type: Boolean,
       default: false,
     },
-    startTime: {
-      type: String,
-      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:MM format validation
-    },
-    endTime: {
-      type: String,
-      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:MM format validation
+    slots: {
+      type: [TimeSlotSchema],
+      default: [{ startTime: "09:00", endTime: "17:00" }],
     },
   },
   { _id: false } // Disable _id for subdocuments
@@ -517,13 +524,34 @@ const doctorDetailsSchema = new mongoose.Schema({
     of: AppointmentSlotSchema,
     default: () =>
       new Map([
-        ["Monday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Tuesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Wednesday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Thursday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Friday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Saturday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
-        ["Sunday", { enabled: false, startTime: "09:00", endTime: "17:00" }],
+        [
+          "Monday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Tuesday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Wednesday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Thursday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Friday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Saturday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
+        [
+          "Sunday",
+          { enabled: false, slots: [{ startTime: "09:00", endTime: "17:00" }] },
+        ],
       ]),
   },
   appointments: {
@@ -543,7 +571,10 @@ const doctorDetailsSchema = new mongoose.Schema({
     type: [PrescriptionSchema],
     default: [],
   },
-
+  upload: {
+    type: [FileUploadSchema],
+    default: [],
+  },
   practiceSettingData: {
     type: practiceSettingData,
   },

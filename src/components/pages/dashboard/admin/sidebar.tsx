@@ -66,7 +66,7 @@ export default function Sidebar({ open }: SidebarProps) {
     >
       <div className="flex flex-col  pt-16 h-full">
         {/* Navigation */}
-        <nav className="flex-1 p-4 overflow-y-auto">
+        <nav className="flex-1 p-4 custom-scrollbar">
           <ul className="space-y-2">
             {menuItems.map((item, index) => (
               <li key={index}>

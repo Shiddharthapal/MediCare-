@@ -174,6 +174,8 @@ export default function Dashboard() {
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
   const [doctorData, setDoctorData] = useState<DoctorDetails[]>([]);
   const [randomDoctors, setRandomDoctors] = useState<DoctorDetails[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
@@ -220,6 +222,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         let response = await fetch(`/api/admin/${id}`, {
           method: "GET",
           headers: {
@@ -230,6 +233,8 @@ export default function Dashboard() {
         setAdminData(admindata?.adminstore);
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -239,6 +244,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         let response = await fetch(`/api/admin/fetchdata`, {
           method: "GET",
           headers: {
@@ -256,6 +262,8 @@ export default function Dashboard() {
         setDoctorData(result.doctordetails);
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -266,6 +274,17 @@ export default function Dashboard() {
     // Cleanup: clear interval when component unmounts
     return () => clearInterval(interval);
   }, [admin]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   //Calculate new patient
   const currentMonthNewPatients = useMemo(() => {
@@ -503,14 +522,13 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-background">
       {/* Mobile menu button */}
-      <Button
-        variant="ghost"
+      <button
         size="icon"
-        className="fixed top-3  z-50 lg:hidden hover:bg-gray-300"
+        className="fixed top-5 ml-2  z-50 lg:hidden hover:text-[hsl(201,95%,31%)]"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
-        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
+        {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
 
       {/* Sidebar */}
       <div
@@ -608,14 +626,14 @@ export default function Dashboard() {
       )}
 
       <div
-        className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
+        className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen w-full flex-1`}
       >
         {currentPage === "dashboard" && (
-          <div className=" container flex-1 flex items-center mx-auto pt-5 flex-col ">
-            <main className="flex-1 overflow-y-auto px-6 pb-6 pt-2 w-full">
+          <div className=" container flex-1 flex items-center mx-auto pt-1 lg:pt-5 flex-col ">
+            <main className="flex-1 custom-scrollbar lg:p-6 pt-3 lg:pt-6 w-full">
               <div className="max-w-6xl mx-auto space-y-6">
                 {/* Header */}
-                <div className="space-y-1">
+                <div className="space-y-0">
                   <h1 className="text-2xl font-semibold text-gray-900">
                     Welcome {adminData?.name},
                   </h1>
@@ -631,7 +649,7 @@ export default function Dashboard() {
                         <CardContent className="px-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm text-gray-600 mb-1">
+                              <p className="text-sm text-gray-600 mb-0">
                                 {stat.label}
                               </p>
                               <p className="text-2xl font-bold">{stat.value}</p>
@@ -671,76 +689,75 @@ export default function Dashboard() {
                         </span>
                       </div>
                     </div>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart
-                        data={hospitalSurveyData}
-                        margin={{
-                          top: 10,
-                          right: 20,
-                          left: 10,
-                          bottom: 20,
-                        }}
-                      >
-                        <XAxis
-                          dataKey="date"
-                          stroke="#94a3b8"
-                          label={{
-                            value: "Month",
-                            position: "insideBottom",
-                            offset: -10,
-                            style: {
-                              textAnchor: "middle",
-                              fill: "black",
-                              fontSize: "14px",
-                            },
+                    <div className="chart-wrapper">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={hospitalSurveyData}
+                          margin={{
+                            top: 10,
+                            right: 20,
+                            left: 10,
+                            bottom: 20,
                           }}
-                        />
-                        <YAxis
-                          stroke="#94a3b8"
-                          allowDecimals={false}
-                          label={{
-                            value: " Patient ",
-                            position: "insideLeft",
-                            angle: -90,
-                            style: {
-                              textAnchor: "middle",
-                              fill: "black",
-                              fontSize: "16px",
-                            },
-                          }}
-                        />
-                        <Tooltip />
-                        <Line
-                          type="monotone"
-                          dataKey="newPatients"
-                          stroke="#f87171"
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="oldPatients"
-                          stroke="#60a5fa"
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
+                        >
+                          <XAxis
+                            dataKey="date"
+                            stroke="#94a3b8"
+                            label={{
+                              value: "Month",
+                              position: "insideBottom",
+                              offset: -10,
+                              style: {
+                                textAnchor: "middle",
+                                fill: "black",
+                                fontSize: "14px",
+                              },
+                            }}
+                          />
+                          <YAxis
+                            stroke="#94a3b8"
+                            allowDecimals={false}
+                            label={{
+                              value: " Patient ",
+                              position: "insideLeft",
+                              angle: -90,
+                              style: {
+                                textAnchor: "middle",
+                                fill: "black",
+                                fontSize: "16px",
+                              },
+                            }}
+                          />
+                          <Tooltip />
+                          <Line
+                            type="monotone"
+                            dataKey="newPatients"
+                            stroke="#f87171"
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="oldPatients"
+                            stroke="#60a5fa"
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 space-y-6 ">
                     <div className="bg-white rounded-lg shadow-sm border border-gray-700 overflow-hidden">
-                      <div className="p-6 border-b border-slate-200 flex items-center justify-between">
+                      <div className="px-6 py-2 lg:p-6 border-b border-slate-200 flex items-center justify-between">
                         <h3 className="text-lg font-semibold text-slate-900">
                           Booked Appointment
                         </h3>
-                        <button className="text-slate-400 hover:text-slate-600">
-                          <MoreVertical size={20} />
-                        </button>
                       </div>
-                      <div className="overflow-x-auto">
+                      <div className="custom-x-scrollbar">
                         <table className="w-full">
                           <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50">
+                            <tr className="border-b border-slate-200 bg-gradient-to-r py-2 from-purple-100 to-pink-100">
                               <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
                                 Assigned Doctor
                               </th>
@@ -812,10 +829,10 @@ export default function Dashboard() {
                           <MoreVertical size={20} />
                         </button>
                       </div>
-                      <div className="overflow-x-auto">
+                      <div className="custom-x-scrollbar">
                         <table className="w-full">
                           <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50">
+                            <tr className="border-b border-slate-200 bg-gradient-to-r py-2 from-green-100 to-blue-100">
                               <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600">
                                 Doctor Name
                               </th>
@@ -830,7 +847,7 @@ export default function Dashboard() {
                                 key={idx}
                                 className="border-b border-slate-200 hover:bg-slate-50"
                               >
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-2 lg:py-4">
                                   <div className="flex items-center gap-3">
                                     <Avatar className="h-10 w-10">
                                       <AvatarImage src="/placeholder.svg?height=40&width=40" />
@@ -872,7 +889,7 @@ export default function Dashboard() {
           </div>
         )}
         {currentPage === "appointments" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Appointments onNavigate={setCurrentPage} />
             </div>
@@ -880,28 +897,28 @@ export default function Dashboard() {
         )}
 
         {currentPage === "doctors" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen   lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Doctors onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "patients" && (
-          <div className="h-screen  p-6 lg:p-6 ">
+          <div className="h-screen  lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Patients onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "prescription" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Prescription onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "document" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen   lg:p-6 pt-3 lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Document onNavigate={setCurrentPage} />
             </div>
@@ -909,8 +926,8 @@ export default function Dashboard() {
         )}
 
         {currentPage === "settings" && (
-          <div className="h-screen  p-6 lg:p-6 ">
-            <div className="max-w-6xl mx-auto">
+          <div className="h-screen w-full flex-1 p-0 lg:p-6 pt-3 lg:pt-6">
+            <div className=" mx-auto">
               <Setting onNavigate={setCurrentPage} />
             </div>
           </div>

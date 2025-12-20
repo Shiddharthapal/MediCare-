@@ -144,23 +144,6 @@ const mockappointmentdata = {
   status: "",
 };
 
-const mockpatientData = {
-  _id: "",
-  userId: "",
-  email: "",
-  name: "",
-  fatherName: "",
-  address: "",
-  contactNumber: "",
-  age: "",
-  gender: "",
-  bloodGroup: "",
-  weight: "",
-  height: "",
-  appoinments: mockappointmentdata,
-  lastTreatmentDate: Date.now(),
-  createdAt: Date.now(),
-};
 const getStatusColor = (status: string) => {
   console.log("🧞‍♂️status --->", status);
   switch (status) {
@@ -281,10 +264,6 @@ const getModeIcon = (mode: string) => {
   }
 };
 
-interface UploadedFile extends File {
-  preview?: string;
-}
-
 // Add your Bunny CDN configuration
 const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
 
@@ -295,6 +274,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(file || "dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isReschedule, setIsReschedule] = useState(false);
@@ -317,6 +297,7 @@ export default function Dashboard() {
   //Fecth user data
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -325,11 +306,13 @@ export default function Dashboard() {
           },
         });
         let userdata = await response.json();
-        console.log("🧞‍♂️userdata --->", userdata?.userdetails);
+
         setPatientData(userdata?.userdetails);
         setAppointmentsData(userdata?.userdetails?.appointments);
       } catch (err) {
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -520,6 +503,17 @@ export default function Dashboard() {
       }
     };
   }, [showReportsModal]);
+
+  if (isUploading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Uploading...</p>
+        </div>
+      </div>
+    );
+  }
 
   //user trying to save document
   const handleSaveDocuments = async () => {
@@ -791,14 +785,13 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile menu button */}
-      <Button
-        variant="ghost"
+      <button
         size="icon"
-        className="fixed top-3  z-50 lg:hidden hover:bg-gray-300"
+        className="fixed top-5 ml-2  z-50 lg:hidden hover:text-[hsl(201,95%,31%)]"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
-        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
+        {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
 
       {/* Sidebar */}
       <div
@@ -901,7 +894,7 @@ export default function Dashboard() {
         className={`transition-all duration-300 ease-in-out ${collapsed ? "lg:ml-16" : "lg:ml-64"} min-h-screen`}
       >
         {currentPage === "dashboard" && (
-          <main className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <main className="h-screen  p-6 lg:p-6 pt-5  lg:pt-10">
             <div className="max-w-6xl mx-auto space-y-6">
               {/* Header */}
               <div className="space-y-1">
@@ -1098,7 +1091,7 @@ export default function Dashboard() {
                 {/* Details Modal */}
                 {showDetailsModal && selectedAppointment && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h2 className="text-xl font-semibold text-gray-900">
@@ -1110,7 +1103,7 @@ export default function Dashboard() {
                             size="icon"
                             onClick={() => setShowDetailsModal(false)}
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-4 w-4 transition-colors hover:text-blue-600" />
                           </Button>
                         </div>
                         <div className="mb-4">
@@ -1289,7 +1282,7 @@ export default function Dashboard() {
                 {/* Prescription Modal */}
                 {showPrescriptionModal && selectedAppointment && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h2 className="text-xl font-semibold text-gray-900">
@@ -1373,7 +1366,7 @@ export default function Dashboard() {
                 {/*Report modal*/}
                 {showReportsModal && selectedAppointment && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] custom-scrollbar">
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h2 className="text-xl font-semibold text-gray-900">
@@ -1619,7 +1612,7 @@ export default function Dashboard() {
               </div>
 
               {/* Add some extra content to demonstrate scrolling */}
-              <div className="space-y-4">
+              <div className="space-y-4 pb-10">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Recent Activity
                 </h2>
@@ -1655,7 +1648,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "appointments" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Appointments onNavigate={setCurrentPage} />
             </div>
@@ -1663,7 +1656,7 @@ export default function Dashboard() {
         )}
 
         {currentPage === "doctors" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Doctors />
             </div>
@@ -1671,21 +1664,21 @@ export default function Dashboard() {
         )}
 
         {currentPage === "reports" && (
-          <div className="h-screen  p-6 lg:p-6 pt-16 lg:pt-6">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <Reports />
             </div>
           </div>
         )}
         {currentPage === "health records" && (
-          <div className="h-screen  p-6 lg:p-6 ">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <HealthRecords onNavigate={setCurrentPage} />
             </div>
           </div>
         )}
         {currentPage === "settings" && (
-          <div className="h-screen  p-6 lg:p-6 ">
+          <div className="h-screen  p-6 lg:p-6 pt-3  lg:pt-6">
             <div className="max-w-6xl mx-auto">
               <SettingPatient onNavigate={setCurrentPage} />
             </div>

@@ -35,6 +35,7 @@ export default function HealthRecords({
 }) {
   const [activeTab, setActiveTab] = useState<"add" | "previous">("add");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [records, setRecords] = useState<HealthRecord[]>([]);
 
   const [formData, setFormData] = useState({
@@ -50,22 +51,51 @@ export default function HealthRecords({
   const user = useAppSelector((state) => state.auth.user);
   const id = user?._id;
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`/api/user/${id}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data");
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/user/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+        let result = await response.json();
+        setRecords(result?.userdetails?.healthRecord);
+      } catch (error) {
+        console.error("No user data  are  available.Error:", error);
+      } finally {
+        setIsLoading(false);
       }
-      let result = await response.json();
-      setRecords(result?.userdetails?.healthRecord);
     };
     fetchData();
   }, [user]);
 
+  if (isSubmitting) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Submitting...</p>
+        </div>
+      </div>
+    );
+  }
+
   //Handle submit function to submit the data of form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       const response = await fetch("/api/user/healthrecords", {
         method: "POST",
@@ -79,7 +109,6 @@ export default function HealthRecords({
         throw new Error("Failed to save health record");
       }
       const result = await response.json();
-      console.log("🧞‍♂️  result --->", result);
       setRecords(result?.updatedRecord?.healthRecord);
 
       // Reset form
@@ -95,7 +124,7 @@ export default function HealthRecords({
     } catch (error) {
       console.error("Error saving health record:", error);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 

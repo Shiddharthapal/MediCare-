@@ -267,7 +267,6 @@ export default function PrescriptionShow({
     window.print();
   };
 
-  console.log("🧞‍♂️  patientData --->", patientData);
   const PrescriptionPDF = ({ patientData }) => (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -574,48 +573,42 @@ export default function PrescriptionShow({
     }
   };
 
-  const getPatientInitials = (patientName: string) => {
-    if (!patientName) return "AB";
-    const cleanName = patientName.trim();
-    if (!cleanName) return "AB";
-    const words = cleanName.split(" ").filter((word) => word.length > 0);
-    if (words.length >= 2) {
-      return (words[0][0] + words[1][0]).toUpperCase();
-    } else if (words.length === 1) {
-      return words[0].substring(0, 2).toUpperCase();
-    } else {
-      return "AB";
-    }
-  };
-
   // Generate prescription ID if not available
   const prescriptionId = patientData.patientId
     ? `RX-${patientData.patientId}-${Date.now()}`
     : `RX-${Date.now()}`;
 
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden print:shadow-none print:rounded-none">
+    <div className="bg-white  shadow-lg rounded-lg custom-scrollbar print:shadow-none print:rounded-none">
       {/* Print Button */}
-      <div className="p-4 flex flex-row justify-between bg-gray-50 border-b print:hidden">
+      <div className="p-4 w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-gray-50 border-b print:hidden">
         <Button
           variant="outline"
           onClick={onClose}
-          className="border border-gray-400 bg-transparent"
+          className="w-full sm:w-auto border border-gray-400 bg-transparent"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
+          <ArrowLeft className="h-4 w-4 mr-0" />
           Back to Dashboard
         </Button>
-        <div className="flex flex-row gap-2">
+        <div className="flex w-full flex-col sm:w-auto sm:flex-row gap-2">
           <button
             onClick={downloadAsPDF}
             disabled={downloading === "pdf"}
-            className=" px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition disabled:opacity-50"
+            className="flex items-center justify-center px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition disabled:opacity-50 text-sm sm:text-base w-full sm:w-auto"
           >
-            <Download className="h-4 w-4 inline mr-2" />
-            {downloading === "pdf" ? "Generating PDF..." : "PDF"}
+            <Download className="h-4 w-4 mr-2" />
+            <span className="hidden xs:inline">
+              {downloading === "pdf" ? "Generating PDF..." : "Download PDF"}
+            </span>
+            <span className="xs:hidden">
+              {downloading === "pdf" ? "Generating..." : "PDF"}
+            </span>
           </button>
-          <Button onClick={handlePrint} className="w-full sm:w-auto">
-            <Printer className="h-4 w-4 mr-2" />
+          <Button
+            onClick={handlePrint}
+            className="w-full sm:w-auto flex items-center sm:justify-center justify-center"
+          >
+            <Printer className="h-4 w-4 mr-0" />
             Print Prescription
           </Button>
         </div>
