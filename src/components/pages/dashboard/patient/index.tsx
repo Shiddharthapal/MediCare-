@@ -144,23 +144,6 @@ const mockappointmentdata = {
   status: "",
 };
 
-const mockpatientData = {
-  _id: "",
-  userId: "",
-  email: "",
-  name: "",
-  fatherName: "",
-  address: "",
-  contactNumber: "",
-  age: "",
-  gender: "",
-  bloodGroup: "",
-  weight: "",
-  height: "",
-  appoinments: mockappointmentdata,
-  lastTreatmentDate: Date.now(),
-  createdAt: Date.now(),
-};
 const getStatusColor = (status: string) => {
   console.log("🧞‍♂️status --->", status);
   switch (status) {
@@ -281,10 +264,6 @@ const getModeIcon = (mode: string) => {
   }
 };
 
-interface UploadedFile extends File {
-  preview?: string;
-}
-
 // Add your Bunny CDN configuration
 const BUNNY_CDN_PULL_ZONE = "side-effects-pull.b-cdn.net";
 
@@ -295,6 +274,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(file || "dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isReschedule, setIsReschedule] = useState(false);
@@ -317,6 +297,7 @@ export default function Dashboard() {
   //Fecth user data
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let response = await fetch(`/api/user/${id}`, {
           method: "GET",
@@ -325,11 +306,13 @@ export default function Dashboard() {
           },
         });
         let userdata = await response.json();
-        console.log("🧞‍♂️userdata --->", userdata?.userdetails);
+
         setPatientData(userdata?.userdetails);
         setAppointmentsData(userdata?.userdetails?.appointments);
       } catch (err) {
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -520,6 +503,17 @@ export default function Dashboard() {
       }
     };
   }, [showReportsModal]);
+
+  if (isUploading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Uploading...</p>
+        </div>
+      </div>
+    );
+  }
 
   //user trying to save document
   const handleSaveDocuments = async () => {
