@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,13 +11,9 @@ import {
   MapPin,
   Clock,
   Calendar,
-  Video,
-  Phone,
   Search,
   Filter,
   Heart,
-  Brain,
-  Eye,
   Stethoscope,
   Activity,
   Loader2,
@@ -66,7 +62,7 @@ export default function Doctors({
   onNavigate?: (page: string) => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [doctordata, setDoctordata] = useState<DoctorDetails[]>([]);
   const [page, setPage] = useState(1);
@@ -90,6 +86,17 @@ export default function Doctors({
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  }
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   // Fetch doctors with pagination
@@ -187,6 +194,7 @@ export default function Doctors({
     }
   };
 
+  //handler function to filter the doctor
   const filteredDoctors = doctordata?.filter((doctor) => {
     const matchesSearch =
       doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -212,6 +220,7 @@ export default function Doctors({
     return "bg-green-100 text-green-800";
   };
 
+  //return the intial of doctor
   const getDoctorInitials = (doctorName: string) => {
     if (!doctorName) return "DR";
     const cleanName = doctorName.replace(/^(DR\.?|Dr\.?)\s*/i, "").trim();
@@ -226,6 +235,7 @@ export default function Doctors({
     }
   };
 
+  //set the time in 12 hour formate (AM/PM)
   const formatTo12Hour = (time24) => {
     if (!time24) return "";
 
@@ -242,17 +252,6 @@ export default function Doctors({
     } else {
       return `${hour - 12}:${minute} PM`;
     }
-  };
-
-  const formatWorkingHours = (hours) => {
-    if (!hours?.enabled) {
-      return "Closed";
-    }
-
-    const startTime = formatTo12Hour(hours.startTime);
-    const endTime = formatTo12Hour(hours.endTime);
-
-    return `${startTime} - ${endTime}`;
   };
 
   const DoctorCard = ({ doctor }: { doctor: DoctorDetails }) => (
