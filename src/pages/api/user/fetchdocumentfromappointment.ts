@@ -11,8 +11,8 @@ export const POST: APIRoute = async ({ request }) => {
     let { id, doctorpatinetId } = await request.json();
     await connect();
 
-    let doctordetails = await doctorDetails.findOne({ userId: id });
-    if (!doctordetails) {
+    let userdetails = await userDetails.findOne({ userId: id });
+    if (!userdetails) {
       return new Response(
         JSON.stringify({
           message: "Invalid user",
@@ -24,10 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    if (
-      !doctordetails?.appointments ||
-      doctordetails?.appointments.length === 0
-    ) {
+    if (!userdetails?.appointments || userdetails?.appointments.length === 0) {
       return new Response(
         JSON.stringify({
           message: "No appointments found for this user",
@@ -39,7 +36,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    let appointmentDate = doctordetails?.appointments.find(
+    let appointmentDate = userdetails?.appointments.find(
       (appointment) => appointment.doctorpatinetId === doctorpatinetId
     );
 
