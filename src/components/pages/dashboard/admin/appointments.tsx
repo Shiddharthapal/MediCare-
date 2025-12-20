@@ -346,6 +346,7 @@ export default function Appointments({
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isReschedule, setIsReschedule] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [rescheduleData, setRescheduleData] = useState<Partial<
     appointmentdata[]
   > | null>(null);
@@ -360,13 +361,26 @@ export default function Appointments({
   const [patientData, setPatientData] = useState<UserDetails[]>([]);
   const [appointmentsData, setAppointmentsData] =
     useState<appointmentdata | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const admin = useAppSelector((state) => state.auth.user);
   const id = admin?._id;
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         let response = await fetch(`/api/admin/fetchdata`, {
           method: "GET",
           headers: {
@@ -382,6 +396,8 @@ export default function Appointments({
         setPatientData(result.userdetails);
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -469,6 +485,7 @@ export default function Appointments({
   useEffect(() => {
     const fetchDataofAdmin = async () => {
       try {
+        setLoading(true);
         let response = await fetch(`/api/admin/${id}`, {
           method: "GET",
           headers: {
@@ -484,6 +501,8 @@ export default function Appointments({
         setRescheduleappointment(result?.adminstore?.rescheduleAppointment);
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchDataofAdmin();
@@ -510,70 +529,29 @@ export default function Appointments({
     return groupAppointmentsByDate(categorizedAppointments.cancelled);
   }, [categorizedAppointments.cancelled]);
 
-  //Handle to join in video conferrance
-  const handleJoinSession = async (appointment: appointmentdata) => {
-    // If meet link exists, open it
-    if (appointment.meetLink) {
-      window.open(appointment.meetLink, "_blank");
-      return;
-    }
-
-    // If no meet link, try to create one
-    try {
-      const response = await fetch("/api/google/create-meet", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          appointmentId: appointment._id,
-          doctorName: appointment.doctorName,
-          patientName: appointment.patientName,
-          patientEmail: appointment.patientEmail,
-          appointmentDate: appointment.appointmentDate,
-          appointmentTime: appointment.appointmentTime,
-          reasonForVisit: appointment.reasonForVisit,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success && result.meetLink) {
-        // Update appointment with new meet link
-        appointment.meetLink = result.meetLink;
-
-        // Open the meet link
-        window.open(result.meetLink, "_blank");
-
-        // Show success message
-        alert("Google Meet link created successfully!");
-      } else {
-        throw new Error(result.error || "Failed to create Meet link");
-      }
-    } catch (error) {
-      console.error("[v0] Error creating Meet link:", error);
-      alert(
-        "Failed to create video call link. Please try again or contact support."
-      );
-    }
-  };
-
   //Cancel the appointment
   const handleCancelAppointment = async (appointment: AppointmentData) => {
-    let appointmentDeleteResponse = await fetch(
-      "./api/admin/deleteAppointment",
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          appointment,
-        }),
-      }
-    );
-    let appointmentdeleteresponse = await appointmentDeleteResponse.json();
-    setAppointmentsData(appointmentdeleteresponse?.userdetails?.appointments);
+    try {
+      setLoading(true);
+      let appointmentDeleteResponse = await fetch(
+        "./api/admin/deleteAppointment",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            appointment,
+          }),
+        }
+      );
+      let appointmentdeleteresponse = await appointmentDeleteResponse.json();
+      setAppointmentsData(appointmentdeleteresponse?.userdetails?.appointments);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRescheduleAppointment = (appointment: appointmentdata) => {
@@ -1227,9 +1205,9 @@ export default function Appointments({
       )}
 
       {showDetailsModal && selectedAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 custom-scrollbar">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl mt-6 sm:mt-10">
-            <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="p-4 sm:p-6 space-y-4 max-h-[90vh]  custom-scrollbar">
               <div className="flex flex-row sm:items-center sm:justify-between ">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Appointment Details - {selectedAppointment.reasonForVisit}
@@ -1354,9 +1332,9 @@ export default function Appointments({
       )}
 
       {showDetailsModal && selectedrescheduleappointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 custom-scrollbar">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-3xl mt-6 sm:mt-10">
-            <div className="p-4 sm:p-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="p-4 sm:p-6 max-h-[90vh] custom-scrollbar">
               {/* Header */}
               <div className="flex flex-row items-center justify-between gap-3 mb-4">
                 <div>
@@ -1756,9 +1734,9 @@ export default function Appointments({
 
       {/* Prescription Modal */}
       {showPrescriptionModal && selectedAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 custom-scrollbar">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-2xl mt-6 sm:mt-10">
-            <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="p-4 sm:p-6 space-y-4 max-h-[90vh]  custom-scrollbar">
               <div className="flex flex-row items-center justify-between gap-3">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Prescription - {selectedAppointment.consultedType}
@@ -1839,9 +1817,9 @@ export default function Appointments({
 
       {/* Reports Modal add */}
       {showReportsModal && selectedAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-2 sm:p-4 custom-scrollbar">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm sm:max-w-2xl mt-6 sm:mt-10">
-            <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="p-4 sm:p-6 space-y-4 max-h-[90vh]  custom-scrollbar">
               <div className="flex flex-row items-center justify-between gap-3">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Reports - {selectedAppointment.consultedType}
@@ -1881,7 +1859,8 @@ export default function Appointments({
                         {selectedAppointment?.document?.map((file, index) => (
                           <div
                             key={index}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                            className="flex items-center justify-between p-3 bg-gray-50 
+                            rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <div className="p-2 bg-blue-100 rounded">

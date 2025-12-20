@@ -41,7 +41,7 @@ interface GeneralSettingsData {
 
 export function GeneralSettings() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
   const [formData, setFormData] = useState<GeneralSettingsData>({
     profile: {
@@ -84,7 +84,7 @@ export function GeneralSettings() {
 
   const fetchProfileData = async () => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       const response = await fetch(`/api/admin/${id}`);
       const data = await response.json();
       console.log("🧞‍♂️  data --->", data);
@@ -111,7 +111,7 @@ export function GeneralSettings() {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -121,6 +121,17 @@ export function GeneralSettings() {
       preferences: { ...prev.preferences, [field]: value },
     }));
   };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading documents...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3 ">
