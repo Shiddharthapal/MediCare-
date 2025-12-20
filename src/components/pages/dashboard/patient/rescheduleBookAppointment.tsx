@@ -185,6 +185,7 @@ export default function BookAppointment({
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [doctor, setDoctor] = useState<Doctor>();
   const [enabledDays, setEnabledDays] = useState<Appointmentslot[]>();
 
@@ -276,17 +277,35 @@ export default function BookAppointment({
   const handlePrevious = () => {
     setCurrentStep((prev) => prev - 1);
   };
+
   useEffect(() => {
     let _id = existingAppointmentData?.doctorUserId;
-    console.log("🧞‍♂️  _id --->", _id);
     const fetchDoctordata = async () => {
-      let response = await fetch(`/api/doctor/${_id}`);
-      let result = await response.json();
-      console.log("🧞‍♂️  result --->", result);
-      setDoctor(result?.doctordetails);
+      setIsLoading(true);
+      try {
+        let response = await fetch(`/api/doctor/${_id}`);
+        let result = await response.json();
+        console.log("🧞‍♂️  result --->", result);
+        setDoctor(result?.doctordetails);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchDoctordata();
   }, [existingAppointmentData, isReschedule]);
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async () => {
     if (!validateStep(4)) return;
