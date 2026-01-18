@@ -32,7 +32,6 @@ import {
   updateProfileFailure,
 } from "@/redux/slices/profileSlice";
 
-import { loginSuccess } from "@/redux/slices/authSlice";
 
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
@@ -59,29 +58,19 @@ interface UserImage {
 
 interface PatientData {
   email?: string;
-  name: string;
-  fatherName: string;
-  address: string;
-  contactNumber: string;
-  age: string;
-  dateOfBirth: Date;
-  bloodGroup: string;
-  image: UserImage;
-  weight: string;
-  height: string;
-  gender: string;
-}
-interface PatientDataErrors {
   name?: string;
+  fatherName?: string;
   address?: string;
   contactNumber?: string;
   age?: string;
-  gender?: string;
-  email?: string;
+  dateOfBirth?: Date;
+  bloodGroup?: string;
+  image?: UserImage;
   weight?: string;
   height?: string;
-  dateOfBirth?: string;
+  gender?: string;
 }
+
 
 const BUNNY_CDN_PULL_ZONE = "my-lulu.b-cdn.net";
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -93,39 +82,7 @@ const formatDateForInput = (date: Date): string => {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
-
-export default function PatientProfileForm() {
-  const [formData, setFormData] = useState<PatientData>({
-    name: "",
-    fatherName: "",
-    address: "",
-    contactNumber: "",
-    age: "",
-    dateOfBirth: new Date("2016-03-24"),
-    gender: " ",
-    image: {},
-    weight: "",
-    height: "",
-    bloodGroup: "",
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [errors, setErrors] = useState<Partial<PatientData>>({});
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
-  const [isShowingSavedData, setIsShowingSavedData] = useState(false);
-  const [savedPatientId, setSavedPatientId] = useState<string | null>(null);
-  const [showBloodDropdown, setShowBloodDropdown] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [hasProfile, setHasProfile] = useState(false);
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.auth.user);
-  const id = user?._id || null;
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  // Dummy data representing an existing patient
-  const dummyPatientData: PatientData = {
+const dummyPatientData: PatientData = {
     email: "",
     name: "",
     fatherName: "",
@@ -139,6 +96,23 @@ export default function PatientProfileForm() {
     weight: "",
     height: "",
   };
+export default function PatientProfileForm() {
+  const [formData, setFormData] = useState<PatientData>(dummyPatientData);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [errors, setErrors] = useState<Partial<PatientData>>({});
+  const [isShowingSavedData, setIsShowingSavedData] = useState(false);
+  const [savedPatientId, setSavedPatientId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+  const id = user?._id || null;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Dummy data representing an existing patient
+  
 
   //set up the avatar area when click on it open the computer to add picture
   const handleAvatarClick = () => {
@@ -150,16 +124,7 @@ export default function PatientProfileForm() {
   // Update the initial formData state to use dummy data:
   const initialFormData = dummyPatientData;
 
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+
   useEffect(() => {
     if (user) {
       setFormData((prev) => ({
@@ -182,9 +147,13 @@ export default function PatientProfileForm() {
           throw new Error(`Status:${response.status}`);
         }
         const responseData = await response.json();
-        console.log("🧞‍♂️responseData --->", responseData.userdetails);
-        setHasProfile(Boolean(responseData.doctordetails));
-        setFormData(responseData?.userdetails);
+        console.log("🧞responseData --->", responseData.userdetails);
+        if (responseData?.userdetails) {
+        setFormData((prev) => ({
+          ...prev,
+          ...responseData.userdetails,
+        }));
+      } 
       } catch (err) {
         console.log(err);
       }finally{
@@ -311,10 +280,17 @@ export default function PatientProfileForm() {
     setIsEditing(false);
   };
 
-  const handleBloodGroupSelect = (group: string) => {
-    handleInputChange("gender", group);
-    setShowBloodDropdown(false);
-  };
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -538,7 +514,7 @@ export default function PatientProfileForm() {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {formData?.dateOfBirth ? (
-                          format(new Date(formData.dateOfBirth), "PPP")
+                          format(new Date(formData?.dateOfBirth), "PPP")
                         ) : (
                           <span>Pick a date</span>
                         )}

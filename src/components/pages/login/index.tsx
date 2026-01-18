@@ -119,23 +119,23 @@ export default function Login() {
 
   return (
     <div className="bg-gray-200 min-h-screen">
-      <div className="flex justify-center   items-center pt-10 pb-auto">
+      <div className="flex justify-center  items-center pt-10 pb-auto">
         <Card className="w-[450px] bg-gray-100">
           <CardHeader>
-            <CardTitle className="text-2xl text-center">Login</CardTitle>     
-            {/* Tab Navigation */}       
+            <CardTitle className="text-2xl text-center">Login</CardTitle>
+            {/* Tab Navigation */}
             <div className="flex gap-2 mt-4">
               {" "}
-                       
+  
               <Button
                 type="button"
                 variant={activeTab === "user" ? "default" : "outline"}
                 className="flex-1"
                 onClick={() => handleTabChange("user")}
               >
-                  User
+                Patient
               </Button>{" "}
-                       
+        
               <Button
                 type="button"
                 variant={activeTab === "doctor" ? "default" : "outline"}
@@ -156,7 +156,6 @@ export default function Login() {
           </CardHeader>
           <CardContent>
             {" "}
-               
             {activeTab === "admin" ? (
               <form onSubmit={handleSubmit(onSubmit)} className="">
                 <div className="space-y-2 mb-5">
@@ -188,9 +187,9 @@ export default function Login() {
                 </div>
 
                 <div className="space-y-2 mb-8">
-                  <Label htmlFor="password">Password</Label>             
+                  <Label htmlFor="password">Password</Label>
                   <div className="relative">
-                               
+
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -203,7 +202,6 @@ export default function Login() {
                       })}
                       className="focus-visible:ring-0 focus-visible:ring-blue-600 border border-[hsl(201,72%,38%)] shadow-md"
                     />
-                               
                     <Button
                       type="button"
                       variant="ghost"
@@ -215,21 +213,21 @@ export default function Login() {
                       ) : (
                         <Eye className="h-4 w-4" />
                       )}
-                       
+                      
                     </Button>
                   </div>
                   {errors.password && (
                     <p className="text-sm text-red-500">
-                      {errors.password.message}             
+                      {errors.password.message}
                     </p>
                   )}
-                   
+                
                 </div>
 
                 <div className="mt-5">
                   {error && <p className="text-sm text-red-500">{error}</p>} 
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Loading..." : `Login as Admin`}         
+                    {loading ? "Loading..." : `Login as Admin`}
                   </Button>
                 </div>
                 <div className="text-center text-sm mt-2">
@@ -243,9 +241,8 @@ export default function Login() {
               </form>
             ) : (
               <form onSubmit={handleSubmit(onSubmit)} className="">
-                         
                 <div className="space-y-2 mb-5">
-                  <Label htmlFor="email">Email</Label>   
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -258,19 +255,19 @@ export default function Login() {
                     })}
                     className="focus-visible:ring-0 border border-[hsl(201,72%,38%)]  shadow-md"
                   />
-                             
+
                   {errors.email && (
                     <p className="text-sm text-red-500">
                       {errors.email.message}
                     </p>
                   )}
-                           
+
                 </div>
-                     
+
                 <div className="space-y-2 mb-8">
-                  <Label htmlFor="password">Password</Label>             
+                  <Label htmlFor="password">Password</Label>
                   <div className="relative">
-                               
+
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -283,7 +280,7 @@ export default function Login() {
                       })}
                       className="focus-visible:ring-0 focus-visible:ring-blue-600 border border-[hsl(201,72%,38%)] shadow-md"
                     />
-                               
+            
                     <Button
                       type="button"
                       variant="ghost"
@@ -295,25 +292,22 @@ export default function Login() {
                       ) : (
                         <Eye className="h-4 w-4" />
                       )}
-                       
+ 
                     </Button>
                   </div>
                   {errors.password && (
                     <p className="text-sm text-red-500">
-                                        {errors.password.message}             
+                   {errors.password.message}
                     </p>
-                  )}
-                   
+                  )}   
                 </div>
                 <div className="mt-0">
                   {error && <p className="text-sm text-red-500">{error}</p>} 
                   <Button type="submit" className="w-full" disabled={loading}>
                     {" "}
-                           
                     {loading
                       ? "Loading..."
-                      : `Login as ${activeTab === "user" ? "User" : "Doctor"}`}
-                             
+                      : `Login as ${activeTab === "user" ? "Patient" : "Doctor"}`}   
                   </Button>
                 </div>
                 <div className="text-center text-sm mt-2">
@@ -321,18 +315,13 @@ export default function Login() {
                     to={`${activeTab === "user" ? "/registerasUser" : "/registerasDoctor"}`}
                     className="text-primary hover:underline "
                   >
-                    Don't have an account? Register            
+                    Don't have an account? Register
                   </Link>{" "}
-                       
                 </div>{" "}
-                     
               </form>
             )}
-                   
           </CardContent>
-             
         </Card>
-         
       </div>
     </div>
   );
