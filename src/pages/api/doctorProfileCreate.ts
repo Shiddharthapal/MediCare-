@@ -65,7 +65,6 @@ export const POST: APIRoute = async ({ request }) => {
       !education ||
       !degree ||
       !language ||
-      !about ||
       !consultationModes
     ) {
       return new Response(
