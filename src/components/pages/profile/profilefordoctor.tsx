@@ -127,6 +127,7 @@ export default function DoctorProfilePage() {
   const [hasProfile, setHasProfile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<PracticeData>({
     appointmentSlot: {
       Monday: {
@@ -376,9 +377,45 @@ export default function DoctorProfilePage() {
 
   const handleEdit = () => {
     setIsEditing(true);
+    setFormErrors({});
   };
 
   const handleSave = async () => {
+    const nextErrors: Record<string, string> = {};
+    const requiredMessage = "This field is required";
+
+    if (!editedDoctor?.name?.trim()) nextErrors.name = requiredMessage;
+    if (!editedDoctor?.specialist?.trim())
+      nextErrors.specialist = requiredMessage;
+    if (!editedDoctor?.hospital?.trim()) nextErrors.hospital = requiredMessage;
+    if (!editedDoctor?.education?.trim())
+      nextErrors.education = requiredMessage;
+    if (!editedDoctor?.degree?.trim()) nextErrors.degree = requiredMessage;
+    if (!editedDoctor?.experience?.trim())
+      nextErrors.experience = requiredMessage;
+    if (!editedDoctor?.contact?.trim()) nextErrors.contact = requiredMessage;
+    if (!editedDoctor?.gender?.trim()) nextErrors.gender = requiredMessage;
+    if (!editedDoctor?.about?.trim()) nextErrors.about = requiredMessage;
+    if (!editedDoctor?.specializations?.length)
+      nextErrors.specializations = requiredMessage;
+    if (!editedDoctor?.language?.length)
+      nextErrors.language = requiredMessage;
+    if (!editedDoctor?.consultationModes?.length)
+      nextErrors.consultationModes = requiredMessage;
+    if (!editedDoctor?.fees || editedDoctor?.fees <= 0)
+      nextErrors.fees = requiredMessage;
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFormErrors(nextErrors);
+      toast({
+        title: "Validation Error",
+        description: "Please fill all required fields before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setFormErrors({});
+
     setIsCreating(true);
     try {
       dispatch(updateProfileStart());
@@ -492,16 +529,29 @@ export default function DoctorProfilePage() {
         };
       }
     });
+    setFormErrors((prev) => {
+      if (!prev.consultationModes) return prev;
+      const next = { ...prev };
+      delete next.consultationModes;
+      return next;
+    });
   };
   const handleCancel = () => {
     setEditedDoctor({ ...doctor });
     setIsEditing(false);
+    setFormErrors({});
   };
 
   const handleInputChange = (field: keyof Doctor, value: string | number) => {
     setEditedDoctor({
       ...editedDoctor,
       [field]: value,
+    });
+    setFormErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
     });
   };
 
@@ -512,6 +562,12 @@ export default function DoctorProfilePage() {
         language: [...(editedDoctor?.language || []), language.trim()],
       });
       setLanguage("");
+      setFormErrors((prev) => {
+        if (!prev.language) return prev;
+        const next = { ...prev };
+        delete next.language;
+        return next;
+      });
     }
   };
 
@@ -532,6 +588,12 @@ export default function DoctorProfilePage() {
         ],
       });
       setSpecializations("");
+      setFormErrors((prev) => {
+        if (!prev.specializations) return prev;
+        const next = { ...prev };
+        delete next.specializations;
+        return next;
+      });
     }
   };
 
@@ -558,6 +620,9 @@ export default function DoctorProfilePage() {
     return value || defaultText;
   };
 
+  const renderRequiredStar = () =>
+    isEditing ? <span className="text-red-500 ml-1">*</span> : null;
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -580,26 +645,52 @@ export default function DoctorProfilePage() {
               </Avatar>
               <div className="flex-1">
                 {isEditing ? (
-                  <Input
-                    value={editedDoctor?.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    className="text-2xl font-bold bg-white/10 border-white/20 text-white placeholder:text-white/70"
-                    placeholder="Enter your full name"
-                  />
+                  <>
+                    <Label className="text-sm text-white/90">
+                      Full Name{renderRequiredStar()}
+                    </Label>
+                    <Input
+                      value={editedDoctor?.name}
+                      onChange={(e) => handleInputChange("name", e.target.value)}
+                      className={`text-2xl font-bold bg-white/10 text-white placeholder:text-white/70 ${
+                        formErrors.name ? "border-red-400" : "border-white/20"
+                      }`}
+                      placeholder="Enter your full name"
+                    />
+                    {formErrors.name && (
+                      <p className="text-sm text-red-200 mt-1">
+                        {formErrors.name}
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <h1 className="text-3xl font-bold">
                     {currentDoctor?.name || "Doctor Name Not Provided"}
                   </h1>
                 )}
                 {isEditing ? (
-                  <Input
-                    value={editedDoctor?.specialist}
-                    onChange={(e) =>
-                      handleInputChange("specialist", e.target.value)
-                    }
-                    className="mt-2 bg-white/10 border-white/20 text-white placeholder:text-white/70"
-                    placeholder="Enter your specialty"
-                  />
+                  <>
+                    <Label className="text-sm text-white/90 mt-2 block">
+                      Specialist{renderRequiredStar()}
+                    </Label>
+                    <Input
+                      value={editedDoctor?.specialist}
+                      onChange={(e) =>
+                        handleInputChange("specialist", e.target.value)
+                      }
+                      className={`bg-white/10 text-white placeholder:text-white/70 ${
+                        formErrors.specialist
+                          ? "border-red-400"
+                          : "border-white/20"
+                      }`}
+                      placeholder="Enter your specialty"
+                    />
+                    {formErrors.specialist && (
+                      <p className="text-sm text-red-200 mt-1">
+                        {formErrors.specialist}
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <p className="text-xl text-blue-100 mt-1">
                     {currentDoctor?.specialist || "Specialization not provided"}
@@ -635,6 +726,7 @@ export default function DoctorProfilePage() {
               <Label className="text-lg font-semibold flex items-center text-purple-900">
                 <Target className="text-purple-600" />
                 Specializations
+                {renderRequiredStar()}
               </Label>
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
@@ -671,12 +763,21 @@ export default function DoctorProfilePage() {
                       value={specializations}
                       onChange={(e) => setSpecializations(e.target.value)}
                       placeholder="Add your specializations(e.g., Heart Surgery, Skin Cancer )"
-                      className="flex-1  border border-gray-400"
+                      className={`flex-1 border ${
+                        formErrors.specializations
+                          ? "border-red-500"
+                          : "border-gray-400"
+                      }`}
                     />
                     <Button onClick={handleAddSpecializations} size="sm">
                       Add
                     </Button>
                   </div>
+                )}
+                {isEditing && formErrors.specializations && (
+                  <p className="text-sm text-red-500">
+                    {formErrors.specializations}
+                  </p>
                 )}
               </div>
             </div>
@@ -687,6 +788,7 @@ export default function DoctorProfilePage() {
                   <Label className="text-lg font-semibold flex items-center text-blue-900 mb-0">
                     <Building2 className="h-5 w-5 mr-2 text-blue-600" />
                     Hospital/Clinic
+                    {renderRequiredStar()}
                   </Label>
                   {isEditing ? (
                     <Input
@@ -695,11 +797,18 @@ export default function DoctorProfilePage() {
                         handleInputChange("hospital", e.target.value)
                       }
                       placeholder="Enter hospital or clinic name"
-                      className=" border border-gray-400"
+                      className={`border ${
+                        formErrors.hospital ? "border-red-500" : "border-gray-400"
+                      }`}
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
                       {displayValue(currentDoctor?.hospital)}
+                    </p>
+                  )}
+                  {isEditing && formErrors.hospital && (
+                    <p className="text-sm text-red-500">
+                      {formErrors.hospital}
                     </p>
                   )}
                 </div>
@@ -708,6 +817,7 @@ export default function DoctorProfilePage() {
                   <Label className="text-lg font-semibold flex items-center text-amber-900 mb-0">
                     <GraduationCap className="h-5 w-5 mr-2 text-amber-600" />
                     Education
+                    {renderRequiredStar()}
                   </Label>
                   {isEditing ? (
                     <Input
@@ -716,11 +826,20 @@ export default function DoctorProfilePage() {
                         handleInputChange("education", e.target.value)
                       }
                       placeholder="Enter your medical collage name"
-                      className=" border border-gray-400"
+                      className={`border ${
+                        formErrors.education
+                          ? "border-red-500"
+                          : "border-gray-400"
+                      }`}
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
                       {displayValue(currentDoctor?.education)}
+                    </p>
+                  )}
+                  {isEditing && formErrors.education && (
+                    <p className="text-sm text-red-500">
+                      {formErrors.education}
                     </p>
                   )}
                 </div>
@@ -729,6 +848,7 @@ export default function DoctorProfilePage() {
                   <Label className="text-lg font-semibold flex items-center text-teal-900 mb-0">
                     <BookText className="h-5 w-5 mr-2 text-teal-600" />
                     Medical Degree
+                    {renderRequiredStar()}
                   </Label>
                   {isEditing ? (
                     <Input
@@ -737,12 +857,17 @@ export default function DoctorProfilePage() {
                         handleInputChange("degree", e.target.value)
                       }
                       placeholder="Enter your medical degree"
-                      className=" border border-gray-400"
+                      className={`border ${
+                        formErrors.degree ? "border-red-500" : "border-gray-400"
+                      }`}
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
                       {displayValue(currentDoctor?.degree)}
                     </p>
+                  )}
+                  {isEditing && formErrors.degree && (
+                    <p className="text-sm text-red-500">{formErrors.degree}</p>
                   )}
                 </div>
 
@@ -750,6 +875,7 @@ export default function DoctorProfilePage() {
                   <Label className="text-lg font-semibold flex items-center text-indigo-900 mb-0">
                     <User className="h-5 w-5 mr-2 text-indigo-600" />
                     Experience
+                    {renderRequiredStar()}
                   </Label>
                   {isEditing ? (
                     <Input
@@ -758,11 +884,20 @@ export default function DoctorProfilePage() {
                         handleInputChange("experience", e.target.value)
                       }
                       placeholder="e.g., 2+ years"
-                      className=" border border-gray-400"
+                      className={`border ${
+                        formErrors.experience
+                          ? "border-red-500"
+                          : "border-gray-400"
+                      }`}
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
                       {displayValue(currentDoctor?.experience)}
+                    </p>
+                  )}
+                  {isEditing && formErrors.experience && (
+                    <p className="text-sm text-red-500">
+                      {formErrors.experience}
                     </p>
                   )}
                 </div>
@@ -770,6 +905,7 @@ export default function DoctorProfilePage() {
                   <Label className="text-lg font-semibold flex items-center text-green-900 mb-0">
                     <Phone className="h-5 w-5 mr-2 text-green-600" />
                     Contact Number
+                    {renderRequiredStar()}
                   </Label>
                   {isEditing ? (
                     <Input
@@ -779,11 +915,18 @@ export default function DoctorProfilePage() {
                         handleInputChange("contact", e.target.value)
                       }
                       placeholder="Enter your contact number"
-                      className=" border border-gray-400"
+                      className={`border ${
+                        formErrors.contact ? "border-red-500" : "border-gray-400"
+                      }`}
                     />
                   ) : (
                     <p className="text-gray-700 text-lg">
                       {displayValue(currentDoctor?.contact)}
+                    </p>
+                  )}
+                  {isEditing && formErrors.contact && (
+                    <p className="text-sm text-red-500">
+                      {formErrors.contact}
                     </p>
                   )}
                 </div>
@@ -804,6 +947,7 @@ export default function DoctorProfilePage() {
                     <Label className="text-lg font-semibold flex items-center text-cyan-900 mb-1">
                       <Video className="h-5 w-5 mr-2 text-cyan-600" />
                       Consultation Mode
+                      {renderRequiredStar()}
                     </Label>
                     {isEditing ? (
                       <div className="flex flex-wrap lg:flex-nowrap gap-2">
@@ -845,7 +989,112 @@ export default function DoctorProfilePage() {
                         )}
                       </div>
                     )}
+                    {isEditing && formErrors.consultationModes && (
+                      <p className="text-sm text-red-500">
+                        {formErrors.consultationModes}
+                      </p>
+                    )}
                   </div>
+                </div>
+                <div>
+                  <Label className="text-lg font-semibold flex items-center text-violet-900 mb-1 ">
+                    <Languages className="h-5 w-5 mr-2 text-violet-600" />
+                    Language
+                    {renderRequiredStar()}
+                  </Label>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      {currentDoctor?.language?.length > 0
+                        ? currentDoctor?.language.map((slot, index) => (
+                            <div key={index} className="flex items-center">
+                              <Badge
+                                variant="outline"
+                                className="text-sm bg-violet-200"
+                              >
+                                {slot}
+                              </Badge>
+                              {isEditing && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleRemoveLanguage(index)}
+                                  className="ml-1 h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          ))
+                        : !isEditing && (
+                            <p className="text-gray-500 text-sm">
+                              Not Provided
+                            </p>
+                          )}
+                    </div>
+                    {isEditing && (
+                      <div className="flex gap-2 mt-3">
+                        <Input
+                          value={language}
+                          onChange={(e) => setLanguage(e.target.value)}
+                          placeholder="Add language (English, other)"
+                          className={`flex-1 border ${
+                            formErrors.language
+                              ? "border-red-500"
+                              : "border-gray-400"
+                          }`}
+                        />
+                        <Button onClick={handleAddLanguage} size="sm">
+                          Add
+                        </Button>
+                      </div>
+                    )}
+                    {isEditing && formErrors.language && (
+                      <p className="text-sm text-red-500">
+                        {formErrors.language}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-lg font-semibold flex items-center text-pink-900 mb-0">
+                    <Transgender className="h-5 w-5 mr-2 text-pink-600" />
+                    Gender
+                    {renderRequiredStar()}
+                  </Label>
+                  {isEditing ? (
+                    <>
+                      <Select
+                        value={editedDoctor?.gender}
+                        onValueChange={(value) =>
+                          handleInputChange("gender", value)
+                        }
+                      >
+                        <SelectTrigger
+                          className={`border ${
+                            formErrors.gender
+                              ? "border-red-500"
+                              : "border-gray-400"
+                          }`}
+                        >
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {isEditing && formErrors.gender && (
+                        <p className="text-sm text-red-500">
+                          {formErrors.gender}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className=" pl-2  ">
+                      {currentDoctor?.gender || "Not provided"}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -855,6 +1104,7 @@ export default function DoctorProfilePage() {
                   <Label className="text-lg font-semibold flex items-center mb-0 ">
                     <BadgeDollarSign className="h-5 w-5 mr-2 text-red-600" />
                     Consultation Fees
+                    {renderRequiredStar()}
                   </Label>
                   <div className="text-sm">
                     (To set your Receive payment method go to
@@ -871,7 +1121,9 @@ export default function DoctorProfilePage() {
                         )
                       }
                       placeholder="Enter consultation fees"
-                      className=" border border-gray-400"
+                      className={`border ${
+                        formErrors.fees ? "border-red-500" : "border-gray-400"
+                      }`}
                     />
                   ) : (
                     <p className="text-3xl font-bold text-green-600">
@@ -879,6 +1131,9 @@ export default function DoctorProfilePage() {
                         ? `$${currentDoctor?.fees}`
                         : "Fees not set"}
                     </p>
+                  )}
+                  {isEditing && formErrors.fees && (
+                    <p className="text-sm text-red-500">{formErrors.fees}</p>
                   )}
                 </div>
 
@@ -1072,84 +1327,7 @@ export default function DoctorProfilePage() {
                   </div>
                 )}
 
-                <div>
-                  <Label className="text-lg font-semibold flex items-center text-violet-900 mb-1 ">
-                    <Languages className="h-5 w-5 mr-2 text-violet-600" />
-                    Language
-                  </Label>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap gap-2">
-                      {currentDoctor?.language?.length > 0
-                        ? currentDoctor?.language.map((slot, index) => (
-                            <div key={index} className="flex items-center">
-                              <Badge
-                                variant="outline"
-                                className="text-sm bg-violet-200"
-                              >
-                                {slot}
-                              </Badge>
-                              {isEditing && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleRemoveLanguage(index)}
-                                  className="ml-1 h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              )}
-                            </div>
-                          ))
-                        : !isEditing && (
-                            <p className="text-gray-500 text-sm">
-                              Not Provided
-                            </p>
-                          )}
-                    </div>
-                    {isEditing && (
-                      <div className="flex gap-2 mt-3">
-                        <Input
-                          value={language}
-                          onChange={(e) => setLanguage(e.target.value)}
-                          placeholder="Add language (English, other)"
-                          className="flex-1  border border-gray-400"
-                        />
-                        <Button onClick={handleAddLanguage} size="sm">
-                          Add
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-lg font-semibold flex items-center text-pink-900 mb-0">
-                    <Transgender className="h-5 w-5 mr-2 text-pink-600" />
-                    Gender
-                  </Label>
-                  {isEditing ? (
-                    <>
-                      <Select
-                        value={editedDoctor?.gender}
-                        onValueChange={(value) =>
-                          handleInputChange("gender", value)
-                        }
-                      >
-                        <SelectTrigger className=" border border-gray-400">
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </>
-                  ) : (
-                    <p className=" pl-2  ">
-                      {currentDoctor?.gender || "Not provided"}
-                    </p>
-                  )}
-                </div>
+                
               </div>
             </div>
 
@@ -1158,6 +1336,7 @@ export default function DoctorProfilePage() {
             <div>
               <Label className="text-lg font-semibold mb-3 block">
                 About You
+                {renderRequiredStar()}
               </Label>
               {isEditing ? (
                 <Textarea
@@ -1165,13 +1344,18 @@ export default function DoctorProfilePage() {
                   onChange={(e) => handleInputChange("about", e.target.value)}
                   placeholder="Tell patients about yourself, your approach to medicine, and your expertise..."
                   rows={4}
-                  className="resize-none  border border-gray-400"
+                  className={`resize-none border ${
+                    formErrors.about ? "border-red-500" : "border-gray-400"
+                  }`}
                 />
               ) : (
                 <p className="text-gray-700 leading-relaxed text-lg">
                   {currentDoctor?.about ||
                     "No information provided about the doctor."}
                 </p>
+              )}
+              {isEditing && formErrors.about && (
+                <p className="text-sm text-red-500">{formErrors.about}</p>
               )}
             </div>
 
