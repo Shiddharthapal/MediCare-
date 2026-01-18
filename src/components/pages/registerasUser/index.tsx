@@ -94,7 +94,7 @@ export default function Register() {
       <Card className="w-[450px]">
         <CardHeader>
           <CardTitle className="text-2xl text-center">
-            Register as User
+            Register as Patient
           </CardTitle>
         </CardHeader>
         <CardContent>
