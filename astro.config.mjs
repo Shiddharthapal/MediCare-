@@ -2,12 +2,27 @@ import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import node from "@astrojs/node";
 import tailwind from "@astrojs/tailwind";
+import netlify from "@astrojs/netlify";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react(), tailwind()],
   output: "server",
-  adapter: node({
-    mode: "standalone",
+  adapter: netlify({
+    edgeMiddleware: false,
   }),
+  
+  integrations: [
+    react(),
+    tailwind({
+      applyBaseStyles: false,
+    }),
+  ],
+
+  vite: {
+    resolve: {
+      alias: {
+        "@": "/src",
+      },
+    },
+  },
 });

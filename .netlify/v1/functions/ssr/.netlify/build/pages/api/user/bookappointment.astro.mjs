@@ -1,0 +1,327 @@
+import { c as connect } from '../../../chunks/connection_lTvPKgE7.mjs';
+import { u as userDetails } from '../../../chunks/userDetails_BjvOpMvp.mjs';
+import { d as doctorDetails } from '../../../chunks/doctorDetails_CR6glRtk.mjs';
+import { a as adminStore } from '../../../chunks/adminStore_C1mgR9-O.mjs';
+export { renderers } from '../../../renderers.mjs';
+
+const POST = async ({ request }) => {
+  const headers = {
+    "Content-Type": "application/json"
+  };
+  try {
+    const body = await request.json();
+    const { formData, doctor, id } = body;
+    const {
+      appointmentDate,
+      appointmentTime,
+      consultationType,
+      consultedType,
+      reasonForVisit,
+      symptoms,
+      previousVisit,
+      emergencyContact,
+      emergencyPhone,
+      paymentMethod,
+      specialRequests
+    } = formData;
+    console.log("🧞‍♂️  formData --->", formData);
+    const { userId, name, specialist, gender } = doctor;
+    if (!appointmentDate || !appointmentTime || !consultationType || !symptoms || !previousVisit || !paymentMethod) {
+      return new Response(
+        JSON.stringify({
+          message: "Missing field required",
+          details: {
+            appointmentDate: !appointmentDate ? "Appointment date is required" : null,
+            appointmentTime: !appointmentTime ? "Appointment time is required" : null,
+            consultationTyp: !consultationType ? "Consultation Type is required" : null,
+            symptoms: !symptoms ? "Symptoms is required" : null,
+            previousVisit: !previousVisit ? "Previous visit is required" : null,
+            paymentMethod: !paymentMethod ? "Payment method Modes is required" : null
+          }
+        }),
+        {
+          status: 401,
+          headers
+        }
+      );
+    }
+    const uniqueId = crypto.randomUUID();
+    await connect();
+    const userdetails = await userDetails.findOne({
+      userId: id
+    });
+    const doctordetails = await doctorDetails.findOne({ userId });
+    if (!doctordetails) {
+      return new Response(
+        JSON.stringify({
+          message: "No doctor found"
+        }),
+        {
+          status: 500,
+          headers
+        }
+      );
+    }
+    const normalizeTimeLabel = (label) => {
+      return label.replace(/\s+/g, " ").trim().toLowerCase();
+    };
+    const isAppointmentCancelled = (status) => {
+      if (!status) return false;
+      const normalized = status.toLowerCase();
+      return normalized === "cancelled" || normalized === "canceled";
+    };
+    const hasSlotConflict = doctordetails.appointments?.some((appointment) => {
+      if (appointment.appointmentDate !== appointmentDate) return false;
+      if (isAppointmentCancelled(appointment.status)) return false;
+      return normalizeTimeLabel(appointment.appointmentTime || "") === normalizeTimeLabel(appointmentTime);
+    });
+    if (hasSlotConflict) {
+      return new Response(
+        JSON.stringify({
+          message: "Selected time slot is already booked"
+        }),
+        {
+          status: 409,
+          headers
+        }
+      );
+    }
+    if (userdetails) {
+      const newbookAppoinmentsDetails = {
+        doctorpatinetId: uniqueId,
+        doctorUserId: doctor.userId,
+        doctorName: name,
+        doctorSpecialist: specialist,
+        doctorGender: gender,
+        doctorEmail: doctordetails?.email,
+        hospital: doctordetails?.hospital,
+        patientId: userdetails.userId,
+        patientName: userdetails?.name,
+        patientEmail: userdetails?.email || "",
+        patientPhone: userdetails?.contactNumber,
+        appointmentDate,
+        appointmentTime,
+        consultationType,
+        consultedType,
+        reasonForVisit,
+        symptoms,
+        previousVisit,
+        emergencyContact,
+        emergencyPhone,
+        paymentMethod,
+        specialRequests,
+        prescription: {},
+        createdAt: /* @__PURE__ */ new Date()
+      };
+      const updatedUser = await userDetails.findByIdAndUpdate(
+        userdetails._id,
+        {
+          $push: { appointments: newbookAppoinmentsDetails }
+        },
+        {
+          new: true,
+          runValidators: true
+        }
+      );
+      const newbookAppoinmentsDataforDoctor = {
+        doctorpatinetId: uniqueId,
+        doctorName: name,
+        doctorUserId: userId,
+        doctorSpecialist: specialist,
+        doctorEmail: "",
+        patientId: userdetails.userId,
+        patientName: userdetails.name,
+        patientEmail: userdetails.email || "",
+        patientPhone: userdetails.contactNumber,
+        patientGender: userdetails?.gender,
+        patientAge: userdetails?.age,
+        patientAddress: userdetails?.address,
+        patientBloodgroup: userdetails?.bloodGroup,
+        patientBithofday: userdetails?.dateOfBirth,
+        appointmentDate,
+        appointmentTime,
+        consultationType,
+        consultedType,
+        reasonForVisit,
+        symptoms,
+        previousVisit,
+        emergencyContact,
+        emergencyPhone,
+        paymentMethod,
+        specialRequests,
+        prescription: {},
+        createdAt: /* @__PURE__ */ new Date()
+      };
+      const updateDoctor = await doctorDetails.findByIdAndUpdate(
+        doctordetails._id,
+        {
+          $push: { appointments: newbookAppoinmentsDataforDoctor }
+        },
+        {
+          new: true,
+          runValidators: true
+        }
+      );
+      await adminStore.updateOne(
+        { "patientDetails.userId": userdetails?.userId },
+        // Empty filter = update all admin documents
+        {
+          $push: {
+            "patientDetails.$[patient].appointments": {
+              doctorpatinetId: uniqueId,
+              doctorUserId: doctor.userId,
+              doctorName: name,
+              doctorSpecialist: specialist,
+              doctorGender: gender,
+              doctorEmail: doctordetails?.email,
+              doctorContact: doctordetails?.contact,
+              doctorRegistrationNo: doctordetails?.registrationNo,
+              hospital: doctordetails?.hospital,
+              patientId: userdetails.userId,
+              patientName: userdetails?.name,
+              patientEmail: userdetails?.email || "",
+              patientPhone: userdetails?.contactNumber,
+              appointmentDate,
+              appointmentTime,
+              consultationType,
+              consultedType,
+              reasonForVisit,
+              symptoms,
+              previousVisit,
+              emergencyContact,
+              emergencyPhone,
+              paymentMethod,
+              specialRequests,
+              prescription: {},
+              createdAt: /* @__PURE__ */ new Date()
+            }
+          }
+        },
+        {
+          arrayFilters: [
+            { "patient.userId": userdetails.userId }
+            // Match all patients with this ID
+          ]
+        }
+      );
+      await adminStore.updateOne(
+        { "doctorDetails.userId": doctordetails.userId },
+        // Empty filter = update all admin documents
+        {
+          $push: {
+            "doctorDetails.$[doctor].appointments": {
+              doctorpatinetId: uniqueId,
+              doctorName: name,
+              doctorUserId: userId,
+              doctorSpecialist: specialist,
+              doctorEmail: "",
+              patientId: userdetails.userId,
+              patientName: userdetails.name,
+              patientEmail: userdetails.email || "",
+              patientPhone: userdetails.contactNumber,
+              patientGender: userdetails?.gender,
+              patientAge: userdetails?.age,
+              patientAddress: userdetails?.address,
+              patientBloodgroup: userdetails?.bloodGroup,
+              patientBithofday: userdetails?.dateOfBirth,
+              appointmentDate,
+              appointmentTime,
+              consultationType,
+              consultedType,
+              reasonForVisit,
+              symptoms,
+              previousVisit,
+              emergencyContact,
+              emergencyPhone,
+              paymentMethod,
+              specialRequests,
+              prescription: {},
+              createdAt: /* @__PURE__ */ new Date()
+            }
+          }
+        },
+        {
+          arrayFilters: [
+            { "doctor.userId": doctordetails.userId }
+            // Match all patients with this ID
+          ]
+        }
+      );
+      await adminStore.updateMany(
+        {},
+        // Empty filter = update all admin documents
+        {
+          $push: {
+            appointment: {
+              doctorpatinetId: uniqueId,
+              doctorUserId: doctor.userId,
+              doctorName: name,
+              doctorSpecialist: specialist,
+              doctorGender: gender,
+              doctorEmail: doctordetails?.email,
+              doctorContact: doctordetails?.contact,
+              doctorRegistrationNo: doctordetails?.registrationNo,
+              hospital: doctordetails?.hospital,
+              patientId: userdetails.userId,
+              patientName: userdetails?.name,
+              patientEmail: userdetails?.email || "",
+              patientPhone: userdetails?.contactNumber,
+              patientGender: userdetails?.gender,
+              patientAge: userdetails?.age,
+              patientAddress: userdetails?.address,
+              patientBloodgroup: userdetails?.bloodGroup,
+              patientBithofday: userdetails?.dateOfBirth,
+              appointmentDate,
+              appointmentTime,
+              consultationType,
+              consultedType,
+              reasonForVisit,
+              symptoms,
+              previousVisit,
+              emergencyContact,
+              emergencyPhone,
+              paymentMethod,
+              specialRequests,
+              prescription: {},
+              createdAt: /* @__PURE__ */ new Date()
+            }
+          }
+        }
+      );
+      return new Response(JSON.stringify({ updatedUser }), {
+        status: 200,
+        headers
+      });
+    } else {
+      return new Response(
+        JSON.stringify({
+          message: "Your profile is not created."
+        }),
+        {
+          status: 403,
+          headers
+        }
+      );
+    }
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        message: "Can't create book appoinment  ",
+        error: error instanceof Error ? error.message : "Token verification failed"
+      }),
+      {
+        status: 400,
+        headers
+      }
+    );
+  }
+};
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  POST
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };
