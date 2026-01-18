@@ -1,48 +1,77 @@
-# Astro Starter Kit: Basics
+# MediCare+
 
-```sh
-pnpm create astro@latest -- --template basics
-```
+MediCare+ is a full-stack healthcare platform built on Astro and React. It provides role-based experiences for patients, doctors, and admins, with dashboards, profile management, appointments, documents, and real-time communication.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+## Features
+- Patient, doctor, and admin authentication with JWT
+- Role-specific dashboards and profile management
+- Appointment booking, rescheduling, and cancellation flows
+- Document uploads and retrieval backed by BunnyCDN storage
+- Prescriptions and report views
+- Real-time chat and WebRTC video rooms using Socket.IO
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Tech Stack
+- Astro (server output) with React Router
+- React 19, Redux Toolkit, Redux Persist
+- Tailwind CSS + Radix UI components
+- Node/Express + Socket.IO for realtime
+- MongoDB + Mongoose
+- BunnyCDN storage integration
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
+## Project Structure
 ```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+src/
+  components/           React UI, pages, and layouts
+  layouts/              Astro and React layout shells
+  pages/                Astro entry + API routes
+  pages/api/            REST-style API endpoints
+  lib/                  DB connection, BunnyCDN helpers
+  model/                Mongoose schemas
+  redux/                Store and slices
+  server/               Socket.IO server
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Getting Started
+Prerequisites:
+- Node.js 18+
+- pnpm
 
-## 🧞 Commands
+Install dependencies:
+```bash
+pnpm install
+```
 
-All commands are run from the root of the project, from a terminal:
+Run the Astro dev server:
+```bash
+pnpm dev
+```
 
-| Command                | Action                                           |
-| :--------------------- | :----------------------------------------------- |
-| `pnpm install`         | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+Run the Socket.IO server (separate process):
+```bash
+pnpm socket:dev
+```
 
-## 👀 Want to learn more?
+## Environment Variables
+Create a `.env` file based on `.env.example`. Key values include:
+- `MONGODB_URI` or `PUBLIC_MONGODB_URI`
+- `JWT_SECRET` or `PUBLIC_JWT_SECRET`
+- `BUNNY_STORAGE_ZONE_NAME`
+- `BUNNY_STORAGE_REGION_HOSTNAME`
+- `BUNNY_STORAGE_API_KEY`
+- `SOCKET_HOST`
+- `SOCKET_PORT`
+- `CLIENT_URL`
+- `PUBLIC_SOCKET_URL`
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Scripts
+- `pnpm dev` - start Astro dev server
+- `pnpm build` - build for production
+- `pnpm preview` - preview the production build
+- `pnpm socket:dev` - run the Socket.IO server
+
+## Deployment
+The project is configured for Netlify (`astro.config.mjs`) with server output. Make sure the same environment variables are set in your hosting provider and for the Socket.IO server.
+
+## Notes
+- The app is rendered via `src/pages/[...index].astro` which mounts the React app and uses React Router for client-side routing.
+- API routes live under `src/pages/api` and run on the server.
