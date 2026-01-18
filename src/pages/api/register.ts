@@ -11,6 +11,7 @@ export const POST: APIRoute = async ({ request }) => {
   };
   try {
     const body = await request.json();
+    // console.log("body ==> ", body);
 
     const { email, password, registrationNo } = body;
     // Connect to database
