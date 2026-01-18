@@ -51,14 +51,6 @@ Run the Socket.IO server (separate process):
 pnpm socket:dev
 ```
 
-Other Astro Command
-| Command                | Action                                           |
-| :--------------------- | :----------------------------------------------- |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
 ## Environment Variables
 Create a `.env` file based on `.env.example`. Key values include:
 - `MONGODB_URI` or `PUBLIC_MONGODB_URI`
